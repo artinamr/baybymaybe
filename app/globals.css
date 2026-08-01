@@ -52,7 +52,8 @@ body {
   inset: 0;
   z-index: 40;
   pointer-events: none;
-  opacity: 0.07;
+  /* Kept, but barely: the clean direction wants paper, not visible grain. */
+  opacity: 0.035;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 240px 240px;
@@ -171,34 +172,30 @@ body {
   100% { transform: translateY(240%); opacity: 0; }
 }
 
-/* Base rail — a slow band of capability. Deliberately near-static: at this
-   speed it reads as a held breath, not a news crawl. */
-.rail-track {
-  animation: railRun 72s linear infinite;
-  will-change: transform;
+/* ---- The headline ----
+   Placed by heroLayout (see --hero-* vars) so the type block and the 3D object
+   are laid out by one authority. Real text, not a canvas mask. */
+.hero-head {
+  left: var(--hero-pad, 5.5vw);
+  top: var(--hero-top, 26.5%);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--hero-fs, 8vw);
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
 }
-@keyframes railRun {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+/* Hollow words: outline only. `paint-order` keeps the stroke from eating into
+   the counters, and the @supports block keeps the text visible (rather than
+   invisible) anywhere text-stroke is unavailable. */
+.hero-head .hollow {
+  color: transparent;
+  -webkit-text-stroke: 0.014em var(--accent);
+  paint-order: stroke fill;
 }
-/* Feather both ends so the loop never shows a hard cut. */
-.rail-mask {
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 74%, transparent);
-  mask-image: linear-gradient(to right, transparent, #000 4%, #000 74%, transparent);
-}
-
-/* Availability dot — one slow live signal, with a single expanding ring. */
-.live-dot::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 9999px;
-  border: 1px solid var(--accent);
-  animation: liveRing 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-}
-@keyframes liveRing {
-  0% { transform: scale(0.7); opacity: 0.8; }
-  100% { transform: scale(2.2); opacity: 0; }
+@supports not ((-webkit-text-stroke: 1px black) or (text-stroke: 1px black)) {
+  .hero-head .hollow { color: var(--accent); }
 }
 
 /* Artifact hint — a breathing ring around the click target label. */

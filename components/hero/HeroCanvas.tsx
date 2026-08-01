@@ -7,38 +7,22 @@ import {
   Environment,
   Lightformer,
 } from "@react-three/drei";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import * as THREE from "three";
-import { pointer } from "@/lib/usePointer";
-import { heroAnim } from "@/lib/heroAnim";
-import { drawHeadlineMask } from "@/lib/headlineMask";
 import { CAMERA, heroLayout } from "@/lib/heroLayout";
-import { liquidVertex, liquidFragment } from "@/shaders/liquid";
 import { Crystal } from "./Crystal";
 
-const prefersReduced =
-  typeof window !== "undefined" &&
-  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-function makeMaskTexture(canvas: HTMLCanvasElement, dpr: number) {
-  drawHeadlineMask(canvas, dpr);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.minFilter = THREE.LinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.generateMipmaps = false;
-  tex.needsUpdate = true;
-  return tex;
-}
-
-/** Opaque page-gradient drawn in-canvas (so bloom can run without breaking the page). */
+/** The page field, drawn in-canvas so the object composites onto the same
+ *  surface the DOM sits on. Deliberately quiet: warm paper, a whisper of the
+ *  shard's own colour, and a soft contact shadow under it. */
 function Backdrop() {
   const uniforms = useMemo(
-    () => ({ uRes: { value: new THREE.Vector2(1, 1) }, uShadow: { value: 0.8 } }),
+    () => ({ uShadow: { value: new THREE.Vector2(0.8, 0.2) } }),
     []
   );
   useFrame((s) => {
-    uniforms.uRes.value.set(s.size.width, s.size.height);
-    uniforms.uShadow.value = heroLayout(s.size.width, s.size.height).shadowX;
+    const L = heroLayout(s.size.width, s.size.height);
+    uniforms.uShadow.value.set(L.shadowX, 1 - L.shadowY);
   });
   return (
     <mesh frustumCulled={false} renderOrder={-10}>
@@ -50,113 +34,27 @@ function Backdrop() {
         vertexShader={`varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy,0.0,1.0); }`}
         fragmentShader={`
           varying vec2 vUv;
-          uniform float uShadow;
+          uniform vec2 uShadow;
           void main(){
-            // warm gallery paper — matches --paper / --paper-2
+            // Warm gallery paper. Much flatter than before — the clean direction
+            // wants an even field, so this is a hint of tone, not a gradient.
             vec3 a = vec3(0.969, 0.965, 0.953);
-            vec3 b = vec3(0.929, 0.922, 0.906);
-            vec3 col = mix(a, b, clamp(vUv.x * 0.6 + (1.0 - vUv.y) * 0.6, 0.0, 1.0));
-            // The shard's own light spilling onto the paper — a tall, very soft
-            // halo up its column. This is what keeps the field from reading as
-            // blank; it stays a whisper (the loud background was rejected).
-            vec2 hp = vec2((vUv.x - uShadow) * 1.25, (vUv.y - 0.62) * 0.62);
-            col += vec3(0.11, 0.07, 0.30) * 0.10 * smoothstep(0.5, 0.0, length(hp));
-            // faint indigo whisper in the opposite corner, for balance
-            col += vec3(0.10, 0.07, 0.28) * 0.04 * smoothstep(0.6, 0.0, distance(vUv, vec2(0.05, -0.02)));
-            // implied studio floor — the field settles very slightly toward the base
-            col *= 1.0 - 0.035 * smoothstep(0.32, 0.0, vUv.y);
-            // Corner falloff. A perfectly even field is what reads as "flat
-            // template"; this gives the paper the sense of being lit from the
-            // shard's side, so the page has a direction of light like a shot
-            // rather than a fill.
-            vec2 vg = (vUv - 0.5) * vec2(1.06, 1.0);
-            col *= 1.0 - 0.10 * smoothstep(0.30, 0.78, length(vg));
-            // The monument's weight bleeding into the paper. Its base is cropped
-            // by the frame, so contact is atmospheric — a broad soft occlusion
-            // pooling at the bottom of its column — not a cast ellipse.
-            vec2 sp = vec2(vUv.x - uShadow, (vUv.y + 0.10) * 1.35);
-            col *= 1.0 - 0.17 * smoothstep(0.62, 0.0, length(sp));
+            vec3 b = vec3(0.945, 0.940, 0.928);
+            vec3 col = mix(a, b, clamp(vUv.x * 0.35 + (1.0 - vUv.y) * 0.35, 0.0, 1.0));
+
+            // The shard is shown whole and floating now, so it needs a contact
+            // shadow to sit in the space rather than hover over it. A soft
+            // ellipse under its base, wider than it is tall.
+            vec2 sp = (vUv - uShadow) * vec2(2.3, 7.5);
+            col *= 1.0 - 0.20 * smoothstep(1.0, 0.0, length(sp));
+
+            // A whisper of the shard's colour bleeding onto the paper.
+            vec2 hp = (vUv - vec2(uShadow.x, 0.55)) * vec2(1.5, 1.05);
+            col += vec3(0.10, 0.07, 0.28) * 0.045 * smoothstep(0.55, 0.0, length(hp));
+
             gl_FragColor = vec4(col, 1.0);
           }
         `}
-      />
-    </mesh>
-  );
-}
-
-/** The headline filled with flowing liquid (masked to the letterforms). */
-function LiquidText() {
-  const mat = useRef<THREE.ShaderMaterial>(null);
-  const mouse = useRef(new THREE.Vector2(0, 0));
-  const maskCanvas = useMemo(() => document.createElement("canvas"), []);
-  const texRef = useRef<THREE.CanvasTexture | null>(null);
-
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uMouse: { value: new THREE.Vector2(0, 0) },
-      uRes: { value: new THREE.Vector2(1, 1) },
-      uDive: { value: 0 },
-      uReveal: { value: 0 },
-      uMask: { value: null as THREE.Texture | null },
-    }),
-    []
-  );
-
-  useEffect(() => {
-    let alive = true;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const build = () => {
-      if (!alive) return;
-      const tex = makeMaskTexture(maskCanvas, dpr);
-      const old = texRef.current;
-      texRef.current = tex;
-      uniforms.uMask.value = tex;
-      if (mat.current) mat.current.uniforms.uMask.value = tex;
-      old?.dispose();
-    };
-    build();
-    document.fonts?.ready.then(build);
-    let raf = 0;
-    const onResize = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(build);
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      alive = false;
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", onResize);
-      texRef.current?.dispose();
-    };
-  }, [maskCanvas, uniforms]);
-
-  useFrame((state) => {
-    const m = mat.current;
-    if (!m) return;
-    m.uniforms.uTime.value = prefersReduced ? 0 : state.clock.elapsedTime;
-    m.uniforms.uReveal.value = prefersReduced
-      ? 1
-      : THREE.MathUtils.clamp((state.clock.elapsedTime - 0.15) / 1.1, 0, 1);
-    mouse.current.x += (pointer.tx - mouse.current.x) * 0.05;
-    mouse.current.y += (pointer.ty - mouse.current.y) * 0.05;
-    m.uniforms.uMouse.value.copy(mouse.current);
-    m.uniforms.uRes.value.set(state.size.width, state.size.height);
-    m.uniforms.uDive.value = heroAnim.awaken;
-  });
-
-  return (
-    <mesh frustumCulled={false} renderOrder={999}>
-      <planeGeometry args={[2, 2]} />
-      <shaderMaterial
-        ref={mat}
-        uniforms={uniforms}
-        vertexShader={liquidVertex}
-        fragmentShader={liquidFragment}
-        transparent
-        depthTest={false}
-        depthWrite={false}
-        blending={THREE.NormalBlending}
       />
     </mesh>
   );
@@ -167,32 +65,27 @@ function Scene() {
     <>
       <Backdrop />
 
-      {/* Studio key from high right + a whisper of indigo rim from back-left —
-          these carve the dark facets; the env map adds the glassy streaks. */}
-      <directionalLight position={[4, 6, 5]} intensity={0.85} color="#ffffff" />
-      <directionalLight position={[-5, 2, -4]} intensity={0.5} color="#6a4bff" />
+      {/* MATTE lighting. A rough surface scatters, so it wants broad soft
+          sources that wrap the form and reveal the facet planes by shading.
+          (The narrow strips this replaced were tuned for gloss — on a matte
+          body they'd do nothing but leave it flat.) */}
+      {/* Held DOWN. A matte body has no highlights to carry brightness, so the
+          light level alone decides its value — lit like the glossy pass was,
+          this dark stone came back as light lavender putty. */}
+      <hemisphereLight args={["#ffffff", "#c6c1d6", 0.42]} />
+      <directionalLight position={[4, 6, 5]} intensity={0.95} color="#ffffff" />
+      <directionalLight position={[-5, 1.5, 2]} intensity={0.34} color="#8b76ff" />
+      <directionalLight position={[0, -3, 4]} intensity={0.18} color="#ffffff" />
 
-      {/* The client's obsidian crystal, lit by a studio environment of tall
-          narrow sources → crisp edge highlights on the facets. */}
       <Suspense fallback={null}>
         <Crystal />
       </Suspense>
 
-      {/* NARROW sources on purpose. The facets of this shard are big and flat,
-          so a wide light strip is caught by a whole facet at once and comes back
-          as a broad mid-grey panel — the shard stops reading as polished stone
-          and starts reading as grey plastic. Thin strips are caught only at
-          grazing angles, which is what makes a sharp edge highlight. */}
-      <Environment resolution={256}>
-        <Lightformer intensity={4.4} position={[3.5, 2, 5]} scale={[0.32, 11, 1]} color="#ffffff" />
-        <Lightformer intensity={3.0} position={[2.2, -1, 5]} scale={[0.16, 9, 1]} color="#ffffff" />
-        <Lightformer intensity={2.6} position={[-4.5, 1, 4]} scale={[0.26, 9, 1]} color="#cdd6ff" />
-        <Lightformer intensity={1.1} position={[1.5, -5, 3]} scale={[8, 0.5, 1]} color="#ffffff" />
-        <Lightformer intensity={0.9} position={[-2, 5.5, -4]} scale={[7, 0.7, 1]} color="#c6cdff" />
-        <Lightformer intensity={1.6} position={[5, -1, -3]} scale={[0.5, 6, 1]} color="#6a4bff" />
+      <Environment resolution={128}>
+        <Lightformer intensity={0.8} position={[3, 3, 4]} scale={[6, 8, 1]} color="#ffffff" />
+        <Lightformer intensity={0.5} position={[-4, 1, 3]} scale={[5, 7, 1]} color="#dcd9ea" />
+        <Lightformer intensity={0.35} position={[0, -4, 2]} scale={[7, 3, 1]} color="#ffffff" />
       </Environment>
-
-      <LiquidText />
     </>
   );
 }

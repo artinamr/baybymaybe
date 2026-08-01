@@ -20,7 +20,7 @@ const W = +(process.argv[3] || 1512);
 const H = +(process.argv[4] || 900);
 
 // Node >= 22 strips the types; this is the same module the app ships.
-const { heroLayout, WORD, CAMERA, LINES } = await import(
+const { heroLayout, WORD, CAMERA, LINES, LEADING } = await import(
   new URL("../lib/heroLayout.ts", import.meta.url).href
 );
 const L = heroLayout(W, H);
@@ -153,22 +153,21 @@ function frame(x, y, w, h, col, t = 2) {
 }
 
 const cap = WORD.cap * L.fontSize;
-const boxes = [{ kind: "chrome", x: 0.04 * W, y: 0, w: W - 0.08 * W, h: 86 }];
+const lh = LEADING * L.fontSize;
+let typeMaxX = 0;
 LINES.forEach((line, i) => {
-  const wid = WORD[line.word] * L.fontSize;
-  boxes.push({
-    kind: line.fill,
-    x: line.align === "left" ? L.padX : L.right - wid,
-    y: L.baseline - cap + i * L.lineHeight,
-    w: wid,
-    h: cap,
-  });
+  const words = line.text.toUpperCase().split(" ");
+  const wid =
+    (words.reduce((a, word) => a + WORD[word], 0) +
+      WORD.SPACE * (words.length - 1)) *
+    L.fontSize;
+  typeMaxX = Math.max(typeMaxX, L.padX + wid);
+  const y = L.typeTop + i * lh;
+  const col = line.style === "hollow" ? [0.357, 0.239, 0.941] : [0.04, 0.043, 0.063];
+  // hollow lines are drawn as an outline so the proof matches the page
+  if (line.style === "hollow") frame(L.padX, y, wid, cap, col, 3);
+  else rect(L.padX, y, wid, cap, col, 0.92);
 });
-for (const b of boxes) {
-  const col = b.kind === "liquid" ? [0.357, 0.239, 0.941] : b.kind === "solid" ? [0.04, 0.043, 0.063] : [0.85, 0.2, 0.2];
-  if (b.kind === "guide") frame(b.x, b.y, b.w, b.h, col, 1);
-  else rect(b.x, b.y, b.w, b.h, col, b.kind === "chrome" ? 0.18 : 0.92);
-}
 
 /* ---------- PNG ---------- */
 const raw = Buffer.alloc(H * (W * 3 + 1));
@@ -204,7 +203,7 @@ console.log(JSON.stringify({
   pctW: +(((maxX - minX) / W) * 100).toFixed(1),
   marginRight: W - maxX,
   marginTop: minY,
-  typeRight: +L.right.toFixed(0),
+  typeRight: +L.right.toFixed(0), typeMaxX: +typeMaxX.toFixed(0),
   // Must stay positive on desktop: the channel between type and monument.
-  gapTypeToStone: +(minX - L.right).toFixed(0),
+  gapTypeToStone: +(minX - typeMaxX).toFixed(0),
 }));

@@ -50,46 +50,33 @@ export function Crystal() {
       // luminance — both land in the same range, so a shader remap kills the
       // veins too. The veins are a nice-to-have; the cloud panels were fatal.
 
-      // Upgrade Standard → Physical so the shard can carry THIN-FILM
-      // IRIDESCENCE. This is what makes it read as alien rather than as a dark
-      // rock: an oil-slick interference sheen that swings through violet, cyan
-      // and magenta as the facets turn, on top of a near-black obsidian body.
+      // MATTE STONE (2026-08-02). The glossy/iridescent pass read as a glass
+      // prop; this is carved rock — high roughness, no clearcoat, a dielectric
+      // body just off pure black so the facet planes separate by shading rather
+      // than by reflection. Form does the work, not shine.
       const mat = new THREE.MeshPhysicalMaterial({
-        // baseColor / MR maps DELIBERATELY DROPPED — see note below.
+        // baseColor / MR maps DELIBERATELY DROPPED — see note above.
         emissiveMap: src.emissiveMap,
         emissive: src.emissive,
-        // Obsidian, straight: a near-black dielectric body. All of this shard's
-        // variation now comes from form and light — per-facet flat shading,
-        // tight highlights off narrow sources, per-facet iridescent fringes and
-        // the moving internal energy — which is exactly the client's reference
-        // (polished black faceted crystal with sharp edge highlights).
-        color: new THREE.Color(0.055, 0.052, 0.075),
-        // OBSIDIAN IS A DIELECTRIC. Metalness tints reflection by base colour
-        // and reflects the whole environment broadly — at 0.55 the tall white
-        // Lightformer strips came back as big pale mirror panels that read as a
-        // washed-out glass prop, not stone. At 0 the env survives only as tight
-        // specular edge highlights, which is exactly the reference: polished
-        // black crystal with sharp edges.
+        // Graphite with a violet undertone. Pure black would read as a
+        // silhouette against the paper and lose the facets entirely.
+        color: new THREE.Color(0.052, 0.049, 0.068),
+        // Obsidian is a dielectric — metalness must stay at 0 or the whole
+        // environment comes back as broad pale mirror panels.
         metalness: 0.0,
+        // Rough and dry. This is the setting that decides matte vs glass.
+        roughness: 0.78,
         // The Sketchfab export ships emissiveFactor 1.0, which flattens every
-        // light in the scene — pull it down to a faint violet inner glow.
-        emissiveIntensity: 0.1,
-        // Polished: tight highlights rather than broad soft sheen.
-        roughness: 0.16,
-        envMapIntensity: 0.7, // crisp studio reflections on the facets
+        // light in the scene — reduced to a faint violet interior.
+        emissiveIntensity: 0.055,
+        envMapIntensity: 0.35,
         flatShading: true, // crisp per-facet normals, not waxy smooth shading
-        // Iridescence is an ACCENT, the same way the veins are — enough to shift
-        // violet→cyan→magenta as the facets turn, not enough to own the surface.
-        iridescence: 0.6,
-        iridescenceIOR: 1.9,
-        // A wide film range so neighbouring facets land on different fringes —
-        // the shard shifts colour as it turns instead of tinting uniformly.
-        iridescenceThicknessRange: [140, 780],
-        // Kept moderate: clearcoat reflects the environment on top of the
-        // iridescence layer regardless of metalness, so stacking all three high
-        // re-introduces the broad pale panels that metalness:0 just removed.
-        clearcoat: 0.6,
-        clearcoatRoughness: 0.08, // wet polish over the interference layer
+        // Barely there: a trace of interference so the stone isn't inert, far
+        // below the level where it starts to look wet.
+        iridescence: 0.16,
+        iridescenceIOR: 1.6,
+        iridescenceThicknessRange: [180, 640],
+        clearcoat: 0,
       });
       mat.userData.alien = true;
 
@@ -124,8 +111,10 @@ export function Crystal() {
               // Fresnel-weighted so the light reads as INSIDE the crystal,
               // catching on the grazing facets, not painted on the surface.
               float fres = pow(1.0 - abs(dot(normalize(vViewPosition), normal)), 2.2);
+              // Held well down — on a matte body a strong internal glow reads
+              // as a lamp inside a rock. This is a slow ember, nothing more.
               totalEmissiveRadiance +=
-                vec3(0.34, 0.16, 1.0) * energy * (0.16 + fres * 0.85) * 0.42;
+                vec3(0.34, 0.16, 1.0) * energy * (0.16 + fres * 0.85) * 0.13;
             }
             `
           );
