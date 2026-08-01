@@ -1,4 +1,6 @@
 import puppeteer from "puppeteer-core";
+import os from "node:os";
+import path from "node:path";
 
 const EDGE = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 const URL = process.argv[2] || "http://localhost:3000";
@@ -8,9 +10,14 @@ const H = Number(process.argv[5]) || 900;
 const WAIT = Number(process.argv[6]) || 4500;
 const UNTIL = process.argv[7] || "networkidle2";
 
+// Dedicated profile dir so we never collide with the user's running Edge
+// (a shared profile makes the new process hand off and exit → launch fails).
+const USER_DATA = path.join(os.tmpdir(), `nerodyn-shot-${process.pid}`);
+
 const browser = await puppeteer.launch({
   executablePath: EDGE,
   headless: "new",
+  userDataDir: USER_DATA,
   args: [
     "--no-sandbox",
     "--enable-unsafe-swiftshader",

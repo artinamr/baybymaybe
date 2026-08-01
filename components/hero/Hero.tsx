@@ -24,6 +24,17 @@ export function Hero() {
       {/* Whisper-quiet background */}
       <div className="hero-bg fixed inset-0 z-0" />
 
+      {/* Film grain over everything */}
+      <div className="grain" aria-hidden />
+
+      {/* Vertical editorial caption along the left edge (over the light field) */}
+      <span
+        aria-hidden
+        className={`reveal-fade fixed left-4 top-1/2 z-30 hidden -translate-y-1/2 text-[0.58rem] font-medium uppercase tracking-[0.34em] text-ink/35 [writing-mode:vertical-rl] lg:block transition-opacity duration-700 ${fade}`}
+      >
+        Nerodyn · Obsidian Core · EST MMXXVI
+      </span>
+
       {/* Accessible headline (the visual is rendered as liquid in the canvas) */}
       <h1 className="sr-only">Maximise Your Digital Potential</h1>
 
@@ -78,11 +89,21 @@ export function Hero() {
         <div className="flex-1" />
 
         <footer className="flex flex-col gap-10 pb-9 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-col gap-6">
+          {/* All copy lives in a confident left column; the monument owns the right. */}
+          <div className="flex max-w-[32rem] flex-col gap-7">
             <span className="reveal-fade flex items-center gap-3 text-[0.68rem] font-medium uppercase tracking-[0.26em] text-muted">
               <span className="h-px w-8 bg-accent/70" />
               Digital Infrastructure · AI Automation
             </span>
+
+            <p className="reveal-fade pointer-events-auto max-w-[28rem] border-l border-accent/30 pl-5 text-[0.95rem] leading-relaxed text-ink/70">
+              <span className="font-medium text-ink">
+                The architecture behind ambitious companies.
+              </span>{" "}
+              Nerodyn engineers the digital infrastructure and AI automation that
+              move you faster — built, integrated, and run end to end.
+            </p>
+
             <div className="reveal-fade flex flex-wrap items-center gap-3">
               <div className="pointer-events-auto">
                 <HearTheStory onDive={() => setDiving(true)} />
@@ -99,13 +120,11 @@ export function Hero() {
             </div>
           </div>
 
-          <p className="reveal-fade pointer-events-auto max-w-[22rem] border-l border-accent/30 pl-5 text-[0.95rem] leading-relaxed text-ink/70">
-            <span className="font-medium text-ink">
-              The architecture behind ambitious companies.
-            </span>{" "}
-            Nerodyn engineers the digital infrastructure and AI automation that
-            move you faster — built, integrated, and run end to end.
-          </p>
+          {/* Scroll cue, lower-right, clear of the monument's narrow base. */}
+          <span className="reveal-fade pointer-events-none mb-1 hidden items-center gap-3 text-[0.62rem] font-medium uppercase tracking-[0.28em] text-ink/40 sm:flex">
+            Scroll to explore
+            <span aria-hidden className="scroll-cue relative block h-9 w-px bg-ink/20" />
+          </span>
         </footer>
       </div>
     </section>

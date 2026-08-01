@@ -17,11 +17,12 @@ export function drawHeadlineMask(canvas: HTMLCanvasElement, dpr: number) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
 
+  // Smaller now, anchored in the left ~60% so the 3D object owns the right zone.
   const sm = w < 640;
-  const fs = (sm ? 0.15 : 0.135) * w;
-  const padX = 0.04 * w;
+  const fs = (sm ? 0.13 : 0.08) * w;
+  const padX = 0.05 * w;
   const lh = 0.84 * fs;
-  const right = w - padX;
+  const right = sm ? w - padX : 0.6 * w;
 
   // Channel-coded mask: RED = liquid-filled words, GREEN = solid-black words.
   // Alpha carries the anti-aliased coverage so edges stay crisp.

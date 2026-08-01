@@ -1,6 +1,6 @@
 "use client";
 
-import { startDive } from "@/lib/heroAnim";
+import { startAwaken } from "@/lib/heroAnim";
 
 export function HearTheStory({ onDive }: { onDive: () => void }) {
   return (
@@ -8,7 +8,7 @@ export function HearTheStory({ onDive }: { onDive: () => void }) {
       type="button"
       onClick={() => {
         onDive();
-        startDive();
+        startAwaken();
       }}
       className="btn-shine group relative inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[0.92rem] font-medium tracking-tight text-white shadow-[0_10px_30px_-8px_rgba(91,61,240,0.65),inset_0_1px_0_rgba(255,255,255,0.28)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_38px_-8px_rgba(91,61,240,0.75),inset_0_1px_0_rgba(255,255,255,0.3)]"
       style={{

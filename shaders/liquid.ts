@@ -84,25 +84,26 @@ void main() {
   float f = fbm(pw + 3.2 * r);
   f = clamp(f + uDive * 0.2, 0.0, 1.3);
 
-  // Dark, legible palette — letters stay clearly darker than the off-white page.
-  vec3 ink    = vec3(0.090, 0.055, 0.230);
-  vec3 indigo = vec3(0.357, 0.239, 0.941);
-  vec3 violet = vec3(0.640, 0.560, 1.000);
+  // FULLY-SATURATED electric-indigo fill — never greyed. The letters read as a
+  // solid, rich #5B3DF0 with a darker indigo shadow and only a thin bright crest.
+  vec3 deep = vec3(0.140, 0.080, 0.520);  // deep indigo shadow
+  vec3 mid  = vec3(0.357, 0.239, 0.941);  // electric indigo #5B3DF0
+  vec3 hi   = vec3(0.560, 0.470, 1.000);  // bright crest (used sparingly)
 
-  vec3 col = ink;
-  col = mix(col, indigo, smoothstep(0.30, 0.72, f));
-  col = mix(col, violet, smoothstep(0.62, 0.98, f) * 0.85);
+  vec3 col = mix(deep, mid, smoothstep(0.05, 0.65, f));
+  col = mix(col, hi, smoothstep(0.78, 1.00, f) * 0.40);
 
-  // Cursor bloom.
-  float glow = smoothstep(0.6, 0.0, md);
-  col = mix(col, violet, glow * 0.45);
+  // Cursor bloom — a gentle brightening that follows the pointer.
+  float glow = smoothstep(0.55, 0.0, md);
+  col = mix(col, hi, glow * 0.22);
 
-  // Travelling diagonal light sweep — premium sheen across the type.
-  float band = fract(uTime * 0.11);
+  // Thin travelling sheen — a crest of light, kept tight so it never washes flat.
+  float band = fract(uTime * 0.09);
   float diag = vUv.x * 0.62 + (1.0 - vUv.y) * 0.38;
-  float sweep = smoothstep(0.05, 0.0, abs(diag - band));
-  col += sweep * (0.45 + 0.4 * uDive);
+  float sweep = smoothstep(0.025, 0.0, abs(diag - band));
+  col += sweep * vec3(0.10, 0.09, 0.18) * (1.0 + uDive);
 
-  gl_FragColor = vec4(col, a);
+  // Clamp so the type never trips the bloom threshold (only the veins glow).
+  gl_FragColor = vec4(min(col, vec3(1.0)), a);
 }
 `;
