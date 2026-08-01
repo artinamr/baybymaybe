@@ -56,3 +56,7 @@ premium*.png
 deltoid*.png
 obsidian*.png
 newlogo*.png
+
+# stray dev-server logs
+dev.log
+dev-err.log

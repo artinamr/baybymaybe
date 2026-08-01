@@ -1,10 +1,15 @@
 "use client";
 
+import { heroLayout } from "./heroLayout";
+
 /**
  * Draws the headline into an offscreen canvas (white on transparent) to use as
  * a GPU mask. The shader then fills these exact letterforms with flowing liquid.
  * Layout mirrors the editorial DOM intent: MAXIMISE (left) / YOUR—DIGITAL
- * (justified) / POTENTIAL (right), vertically centred.
+ * (justified) / POTENTIAL (right), anchored high in the left zone.
+ *
+ * Geometry comes from `heroLayout` so the type zone always ends where the
+ * monument begins — see lib/heroLayout.ts.
  */
 export function drawHeadlineMask(canvas: HTMLCanvasElement, dpr: number) {
   const w = window.innerWidth;
@@ -17,12 +22,7 @@ export function drawHeadlineMask(canvas: HTMLCanvasElement, dpr: number) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
 
-  // Smaller now, anchored in the left ~60% so the 3D object owns the right zone.
-  const sm = w < 640;
-  const fs = (sm ? 0.13 : 0.08) * w;
-  const padX = 0.05 * w;
-  const lh = 0.84 * fs;
-  const right = sm ? w - padX : 0.6 * w;
+  const { fontSize: fs, padX, right, baseline, lineHeight: lh } = heroLayout(w, h);
 
   // Channel-coded mask: RED = liquid-filled words, GREEN = solid-black words.
   // Alpha carries the anti-aliased coverage so edges stay crisp.
@@ -37,9 +37,7 @@ export function drawHeadlineMask(canvas: HTMLCanvasElement, dpr: number) {
       `${(-0.02 * fs).toFixed(2)}px`;
   } catch {}
 
-  const cap = ctx.measureText("MAXIMISE").actualBoundingBoxAscent || fs * 0.7;
-  const totalVisual = lh * 2 + cap;
-  const y1 = Math.round((h - totalVisual) / 2 + cap);
+  const y1 = baseline;
   const y2 = y1 + lh;
   const y3 = y2 + lh;
 

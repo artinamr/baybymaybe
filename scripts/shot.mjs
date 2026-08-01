@@ -1,8 +1,17 @@
 import puppeteer from "puppeteer-core";
 import os from "node:os";
 import path from "node:path";
+import fsSync from "node:fs";
 
-const EDGE = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+// Edge first, Chrome as fallback — whichever is installed.
+const CANDIDATES = [
+  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+];
+const EDGE =
+  process.env.SHOT_BROWSER ||
+  CANDIDATES.find((p) => fsSync.existsSync(p)) ||
+  CANDIDATES[0];
 const URL = process.argv[2] || "http://localhost:3000";
 const OUT = process.argv[3] || "C:\\Nerodyn\\baybymaybe\\preview3.png";
 const W = Number(process.argv[4]) || 1440;
@@ -16,12 +25,19 @@ const USER_DATA = path.join(os.tmpdir(), `nerodyn-shot-${process.pid}`);
 
 const browser = await puppeteer.launch({
   executablePath: EDGE,
-  headless: "new",
+  // puppeteer-core >= 23 removed headless:"new" — passing it yields a browser
+  // that exits immediately ("Failed to launch… Code: 0"), which looks exactly
+  // like the Edge profile-handoff failure and wasted real time. Use `true`.
+  headless: true,
+  // Force the websocket transport: the default DevTools *pipe* transport is
+  // what actually breaks the handshake on this machine.
+  pipe: false,
   userDataDir: USER_DATA,
   args: [
     "--no-sandbox",
     "--enable-unsafe-swiftshader",
     "--use-angle=swiftshader",
+    "--disable-extensions",
     `--window-size=${W},${H}`,
   ],
   defaultViewport: { width: W, height: H },

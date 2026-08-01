@@ -102,10 +102,29 @@ and what we've learned:
   (`directionalLight`s in HeroCanvas). Grounding: a canvas radial-gradient
   `GroundShadow` plane under the shard (drei `ContactShadows` silently rendered
   nothing here — don't reintroduce it; the ellipse is cheaper and cleaner).
+- **CURRENT — the shard framed as a MONUMENT (2026-08-01).** Client: *"I like the
+  stone, but not its size."* It was 18% of frame width — a thin sliver floating
+  mid-frame with an ellipse shadow, i.e. a product shot of a prop. Now: scale
+  2.15, tip just under the nav, base running **off the bottom edge of the frame**.
+  The crop is the whole point — it is what gives the shard mass and grounding,
+  and it made the `GroundShadow` ellipse obsolete (deleted; replaced by a broad
+  soft occlusion in the `Backdrop` shader, tracking the shard's column). ~30% of
+  frame width, 87% of height, right edge landing on the 4vw gutter so it aligns
+  optically with the nav's right edge. Float/parallax amplitudes were cut (at
+  this mass, visible bobbing reads as weightless).
 - **Hard constraints learned about placement:** the object must NOT overlap the top
-  nav, and must NOT collide with the bottom-right description text. It should feel
+  nav, and must NOT collide with the description text. It should feel
   big and confident but contained in its zone. Earlier versions bled into the menu —
   that is unacceptable.
+- **`lib/heroLayout.ts` is now the single layout authority.** The headline mask,
+  the crystal transform, and the DOM footer width all derive from it, so the type
+  zone always ends exactly where the monument begins. Before this they were
+  independently hardcoded (`right = 0.6 * w` vs `position={[1.7,0,0]}`), which
+  held at exactly one aspect ratio and collided at others. **Do not reintroduce
+  hardcoded hero geometry** — add it there instead. It also owns the small-screen
+  branch, where a single column can't host a cropped monument without sitting on
+  the copy: there the shard is shown *whole*, in its own band between the
+  headline and the copy block.
 
 **Open creative question for next session:** EVERY discrete-3D-object direction
 has now been rejected (speckle, worley cracks, floating crystal, grounded
@@ -164,6 +183,12 @@ worley crack veins (latest). Text-in-the-dead-center "AI look" is forbidden.
    headless shot, and never tell the client it looks good based on one.** Scripts:
    `scripts/shot.mjs` (args: url out w h waitMs waitUntil); it emulates
    `prefers-reduced-motion: no-preference` so intros run.
+   For **geometry** questions (size, placement, collisions, crops) prefer
+   `scripts/compose.mjs <out.png> [w] [h]` — a software rasterizer that projects
+   the real `crystal.glb` through the real camera using `lib/heroLayout.ts`, and
+   overlays the headline blocks. No browser, no GPU, ~1s per viewport, and it is
+   *exact* about geometry in a way SwiftShader shots are not. It prints the
+   type→stone gap, which must stay positive on desktop.
 2. **Tailwind v4 + next/font circular var:** never name a next/font `variable` the
    same as a `@theme --font-*` token — it silently breaks globals.css compile and
    Turbopack serves stale CSS. (Font is `--font-grotesk` → theme `--font-display`.)
@@ -174,13 +199,16 @@ worley crack veins (latest). Text-in-the-dead-center "AI look" is forbidden.
 4. **Reusing a `CanvasTexture` across a size change** throws
    `glCopySubTextureCHROMIUM: Offset overflows` — create a FRESH texture per mask
    rebuild (on resize + `document.fonts.ready`).
-5. **`scripts/shot.mjs` must launch Edge with its own `userDataDir`** (now does) —
-   otherwise, if the user has Edge open, the spawned process hands off to the
-   running instance and exits → puppeteer "Failed to launch… Code: 0". If shots
-   still fail with Code: 0, headless Edge is wedged (seen after mass process
-   kills / mid-update); it's environmental, not the code — fall back to
-   `tsc --noEmit` + `curl` HTTP 200 + the dev-server `[browser]` console log
-   (forwarded client logs show runtime errors without a screenshot).
+5. **`scripts/shot.mjs` "Failed to launch… Code: 0" — SOLVED (2026-08-01).**
+   This was blamed on the Edge profile handoff and written off as environmental;
+   it was mostly the code. Two real causes, both now fixed: puppeteer-core ≥ 23
+   **removed `headless: "new"`** (passing it yields a browser that exits
+   instantly), and the default DevTools **pipe** transport breaks the handshake
+   here — the script now uses `headless: true` + `pipe: false`. Headless **Edge
+   is genuinely wedged on this machine** but **Chrome works**, so the script
+   probes for an installed browser and `SHOT_BROWSER=<path>` overrides it. If a
+   launch ever fails again, first run the browser by hand with `--dump-dom` to
+   see the real error before assuming it's the environment.
 6. **Next 16 dev can crash-loop its `.next/dev/build/<hash>.js` workers and spawn
    hundreds of node procs → OOM.** If the dev server dies with "Zone Allocation
    failed", kill the `.next\dev\build` node processes, `rm -rf .next`, restart
@@ -192,12 +220,19 @@ worley crack veins (latest). Text-in-the-dead-center "AI look" is forbidden.
 
 ## File map (hero)
 
+- `lib/heroLayout.ts` — **the layout authority** (camera constants, crystal
+  transform, headline geometry, `--hero-right`). Read this first.
+- `scripts/compose.mjs` — GPU-free composition proof (see gotcha #1).
 - `components/hero/Hero.tsx` — layout shell, nav, CTAs, eyebrow, description, fade.
-- `components/hero/HeroCanvas.tsx` — R3F Canvas: Backdrop, key+rim lights,
-  `Crystal`, `GroundShadow`, `Environment` (Lightformer strips), `LiquidText`.
+  Publishes `--hero-right` so the footer ends where the monument begins; the
+  scroll cue lives in that channel, right-aligned to the headline's edge.
+- `components/hero/HeroCanvas.tsx` — R3F Canvas: Backdrop (page gradient +
+  the monument's contact shadow), key+rim lights, `Crystal`, `Environment`
+  (Lightformer strips), `LiquidText`.
 - `components/hero/Crystal.tsx` — the centerpiece: loads `public/crystal.glb`
   (client's obsidian shard), fixes the Sketchfab material (emissive 0.12,
-  roughness 0.32, flatShading) + float/parallax rig. `FrozenCrystal.tsx`,
+  roughness 0.32, flatShading) + drift/parallax rig, framed by `heroLayout`.
+  `GroundShadow` (in HeroCanvas), `FrozenCrystal.tsx`,
   `Artifact.tsx`, `shaders/artifact.ts`, `shaders/atmosphere.ts`,
   `shaders/particles.ts`, `Monolith.tsx`, `LogoMark3D.tsx`, `ObsidianMark.tsx`,
   `shaders/obsidian.ts` were all deleted.

@@ -12,6 +12,7 @@ import * as THREE from "three";
 import { pointer } from "@/lib/usePointer";
 import { heroAnim } from "@/lib/heroAnim";
 import { drawHeadlineMask } from "@/lib/headlineMask";
+import { CAMERA, heroLayout } from "@/lib/heroLayout";
 import { liquidVertex, liquidFragment } from "@/shaders/liquid";
 import { Crystal } from "./Crystal";
 
@@ -31,8 +32,14 @@ function makeMaskTexture(canvas: HTMLCanvasElement, dpr: number) {
 
 /** Opaque page-gradient drawn in-canvas (so bloom can run without breaking the page). */
 function Backdrop() {
-  const uniforms = useMemo(() => ({ uRes: { value: new THREE.Vector2(1, 1) } }), []);
-  useFrame((s) => uniforms.uRes.value.set(s.size.width, s.size.height));
+  const uniforms = useMemo(
+    () => ({ uRes: { value: new THREE.Vector2(1, 1) }, uShadow: { value: 0.8 } }),
+    []
+  );
+  useFrame((s) => {
+    uniforms.uRes.value.set(s.size.width, s.size.height);
+    uniforms.uShadow.value = heroLayout(s.size.width, s.size.height).shadowX;
+  });
   return (
     <mesh frustumCulled={false} renderOrder={-10}>
       <planeGeometry args={[2, 2]} />
@@ -43,6 +50,7 @@ function Backdrop() {
         vertexShader={`varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy,0.0,1.0); }`}
         fragmentShader={`
           varying vec2 vUv;
+          uniform float uShadow;
           void main(){
             // warm gallery paper — matches --paper / --paper-2
             vec3 a = vec3(0.969, 0.965, 0.953);
@@ -53,6 +61,11 @@ function Backdrop() {
             col += vec3(0.10, 0.07, 0.28) * 0.04 * smoothstep(0.6, 0.0, distance(vUv, vec2(0.05, -0.02)));
             // implied studio floor — the field settles very slightly toward the base
             col *= 1.0 - 0.035 * smoothstep(0.32, 0.0, vUv.y);
+            // The monument's weight bleeding into the paper. Its base is cropped
+            // by the frame, so contact is atmospheric — a broad soft occlusion
+            // pooling at the bottom of its column — not a cast ellipse.
+            vec2 sp = vec2(vUv.x - uShadow, (vUv.y + 0.10) * 1.35);
+            col *= 1.0 - 0.17 * smoothstep(0.62, 0.0, length(sp));
             gl_FragColor = vec4(col, 1.0);
           }
         `}
@@ -139,52 +152,6 @@ function LiquidText() {
   );
 }
 
-/** Soft elliptical ground shadow — anchors the floating shard to the paper
- *  field like a studio product shot. A radial-gradient canvas texture on a
- *  floor plane; it breathes in counter-phase with the crystal's float. */
-function GroundShadow() {
-  const ref = useRef<THREE.Mesh>(null);
-  const tex = useMemo(() => {
-    const c = document.createElement("canvas");
-    c.width = c.height = 256;
-    const ctx = c.getContext("2d");
-    if (ctx) {
-      const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-      g.addColorStop(0, "rgba(18, 11, 36, 0.52)");
-      g.addColorStop(0.45, "rgba(18, 11, 36, 0.24)");
-      g.addColorStop(1, "rgba(18, 11, 36, 0)");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, 256, 256);
-    }
-    const t = new THREE.CanvasTexture(c);
-    t.needsUpdate = true;
-    return t;
-  }, []);
-
-  useFrame((state) => {
-    const m = ref.current;
-    if (!m) return;
-    const t = state.clock.elapsedTime;
-    const floatY = prefersReduced ? 0 : Math.sin(t * 0.5) * 0.09;
-    // rises → shadow shrinks + fades; sinks → it spreads + deepens
-    const mat = m.material as THREE.MeshBasicMaterial;
-    mat.opacity = 0.8 - floatY * 1.6;
-    m.scale.set(1.9 - floatY * 1.4, 1, 1.1 - floatY * 0.8);
-  });
-
-  return (
-    <mesh
-      ref={ref}
-      position={[1.7, -1.42, 0]}
-      rotation-x={-Math.PI / 2}
-      renderOrder={1}
-    >
-      <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial map={tex} transparent depthWrite={false} />
-    </mesh>
-  );
-}
-
 function Scene() {
   return (
     <>
@@ -200,9 +167,6 @@ function Scene() {
       <Suspense fallback={null}>
         <Crystal />
       </Suspense>
-
-      {/* Soft product-shot shadow grounding the shard on the paper field. */}
-      <GroundShadow />
 
       <Environment resolution={256}>
         <Lightformer intensity={3.6} position={[3.5, 2, 5]} scale={[1.1, 11, 1]} color="#ffffff" />
@@ -225,7 +189,7 @@ export default function HeroCanvas() {
       className="!fixed inset-0"
       style={{ position: "fixed" }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
-      camera={{ position: [0, 0, 7], fov: 30 }}
+      camera={{ position: [...CAMERA.position], fov: CAMERA.fov }}
       dpr={dpr}
     >
       <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.75)} />

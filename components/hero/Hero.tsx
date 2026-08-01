@@ -3,7 +3,8 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { heroLayout } from "@/lib/heroLayout";
 import { usePointerTracking } from "@/lib/usePointer";
 import { useSmoothScroll } from "@/lib/useSmoothScroll";
 import { HearTheStory } from "./HearTheStory";
@@ -21,6 +22,20 @@ export function Hero() {
 
   usePointerTracking();
   useSmoothScroll();
+
+  // Publish the type zone's right edge to CSS, from the same authority the
+  // headline mask and the crystal use. The DOM chrome then ends exactly where
+  // the monument begins, at every viewport, with no magic percentages.
+  useEffect(() => {
+    const apply = () =>
+      document.documentElement.style.setProperty(
+        "--hero-right",
+        `${heroLayout(window.innerWidth, window.innerHeight).right}px`
+      );
+    apply();
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+  }, []);
 
   const fade = diving ? "opacity-0" : "opacity-100";
 
@@ -90,8 +105,12 @@ export function Hero() {
 
         <div className="flex-1" />
 
-        <footer className="flex flex-col gap-10 pb-9 sm:flex-row sm:items-end sm:justify-between">
-          {/* All copy lives in a confident left column; the monument owns the right. */}
+        <footer
+          className="flex flex-col gap-10 pb-9 sm:flex-row sm:items-end sm:justify-between"
+          style={{ maxWidth: "calc(var(--hero-right, 60%) - 4vw)" }}
+        >
+          {/* All copy lives in a confident left column; the monument owns the
+              right zone outright — nothing else is allowed into it. */}
           <div className="flex max-w-[32rem] flex-col gap-7">
             <span className="reveal-fade flex items-center gap-3 text-[0.68rem] font-medium uppercase tracking-[0.26em] text-muted">
               <span className="h-px w-8 bg-accent/70" />
@@ -102,8 +121,12 @@ export function Hero() {
               <span className="font-medium text-ink">
                 The architecture behind ambitious companies.
               </span>{" "}
-              Nerodyn engineers the digital infrastructure and AI automation that
-              move you faster — built, integrated, and run end to end.
+              {/* Small screens are one column and the shard needs its own band —
+                  the second sentence would push the copy up into it. */}
+              <span className="hidden sm:inline">
+                Nerodyn engineers the digital infrastructure and AI automation
+                that move you faster — built, integrated, and run end to end.
+              </span>
             </p>
 
             <div className="reveal-fade flex flex-wrap items-center gap-3">
@@ -122,9 +145,12 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Scroll cue, lower-right, clear of the monument's narrow base. */}
+          {/* Scroll cue. It used to sit in the footer's right slot, which the
+              monument now occupies entirely. It sits in the channel between the
+              copy column and the shard instead — the one piece of quiet space
+              left in the composition — and stays the lowest thing on the page. */}
           <span className="reveal-fade pointer-events-none mb-1 hidden items-center gap-3 text-[0.62rem] font-medium uppercase tracking-[0.28em] text-ink/40 sm:flex">
-            Scroll to explore
+            Scroll
             <span aria-hidden className="scroll-cue relative block h-9 w-px bg-ink/20" />
           </span>
         </footer>
