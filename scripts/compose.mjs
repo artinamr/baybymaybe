@@ -20,7 +20,7 @@ const W = +(process.argv[3] || 1512);
 const H = +(process.argv[4] || 900);
 
 // Node >= 22 strips the types; this is the same module the app ships.
-const { heroLayout, WORD, CAMERA } = await import(
+const { heroLayout, WORD, CAMERA, LINES } = await import(
   new URL("../lib/heroLayout.ts", import.meta.url).href
 );
 const L = heroLayout(W, H);
@@ -153,16 +153,17 @@ function frame(x, y, w, h, col, t = 2) {
 }
 
 const cap = WORD.cap * L.fontSize;
-const y1 = L.baseline - cap;
-const y2 = y1 + L.lineHeight;
-const y3 = y2 + L.lineHeight;
-const boxes = [
-  { kind: "chrome", x: 0.04 * W, y: 0, w: W - 0.08 * W, h: 86 },
-  { kind: "liquid", x: L.padX, y: y1, w: WORD.MAXIMISE * L.fontSize, h: cap },
-  { kind: "solid", x: L.padX, y: y2, w: WORD.YOUR * L.fontSize, h: cap },
-  { kind: "solid", x: L.right - WORD.DIGITAL * L.fontSize, y: y2, w: WORD.DIGITAL * L.fontSize, h: cap },
-  { kind: "liquid", x: L.right - WORD.POTENTIAL * L.fontSize, y: y3, w: WORD.POTENTIAL * L.fontSize, h: cap },
-];
+const boxes = [{ kind: "chrome", x: 0.04 * W, y: 0, w: W - 0.08 * W, h: 86 }];
+LINES.forEach((line, i) => {
+  const wid = WORD[line.word] * L.fontSize;
+  boxes.push({
+    kind: line.fill,
+    x: line.align === "left" ? L.padX : L.right - wid,
+    y: L.baseline - cap + i * L.lineHeight,
+    w: wid,
+    h: cap,
+  });
+});
 for (const b of boxes) {
   const col = b.kind === "liquid" ? [0.357, 0.239, 0.941] : b.kind === "solid" ? [0.04, 0.043, 0.063] : [0.85, 0.2, 0.2];
   if (b.kind === "guide") frame(b.x, b.y, b.w, b.h, col, 1);

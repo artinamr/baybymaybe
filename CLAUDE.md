@@ -41,7 +41,11 @@ entire job right now is to make **one screen** breathtaking.
   "Your" + "Digital" are **solid near-black**. The *treatment must stay exactly as
   designed* — only its size/placement may change. It must read as **strong,
   saturated indigo, never greyed/washed out**. (Greying is a recurring regression —
-  guard against it.)
+  guard against it.) Set as **one word per line**, cascading left→right toward the
+  monument (`LINES` in `lib/heroLayout.ts`). The old three-line setting put YOUR
+  and DIGITAL on one line, and *their combined width* — not the frame — was what
+  capped the type size; one word per line made it ~20% bigger and bound only by
+  the height it may occupy.
 - **A defined 3D zone on the right** holding ONE centerpiece object. The left is
   type, the right is the object. Mouse interaction is isolated to the 3D zone; the
   left text stays selectable and scroll is never hijacked.
@@ -173,6 +177,23 @@ worley crack veins (latest). Text-in-the-dead-center "AI look" is forbidden.
 - Obsidian material is `meshPhysicalMaterial` patched via `onBeforeCompile`
   (inject `vObj`, `uTime`, `uVein`; emissive added at `<emissivemap_fragment>`,
   where `normal` and `vViewPosition` are available for fresnel).
+- **`crystal.glb`'s own maps are good — don't fight them.** Extracted and checked:
+  baseColor is real black obsidian with pale crack veins (exactly the brief),
+  emissive is a violet nebula. If the shard ever looks pale/washed, it is **not**
+  the textures — it is **environment reflection**. `metalness` is the lever:
+  obsidian is a **dielectric, so metalness must be ~0**. At 0.55 the tall white
+  Lightformer strips came back as broad pale mirror panels that read as a glass
+  prop; at 0 the env survives only as tight specular edge highlights, which is
+  the reference. `clearcoat` and `iridescence` also reflect the env on top of
+  that regardless of metalness — stacking all three high re-creates the wash.
+- **"Alien" (client ask, 2026-08-01) = thin-film iridescence**, not a new texture:
+  `iridescence 0.6 / IOR 1.9 / thicknessRange [140,780]` so neighbouring facets
+  land on different fringes and the shard shifts violet→cyan→magenta as it turns,
+  plus **two broad slow emissive bands** travelling through object space (the
+  client's original "light that runs through the veins"). Deliberately LOW
+  frequency — the rejected speckle and worley passes both failed because
+  high-frequency noise reads as grain. The same cyan↔magenta interference is
+  echoed on the liquid headline's crest so type and shard share one material world.
 
 ## CRITICAL GOTCHAS (each cost real time)
 

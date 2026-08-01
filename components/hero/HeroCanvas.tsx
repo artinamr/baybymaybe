@@ -56,8 +56,12 @@ function Backdrop() {
             vec3 a = vec3(0.969, 0.965, 0.953);
             vec3 b = vec3(0.929, 0.922, 0.906);
             vec3 col = mix(a, b, clamp(vUv.x * 0.6 + (1.0 - vUv.y) * 0.6, 0.0, 1.0));
-            // faint indigo whispers in opposite corners
-            col += vec3(0.10, 0.07, 0.28) * 0.05 * smoothstep(0.6, 0.0, distance(vUv, vec2(0.9, 1.02)));
+            // The shard's own light spilling onto the paper — a tall, very soft
+            // halo up its column. This is what keeps the field from reading as
+            // blank; it stays a whisper (the loud background was rejected).
+            vec2 hp = vec2((vUv.x - uShadow) * 1.25, (vUv.y - 0.62) * 0.62);
+            col += vec3(0.11, 0.07, 0.30) * 0.085 * smoothstep(0.5, 0.0, length(hp));
+            // faint indigo whisper in the opposite corner, for balance
             col += vec3(0.10, 0.07, 0.28) * 0.04 * smoothstep(0.6, 0.0, distance(vUv, vec2(0.05, -0.02)));
             // implied studio floor — the field settles very slightly toward the base
             col *= 1.0 - 0.035 * smoothstep(0.32, 0.0, vUv.y);

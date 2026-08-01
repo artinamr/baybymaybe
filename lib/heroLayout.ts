@@ -33,7 +33,19 @@ const EXT = { left: 0.3955, right: 0.4944, top: 1.0279, bottom: 0.9876 };
  *  of the copy. There the shard is shown WHOLE, in its own band between the
  *  headline and the copy block — these are the band's edges, as fractions of
  *  viewport height. */
-const SM_BAND = { top: 0.33, bottom: 0.63 };
+const SM_BAND = { top: 0.35, bottom: 0.65 };
+
+/**
+ * The headline, one word per line, cascading left→right toward the monument.
+ * `liquid` words get the flowing indigo fill, `solid` words are near-black ink —
+ * that two-tone treatment is fixed brand direction, only size/placement move.
+ */
+export const LINES = [
+  { word: "MAXIMISE", fill: "liquid", align: "left" },
+  { word: "YOUR", fill: "solid", align: "left" },
+  { word: "DIGITAL", fill: "solid", align: "right" },
+  { word: "POTENTIAL", fill: "liquid", align: "right" },
+] as const;
 
 /** Nav occupies the top ~86px; the shard's tip must clear it. */
 const NAV_H = 86;
@@ -66,8 +78,8 @@ export const WORD = {
   cap: 0.71925,
 };
 
-/** Sum of the two words that share line 2 — the constraint that caps type size. */
-const LINE2 = WORD.YOUR + WORD.DIGITAL;
+/** The widest single word — with one word per line, this alone caps type width. */
+const WIDEST = WORD.POTENTIAL;
 
 export function heroLayout(w: number, h: number): HeroLayout {
   const pxPerWorld = h / WORLD_H;
@@ -97,22 +109,29 @@ export function heroLayout(w: number, h: number): HeroLayout {
   const centerPx = w / 2 + posX * pxPerWorld;
 
   // --- the type -----------------------------------------------------------
-  const padX = 0.05 * w;
+  // 4vw — the SAME gutter the nav, eyebrow, copy and CTAs use. It was 0.05w,
+  // so the headline sat ~15px inside every other element on the page: a margin
+  // that read as sloppy rather than as a decision.
+  const padX = 0.04 * w;
   const right = isSmall ? w - padX : leftPx - 0.045 * w;
   const zone = right - padX;
 
-  // Cap by width so YOUR and DIGITAL always keep an airy gap on line 2, and by
-  // viewport so the type never outgrows the frame on very wide screens.
+  // One word per line now. The old three-line setting put YOUR and DIGITAL on
+  // one line, and their COMBINED width — not the frame — was what capped the
+  // type at ~0.086w. Giving each word its own line lets the headline grow ~20%
+  // and stand as a column against the monument, so size is bound by the height
+  // it's allowed to occupy rather than by a word pair.
+  const typeTop = Math.max(0.125 * h, NAV_H + 30);
+  const availH = (isSmall ? 0.5 : 0.665) * h - typeTop;
   const fontSize = isSmall
-    ? 0.13 * w
-    : Math.min(0.088 * w, zone / (LINE2 + 0.64));
+    ? 0.115 * w
+    : Math.min(zone / WIDEST, availH / (3 * 0.8 + WORD.cap));
 
-  const lineHeight = 0.84 * fontSize;
-  const blockH = lineHeight * 2 + WORD.cap * fontSize;
-  // Optical centre sits above the geometric one — the type reads as anchored
-  // high against the copy block in the footer, not floating mid-frame.
-  // On small screens the type has to clear the shard's band above it.
-  const blockTop = (isSmall ? 0.21 : 0.4) * h - blockH / 2;
+  // Tighter leading than before (0.84): the four lines lock into one mass.
+  const lineHeight = 0.8 * fontSize;
+  const blockH = lineHeight * 3 + WORD.cap * fontSize;
+  // On small screens the type has to clear the shard's band below it.
+  const blockTop = isSmall ? 0.235 * h - blockH / 2 : typeTop;
   const baseline = Math.round(blockTop + WORD.cap * fontSize);
 
   return {

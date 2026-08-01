@@ -1,6 +1,6 @@
 "use client";
 
-import { heroLayout } from "./heroLayout";
+import { heroLayout, LINES } from "./heroLayout";
 
 /**
  * Draws the headline into an offscreen canvas (white on transparent) to use as
@@ -37,18 +37,9 @@ export function drawHeadlineMask(canvas: HTMLCanvasElement, dpr: number) {
       `${(-0.02 * fs).toFixed(2)}px`;
   } catch {}
 
-  const y1 = baseline;
-  const y2 = y1 + lh;
-  const y3 = y2 + lh;
-
-  ctx.textAlign = "left";
-  ctx.fillStyle = LIQUID;
-  ctx.fillText("MAXIMISE", padX, y1);
-  ctx.fillStyle = SOLID;
-  ctx.fillText("YOUR", padX, y2);
-  ctx.textAlign = "right";
-  ctx.fillStyle = SOLID;
-  ctx.fillText("DIGITAL", right, y2);
-  ctx.fillStyle = LIQUID;
-  ctx.fillText("POTENTIAL", right, y3);
+  LINES.forEach((line, i) => {
+    ctx.textAlign = line.align;
+    ctx.fillStyle = line.fill === "liquid" ? LIQUID : SOLID;
+    ctx.fillText(line.word, line.align === "left" ? padX : right, baseline + i * lh);
+  });
 }

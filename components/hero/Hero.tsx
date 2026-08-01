@@ -66,7 +66,7 @@ export function Hero() {
       <div
         className={`pointer-events-none relative z-30 flex min-h-screen flex-col px-[4vw] transition-opacity duration-700 ${fade}`}
       >
-        <header className="flex items-center justify-between py-7">
+        <header className="flex items-center justify-between border-b border-ink/[0.07] py-7">
           <Link
             href="/"
             className="reveal-fade pointer-events-auto flex items-center gap-2 text-ink"
