@@ -45,10 +45,19 @@ function Backdrop() {
             // The shard is shown whole and floating now, so it needs a contact
             // shadow to sit in the space rather than hover over it. A soft
             // ellipse under its base, wider than it is tall.
-            vec2 sp = (vUv - uShadow) * vec2(2.3, 7.5);
-            col *= 1.0 - 0.20 * smoothstep(1.0, 0.0, length(sp));
+            // Wide and soft. The object ends in a sharp point, so a tight dark
+            // pool right under it reads as a smudge stuck to the tip rather
+            // than as ground shadow.
+            vec2 sp = (vUv - vec2(uShadow.x, uShadow.y - 0.02)) * vec2(1.55, 9.5);
+            col *= 1.0 - 0.13 * smoothstep(1.0, 0.0, length(sp));
 
-            // A whisper of the shard's colour bleeding onto the paper.
+            // Light focused THROUGH the glass and onto the paper — a small
+            // caustic sitting inside the shadow. It is what tells the eye the
+            // object above it is transparent rather than solid.
+            vec2 cp = (vUv - vec2(uShadow.x, uShadow.y + 0.012)) * vec2(3.4, 13.0);
+            col += vec3(0.52, 0.46, 1.0) * 0.055 * smoothstep(1.0, 0.0, length(cp));
+
+            // A whisper of the object's colour bleeding onto the paper.
             vec2 hp = (vUv - vec2(uShadow.x, 0.55)) * vec2(1.5, 1.05);
             col += vec3(0.10, 0.07, 0.28) * 0.045 * smoothstep(0.55, 0.0, length(hp));
 

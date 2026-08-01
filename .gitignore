@@ -60,3 +60,7 @@ newlogo*.png
 # stray dev-server logs
 dev.log
 dev-err.log
+
+# heavy source models (stripped copies live in public/)
+heart_in_glass.glb
+crystal.glb

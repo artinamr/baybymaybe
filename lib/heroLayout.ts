@@ -20,20 +20,20 @@ export const WORLD_H =
   2 * CAMERA.position[2] * Math.tan(((CAMERA.fov / 2) * Math.PI) / 180);
 
 /**
- * Projected extents of crystal.glb at scale 1, in world units from the group
+ * Projected extents of heart.glb at scale 1, in world units from the group
  * origin, at the rig's resting rotation (y≈0.5, x≈0.04). Measured by projecting
- * the real mesh through the real camera (scripts/compose.mjs).
+ * the real mesh through the real camera — re-measure if the model changes.
  */
-const EXT = { left: 0.3955, right: 0.4944, top: 1.0279, bottom: 0.9876 };
+const EXT = { left: 0.5215, right: 0.4813, top: 1.0011, bottom: 0.9874 };
 
-/** The shard is shown WHOLE and set back — it occupies this fraction of the
- *  viewport height, with its tip this far down. (It used to be cropped by the
- *  bottom edge at 87%, which read as looming rather than composed.) */
-const OBJ = { heightFrac: 0.7, topFrac: 0.16, rightFrac: 0.9 };
+/** The object is shown WHOLE and LARGE — it occupies this fraction of the
+ *  viewport height, tip below the nav, right edge on the page gutter so it
+ *  lines up with the nav's last link. */
+const OBJ = { heightFrac: 0.84, topFrac: 0.13, rightFrac: 0.96 };
 
 /** Page gutter, and the channel between the type and the object. */
 const PAD_FRAC = 0.055;
-const GUTTER_FRAC = 0.06;
+const GUTTER_FRAC = 0.05;
 
 /** Where the headline block starts and the latest it may end. */
 const TYPE_TOP_FRAC = 0.265;
@@ -46,9 +46,9 @@ const TYPE_BOTTOM_FRAC = 0.66;
  * live type and far more machinery than an outline needs.
  */
 export const LINES = [
-  { text: "Maximise", style: "hollow" },
-  { text: "Your Digital", style: "solid" },
-  { text: "Potential", style: "hollow" },
+  { text: "Maximise", style: "solid" },
+  { text: "Your Digital", style: "hollow" },
+  { text: "Potential", style: "solid" },
 ] as const;
 
 /** Advance widths per px of font-size, Space Grotesk 700 uppercase at -0.02em —

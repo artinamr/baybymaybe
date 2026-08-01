@@ -177,7 +177,30 @@ worley crack veins (latest). Text-in-the-dead-center "AI look" is forbidden.
 - Obsidian material is `meshPhysicalMaterial` patched via `onBeforeCompile`
   (inject `vObj`, `uTime`, `uVein`; emissive added at `<emissivemap_fragment>`,
   where `normal` and `vViewPosition` are available for fresnel).
-- **`crystal.glb`'s baseColor + metallicRoughness maps are DROPPED, on purpose.**
+- **CURRENT CENTERPIECE — `public/heart.glb` (2026-08-02).** The client replaced
+  the shard with a **heart-in-glass** model: a faceted transparent shell (32 tris,
+  material `Crystal`) with a heart suspended inside it (836 tris, material
+  `Coeur1`). The source `heart_in_glass.glb` is **12.9MB of baked textures** and
+  is gitignored; `scripts/strip-glb.mjs` removes every image → **40KB**, because
+  both materials are rebuilt in `Crystal.tsx` anyway. The heart is clad in the
+  client's own dark volcanic-rock photo (`public/rock.jpg`, converted from their
+  AVIF) as `map` + `bumpMap`; the shell stays glass, because the encasement is
+  the point of the model — do not texture the shell opaque.
+  - **Texture repeat must stay 1:1.** At 2.2 the photo's large forms repeated
+    across the heart's UVs and read as horizontal banding, not rock.
+  - **Glass alpha is Fresnel-driven** via `onBeforeCompile`, and the exponent
+    matters: this shell is FACETED, so nearly every face sits at a middling
+    angle to the camera. A gentle curve (`pow(ndv, 1.35)`) lifts them all at
+    once and the glass becomes frosted plastic. `pow(1 - ndv, 5.0)` keeps the
+    body clear and brightens only near-grazing angles.
+  - `DoubleSide` means each ray crosses the shell twice, so on-screen opacity is
+    ~double the material's `opacity` — keep it very low (~0.02).
+  - The heart carries a slow double-thump **heartbeat** on `emissiveIntensity`,
+    and the backdrop has a small **caustic** inside its contact shadow — that
+    bright spot is what tells the eye the shell is transparent.
+- **The old `crystal.glb` shard is deleted.** Notes below are kept because the
+  lessons generalise (dielectrics, narrow vs broad sources, atlas padding).
+- **`crystal.glb`'s baseColor + metallicRoughness maps were DROPPED, on purpose.**
   Its atlas is a few black obsidian islands surrounded by broad radial **grey
   streak padding**, and many faces sample that padding. Stretched over the
   shard's big flat facets the streaks read as photographic **cloud panels** —

@@ -36,7 +36,7 @@ const CAM_Z = CAMERA.position[2],
   FOV = CAMERA.fov;
 
 /* ---------- GLB ---------- */
-const buf = fs.readFileSync("public/crystal.glb");
+const buf = fs.readFileSync(process.env.GLB || "public/heart.glb");
 const jsonLen = buf.readUInt32LE(12);
 const gltf = JSON.parse(buf.slice(20, 20 + jsonLen).toString("utf8"));
 const binOff = 20 + jsonLen + 8;
@@ -60,9 +60,14 @@ function readAt(Ctor, o) {
   return bin.readUInt32LE(o);
 }
 
-const prim = gltf.meshes[0].primitives[0];
-const POS = read(prim.attributes.POSITION);
-const IDX = read(prim.indices);
+// Every primitive in the file — the heart model is a shell plus the heart.
+const PRIMS = gltf.meshes.flatMap((m) =>
+  m.primitives.map((p) => ({
+    pos: read(p.attributes.POSITION),
+    idx: read(p.indices),
+    name: gltf.materials?.[p.material]?.name ?? "",
+  }))
+);
 
 /* ---------- transform ---------- */
 const cy = Math.cos(ROTY), sy = Math.sin(ROTY);
@@ -97,6 +102,7 @@ const zb = new Float32Array(W * H).fill(1e9);
 const LIGHT = (() => { const v = [0.5, 0.75, 0.55], m = Math.hypot(...v); return v.map((x) => x / m); })();
 let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
 
+for (const { pos: POS, idx: IDX, name } of PRIMS) {
 for (let t = 0; t < IDX.length; t += 3) {
   const w = [], s = [];
   for (let k = 0; k < 3; k++) {
@@ -111,8 +117,13 @@ for (let t = 0; t < IDX.length; t += 3) {
   const lam = Math.max(0, n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]);
   const rim = Math.pow(1 - Math.abs(n[2]), 3);
   // obsidian: near-black base, sharp specular-ish edge, faint indigo rim
-  const g = 0.045 + 0.5 * Math.pow(lam, 6) + 0.12 * Math.pow(lam, 2);
-  const col = [g + rim * 0.16, g + rim * 0.13, g + rim * 0.34];
+  const glass = name === "Crystal";
+  const g = glass
+    ? 0.62 + 0.3 * Math.pow(lam, 6) + 0.08 * rim
+    : 0.045 + 0.5 * Math.pow(lam, 6) + 0.12 * Math.pow(lam, 2);
+  const col = glass
+    ? [g, g, g + 0.03]
+    : [g + rim * 0.16, g + rim * 0.13, g + rim * 0.34];
 
   const bx0 = Math.max(0, Math.floor(Math.min(s[0][0], s[1][0], s[2][0])));
   const bx1 = Math.min(W - 1, Math.ceil(Math.max(s[0][0], s[1][0], s[2][0])));
@@ -137,6 +148,7 @@ for (let t = 0; t < IDX.length; t += 3) {
       if (y < minY) minY = y; if (y > maxY) maxY = y;
     }
   }
+}
 }
 
 /* ---------- UI overlay (measured from the live page) ---------- */
