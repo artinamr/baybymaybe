@@ -39,20 +39,31 @@ export function Crystal() {
       if (!src?.isMeshStandardMaterial || (src as THREE.Material).userData.alien)
         return;
 
+      // WHY THE GLB's baseColor AND metallicRoughness MAPS ARE DROPPED.
+      // Its atlas is a few black obsidian islands surrounded by broad radial
+      // grey STREAK PADDING, and a lot of this mesh's faces sample that padding.
+      // Stretched across the shard's big flat facets the streaks read as
+      // photographic cloud panels — the single worst thing about how the shard
+      // looked. Confirmed by rendering with map:null (the whole shard went
+      // uniformly pale, so the map was the only thing making it black), and the
+      // padding cannot be separated from the map's own bright hairline veins by
+      // luminance — both land in the same range, so a shader remap kills the
+      // veins too. The veins are a nice-to-have; the cloud panels were fatal.
+
       // Upgrade Standard → Physical so the shard can carry THIN-FILM
       // IRIDESCENCE. This is what makes it read as alien rather than as a dark
       // rock: an oil-slick interference sheen that swings through violet, cyan
       // and magenta as the facets turn, on top of a near-black obsidian body.
       const mat = new THREE.MeshPhysicalMaterial({
-        map: src.map,
-        roughnessMap: src.roughnessMap,
-        metalnessMap: src.metalnessMap,
+        // baseColor / MR maps DELIBERATELY DROPPED — see note below.
         emissiveMap: src.emissiveMap,
         emissive: src.emissive,
-        // Slight cool deepening of an already-black baseColor map (it is real
-        // obsidian with pale crack veins — the veins are the client's brief, so
-        // don't crush them).
-        color: new THREE.Color(0.78, 0.77, 0.86),
+        // Obsidian, straight: a near-black dielectric body. All of this shard's
+        // variation now comes from form and light — per-facet flat shading,
+        // tight highlights off narrow sources, per-facet iridescent fringes and
+        // the moving internal energy — which is exactly the client's reference
+        // (polished black faceted crystal with sharp edge highlights).
+        color: new THREE.Color(0.055, 0.052, 0.075),
         // OBSIDIAN IS A DIELECTRIC. Metalness tints reflection by base colour
         // and reflects the whole environment broadly — at 0.55 the tall white
         // Lightformer strips came back as big pale mirror panels that read as a
@@ -64,8 +75,8 @@ export function Crystal() {
         // light in the scene — pull it down to a faint violet inner glow.
         emissiveIntensity: 0.1,
         // Polished: tight highlights rather than broad soft sheen.
-        roughness: 0.18,
-        envMapIntensity: 0.9, // crisp studio reflections on the facets
+        roughness: 0.16,
+        envMapIntensity: 0.7, // crisp studio reflections on the facets
         flatShading: true, // crisp per-facet normals, not waxy smooth shading
         // Iridescence is an ACCENT, the same way the veins are — enough to shift
         // violet→cyan→magenta as the facets turn, not enough to own the surface.

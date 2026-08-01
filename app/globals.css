@@ -171,6 +171,36 @@ body {
   100% { transform: translateY(240%); opacity: 0; }
 }
 
+/* Base rail — a slow band of capability. Deliberately near-static: at this
+   speed it reads as a held breath, not a news crawl. */
+.rail-track {
+  animation: railRun 72s linear infinite;
+  will-change: transform;
+}
+@keyframes railRun {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+/* Feather both ends so the loop never shows a hard cut. */
+.rail-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 74%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 74%, transparent);
+}
+
+/* Availability dot — one slow live signal, with a single expanding ring. */
+.live-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  border: 1px solid var(--accent);
+  animation: liveRing 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes liveRing {
+  0% { transform: scale(0.7); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
 /* Artifact hint — a breathing ring around the click target label. */
 .hint-ring {
   position: relative;

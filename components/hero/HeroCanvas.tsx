@@ -60,11 +60,17 @@ function Backdrop() {
             // halo up its column. This is what keeps the field from reading as
             // blank; it stays a whisper (the loud background was rejected).
             vec2 hp = vec2((vUv.x - uShadow) * 1.25, (vUv.y - 0.62) * 0.62);
-            col += vec3(0.11, 0.07, 0.30) * 0.085 * smoothstep(0.5, 0.0, length(hp));
+            col += vec3(0.11, 0.07, 0.30) * 0.10 * smoothstep(0.5, 0.0, length(hp));
             // faint indigo whisper in the opposite corner, for balance
             col += vec3(0.10, 0.07, 0.28) * 0.04 * smoothstep(0.6, 0.0, distance(vUv, vec2(0.05, -0.02)));
             // implied studio floor — the field settles very slightly toward the base
             col *= 1.0 - 0.035 * smoothstep(0.32, 0.0, vUv.y);
+            // Corner falloff. A perfectly even field is what reads as "flat
+            // template"; this gives the paper the sense of being lit from the
+            // shard's side, so the page has a direction of light like a shot
+            // rather than a fill.
+            vec2 vg = (vUv - 0.5) * vec2(1.06, 1.0);
+            col *= 1.0 - 0.10 * smoothstep(0.30, 0.78, length(vg));
             // The monument's weight bleeding into the paper. Its base is cropped
             // by the frame, so contact is atmospheric — a broad soft occlusion
             // pooling at the bottom of its column — not a cast ellipse.
@@ -172,12 +178,18 @@ function Scene() {
         <Crystal />
       </Suspense>
 
+      {/* NARROW sources on purpose. The facets of this shard are big and flat,
+          so a wide light strip is caught by a whole facet at once and comes back
+          as a broad mid-grey panel — the shard stops reading as polished stone
+          and starts reading as grey plastic. Thin strips are caught only at
+          grazing angles, which is what makes a sharp edge highlight. */}
       <Environment resolution={256}>
-        <Lightformer intensity={3.6} position={[3.5, 2, 5]} scale={[1.1, 11, 1]} color="#ffffff" />
-        <Lightformer intensity={2.2} position={[-4.5, 1, 4]} scale={[0.9, 9, 1]} color="#cdd6ff" />
-        <Lightformer intensity={1.5} position={[1.5, -5, 3]} scale={[8, 1.5, 1]} color="#ffffff" />
-        <Lightformer intensity={1.3} position={[-2, 5.5, -4]} scale={[7, 2.2, 1]} color="#c6cdff" />
-        <Lightformer intensity={1.0} position={[5, -1, -3]} scale={[2.2, 6, 1]} color="#6a4bff" />
+        <Lightformer intensity={4.4} position={[3.5, 2, 5]} scale={[0.32, 11, 1]} color="#ffffff" />
+        <Lightformer intensity={3.0} position={[2.2, -1, 5]} scale={[0.16, 9, 1]} color="#ffffff" />
+        <Lightformer intensity={2.6} position={[-4.5, 1, 4]} scale={[0.26, 9, 1]} color="#cdd6ff" />
+        <Lightformer intensity={1.1} position={[1.5, -5, 3]} scale={[8, 0.5, 1]} color="#ffffff" />
+        <Lightformer intensity={0.9} position={[-2, 5.5, -4]} scale={[7, 0.7, 1]} color="#c6cdff" />
+        <Lightformer intensity={1.6} position={[5, -1, -3]} scale={[0.5, 6, 1]} color="#6a4bff" />
       </Environment>
 
       <LiquidText />

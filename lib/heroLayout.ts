@@ -63,6 +63,9 @@ export type HeroLayout = {
   /** Baseline of the first line. */
   baseline: number;
   lineHeight: number;
+  /** Top of the SECOND headline line — the DOM index sits in the notch that
+   *  the short word on that line ("YOUR") leaves open to its right. */
+  line2Top: number;
   /** Normalised x of the shard's centre, for the backdrop's contact shadow. */
   shadowX: number;
   isSmall: boolean;
@@ -122,7 +125,7 @@ export function heroLayout(w: number, h: number): HeroLayout {
   // and stand as a column against the monument, so size is bound by the height
   // it's allowed to occupy rather than by a word pair.
   const typeTop = Math.max(0.125 * h, NAV_H + 30);
-  const availH = (isSmall ? 0.5 : 0.665) * h - typeTop;
+  const availH = (isSmall ? 0.5 : 0.655) * h - typeTop;
   const fontSize = isSmall
     ? 0.115 * w
     : Math.min(zone / WIDEST, availH / (3 * 0.8 + WORD.cap));
@@ -143,6 +146,7 @@ export function heroLayout(w: number, h: number): HeroLayout {
     right,
     baseline,
     lineHeight,
+    line2Top: blockTop + lineHeight,
     shadowX: centerPx / w,
     isSmall,
   };

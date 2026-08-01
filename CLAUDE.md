@@ -177,15 +177,43 @@ worley crack veins (latest). Text-in-the-dead-center "AI look" is forbidden.
 - Obsidian material is `meshPhysicalMaterial` patched via `onBeforeCompile`
   (inject `vObj`, `uTime`, `uVein`; emissive added at `<emissivemap_fragment>`,
   where `normal` and `vViewPosition` are available for fresnel).
-- **`crystal.glb`'s own maps are good — don't fight them.** Extracted and checked:
-  baseColor is real black obsidian with pale crack veins (exactly the brief),
-  emissive is a violet nebula. If the shard ever looks pale/washed, it is **not**
-  the textures — it is **environment reflection**. `metalness` is the lever:
+- **`crystal.glb`'s baseColor + metallicRoughness maps are DROPPED, on purpose.**
+  Its atlas is a few black obsidian islands surrounded by broad radial **grey
+  streak padding**, and many faces sample that padding. Stretched over the
+  shard's big flat facets the streaks read as photographic **cloud panels** —
+  the single worst thing about how the shard looked, and the thing the client
+  reacted to. Verified by rendering with `map:null` (the whole shard went
+  uniformly pale → the map was the only thing making it black). The padding
+  **cannot** be separated from the map's own bright hairline veins by luminance
+  (both land in the same range), so a shader remap kills the veins too. The
+  shard is now a near-black dielectric with NO colour map; all its variation
+  comes from flat-shaded facets, tight highlights off narrow sources,
+  per-facet iridescence and the moving internal energy. **Do not re-enable
+  `map`/`roughnessMap` without fixing the atlas first** (filling the padding
+  with black would be the real fix, and would let the veins come back).
+  `emissiveMap` is safe and still used — it's a smooth full-coverage violet
+  nebula with no island/padding structure.
+- If the shard ever looks pale/washed, the other lever is **environment
+  reflection**. `metalness` matters most:
   obsidian is a **dielectric, so metalness must be ~0**. At 0.55 the tall white
   Lightformer strips came back as broad pale mirror panels that read as a glass
   prop; at 0 the env survives only as tight specular edge highlights, which is
   the reference. `clearcoat` and `iridescence` also reflect the env on top of
   that regardless of metalness — stacking all three high re-creates the wash.
+- **Light sources must be NARROW.** This mesh's facets are large and flat, so a
+  wide Lightformer strip is caught by a whole facet at once and returns a broad
+  mid-grey panel (grey plastic, not stone). Thin strips are caught only at
+  grazing angles — that is what makes a *sharp edge highlight*.
+- **The hero is a dense editorial page, not a headline + a prop** (2026-08-02).
+  The client rejected the sparse version twice as "plain / not impressive": the
+  fix was density and craft, not more polish on two elements. Present: hairline
+  column grid, capability index sitting in the notch the headline cascade leaves
+  open, a slow base rail, an availability signal, corner vignette + the shard's
+  halo on the paper. All DOM chrome is anchored to `--hero-right` /
+  `--hero-inset-r` / `--hero-l2` / `--hero-pad`, published from `heroLayout`, so
+  it lines up with the headline at any viewport. Keep additions on that grid and
+  keep everything except the headline small and quiet — that discipline is what
+  separates density from clutter.
 - **"Alien" (client ask, 2026-08-01) = thin-film iridescence**, not a new texture:
   `iridescence 0.6 / IOR 1.9 / thicknessRange [140,780]` so neighbouring facets
   land on different fringes and the shard shifts violet→cyan→magenta as it turns,

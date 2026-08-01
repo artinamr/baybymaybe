@@ -48,13 +48,19 @@ float fbm(vec2 p) {
 }
 
 void main() {
-  vec4 mtex = texture2D(uMask, vUv);
+  // Reveal ramp, biased top-to-bottom so the four cascading lines arrive in
+  // sequence rather than all at once, with a slight left-to-right lean. It
+  // depends only on vUv, so it can drive the sampling offset below.
+  float rev = clamp(uReveal * 1.9 - (1.0 - vUv.y) * 0.55 - vUv.x * 0.16, 0.0, 1.0);
+
+  // Sample the mask from BELOW while the ramp is running, so each line rises
+  // into place as it fades up rather than simply appearing. Eased, so it
+  // settles rather than stopping dead.
+  float rise = (1.0 - rev) * (1.0 - rev) * 0.055;
+  vec4 mtex = texture2D(uMask, vUv + vec2(0.0, rise));
   float mask = mtex.a;
   if (mask < 0.004) discard;
 
-  // Wipe-in, biased top-to-bottom so the four cascading lines arrive in
-  // sequence rather than all at once, with a slight left-to-right lean.
-  float rev = clamp(uReveal * 1.9 - (1.0 - vUv.y) * 0.55 - vUv.x * 0.16, 0.0, 1.0);
   float a = mask * smoothstep(0.0, 0.26, rev);
 
   // GREEN channel = solid ink words ("Your" / "Digital"). Near-black, but not
