@@ -12,6 +12,10 @@ const HeroCanvas = dynamic(() => import("./HeroCanvas"), { ssr: false });
 
 const NAV_LINKS = ["Work", "Our Story", "Labs", "Insights", "Connect"];
 
+// next/image does NOT prepend basePath for us (Next 16 docs) — do it manually,
+// same as the GLB URL, so assets resolve on the GitHub Pages subpath.
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export function Hero() {
   const [diving, setDiving] = useState(false);
 
@@ -53,7 +57,7 @@ export function Hero() {
             className="reveal-fade pointer-events-auto flex items-center gap-2 text-ink"
             aria-label="Nerodyn home"
           >
-            <Image src="/new-logo.svg" alt="" width={30} height={30} priority />
+            <Image src={`${BASE}/new-logo.svg`} alt="" width={30} height={30} priority />
             <span className="text-lg font-semibold tracking-tight">Nerodyn</span>
           </Link>
           <nav className="hidden items-center gap-9 text-[0.72rem] font-medium uppercase tracking-[0.18em] text-ink/80 md:flex">
