@@ -43,6 +43,10 @@ next-env.d.ts
 # local verification artifacts
 preview*.png
 
+# client's original 4MB GLB upload — the web-optimized copy lives in public/
+/crystal.glb
+
+
 # intro/preview verification artifacts
 intro-*.png
 final-*.png

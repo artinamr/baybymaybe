@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { usePointerTracking } from "@/lib/usePointer";
 import { useSmoothScroll } from "@/lib/useSmoothScroll";
@@ -21,9 +22,6 @@ export function Hero() {
 
   return (
     <section className="relative min-h-screen w-full overflow-hidden">
-      {/* Whisper-quiet background */}
-      <div className="hero-bg fixed inset-0 z-0" />
-
       {/* Film grain over everything */}
       <div className="grain" aria-hidden />
 
@@ -50,14 +48,14 @@ export function Hero() {
         className={`pointer-events-none relative z-30 flex min-h-screen flex-col px-[4vw] transition-opacity duration-700 ${fade}`}
       >
         <header className="flex items-center justify-between py-7">
-          <a
+          <Link
             href="/"
             className="reveal-fade pointer-events-auto flex items-center gap-2 text-ink"
             aria-label="Nerodyn home"
           >
-            <Image src="/logo-mark.svg" alt="" width={34} height={34} priority />
+            <Image src="/new-logo.svg" alt="" width={30} height={30} priority />
             <span className="text-lg font-semibold tracking-tight">Nerodyn</span>
-          </a>
+          </Link>
           <nav className="hidden items-center gap-9 text-[0.72rem] font-medium uppercase tracking-[0.18em] text-ink/80 md:flex">
             {NAV_LINKS.map((l) => (
               <a

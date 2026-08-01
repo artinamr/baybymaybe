@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   // Emit `/foo/index.html` + `/foo/` URLs so Pages deep links resolve cleanly.
   trailingSlash: true,
+  // Keep the dev-tools button off the hero's header.
+  devIndicators: { position: "bottom-right" },
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),
 };
 

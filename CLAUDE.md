@@ -87,25 +87,21 @@ and what we've learned:
   mark as a masked 2D flow shader, no 3D object). Built and ran, but the client
   then supplied igloo.inc references and chose a real 3D direction, so this was
   replaced before a verdict. (Deleted: `ObsidianMark.tsx`, `shaders/obsidian.ts`.)
-- **CURRENT (awaiting client's GLB) — igloo.inc-style FROZEN OBSIDIAN-GLASS CRYSTAL.**
-  Decisive turning point: the client showed igloo.inc refs (subjects frozen in
-  refractive ice + techy HUD) and — crucially — **offered to provide a 3D model**,
-  acknowledging procedural geometry can't hit "premium, not Xbox-360." Locked via
-  AskUserQuestion: **dark obsidian glass** surface, **faceted shard in the
-  Nerodyn-mark silhouette** form, **solid inside** (nothing embedded). So the plan
-  is now: CLIENT PROVIDES THE MESH; we own the rig. `components/hero/FrozenCrystal.tsx`
-  holds a **placeholder** (SVG-extruded mark with a chunky bevel) wrapped in drei
-  `MeshTransmissionMaterial` tuned to smoky black glass (transmission 1, dark
-  `attenuationColor` + short `attenuationDistance`, chromaticAberration, flatShading)
-  with slow 3/4 sway + float + cursor parallax. HeroCanvas got the `Environment`
-  Lightformer strips back (transmission needs an env to refract). `Hero.tsx` adds
-  the igloo HUD in DOM/SVG: annotation label + leader line (`Nerodyn_Core_01`),
-  IOR/TEMP telemetry, `Click to explore`, a faint constellation (use `<line>`/
-  `<circle>` with % coords — `<polyline points>` does NOT accept %), corner ticks.
-  **To swap in the real model:** drop it at `public/centerpiece.glb` and replace
-  the placeholder `<mesh geometry>` in FrozenCrystal with the loaded scene (see the
-  file's header comment) — material + behaviour carry over. **Transmission is
-  unjudgeable headless (SwiftShader mutes it) — judge on the client's GPU.**
+- **RESOLVED — client-supplied obsidian crystal GLB.** The client provided
+  `crystal.glb` (Sketchfab export: obsidian shard, dark baseColor with pale
+  veins, violet emissive nebula, ~1K verts). It is the hero centerpiece, loaded
+  in `components/hero/Crystal.tsx` via `useGLTF` from `public/crystal.glb`
+  (textures resized to 1K + re-encoded as JPEG: 4.1MB → 0.5MB; the original 4MB
+  stays at the repo root, gitignored). Material fixes applied on load: the
+  Sketchfab `emissiveFactor 1.0` (which flattens all lighting) is pulled down to
+  `emissiveIntensity 0.12`, roughness multiplier 0.32, envMapIntensity 1.5,
+  flat (unused) normal map dropped, `flatShading` on for crisp facets. Same
+  behaviour rig as before (slow 3/4 sway + float + cursor parallax) at
+  `position [1.7, 0, 0] scale 1.3` — clears the nav and the bottom copy block.
+  Lighting: tall Lightformer env strips + a white key and a faint indigo rim
+  (`directionalLight`s in HeroCanvas). Grounding: a canvas radial-gradient
+  `GroundShadow` plane under the shard (drei `ContactShadows` silently rendered
+  nothing here — don't reintroduce it; the ellipse is cheaper and cleaner).
 - **Hard constraints learned about placement:** the object must NOT overlap the top
   nav, and must NOT collide with the bottom-right description text. It should feel
   big and confident but contained in its zone. Earlier versions bled into the menu —
@@ -197,19 +193,23 @@ worley crack veins (latest). Text-in-the-dead-center "AI look" is forbidden.
 ## File map (hero)
 
 - `components/hero/Hero.tsx` — layout shell, nav, CTAs, eyebrow, description, fade.
-- `components/hero/HeroCanvas.tsx` — R3F Canvas: Backdrop, `FrozenCrystal`,
-  `Environment` (Lightformer strips), `LiquidText`.
-- `components/hero/FrozenCrystal.tsx` — the frozen obsidian-glass centerpiece
-  (placeholder mesh + `MeshTransmissionMaterial` + float/parallax). Header
-  comment documents how to drop in the client's `public/centerpiece.glb`.
-  `Monolith.tsx`, `LogoMark3D.tsx`, `ObsidianMark.tsx`, `shaders/obsidian.ts`
-  were all deleted.
+- `components/hero/HeroCanvas.tsx` — R3F Canvas: Backdrop, key+rim lights,
+  `Crystal`, `GroundShadow`, `Environment` (Lightformer strips), `LiquidText`.
+- `components/hero/Crystal.tsx` — the centerpiece: loads `public/crystal.glb`
+  (client's obsidian shard), fixes the Sketchfab material (emissive 0.12,
+  roughness 0.32, flatShading) + float/parallax rig. `FrozenCrystal.tsx`,
+  `Artifact.tsx`, `shaders/artifact.ts`, `shaders/atmosphere.ts`,
+  `shaders/particles.ts`, `Monolith.tsx`, `LogoMark3D.tsx`, `ObsidianMark.tsx`,
+  `shaders/obsidian.ts` were all deleted.
 - `components/hero/HearTheStory.tsx` — the indigo "Hear the story" pill.
 - `shaders/liquid.ts` — masked liquid-headline fragment shader.
 - `lib/headlineMask.ts` — channel-coded headline mask drawing.
 - `lib/usePointer.ts`, `lib/heroAnim.ts` — pointer state + reveal/dive state.
-- `app/globals.css` — tokens (`--base`, `--ink`, `--accent`), `.hero-bg`,
-  button shine, CSS-keyframe intro, reduced-motion overrides.
+- `app/globals.css` — tokens (`--paper` #F6F5F2, `--ink` #0A0B10, `--muted`,
+  `--accent`), film grain, button shine, CSS-keyframe intro, reduced-motion
+  overrides. Body is ink-on-paper; `text-ink`/`text-muted`/`text-accent` are
+  real theme colors — keep them defined (an earlier dark token set left them
+  undefined and every DOM text rendered invisible white).
 
 ## Still owed (when the hero is signed off)
 

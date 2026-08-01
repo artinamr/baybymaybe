@@ -1,24 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --void: #04050a; /* page black — the deep the artifact floats in */
-  --void-2: #090c15;
-  --bone: #eceef4; /* primary text */
-  --ghost: rgba(236, 238, 244, 0.55); /* secondary text */
-  --faint: rgba(236, 238, 244, 0.32);
+  --paper: #f6f5f2; /* page base — warm off-white, the gallery wall */
+  --paper-2: #eeece8; /* deeper whisper for gradients */
+  --ink: #0a0b10; /* primary text — near-black */
+  --muted: #5f626c; /* secondary text */
   --accent: #5b3df0; /* electric indigo — Nerodyn signature */
   --accent-hot: #8b76ff;
-  --ice: #9fd8ff; /* cold light temperature on the artifact's edges */
-  --hairline: rgba(236, 238, 244, 0.14);
-  --hairline-soft: rgba(236, 238, 244, 0.08);
+  --ice: #9fd8ff; /* cold glint, used sparingly */
+  --hairline: rgba(10, 11, 16, 0.14);
+  --hairline-soft: rgba(10, 11, 16, 0.08);
 }
 
 @theme inline {
-  --color-void: var(--void);
-  --color-void-2: var(--void-2);
-  --color-bone: var(--bone);
-  --color-ghost: var(--ghost);
-  --color-faint: var(--faint);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-hot: var(--accent-hot);
   --color-ice: var(--ice);
@@ -31,13 +29,13 @@
 
 html {
   height: 100%;
-  background: var(--void);
+  background: var(--paper);
 }
 
 body {
-  color: var(--bone);
+  color: var(--ink);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  background: var(--void);
+  background: var(--paper);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
@@ -48,7 +46,7 @@ body {
   color: #fff;
 }
 
-/* ---- Film grain: the dark field reads as photographed, not rendered ---- */
+/* ---- Film grain: the light field reads as photographed, not rendered ---- */
 .grain {
   position: fixed;
   inset: 0;
@@ -127,9 +125,9 @@ body {
     transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .ghost-pill:hover {
-  background: var(--bone);
-  border-color: var(--bone);
-  color: var(--void);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
   transform: translateY(-1px);
 }
 
@@ -164,7 +162,7 @@ body {
   top: 0;
   width: 100%;
   height: 45%;
-  background: linear-gradient(to bottom, var(--ice), transparent);
+  background: linear-gradient(to bottom, var(--accent), transparent);
   animation: scrollRun 2.2s cubic-bezier(0.6, 0, 0.4, 1) infinite;
 }
 @keyframes scrollRun {
@@ -183,7 +181,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 9999px;
-  border: 1px solid rgba(159, 216, 255, 0.55);
+  border: 1px solid rgba(91, 61, 240, 0.45);
 }
 .hint-ring::before {
   animation: hintPulse 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;

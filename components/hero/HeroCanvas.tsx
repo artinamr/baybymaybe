@@ -13,7 +13,7 @@ import { pointer } from "@/lib/usePointer";
 import { heroAnim } from "@/lib/heroAnim";
 import { drawHeadlineMask } from "@/lib/headlineMask";
 import { liquidVertex, liquidFragment } from "@/shaders/liquid";
-import { FrozenCrystal } from "./FrozenCrystal";
+import { Crystal } from "./Crystal";
 
 const prefersReduced =
   typeof window !== "undefined" &&
@@ -44,8 +44,9 @@ function Backdrop() {
         fragmentShader={`
           varying vec2 vUv;
           void main(){
-            vec3 a = vec3(0.988, 0.988, 0.984);
-            vec3 b = vec3(0.941, 0.937, 0.957);
+            // warm gallery paper — matches --paper / --paper-2
+            vec3 a = vec3(0.969, 0.965, 0.953);
+            vec3 b = vec3(0.929, 0.922, 0.906);
             vec3 col = mix(a, b, clamp(vUv.x * 0.6 + (1.0 - vUv.y) * 0.6, 0.0, 1.0));
             // faint indigo whispers in opposite corners
             col += vec3(0.10, 0.07, 0.28) * 0.05 * smoothstep(0.6, 0.0, distance(vUv, vec2(0.9, 1.02)));
@@ -138,16 +139,70 @@ function LiquidText() {
   );
 }
 
+/** Soft elliptical ground shadow — anchors the floating shard to the paper
+ *  field like a studio product shot. A radial-gradient canvas texture on a
+ *  floor plane; it breathes in counter-phase with the crystal's float. */
+function GroundShadow() {
+  const ref = useRef<THREE.Mesh>(null);
+  const tex = useMemo(() => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 256;
+    const ctx = c.getContext("2d");
+    if (ctx) {
+      const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+      g.addColorStop(0, "rgba(18, 11, 36, 0.52)");
+      g.addColorStop(0.45, "rgba(18, 11, 36, 0.24)");
+      g.addColorStop(1, "rgba(18, 11, 36, 0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 256, 256);
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.needsUpdate = true;
+    return t;
+  }, []);
+
+  useFrame((state) => {
+    const m = ref.current;
+    if (!m) return;
+    const t = state.clock.elapsedTime;
+    const floatY = prefersReduced ? 0 : Math.sin(t * 0.5) * 0.09;
+    // rises → shadow shrinks + fades; sinks → it spreads + deepens
+    const mat = m.material as THREE.MeshBasicMaterial;
+    mat.opacity = 0.8 - floatY * 1.6;
+    m.scale.set(1.9 - floatY * 1.4, 1, 1.1 - floatY * 0.8);
+  });
+
+  return (
+    <mesh
+      ref={ref}
+      position={[1.7, -1.42, 0]}
+      rotation-x={-Math.PI / 2}
+      renderOrder={1}
+    >
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial map={tex} transparent depthWrite={false} />
+    </mesh>
+  );
+}
+
 function Scene() {
   return (
     <>
       <Backdrop />
 
-      {/* The frozen obsidian-glass shard, refracting a studio environment of
-          tall narrow sources → crisp edge highlights on the facets. */}
+      {/* Studio key from high right + a whisper of indigo rim from back-left —
+          these carve the dark facets; the env map adds the glassy streaks. */}
+      <directionalLight position={[4, 6, 5]} intensity={0.85} color="#ffffff" />
+      <directionalLight position={[-5, 2, -4]} intensity={0.5} color="#6a4bff" />
+
+      {/* The client's obsidian crystal, lit by a studio environment of tall
+          narrow sources → crisp edge highlights on the facets. */}
       <Suspense fallback={null}>
-        <FrozenCrystal />
+        <Crystal />
       </Suspense>
+
+      {/* Soft product-shot shadow grounding the shard on the paper field. */}
+      <GroundShadow />
 
       <Environment resolution={256}>
         <Lightformer intensity={3.6} position={[3.5, 2, 5]} scale={[1.1, 11, 1]} color="#ffffff" />
