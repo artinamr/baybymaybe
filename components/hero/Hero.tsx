@@ -2,12 +2,13 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { heroLayout, LINES } from "@/lib/heroLayout";
+import { useCallback, useEffect, useState } from "react";
+import { heroLayout } from "@/lib/heroLayout";
 import { usePointerTracking } from "@/lib/usePointer";
 import { useSmoothScroll } from "@/lib/useSmoothScroll";
 import { HearTheStory } from "./HearTheStory";
 import { Logo } from "./Logo";
+import { Seal } from "./Seal";
 
 const HeroCanvas = dynamic(() => import("./HeroCanvas"), { ssr: false });
 
@@ -15,61 +16,66 @@ const NAV_LINKS = ["Work", "Our Story", "Labs", "Insights", "Connect"];
 
 export function Hero() {
   const [diving, setDiving] = useState(false);
+  const [rockHot, setRockHot] = useState(false);
 
   usePointerTracking();
   useSmoothScroll();
 
-  // Publish the headline's geometry to CSS from the same authority the crystal
-  // uses, so the type block and the object can never drift apart.
+  // Publish the rock's geometry to CSS from the same authority the 3D scene
+  // uses, so the field glow, its shadow and the seal all track the object.
   useEffect(() => {
     const apply = () => {
       const L = heroLayout(window.innerWidth, window.innerHeight);
       const s = document.documentElement.style;
-      s.setProperty("--hero-fs", `${L.fontSize}px`);
       s.setProperty("--hero-pad", `${L.padX}px`);
-      s.setProperty("--hero-top", `${L.typeTop}px`);
-      s.setProperty("--hero-right", `${L.right}px`);
+      s.setProperty("--rock-left", `${L.rockLeft}px`);
+      s.setProperty("--rock-x", `${(L.rockX * 100).toFixed(2)}%`);
+      s.setProperty("--rock-base", `${(L.rockBaseY * 100).toFixed(2)}%`);
     };
     apply();
     window.addEventListener("resize", apply);
     return () => window.removeEventListener("resize", apply);
   }, []);
 
+  const dive = useCallback(() => setDiving(true), []);
   const fade = diving ? "opacity-0" : "opacity-100";
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden">
+    <section className="relative h-screen w-full overflow-hidden">
+      {/* The page field. CSS rather than a shader quad, because the canvas above
+          it must stay transparent for the rock to occlude the headline. */}
+      <div aria-hidden className={`hero-field ${rockHot ? "is-hot" : ""}`} />
       <div className="grain" aria-hidden />
 
-      {/* The object and the page field. */}
-      <div
-        className={`pointer-events-none fixed inset-0 z-[1] transition-opacity duration-700 ${fade}`}
-      >
-        <HeroCanvas />
-      </div>
-
-      {/* The headline. Real text — sharper than the canvas mask it replaced,
-          selectable, and it needs no sr-only twin. Absolutely placed so it sits
-          exactly where heroLayout says, beside the object's channel. */}
+      {/* THE HEADLINE, BEHIND THE ROCK.
+          z-[1] puts it under the transparent canvas, so the rock genuinely cuts
+          across the letters. Three deliberately different textures — bold sans,
+          serif italic, and a huge outline — because three lines at one size in
+          one weight is the thing that reads as a template. */}
       <h1
-        className={`hero-head pointer-events-none absolute z-20 transition-opacity duration-700 ${fade}`}
+        className={`hero-head pointer-events-none absolute z-[1] transition-opacity duration-700 ${fade}`}
       >
-        {LINES.map((line, i) => (
-          <span
-            key={line.text}
-            className="reveal block"
-            style={{ ["--d" as string]: `${0.35 + i * 0.11}s` }}
-          >
-            <span className={line.style === "hollow" ? "hollow" : undefined}>
-              {line.text}
-            </span>
-          </span>
-        ))}
+        <span className="reveal block" style={{ ["--d" as string]: "0.30s" }}>
+          <span className="hh-1">Maximise</span>
+        </span>
+        <span className="reveal block" style={{ ["--d" as string]: "0.42s" }}>
+          <span className="hh-2">your digital</span>
+        </span>
+        <span className="reveal block" style={{ ["--d" as string]: "0.54s" }}>
+          <span className="hh-3">POTENTIAL</span>
+        </span>
       </h1>
 
-      {/* UI layer */}
+      {/* The rock. */}
       <div
-        className={`pointer-events-none relative z-30 flex min-h-screen flex-col transition-opacity duration-700 ${fade}`}
+        className={`fixed inset-0 z-[2] transition-opacity duration-700 ${fade}`}
+      >
+        <HeroCanvas onEnter={dive} onHover={setRockHot} />
+      </div>
+
+      {/* UI */}
+      <div
+        className={`pointer-events-none relative z-30 flex h-screen flex-col transition-opacity duration-700 ${fade}`}
         style={{ paddingInline: "var(--hero-pad, 5.5vw)" }}
       >
         <header className="flex items-center justify-between py-9">
@@ -102,45 +108,55 @@ export function Hero() {
               </a>
             ))}
           </nav>
-          <button
-            type="button"
-            className="reveal-fade pointer-events-auto text-[0.78rem] font-medium text-ink md:hidden"
-            aria-label="Open menu"
-          >
-            Menu
-          </button>
         </header>
 
         <div className="flex-1" />
 
-        <footer className="flex flex-col gap-7 pb-14">
-          <p
-            className="reveal-fade pointer-events-auto max-w-[27rem] text-[0.98rem] leading-[1.65] text-ink/65"
-            style={{ ["--d" as string]: "0.75s" }}
-          >
-            <span className="font-medium text-ink">
-              The architecture behind ambitious companies.
-            </span>{" "}
-            We build and run the digital infrastructure and AI automation that
-            move you faster.
-          </p>
-
-          <div
-            className="reveal-fade flex flex-wrap items-center gap-3"
-            style={{ ["--d" as string]: "0.88s" }}
-          >
-            <div className="pointer-events-auto">
-              <HearTheStory onDive={() => setDiving(true)} />
-            </div>
-            <a
-              href="#"
-              className="group pointer-events-auto inline-flex items-center gap-2 rounded-full border border-ink/15 px-6 py-3.5 text-[0.92rem] font-medium tracking-tight text-ink transition-colors duration-300 hover:border-ink hover:bg-ink hover:text-white"
+        {/* Capped at the rock's left edge, from the same layout authority, so
+            the seal lands in the channel beside the rock instead of underneath
+            it. */}
+        <footer
+          className="flex items-end justify-between gap-10 pb-12"
+          style={{ maxWidth: "calc(var(--rock-left, 62%) - var(--hero-pad, 5.5vw) - 2.5rem)" }}
+        >
+          <div className="flex max-w-[26rem] flex-col gap-7">
+            <p
+              className="reveal-fade pointer-events-auto text-[0.98rem] leading-[1.65] text-ink/65"
+              style={{ ["--d" as string]: "0.70s" }}
             >
-              Start a project
-              <span className="text-base transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                ↗
-              </span>
-            </a>
+              <span className="font-medium text-ink">
+                The architecture behind ambitious companies.
+              </span>{" "}
+              We build and run the digital infrastructure and AI automation that
+              move you faster.
+            </p>
+
+            <div
+              className="reveal-fade flex flex-wrap items-center gap-3"
+              style={{ ["--d" as string]: "0.82s" }}
+            >
+              <div className="pointer-events-auto">
+                <HearTheStory onDive={dive} />
+              </div>
+              <a
+                href="#"
+                className="group pointer-events-auto inline-flex items-center gap-2 rounded-full border border-ink/15 px-6 py-3.5 text-[0.92rem] font-medium tracking-tight text-ink transition-colors duration-300 hover:border-ink hover:bg-ink hover:text-white"
+              >
+                Start a project
+                <span className="text-base transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                  ↗
+                </span>
+              </a>
+            </div>
+          </div>
+
+          {/* The seal sits under the rock's base, so the two read as one
+              object rather than as a widget parked in a corner. */}
+          <div
+            className="reveal-fade mb-1 hidden lg:block"
+            style={{ ["--d" as string]: "0.95s" }}
+          >
+            <Seal onClick={dive} />
           </div>
         </footer>
       </div>

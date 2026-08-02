@@ -177,7 +177,35 @@ worley crack veins (latest). Text-in-the-dead-center "AI look" is forbidden.
 - Obsidian material is `meshPhysicalMaterial` patched via `onBeforeCompile`
   (inject `vObj`, `uTime`, `uVein`; emissive added at `<emissivemap_fragment>`,
   where `normal` and `vViewPosition` are available for fresnel).
-- **CURRENT CENTERPIECE — `public/heart.glb` (2026-08-02).** The client replaced
+- **THE HERO'S STRUCTURAL MOVE — the canvas is TRANSPARENT (2026-08-02).**
+  `gl={{ alpha: true }}` and there is no backdrop mesh; the page field is CSS
+  (`.hero-field`). That exists so the headline can sit at `z-[1]` UNDER the
+  canvas and be genuinely occluded by the rock — "POTENTIAL" runs behind the
+  stone and is cut by it. That layering is what stopped the page reading as a
+  headline in one box and a prop in another, which the client rejected three
+  times. **Do not reintroduce an opaque in-canvas backdrop** without moving the
+  headline back in front, or the type disappears.
+- **The headline is three deliberately DIFFERENT textures** — bold Space Grotesk,
+  Instrument Serif *italic*, then a very large indigo outline. Three lines at one
+  size in one weight is precisely what read as "a stupid template". Keep the
+  contrast if the words change.
+- **The rock is textured by TRIPLANAR projection**, not UVs. The shell is 32
+  triangles with coarse UVs, so sampling the photo through them smeared one
+  boulder into streaks across each huge facet. Projecting from the three
+  object-space axes and blending by the normal ignores the UVs entirely.
+  - **`texture.needsUpdate = true` is REQUIRED after changing `wrapS/wrapT`.**
+    Triplanar samples far outside 0..1; on the default ClampToEdge every such
+    coordinate returns the same edge pixel and the rock smears into streaks.
+    Setting the wrap mode without `needsUpdate` looks like a triplanar bug and
+    is not one — the parameter never reached the GPU.
+- **GOTCHA — never branch on `material.name` inside the GLB-fixup effect.** It
+  re-runs (StrictMode, HMR, cached `useGLTF` scene), and by the second pass the
+  material has been replaced by ours, so the name no longer matches. That
+  deleted the shell as if it were the heart and the rock silently vanished from
+  the page. Tag `mesh.userData.role` once and branch on the tag.
+- **CENTERPIECE MODEL — `public/heart.glb` (2026-08-02).** The heart mesh inside
+  it is REMOVED at load; the client wants the rock alone. Notes below describe
+  the model as delivered. The client replaced
   the shard with a **heart-in-glass** model: a faceted transparent shell (32 tris,
   material `Crystal`) with a heart suspended inside it (836 tris, material
   `Coeur1`). The source `heart_in_glass.glb` is **12.9MB of baked textures** and

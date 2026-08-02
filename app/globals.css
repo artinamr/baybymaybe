@@ -172,30 +172,90 @@ body {
   100% { transform: translateY(240%); opacity: 0; }
 }
 
+/* ---- The page field ----
+   CSS, not a shader quad: the canvas above it must stay transparent so the rock
+   can occlude the headline behind it. Tracks the rock via --rock-* from
+   heroLayout, so the glow and the contact shadow follow the object. */
+.hero-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    /* contact shadow, pooled under the rock's base */
+    radial-gradient(
+      42vw 16vh at var(--rock-x, 78%) var(--rock-base, 98%),
+      rgba(16, 12, 32, 0.2),
+      transparent 68%
+    ),
+    /* the rock's own light on the paper */
+    radial-gradient(
+      46vw 62vh at var(--rock-x, 78%) 46%,
+      rgba(91, 61, 240, 0.13),
+      transparent 70%
+    ),
+    /* corner falloff, so the field has a direction of light */
+    radial-gradient(120vw 110vh at 18% 8%, rgba(255, 255, 255, 0.85), transparent 60%),
+    linear-gradient(155deg, #f7f6f3 0%, #efedE8 55%, #e9e6df 100%);
+  transition: filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Hovering the rock lifts its halo — the page answers the cursor. */
+.hero-field.is-hot {
+  filter: brightness(1.02) saturate(1.16);
+}
+
 /* ---- The headline ----
-   Placed by heroLayout (see --hero-* vars) so the type block and the 3D object
-   are laid out by one authority. Real text, not a canvas mask. */
+   Three deliberately different textures. Three lines at one size in one weight
+   is exactly what reads as a template, so: bold sans, then serif italic, then a
+   very large outline as the payoff. Sized in vw — desktop only for now. */
 .hero-head {
   left: var(--hero-pad, 5.5vw);
-  top: var(--hero-top, 26.5%);
+  top: 20vh;
   font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 700;
-  font-size: var(--hero-fs, 8vw);
-  line-height: 0.86;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
   color: var(--ink);
+  letter-spacing: -0.03em;
 }
-/* Hollow words: outline only. `paint-order` keeps the stroke from eating into
-   the counters, and the @supports block keeps the text visible (rather than
-   invisible) anywhere text-stroke is unavailable. */
-.hero-head .hollow {
+.hero-head .hh-1 {
+  display: block;
+  font-weight: 700;
+  font-size: 7.4vw;
+  line-height: 0.92;
+}
+.hero-head .hh-2 {
+  display: block;
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 8.6vw;
+  line-height: 0.94;
+  letter-spacing: -0.015em;
+  /* Indented, so the block has a shape instead of a flush left edge. */
+  margin-left: 0.14em;
+  color: rgba(10, 11, 16, 0.62);
+}
+/* The payoff line. Outline only, and wide enough to run under the rock — the
+   occlusion is the whole point, so it must extend past the rock's left edge. */
+.hero-head .hh-3 {
+  display: block;
+  font-weight: 700;
+  font-size: 13.2vw;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
   color: transparent;
-  -webkit-text-stroke: 0.014em var(--accent);
+  -webkit-text-stroke: 0.012em var(--accent);
   paint-order: stroke fill;
 }
 @supports not ((-webkit-text-stroke: 1px black) or (text-stroke: 1px black)) {
-  .hero-head .hollow { color: var(--accent); }
+  .hero-head .hh-3 { color: var(--accent); }
+}
+
+/* ---- The seal ---- */
+.seal-spin {
+  animation: sealSpin 26s linear infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes sealSpin {
+  to { transform: rotate(360deg); }
 }
 
 /* Artifact hint — a breathing ring around the click target label. */
