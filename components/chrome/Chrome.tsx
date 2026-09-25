@@ -156,7 +156,7 @@ function LeaderLines() {
 
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
-    <div className="menu-sheet" data-open={open || undefined} aria-hidden={!open} inert={!open}>
+    <div className="menu-sheet" data-open={open || undefined} aria-hidden={!open}>
       <button type="button" className="menu-close mono" onClick={onClose}>
         Close
       </button>

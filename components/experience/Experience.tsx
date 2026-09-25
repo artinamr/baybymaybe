@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { advance } from "@react-three/fiber";
 import { getLenis, initScroll, updateScroll } from "@/lib/scroll";
 import { bus, intro, ready, scroll } from "@/lib/stores";
@@ -12,19 +12,12 @@ const StageCanvas = dynamic(() => import("@/components/stage/StageCanvas"), { ss
 const INTRO_DONE_MS = 3400;
 const GATE_FALLBACK_MS = 1500;
 
-let webglSupport: boolean | undefined;
-const subscribeCapabilities = () => () => {};
-const serverWebGL = () => true;
 function hasWebGL2(): boolean {
-  if (webglSupport !== undefined) return webglSupport;
   try {
     const c = document.createElement("canvas");
-    const context = c.getContext("webgl2");
-    webglSupport = !!context;
-    context?.getExtension("WEBGL_lose_context")?.loseContext();
-    return webglSupport;
+    return !!c.getContext("webgl2");
   } catch {
-    return (webglSupport = false);
+    return false;
   }
 }
 
@@ -42,7 +35,7 @@ function hasWebGL2(): boolean {
 export function Experience({ children }: { children: ReactNode }) {
   // Decided once on the client. On the server the dynamic canvas renders
   // nothing either way, so the markup matches at hydration.
-  const gl = useSyncExternalStore(subscribeCapabilities, hasWebGL2, serverWebGL);
+  const [gl] = useState(() => (typeof window === "undefined" ? true : hasWebGL2()));
 
   useEffect(() => {
     const root = document.documentElement;

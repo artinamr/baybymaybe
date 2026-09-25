@@ -20,7 +20,6 @@ let lenis: Lenis | null = null;
 let vhPx = 9;
 let lastW = 0;
 let lastH = 0;
-let maxScrollY = 1;
 let sections: HTMLElement[] = [];
 const frameHooks = new Set<(S: number) => void>();
 
@@ -109,7 +108,6 @@ function relayout(force = false) {
     writeLayoutVars(layout.current);
   }
   sections = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
-  maxScrollY = Math.max(1, document.documentElement.scrollHeight - scroll.vh);
   const y = window.scrollY;
   measured.rowS = Array.from(document.querySelectorAll<HTMLElement>("[data-row]")).map((el) => {
     const r = el.getBoundingClientRect();
@@ -128,7 +126,7 @@ export function initScroll(): () => void {
 
   relayout(true);
   if (!reduced) {
-    lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.85, smoothWheel: true, syncTouch: false, autoRaf: false });
+    lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9, smoothWheel: true, syncTouch: false, autoRaf: false });
   }
 
   const onResize = () => relayout();
@@ -205,7 +203,6 @@ export function updateScroll(time: number): void {
     c.state = st;
     if (scroll.S >= c.S0 - 0.5) active = i;
   }
-  document.documentElement.style.setProperty("--page-progress", String(Math.min(1, y / maxScrollY)));
   const scrolled = scroll.S > 0.15;
   if (scrolled !== document.documentElement.hasAttribute("data-scrolled")) {
     document.documentElement.toggleAttribute("data-scrolled", scrolled);

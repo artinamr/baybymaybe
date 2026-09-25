@@ -84,15 +84,12 @@ export function Hero() {
       <div className="hero-ctas">
         <span className="intro intro-rise" style={d(1180)}>
           <Pill onClick={hearTheStory} live>
-            Explore the studio
+            Hear the story
           </Pill>
         </span>
         <span className="intro intro-rise" style={d(1260)}>
           <GhostPill onClick={() => scrollToChapter("mark")}>Start a project</GhostPill>
         </span>
-      </div>
-      <div className="hero-footnote intro" style={d(1400)} aria-hidden="true">
-        <span>Independent digital studio</span><span>Scroll to discover <span className="scroll-arrow">↓</span></span>
       </div>
     </Section>
   );
