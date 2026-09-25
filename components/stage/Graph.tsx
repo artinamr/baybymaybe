@@ -44,12 +44,12 @@ export function Graph() {
   const lastHover = useRef(0);
   const buf = useMemo(() => new THREE.Vector2(), []);
 
-  // Topology from the F3 TARGETS (deterministic), not from wherever the pieces are mid-flight.
+  // Topology from the F3 TARGETS (deterministic), never from wherever the pieces are mid-flight.
   useEffect(() => {
     const stone = getStone();
     prepareFormations(stone.frags, stone.crackOrigin);
     const q = new THREE.Quaternion();
-    const ctx: FormationCtx = { stoneQuat: q, gap: 0, focusTier: -1, focusSlide: 0, time: 0, crownLift: 0, bandLift: 0, split: 0 };
+    const ctx: FormationCtx = { stoneQuat: q, gap: 0, lift: 0, focusTier: -1, focusSlide: 0, time: 0, crownLift: 0, bandLift: 0, split: 0 };
     const p = pose();
     const pts = stone.frags.map((f) => {
       fragTarget("F3", f, ctx, p);

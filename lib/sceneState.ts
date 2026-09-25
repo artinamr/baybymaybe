@@ -97,6 +97,8 @@ export const sceneState = {
     spill: 0,
     /** Cursor RectAreaLight intensity. */
     cursorLight: 8,
+    /** Indigo veins of light on the stone's outer faces, 0..1 (choreo). */
+    vein: 1,
   },
 
   /** ch02: world-space left anchor of each tier (0 bottom … 3 top) for the leader lines; focused tier. */

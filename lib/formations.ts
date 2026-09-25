@@ -30,6 +30,8 @@ export type FormationCtx = {
   stoneQuat: THREE.Quaternion;
   /** F0: push along d. */
   gap: number;
+  /** F0/F1: how far the stone has risen off its reflection (world y). */
+  lift: number;
   /** F2: focused tier (−1 none) and its drawer slide 0..1. */
   focusTier: number;
   focusSlide: number;
@@ -175,12 +177,14 @@ export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Po
       const home = F === "F0" ? homeA : homeB;
       _v.copy(f.centroid).addScaledVector(f.out, ctx.gap).applyQuaternion(ctx.stoneQuat);
       out.pos.copy(home).add(_v);
+      if (F === "F0") out.pos.y += ctx.lift;
       out.quat.copy(ctx.stoneQuat);
       return;
     }
     case "F1": {
       _v.copy(f.centroid).add(p.burst).applyQuaternion(ctx.stoneQuat);
       out.pos.copy(homeA).add(_v);
+      out.pos.y += ctx.lift;
       out.quat.copy(ctx.stoneQuat).multiply(p.spin);
       return;
     }

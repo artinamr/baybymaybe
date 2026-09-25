@@ -301,8 +301,10 @@ html[data-intro-skip] .intro-mask > span {
   clip-path: inset(0 0 0 0);
   transition: clip-path 1100ms var(--ease-expo) 60ms, transform 1100ms var(--ease-expo) 60ms;
 }
+/* 140%: the Didone's tall line box plus the mask's clip margin would let the
+   tops of waiting glyphs peek out at a smaller offset. */
 .chapter[data-state="before"] .rv-in {
-  transform: translateY(108%) skewY(3deg);
+  transform: translateY(140%) skewY(3deg);
 }
 .chapter[data-state="before"] .rv-fade {
   opacity: 0;

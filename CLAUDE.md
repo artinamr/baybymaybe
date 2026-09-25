@@ -37,6 +37,31 @@ unasked. The first typography pass was called "kinda terrible" and was
 replaced (see Typography). Their example video (`preview-card.mp4`) is kept
 for MOTION ONLY — they said its colours and text positions are bad.
 
+## The stone's surface (2026-09-25: "shape great, texture really bad at some angles")
+
+- Flat mirror facets + a mostly-dark studio made the stone a pure-black
+  CUT-OUT at most angles. Fixed by (a) a very low-frequency facet UNDULATION in
+  `shaders/obsidian.ts` (knapped-then-polished glass: strips become flowing
+  sheens), (b) broad dim softboxes all round in `StudioEnv.tsx`, including a
+  high FRONT gradient for the crown (its facets tilt ~27° up and reflect the
+  sky behind the camera) built as graded bands + one crisp line — one wide
+  panel reads as grey plastic — and a graded floor bounce for the pavilion.
+- Veins (client asked for "a bit more veins on some faces"): a few long
+  meandering lines of indigo light from a slanted coordinate bent by
+  LOW-frequency noise, masked to some regions, fixed pixel width via fwidth,
+  plus a softer copy sampled INTO the glass along the view ray (parallax =
+  light inside the stone). Never speckle, never cells — both were rejected.
+- Look-dev: `?freeze=1&yaw=<deg>` pins the stone's rotation; render a sweep of
+  yaws and crop to the stone before judging the surface.
+
+## Scroll moves (2026-09-25: "make the first-to-second bit more impressive, more 3D")
+
+Hero → ch01 is now LOOK UP (camera below the girdle, lens widening, stone
+rising off its reflection) → THE PASS (close, fov 44, the stone filling the
+frame, veins waking) → settle into ch01. ch01 → ch02 dives INTO the burst so
+fragments fly past the lens (fov 46), then pulls out to the floors. The stone
+and camera always turn the same way relative to each other.
+
 ## Typography (after the "texts are terrible" note)
 
 - **Display: Bodoni Moda** (`--font-bodoni`, opsz axis) for the hero line, every
@@ -91,11 +116,11 @@ for MOTION ONLY — they said its colours and text positions are bad.
 1. **Tailwind v4 + next/font:** never name a next/font `variable` the same as an
    `@theme --font-*` token — it silently breaks globals.css and Turbopack serves
    stale CSS.
-2. **Turbopack misses scripted file writes on this machine.** Edits made by
-   Python/shell scripts are sometimes not picked up and the dev server keeps
-   serving stale CSS/JS. After a scripted edit, touch the file through the
-   editor, or restart the dev server with `.next` cleared. Check the served CSS
-   (curl the chunk) before judging a visual.
+2. **Turbopack serves STALE CSS on this machine** — after scripted writes, and
+   sometimes even after normal edits (it logs "Compiled" and still serves the
+   old chunk). Before judging any visual, curl the served CSS chunk and grep
+   for the new rule; if it's missing, stop the dev server, `rm -rf .next`,
+   restart. Don't debug a "bug" you can't see in the served CSS.
 3. **Git Bash mangles `/baybymaybe`** into a Windows path: run the Pages build as
    `MSYS_NO_PATHCONV=1 NEXT_PUBLIC_BASE_PATH=/baybymaybe npm run build`.
 4. **React Compiler lint rules** (`react-hooks/immutability`, `globals`,

@@ -37,6 +37,15 @@ function parse(): Dev {
 
 export const dev: Dev = parse();
 
+/** A numeric URL param for look-dev (`?yaw=135`), or null. Server-safe. */
+export function devNum(name: string): number | null {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get(name);
+  if (v === null || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
 /**
  * Film time (seconds) the Director should hold while `dev.freeze` is on. Far
  * enough past the intro (3.4 s) and the thread that every time-based beat has

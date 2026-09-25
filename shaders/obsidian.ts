@@ -70,6 +70,10 @@ export const obsidianUniforms: {
   uFlow: U<number>;
   /** Cut-face base colour #06050C (linear). */
   uCutColor: U<THREE.Color>;
+  /** Indigo veins of light on some faces, 0..1 (sceneState.u.vein). */
+  uVein: U<number>;
+  /** Facet undulation — how far polished-but-knapped facets bend reflections. */
+  uUndulate: U<number>;
 } = {
   uTime: { value: 0 },
   uFragTex: { value: fragTex.texture },
@@ -87,6 +91,8 @@ export const obsidianUniforms: {
   uIndigoLin: { value: INDIGO_LIN },
   uFlow: { value: 1 },
   uCutColor: { value: new THREE.Color("#06050C") },
+  uVein: { value: 1 },
+  uUndulate: { value: 0.06 },
 };
 
 if (typeof window !== "undefined") {
@@ -128,6 +134,7 @@ export function syncObsidianUniforms(): void {
   U.uFogFar.value = u.fogFar;
   U.uReflect.value = u.reflect;
   U.uFloorY.value = u.floorY;
+  U.uVein.value = u.vein;
   planeAbove.constant = -u.floorY;
   planeBelow.constant = u.floorY;
 }
@@ -162,6 +169,8 @@ varying float vWorldY;  // final world y (after the mesh matrix) — the reflect
   varying vec3 vRipV;    // the same vector in VIEW space — the ripple's radial direction
   varying vec3 vFx;      // glow, flash, fade (fragTex texel 7)
   varying vec3 vPulseP;  // world position before the floor mirror — the seam pulse is authored in world space
+  varying vec3 vViewObj; // camera → surface in STONE object space (vein parallax)
+  varying mat3 vObjToView; // stone object frame → view (facet undulation stays glued to the glass)
 #endif
 #ifdef OBS_INSTANCED
   attribute vec2 aInstFx;
@@ -207,6 +216,9 @@ const VERT_BEGIN = /* glsl */ `
   // Linear in the vertex position, so it interpolates exactly across the face.
   vRipV = mat3(modelViewMatrix) * (mat3(obsModel) * vRipD);
   vPulseP = transformed;
+  // Rotation-only inverse (formations that scale are floor plates, far from any vein close-up).
+  vViewObj = transpose(mat3(obsModel)) * (transformed - cameraPosition);
+  vObjToView = normalMatrix * obsNormalM;
 #else
   vObs = position;
 #endif
@@ -243,6 +255,8 @@ uniform float uFloorY;
 uniform float uFlow;
 uniform vec3 uIndigoLin;
 uniform vec3 uCutColor;
+uniform float uVein;
+uniform float uUndulate;
 varying vec3 vObs;
 varying float vKind;
 varying float vWorldY;
@@ -257,6 +271,8 @@ varying float vWorldY;
   varying vec3 vRipV;
   varying vec3 vFx;
   varying vec3 vPulseP;
+  varying vec3 vViewObj;
+  varying mat3 vObjToView;
 #endif
 #ifdef OBS_INSTANCED
   varying vec2 vInstFx;
@@ -277,6 +293,27 @@ float obsNoise(vec3 x) {
     mix(mix(obsHash(i + vec3(0, 0, 1)), obsHash(i + vec3(1, 0, 1)), f.x),
         mix(obsHash(i + vec3(0, 1, 1)), obsHash(i + vec3(1, 1, 1)), f.x), f.y),
     f.z);
+}
+
+/* Veins of light. A slanted plane coordinate bent by LOW-frequency noise gives
+   a few long meandering lines (marble veining), never speckle or cells — both
+   of those were rejected. A second noise masks them to some regions only, so
+   some faces carry a vein and others stay clean black glass. Lines are drawn
+   to a fixed PIXEL width via fwidth, with a soft halo, and light runs along
+   them slowly. */
+float obsVeinField(vec3 p, float deep) {
+  float warp = obsNoise(p * vec3(0.8, 0.55, 0.8) + 4.3) * 1.7 + obsNoise(p * 1.9 + 1.1) * 0.3;
+  float s = dot(p, vec3(0.42, 0.78, 0.2)) * 1.6 + warp;
+  float d = abs(fract(s) - 0.5);
+  float fw = max(fwidth(s), 1e-5);
+  float core = 1.0 - smoothstep(0.0, fw * mix(1.1, 2.6, deep), d);
+  float halo = exp(-d / (fw * mix(4.5, 8.0, deep)));
+  float mask = smoothstep(0.36, 0.58, obsNoise(p * 0.72 + 11.0));
+  // Width breathes along the line so it reads as a vein, not a drawn stroke.
+  float along = dot(p, vec3(-0.3, 0.25, 0.92)) * 1.4 + warp * 0.8;
+  float body = 0.45 + 0.55 * obsNoise(vec3(along * 2.0, s * 0.5, 3.7));
+  float run = smoothstep(0.62, 1.0, 0.5 + 0.5 * sin(along * 2.4 - uTime * 0.85));
+  return mask * body * (core * 0.85 + halo * 0.3) * (0.6 + 0.9 * run);
 }
 `;
 
@@ -315,6 +352,20 @@ roughnessFactor += (obsNoise(vObs * vec3(0.8, 0.8, 6.0)) - 0.5) * 0.03 * uFlow *
 const FRAG_NORMAL = /* glsl */ `
 #include <normal_fragment_maps>
 float obsRipple = 0.0;
+// Knapped, then polished: facets are never optically flat. A LOW-frequency
+// tilt field (object space, so it stays glued to the glass as it turns) bends
+// the studio strips into flowing highlights across each face instead of one
+// flat tone — the difference between black glass and a black cut-out.
+#ifdef OBS_FRAG
+  if (vKind < 0.5) {
+    vec3 obsQ = vObs * 1.15;
+    vec3 obsW = vec3(obsNoise(obsQ + 1.7), obsNoise(obsQ + 9.2), obsNoise(obsQ + 17.3)) - 0.5;
+    obsW += 0.35 * (vec3(obsNoise(obsQ * 2.3 + 5.1), obsNoise(obsQ * 2.3 + 2.9), obsNoise(obsQ * 2.3 + 8.4)) - 0.5);
+    vec3 obsWv = vObjToView * obsW;
+    obsWv -= dot(obsWv, normal) * normal;
+    normal = normalize(normal + uUndulate * 2.0 * obsWv);
+  }
+#endif
 #ifdef OBS_FRAG
   if (obsCut > 0.5) {
     obsRipple = cos(36.0 * length(vRipD));
@@ -358,6 +409,15 @@ const FRAG_EMISSIVE = /* glsl */ `
       float obsBehind = uThreadHead - vRidgeT;
       float obsTail = 0.25 * step(0.0, obsBehind) * (1.0 - smoothstep(0.14, 0.22, obsBehind));
       obsInd += obsBevel * uThreadAmp * (3.0 * obsHead + obsTail);
+    }
+
+    // Veins: a crisp line at the surface and a softer copy sampled a little
+    // way INTO the glass along the view ray — it slides against the first as
+    // the stone turns, so the light reads as inside the stone, not painted on.
+    if (obsCut < 0.5 && uVein > 0.001) {
+      vec3 obsVd = normalize(vViewObj);
+      float obsV = obsVeinField(vObs, 0.0) + 0.5 * obsVeinField(vObs + obsVd * 0.09, 1.0);
+      obsInd += uVein * obsV * (1.0 - vFx.z);
     }
   #endif
   #ifdef OBS_INSTANCED
@@ -456,9 +516,11 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
     roughness: 0.085,
     ior: 1.49,
     specularIntensity: 1,
-    clearcoat: 0.4,
-    clearcoatRoughness: 0.018,
-    envMapIntensity: 1.3,
+    // A second, glassier lacquer over the body: two reflections at slightly
+    // different depths are what make polished obsidian look deep, not flat.
+    clearcoat: 0.85,
+    clearcoatRoughness: 0.02,
+    envMapIntensity: 1.5,
     side: THREE.FrontSide,
   });
 

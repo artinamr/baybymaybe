@@ -10,7 +10,7 @@ import { fragTex } from "@/lib/fragTex";
 import { layout } from "@/lib/layout";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { bus, intro, pointer, scroll, ui } from "@/lib/stores";
-import { dev, FROZEN_TIME_S } from "@/lib/dev";
+import { dev, devNum, FROZEN_TIME_S } from "@/lib/dev";
 import { DEG, clamp01, easeInOutCubic, easeInOutSine, easeIntro, easeOutSine, lerp, range } from "@/lib/ease";
 import { decayFlash, graphFlash } from "@/lib/graph";
 import { spring, springTo } from "@/lib/springs";
@@ -27,6 +27,7 @@ import { spring, springTo } from "@/lib/springs";
 
 type Thread = { ridge: number; t0: number; dur: number; live: boolean };
 
+const devYaw = devNum("yaw");
 const INTRO_MS = 1500;
 const THREAD_MS = 1280; // 520 crown + 760 pavilion
 const PULSE_MS = 1100;
@@ -43,7 +44,7 @@ export function Director() {
   const quat = useMemo(() => new THREE.Quaternion(), []);
   const euler = useMemo(() => new THREE.Euler(0, 0, 0, "YXZ"), []);
   const ctx = useMemo<FormationCtx>(
-    () => ({ stoneQuat: quat, gap: 0, focusTier: -1, focusSlide: 0, time: 0, crownLift: 0, bandLift: 0, split: 0 }),
+    () => ({ stoneQuat: quat, gap: 0, lift: 0, focusTier: -1, focusSlide: 0, time: 0, crownLift: 0, bandLift: 0, split: 0 }),
     [quat]
   );
   const v = useMemo(() => new THREE.Vector3(), []);
@@ -120,6 +121,8 @@ export function Director() {
     const finaleK = S > 11.6 ? range(S, 11.6, 12.0) * (1 - range(S, 12.6, 12.7)) : 0;
     springTo(s.pitchSpring, (pitchIdle + pPitch) * heroK + (pPitch * 0.3 + pitchIdle) * finaleK, 4.5, dt);
     yaw += s.yawSpring.x;
+    // Look-dev: `?yaw=<deg>` pins the stone's rotation (screenshots per angle).
+    if (devYaw !== null) yaw = devYaw * DEG;
     // The mark lock: pointer tilt ≤ ±1.5° so it breathes but never breaks.
     if (S >= 12.6) yaw += (pointer.has ? 1.5 * DEG * pointer.nx : 0) * (1 - range(S - 12.6, 0.3, 0.5));
     const bob = reduced ? 0 : 0.004 * Math.sin((2 * Math.PI * time) / 9) * heroK;
@@ -227,6 +230,7 @@ export function Director() {
     /* ---- fragments ------------------------------------------------------ */
     springTo(s.slide, sceneState.tiers.focus >= 0 ? 1 : 0, 9, dt);
     ctx.gap = plan.gap;
+    ctx.lift = plan.lift;
     ctx.focusTier = sceneState.tiers.focus;
     ctx.focusSlide = s.slide.x;
     ctx.time = reduced ? 0 : time;

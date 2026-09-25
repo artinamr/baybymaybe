@@ -40,6 +40,8 @@ export const plan = {
   /** Bézier arc strength. */
   arc: 0.35,
   gap: 0,
+  /** The stone rising off its reflection during the hero → ch01 pass (world y). */
+  lift: 0,
   crownLift: 0,
   bandLift: 0,
   split: 0,
@@ -72,9 +74,17 @@ function keys(L: Layout): Key[] {
   const D = (d: number) => (mob ? d / 0.55 : d);
   return [
     { S: 0, pivot: [0, STONE.centerY, 0], az: 0, el: 4, dist: heroD, fov: 30, pp: heroPP },
-    { S: 1.0, pivot: [0, STONE.centerY, 0], az: 0, el: 4, dist: heroD * 0.97, fov: 30, pp: heroPP },
-    { S: 1.7, pivot: [mob ? 0 : 1.8, STONE.centerY, 0], az: -12, el: 8, dist: D(8.0), fov: 30, pp: pp(0.62, 0.5), ease: easeInOutSine },
-    { S: 3.4, pivot: [0, -0.1, 0], az: 24, el: 13, dist: D(11), fov: 28, pp: pp(0.66, 0.52), ease: easeInOutSine },
+    // LOOK UP — the camera cranes below the girdle and looks up at the
+    // monument while the lens widens: the stone becomes architecture.
+    { S: 0.5, pivot: [0, -0.3, 0], az: -40, el: -9, dist: heroD * 0.8, fov: 36, pp: mob ? [0.5, 0.36] : [0.6, 0.5], ease: easeInOutSine },
+    // THE PASS — close, wide lens, the stone filling the frame as the camera
+    // swings round it; highlights race across the facets.
+    { S: 1.0, pivot: [0, 0.02, 0], az: -110, el: 3, dist: heroD * 0.5, fov: 44, pp: [0.5, 0.5], ease: easeInOutSine },
+    { S: 1.7, pivot: [mob ? 0 : 1.8, STONE.centerY, 0], az: -12, el: 8, dist: D(8.0), fov: 30, pp: pp(0.62, 0.5), ease: easeInOutCubic },
+    // INTO THE BURST — as the stone breaks, the camera dives into it and the
+    // fragments fly past the lens, then it pulls out to the four floors.
+    { S: 2.45, pivot: [0, -0.3, 0], az: 12, el: 4, dist: D(2.7), fov: 46, pp: [0.5, 0.5], ease: easeInOutSine },
+    { S: 3.4, pivot: [0, -0.1, 0], az: 24, el: 13, dist: D(11), fov: 28, pp: pp(0.66, 0.52), ease: easeInOutCubic },
     { S: 4.6, pivot: [0, -0.1, 0], az: 40, el: 22, dist: D(11), fov: 28, pp: pp(0.66, 0.5), ease: easeInOutSine },
     { S: 5.9, pivot: [0, 0, 0], az: -70, el: 7, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5), ease: easeInOutCubic },
     { S: 7.2, pivot: [0, 0, 0], az: 0, el: 7, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5), ease: easeInOutSine },
@@ -232,7 +242,9 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   const u = out.u;
 
   /* ---- stone placement ---------------------------------------------- */
-  out.stone.home.set(0, 0, S < 7.7 ? 0 : HOME_B_Z);
+  // Rises 0.32 off its reflection through the pass and settles back before it breaks.
+  plan.lift = 0.32 * Math.sin(Math.PI * easeInOutSine(range(S, 0.1, 1.8)));
+  out.stone.home.set(0, S < 7.7 ? plan.lift : 0, S < 7.7 ? 0 : HOME_B_Z);
   out.stone.visible = true;
   let yaw = 20;
   if (S >= 1.0) yaw = lerp(20, 200, easeInOutSine(range(S, 1.0, 1.7)));
@@ -338,6 +350,8 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
     u.fogFar = 90;
   }
 
+  // The veins wake as the camera passes close, then settle.
+  u.vein = 1 + 0.9 * Math.sin(Math.PI * range(S, 0.45, 1.6));
   u.reflect = S > 3 && S < 7.2 ? 0.5 : 1;
   u.floorY = STONE.floorY;
   u.mistAlpha = 1 - range(S, 0.5, 1.1);
