@@ -161,16 +161,95 @@ export function initScroll(): () => void {
   window.addEventListener("touchstart", onEarly, { passive: true });
   window.addEventListener("keydown", onEarly);
 
+  const inputs = ["wheel", "touchstart", "touchmove", "keydown", "pointerdown"] as const;
+  inputs.forEach((t) => window.addEventListener(t, onUserInput, { passive: true }));
+
   return () => {
     window.removeEventListener("resize", onResize);
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("wheel", onEarly);
     window.removeEventListener("touchstart", onEarly);
     window.removeEventListener("keydown", onEarly);
+    inputs.forEach((t) => window.removeEventListener(t, onUserInput));
     ro.disconnect();
     lenis?.destroy();
     lenis = null;
   };
+}
+
+/* ------------------------------------------------------------------------ */
+/* Auto-framing                                                              */
+/* ------------------------------------------------------------------------ */
+
+/**
+ * The film's composed frames, in S. When you stop scrolling between two of
+ * them, the page glides on to one — the way igloo.inc finishes a move for you:
+ * hero · the statement over the stone · each lit ring of the core · each beat
+ * of the armillary · each work row (measured) · each seating of the method ·
+ * the stone before the last cut · the mark · the footer.
+ */
+const REST_STATIC = [0, 1.62, 3.52, 3.76, 3.99, 4.23, 6.2, 6.88, 10.81, 11.04, 11.26, 11.48, 12.72, 13.32];
+const restPts: number[] = [];
+
+function anchors(): number[] {
+  restPts.length = 0;
+  for (const s of REST_STATIC) restPts.push(s);
+  for (const r of measured.rowS) if (r > 7.3 && r < 10.5) restPts.push(r);
+  restPts.push(Math.max(0, (document.documentElement.scrollHeight - window.innerHeight) / Math.max(1, scroll.vh)));
+  restPts.sort((a, b) => a - b);
+  return restPts;
+}
+
+/** Nearest composed frame, biased toward the way you were travelling. */
+function pickAnchor(S: number, dir: number): number {
+  const pts = anchors();
+  if (S <= pts[0]) return pts[0];
+  if (S >= pts[pts.length - 1]) return pts[pts.length - 1];
+  let prev = pts[0];
+  let next = pts[pts.length - 1];
+  for (const p of pts) {
+    if (p <= S) prev = p;
+    else {
+      next = p;
+      break;
+    }
+  }
+  const f = (S - prev) / Math.max(1e-4, next - prev);
+  if (dir > 0 && f > 0.2) return next;
+  if (dir < 0 && f < 0.8) return prev;
+  return f < 0.5 ? prev : next;
+}
+
+const frame = { lastInput: 0, lastMove: 0, lastS: 0, dir: 0, gliding: false };
+
+/** Any hand on the scroll cancels a glide and restarts the idle clock. */
+function onUserInput() {
+  frame.lastInput = performance.now();
+  frame.gliding = false;
+}
+
+function autoFrame(now: number) {
+  const dS = scroll.S - frame.lastS;
+  frame.lastS = scroll.S;
+  if (Math.abs(dS) > 1e-4) {
+    frame.lastMove = now;
+    if (!frame.gliding) frame.dir = Math.sign(dS);
+  }
+  if (!lenis || frame.gliding || intro.state !== "done") return;
+  if (now - frame.lastInput < 900 || now - frame.lastMove < 200 || frame.lastInput === 0) return;
+  const a = pickAnchor(scroll.S, frame.dir);
+  const d = Math.abs(a - scroll.S);
+  if (d < 0.012) return;
+  frame.gliding = true;
+  lenis.scrollTo(a * scroll.vh, {
+    duration: Math.min(2.2, 0.9 + d * 1.1),
+    easing: easeInOutCubic,
+    force: true,
+    lock: false,
+    onComplete: () => {
+      frame.gliding = false;
+    },
+  });
 }
 
 /** Reveal state of a chapter from its local s. */
@@ -212,6 +291,7 @@ export function updateScroll(time: number): void {
     bus.emit("chapter", { id: CHAPTERS[active].id, index: active });
   }
   pointer.moved = false;
+  autoFrame(time);
   frameHooks.forEach((cb) => cb(scroll.S));
 }
 
@@ -219,7 +299,18 @@ export function updateScroll(time: number): void {
 export function scrollToS(S: number, durationSec?: number, easing?: (t: number) => number): void {
   const target = S * scroll.vh;
   const d = durationSec ?? Math.min(2.8, Math.max(1.2, 0.35 * Math.abs(S - scroll.S)));
-  if (lenis) lenis.scrollTo(target, { duration: d, easing: easing ?? easeInOutQuart, force: true });
+  // A deliberate jump is its own glide: auto-framing stands off until it lands.
+  frame.gliding = true;
+  frame.lastInput = performance.now();
+  if (lenis)
+    lenis.scrollTo(target, {
+      duration: d,
+      easing: easing ?? easeInOutQuart,
+      force: true,
+      onComplete: () => {
+        frame.gliding = false;
+      },
+    });
   else window.scrollTo({ top: target, behavior: document.documentElement.hasAttribute("data-reduced") ? "auto" : "smooth" });
 }
 

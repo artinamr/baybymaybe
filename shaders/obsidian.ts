@@ -308,6 +308,11 @@ float obsVeinField(vec3 p, float deep) {
   float fw = max(fwidth(s), 1e-5);
   float core = 1.0 - smoothstep(0.0, fw * mix(1.1, 2.6, deep), d);
   float halo = exp(-d / (fw * mix(4.5, 8.0, deep)));
+  // Seen edge-on, a face packs many vein periods into a few pixels and they
+  // alias into zebra stripes: fade out once a pixel spans too much of a period.
+  float dense = 1.0 - smoothstep(0.08, 0.22, fw);
+  core *= dense;
+  halo *= dense;
   float mask = smoothstep(0.36, 0.58, obsNoise(p * 0.72 + 11.0));
   // Width breathes along the line so it reads as a vein, not a drawn stroke.
   float along = dot(p, vec3(-0.3, 0.25, 0.92)) * 1.4 + warp * 0.8;
@@ -368,7 +373,9 @@ float obsRipple = 0.0;
 #endif
 #ifdef OBS_FRAG
   if (obsCut > 0.5) {
-    obsRipple = cos(36.0 * length(vRipD));
+    float obsRippleArg = 36.0 * length(vRipD);
+    // Same anti-alias for the conchoidal rings at grazing angles.
+    obsRipple = cos(obsRippleArg) * (1.0 - smoothstep(0.6, 1.6, fwidth(obsRippleArg)));
     float rl = length(vRipV);
     if (rl > 1e-5) normal = normalize(normal + 0.05 * obsRipple * (vRipV / rl));
   }

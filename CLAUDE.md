@@ -82,6 +82,27 @@ and camera always turn the same way relative to each other.
   blur-to-sharp focus pull and 110 ms stagger; exits are quicker and upward.
 - The chapter card is a hero-only beat; it bows out once you scroll.
 
+## Auto-framing + interactivity (2026-09-26: "auto framing like igloo", "AI one more impressive")
+
+- **Auto-framing** (`lib/scroll.ts`): composed frames are listed in
+  `REST_STATIC` (+ measured work rows + the page end). ~0.9 s after the last
+  wheel/touch/key input, with the scroll at rest, the page glides to the
+  nearest frame, biased toward the direction of travel (past 20 % of the gap
+  → onward). Any input cancels a glide; nav jumps suppress it until they land;
+  never before the intro is done or the user has touched the scroll. Chapter
+  `jumpS` values sit ON anchors — keep them in sync when moving keys.
+- **The sculptures live on their own:** the Director integrates ring/orbit
+  PHASES (`sceneState.sculpt`) instead of `speed × time`, so the active beat's
+  orbit can speed up and a fast cursor sweep can "stir" them without any piece
+  jumping; the whole sculpture leans toward the pointer; shards part around
+  the cursor. Transitions between formations SPIRAL (`plan.swirl`).
+- **Light streams** (`shaders/streams.ts`): ~2,600 GPU-positioned indigo
+  points — rings of light inside the tower, morphing with the shards into the
+  armillary's two orbits + a core; they part around the cursor. Normal
+  premultiplied blending (additive vanishes on white).
+- Vein lines and conchoidal ripples FADE when a pixel spans too much of their
+  period (fwidth) — edge-on faces otherwise alias into zebra stripes.
+
 ## Typography (after the "texts are terrible" note)
 
 - **Display: Bodoni Moda** (`--font-bodoni`, opsz axis) for the hero line, every

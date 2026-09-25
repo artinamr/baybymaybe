@@ -35,8 +35,17 @@ export type FormationCtx = {
   /** F2: focused tier (−1 none) and its drawer slide 0..1. */
   focusTier: number;
   focusSlide: number;
-  /** Seconds (F3 tumble). */
+  /** Seconds. */
   time: number;
+  /**
+   * Accumulated spin of each tower ring (F2) and each orbit (F3: P, W, bridges),
+   * radians. Integrated by the Director so speed can change (the active beat,
+   * a stir of the cursor) without a single piece jumping.
+   */
+  ringPhase: number[];
+  orbitPhase: number[];
+  /** The whole sculpture tilts toward the cursor (F2, F3), about its centre. */
+  tilt: THREE.Quaternion;
   /** F6 progress terms 0..1. */
   crownLift: number;
   bandLift: number;
@@ -74,15 +83,17 @@ let prep: Prep[] = [];
 
 /* F2 — THE CORE: four rings of six blades, stacked and counter-rotating, lit from within. */
 export const TIER_Y = (t: number) => -1.6 + 1.05 * t;
-const RING_R = [1.5, 1.34, 1.18, 1.02];
+export const RING_R = [1.5, 1.34, 1.18, 1.02];
 const BLADE_SCALE = 0.82;
-const RING_W = [0.16, -0.12, 0.1, -0.075];
+/** Ring spin rates (rad/s), alternating, for the Director to integrate. */
+export const RING_W = [0.16, -0.12, 0.1, -0.075];
 /* F3 — THE ARMILLARY: two tilted orbits (product, workspace) and three bridges at the heart. */
-const ORBIT_R = 2.0;
+export const ORBIT_R = 2.0;
 const ORBIT_SCALE = 0.8;
-const ORBIT_P = new THREE.Quaternion().setFromEuler(new THREE.Euler((30 * Math.PI) / 180, 0, (18 * Math.PI) / 180));
-const ORBIT_W = new THREE.Quaternion().setFromEuler(new THREE.Euler((-30 * Math.PI) / 180, 0, (-18 * Math.PI) / 180));
-const ORBIT_SPEED = [0.14, -0.11, 0.3];
+export const ORBIT_P = new THREE.Quaternion().setFromEuler(new THREE.Euler((30 * Math.PI) / 180, 0, (18 * Math.PI) / 180));
+export const ORBIT_W = new THREE.Quaternion().setFromEuler(new THREE.Euler((-30 * Math.PI) / 180, 0, (-18 * Math.PI) / 180));
+/** Orbit rates (rad/s): P, W, bridges. */
+export const ORBIT_SPEED = [0.14, -0.11, 0.3];
 const X = new THREE.Vector3(1, 0, 0);
 const NEG_X = new THREE.Vector3(-1, 0, 0);
 const Z = new THREE.Vector3(0, 0, 1);
@@ -151,6 +162,12 @@ export function prepared(i: number): Prep {
   return prep[i];
 }
 
+/** Rotate a pose about a centre (the sculpture leaning toward the cursor). */
+function tiltAbout(out: Pose, centre: THREE.Vector3, tilt: THREE.Quaternion) {
+  out.pos.sub(centre).applyQuaternion(tilt).add(centre);
+  out.quat.premultiply(tilt);
+}
+
 /** Fill `out` with fragment `f`'s world pose in formation `F`. Allocation-free. */
 export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Pose): void {
   const p = prep[f.index];
@@ -176,31 +193,34 @@ export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Po
       // A ring of blades, cut faces out, turning; the focused ring opens out.
       const t = f.tier;
       const focus = t === ctx.focusTier ? ctx.focusSlide : 0;
-      const th = (p.ringSlot / 6) * Math.PI * 2 + t * 0.52 + RING_W[t] * ctx.time;
+      const th = (p.ringSlot / 6) * Math.PI * 2 + t * 0.52 + ctx.ringPhase[t];
       const R = RING_R[t] + 0.22 * focus;
       out.pos.set(homeA.x + R * Math.cos(th), homeA.y + TIER_Y(t) + 0.06 * focus, homeA.z + R * Math.sin(th));
       _q.setFromAxisAngle(Y, -th);
       out.quat.copy(_q).multiply(p.bladeQ);
       out.scale.setScalar(BLADE_SCALE);
+      tiltAbout(out, homeA, ctx.tilt);
       return;
     }
     case "F3": {
       if (p.role === 2) {
         // The bridges: a small slow triangle at the heart where the orbits cross.
-        const th = (p.orbitK / p.orbitN) * Math.PI * 2 + ORBIT_SPEED[2] * ctx.time;
+        const th = (p.orbitK / p.orbitN) * Math.PI * 2 + ctx.orbitPhase[2];
         out.pos.set(homeA.x + 0.42 * Math.cos(th), homeA.y + (p.orbitK - 1) * 0.2, homeA.z + 0.42 * Math.sin(th));
         _q.setFromAxisAngle(Y, -th);
         out.quat.copy(_q).multiply(p.bladeQ);
         out.scale.setScalar(ORBIT_SCALE);
+        tiltAbout(out, homeA, ctx.tilt);
         return;
       }
       const ring = p.role === 0 ? ORBIT_P : ORBIT_W;
-      const th = (p.orbitK / p.orbitN) * Math.PI * 2 + ORBIT_SPEED[p.role] * ctx.time;
+      const th = (p.orbitK / p.orbitN) * Math.PI * 2 + ctx.orbitPhase[p.role];
       _v.set(ORBIT_R * Math.cos(th), 0, ORBIT_R * Math.sin(th)).applyQuaternion(ring);
       out.pos.copy(homeA).add(_v);
       _q.setFromAxisAngle(Y, -th);
       out.quat.copy(ring).multiply(_q).multiply(p.orbitQ);
       out.scale.setScalar(ORBIT_SCALE);
+      tiltAbout(out, homeA, ctx.tilt);
       return;
     }
     case "F4": {

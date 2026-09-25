@@ -14,6 +14,7 @@ import { Mist } from "./Mist";
 import { Flakes } from "./Flakes";
 import { Graph } from "./Graph";
 import { Field } from "./Field";
+import { Streams } from "./Streams";
 
 function Bridge() {
   const { camera, size } = useThree();
@@ -34,6 +35,7 @@ export function Scene() {
       <Mist />
       <Flakes />
       <Graph />
+      <Streams />
       <Field />
       <Bridge />
     </>

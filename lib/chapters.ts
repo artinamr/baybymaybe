@@ -48,7 +48,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Studio",
     vh: 200,
     sticky: true,
-    jumpS: 1.1,
+    jumpS: 1.62,
     specimen: { name: "The studio", line: "Two disciplines, one team." },
   },
   {
@@ -57,7 +57,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Infrastructure",
     vh: 260,
     sticky: true,
-    jumpS: 3.4,
+    jumpS: 3.52,
     specimen: { name: "Digital infrastructure", line: "Interface, platform, data and foundation." },
   },
   {
@@ -66,7 +66,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "AI automation",
     vh: 260,
     sticky: true,
-    jumpS: 5.95,
+    jumpS: 6.2,
     specimen: { name: "AI automation", line: "In your product, and in your workspace." },
   },
   {
@@ -84,7 +84,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Method",
     vh: 220,
     sticky: true,
-    jumpS: 10.6,
+    jumpS: 10.81,
     specimen: { name: "Method", line: "Discover, architect, build, automate." },
   },
   {
@@ -93,7 +93,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Contact",
     vh: 220,
     sticky: true,
-    jumpS: 13.25,
+    jumpS: 13.32,
     specimen: { name: "Contact", line: "We reply to every message personally." },
   },
 ];

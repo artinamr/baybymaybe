@@ -46,8 +46,16 @@ export const plan = {
   /** Stone rotation for stone-relative forms (radians). */
   yaw: 20 * DEG,
   pitch: 0,
-  /** Glow mode for per-fragment cut glow: 0 uniform · 1 tier focus · 2 seating heal · 3 mark */
+  /** Glow mode for per-fragment cut glow: 0 uniform · 1 tier focus · 2 seating heal · 3 mark · 4 armillary beat */
   glowMode: 0,
+  /**
+   * Transitions SPIRAL: while pieces travel between two formations they are
+   * swept round the vertical axis through a centre by swirl·sin(π·progress) —
+   * the change reads as a vortex, not a slide. 0 = straight.
+   */
+  swirl: 0,
+  /** Swirl centre: 0 = HOME_A, 1 = HOME_B. */
+  swirlAt: 0,
   /** F5 window start (seating) and per-group length, in S. */
   seatS0: 10.6,
   seatLen: 0.225,
@@ -90,7 +98,9 @@ function keys(L: Layout): Key[] {
     // THE CORE — a slow orbit round the turning tower of rings.
     { S: 3.4, pivot: [0, -0.05, 0], az: 30, el: 12, dist: D(10.2), fov: 30, pp: pp(0.66, 0.5) },
     { S: 4.6, pivot: [0, -0.05, 0], az: 78, el: 20, dist: D(10.6), fov: 30, pp: pp(0.66, 0.5) },
-    // THE ARMILLARY — swing round to face it from the left of frame.
+    // THE ARMILLARY — frame it on the left early, before the copy arrives on the right…
+    { S: 5.3, pivot: [0, 0, 0], az: 12, el: 13, dist: D(11.2), fov: 30, pp: pp(0.34, 0.5) },
+    // …then swing round it.
     { S: 5.9, pivot: [0, 0, 0], az: -35, el: 9, dist: D(10.2), fov: 30, pp: pp(0.33, 0.5) },
     { S: 7.2, pivot: [0, 0, 0], az: 0, el: 7, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5) },
     { S: 10.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 10, el: 9, dist: D(7.7), fov: 30, pp: pp(0.66, 0.52) },
@@ -331,6 +341,8 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   plan.split = 0;
   plan.arc = 0.35;
   plan.glowMode = 0;
+  plan.swirl = 0;
+  plan.swirlAt = 0;
   plan.stagger = 0;
   plan.mix = 0;
   const set = (a: Formation, b: Formation, mix: number, stagger: number) => {
@@ -348,15 +360,18 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
     plan.arc = 0.5;
   } else if (S < 3.4) {
     set("F1", "F2", range(S, 3.0, 3.4), 2);
+    plan.swirl = 1.3;
     plan.arc = 0.25;
   } else if (S < 4.6) {
     set("F2", "F2", 0, 0);
     plan.glowMode = 1;
   } else if (S < 5.6) {
     set("F2", "F3", range(S, 4.6, 5.6), 3);
+    plan.swirl = -1.8;
     plan.arc = 0.3;
   } else if (S < 7.2) {
     set("F3", "F3", 0, 0);
+    plan.glowMode = 4;
   } else if (S < 8.2) {
     set("F3", "F4", range(S, 7.2, 8.2), 4);
     plan.arc = 0.15;
@@ -364,6 +379,8 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
     set("F4", "F4", 0, 0);
   } else if (S < 11.5) {
     set("F4", "F5", range(S, 10.6, 11.5), 5);
+    plan.swirl = 1.1;
+    plan.swirlAt = 1;
     plan.arc = 0.4;
     plan.glowMode = 2;
   } else if (S < 12.6) {
@@ -447,6 +464,11 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
 
   out.flakes.visible = S > 1.95 && S < 11.5;
   out.flakes.amount = range(S, 1.95, 2.4) * (1 - range(S, 10.9, 11.5));
+
+  // Light streams: rise with the tower, morph from its rings into the two
+  // orbits with the fragments (4.6–5.6), and stream away with them at 7.2.
+  out.streams.fade = smoother(range(S, 3.05, 3.55)) * (1 - smoother(range(S, 7.15, 7.75)));
+  out.streams.morph = smoother(range(S, 4.65, 5.65));
 
   /* ---- the bookend clip + mark lock ---------------------------------- */
   const s6 = S - 12.6;

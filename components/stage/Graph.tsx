@@ -49,7 +49,20 @@ export function Graph() {
     const stone = getStone();
     prepareFormations(stone.frags, stone.crackOrigin);
     const q = new THREE.Quaternion();
-    const ctx: FormationCtx = { stoneQuat: q, gap: 0, lift: 0, focusTier: -1, focusSlide: 0, time: 0, crownLift: 0, bandLift: 0, split: 0 };
+    const ctx: FormationCtx = {
+      stoneQuat: q,
+      gap: 0,
+      lift: 0,
+      focusTier: -1,
+      focusSlide: 0,
+      time: 0,
+      crownLift: 0,
+      bandLift: 0,
+      split: 0,
+      ringPhase: [0, 0, 0, 0],
+      orbitPhase: [0, 0, 0],
+      tilt: new THREE.Quaternion(),
+    };
     const p = pose();
     const pts = stone.frags.map((f) => {
       fragTarget("F3", f, ctx, p);

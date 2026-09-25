@@ -4,7 +4,8 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { evaluate, plan } from "@/lib/choreo";
-import { blendPose, fragTarget, pose, poseMatrix, prepareFormations, prepared, type FormationCtx } from "@/lib/formations";
+import { blendPose, fragTarget, ORBIT_SPEED, pose, poseMatrix, prepareFormations, prepared, RING_W, type FormationCtx } from "@/lib/formations";
+import { HOME_A, HOME_B } from "@/lib/geo/types";
 import { getStone } from "@/lib/geo/crystal";
 import { fragTex } from "@/lib/fragTex";
 import { layout } from "@/lib/layout";
@@ -28,6 +29,7 @@ import { spring, springTo } from "@/lib/springs";
 type Thread = { ridge: number; t0: number; dur: number; live: boolean };
 
 const devYaw = devNum("yaw");
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const INTRO_MS = 1500;
 const THREAD_MS = 1280; // 520 crown + 760 pavilion
 const PULSE_MS = 1100;
@@ -44,9 +46,27 @@ export function Director() {
   const quat = useMemo(() => new THREE.Quaternion(), []);
   const euler = useMemo(() => new THREE.Euler(0, 0, 0, "YXZ"), []);
   const ctx = useMemo<FormationCtx>(
-    () => ({ stoneQuat: quat, gap: 0, lift: 0, focusTier: -1, focusSlide: 0, time: 0, crownLift: 0, bandLift: 0, split: 0 }),
+    () => ({
+      stoneQuat: quat,
+      gap: 0,
+      lift: 0,
+      focusTier: -1,
+      focusSlide: 0,
+      time: 0,
+      crownLift: 0,
+      bandLift: 0,
+      split: 0,
+      ringPhase: sceneState.sculpt.ringPhase,
+      orbitPhase: sceneState.sculpt.orbitPhase,
+      tilt: sceneState.sculpt.tilt,
+    }),
     [quat]
   );
+  const tiltEuler = useMemo(() => new THREE.Euler(), []);
+  const swirlQ = useMemo(() => new THREE.Quaternion(), []);
+  const ndc = useMemo(() => new THREE.Vector3(), []);
+  const camRight = useMemo(() => new THREE.Vector3(), []);
+  const camUp = useMemo(() => new THREE.Vector3(), []);
   const v = useMemo(() => new THREE.Vector3(), []);
   const head = useMemo(() => new THREE.Vector3(), []);
 
@@ -72,6 +92,14 @@ export function Director() {
     /** 1 while the stone is whole (fragments locked rigid), easing to 0 when it breaks. */
     rigid: 1,
     springsLive: false,
+    /** Cursor stir + beat emphasis + tilt for the sculptures. */
+    px: 0,
+    py: 0,
+    stirT: 0,
+    mP: 1,
+    mW: 1,
+    tiltX: spring(0),
+    tiltY: spring(0),
   });
 
   // Every fragment follows its target on its own critically damped spring —
@@ -265,6 +293,46 @@ export function Director() {
     ctx.bandLift = plan.bandLift;
     ctx.split = plan.split;
 
+    /* ---- the sculptures' own life (ch02–03) ---------------------------- */
+    // They spin on their own; the active beat's orbit runs faster; a quick
+    // sweep of the cursor stirs them (spins them up, then they settle); the
+    // whole piece leans toward the pointer.
+    const sc = sceneState.sculpt;
+    const inSculpt = S > 3.0 && S < 7.6;
+    if (pointer.has) {
+      const speed = Math.hypot(pointer.x - s.px, pointer.y - s.py) / Math.max(dt, 1e-3);
+      s.px = pointer.x;
+      s.py = pointer.y;
+      if (inSculpt) s.stirT = Math.max(s.stirT, Math.min(1.6, speed / 1400));
+    }
+    sc.stir += (s.stirT - sc.stir) * (1 - Math.exp(-dt * (s.stirT > sc.stir ? 5 : 1.1)));
+    s.stirT *= Math.exp(-dt * 5);
+    const beat = sceneState.graph.beat;
+    s.mP += ((beat === 1 ? 1.9 : beat === 2 ? 0.55 : 1) - s.mP) * (1 - Math.exp(-dt * 2));
+    s.mW += ((beat === 2 ? 1.9 : beat === 1 ? 0.55 : 1) - s.mW) * (1 - Math.exp(-dt * 2));
+    const stirK = 1 + 2.2 * sc.stir;
+    if (dev.freeze || reduced) {
+      for (let t = 0; t < 4; t++) sc.ringPhase[t] = RING_W[t] * FROZEN_TIME_S;
+      for (let r = 0; r < 3; r++) sc.orbitPhase[r] = ORBIT_SPEED[r] * FROZEN_TIME_S;
+    } else {
+      for (let t = 0; t < 4; t++) sc.ringPhase[t] += RING_W[t] * stirK * dt;
+      sc.orbitPhase[0] += ORBIT_SPEED[0] * s.mP * stirK * dt;
+      sc.orbitPhase[1] += ORBIT_SPEED[1] * s.mW * stirK * dt;
+      sc.orbitPhase[2] += ORBIT_SPEED[2] * stirK * dt;
+    }
+    const lean = inSculpt && pointer.has && !reduced ? 1 : 0;
+    springTo(s.tiltX, -pointer.ny * 0.2 * lean + (reduced || dev.freeze ? 0 : 0.05 * Math.sin(time * 0.21)), 3, dt);
+    springTo(s.tiltY, pointer.nx * 0.34 * lean + (reduced || dev.freeze ? 0 : 0.07 * Math.sin(time * 0.17)), 3, dt);
+    if (dev.freeze) {
+      s.tiltX.x = 0;
+      s.tiltY.x = 0;
+    }
+    tiltEuler.set(s.tiltX.x, s.tiltY.x, 0);
+    sc.tilt.setFromEuler(tiltEuler);
+    camRight.setFromMatrixColumn(camera.matrixWorld, 0);
+    camUp.setFromMatrixColumn(camera.matrixWorld, 1);
+    const aspect = size.width / Math.max(1, size.height);
+
     // Rigid while the stone is whole (F0/F5/F6 at rest): the intact stone must
     // never wobble apart. Released quickly when it breaks, re-locked gently.
     const whole = plan.a === plan.b && (plan.a === "F0" || plan.a === "F5" || plan.a === "F6");
@@ -305,7 +373,22 @@ export function Director() {
         }
         if (plan.stagger !== 5) m = clamp01((m - d) / span);
         fragTarget(plan.b, f, ctx, Bp);
-        blendPose(A, Bp, plan.stagger === 5 ? easeInOutCubic(m) : easeInOutCubic(m), f.out, plan.arc, P);
+        const e = easeInOutCubic(m);
+        blendPose(A, Bp, e, f.out, plan.arc, P);
+        // The spiral: swept round the vertical axis mid-flight, straight at both ends.
+        if (plan.swirl !== 0) {
+          const ang = plan.swirl * Math.sin(Math.PI * e);
+          const cx = plan.swirlAt ? HOME_B[0] : HOME_A[0];
+          const cz = plan.swirlAt ? HOME_B[2] : HOME_A[2];
+          const dx = P.pos.x - cx;
+          const dz = P.pos.z - cz;
+          const c = Math.cos(ang);
+          const sn = Math.sin(ang);
+          P.pos.x = cx + dx * c + dz * sn;
+          P.pos.z = cz - dx * sn + dz * c;
+          swirlQ.setFromAxisAngle(Y_AXIS, ang);
+          P.quat.premultiply(swirlQ);
+        }
       } else {
         P.pos.copy(A.pos);
         P.quat.copy(A.quat);
@@ -323,6 +406,19 @@ export function Director() {
         driftAxis.set(Math.sin(ph), Math.cos(ph * 1.7), Math.sin(ph * 0.9)).normalize();
         drift.setFromAxisAngle(driftAxis, 0.07 * loose * Math.sin(time * 0.33 + ph));
         P.quat.multiply(drift);
+      }
+
+      // Shards part around the cursor (the springs make it a soft give).
+      if (pointer.has && inSculpt && loose > 0.3 && !reduced) {
+        ndc.copy(P.pos).project(camera);
+        const dx = (ndc.x - pointer.nx) * aspect;
+        const dy = ndc.y - pointer.ny;
+        const r = Math.hypot(dx, dy);
+        if (r < 0.34) {
+          const k = 1 - r / 0.34;
+          const push = (k * k * 0.6 * loose) / (r + 1e-4);
+          P.pos.addScaledVector(camRight, dx * push).addScaledVector(camUp, dy * push);
+        }
       }
 
       // Spring toward the target; blend back to the exact target while rigid.
@@ -366,6 +462,10 @@ export function Director() {
         // Unseated pieces carry the light; seating heals the cut.
         glow = 1 - plan.seat[f.group];
         flash = Math.max(flash, s.seatFlash[f.group]);
+      } else if (plan.glowMode === 4) {
+        // The armillary: the orbit of the current beat carries the light.
+        const role = pr.role;
+        glow = role === 2 ? 0.9 : beat === 0 ? 0.7 : (role === 0) === (beat === 1) ? 1 : 0.28;
       } else if (plan.glowMode === 3) {
         glow = f.piece === "crown" ? 0 : 1;
         if (f.piece === "crown") fade = easeInOutSine(range(S - 12.6, 0.22, 0.36));

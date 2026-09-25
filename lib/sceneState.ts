@@ -111,6 +111,22 @@ export const sceneState = {
   /** ch03 constellation. grow 0..1 (edges), beat 0 none · 1 A (product) · 2 B (workspace). */
   graph: { visible: false, grow: 0, beat: 0, fade: 0 },
 
+  /**
+   * The ch02/ch03 sculptures' live motion, integrated by the Director and read
+   * by both the fragments (formations) and the light streams, so shards and
+   * light always turn together.
+   */
+  sculpt: {
+    tilt: new THREE.Quaternion(),
+    ringPhase: [0, 0, 0, 0],
+    orbitPhase: [0, 0, 0],
+    /** 0.. how hard the cursor is stirring the sculpture. */
+    stir: 0,
+  },
+
+  /** Light streams: overall opacity, and tower (0) → orbits (1) morph. */
+  streams: { fade: 0, morph: 0 },
+
   /** ch04 standing-stone field. */
   field: { visible: false, fade: 0 },
 
