@@ -4,7 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { evaluate, plan } from "@/lib/choreo";
-import { blendPose, fragTarget, pose, poseMatrix, prepareFormations, prepared, TIER_X, TIER_Y, type FormationCtx } from "@/lib/formations";
+import { blendPose, fragTarget, pose, poseMatrix, prepareFormations, prepared, type FormationCtx } from "@/lib/formations";
 import { getStone } from "@/lib/geo/crystal";
 import { fragTex } from "@/lib/fragTex";
 import { layout } from "@/lib/layout";
@@ -67,7 +67,30 @@ export function Director() {
     seatDone: [false, false, false, false],
     markRunFired: false,
     bandLineFired: false,
+    /** The 3D's own scroll clock: follows scroll.S with weight (−1 = not started). */
+    S: -1,
+    /** 1 while the stone is whole (fragments locked rigid), easing to 0 when it breaks. */
+    rigid: 1,
+    springsLive: false,
   });
+
+  // Every fragment follows its target on its own critically damped spring —
+  // pieces carry momentum, overshoot nothing, and settle at slightly different
+  // rates, so a formation change reads as matter moving, not a tween.
+  const springs = useMemo(
+    () =>
+      stone.frags.map((f, i) => ({
+        pos: new THREE.Vector3(),
+        vel: new THREE.Vector3(),
+        quat: new THREE.Quaternion(),
+        scale: new THREE.Vector3(1, 1, 1),
+        omega: 3.4 + 2.6 * ((i * 0.618034) % 1),
+        phase: i * 1.713,
+      })),
+    [stone]
+  );
+  const drift = useMemo(() => new THREE.Quaternion(), []);
+  const driftAxis = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((_, rawDt) => {
     const s = st.current;
@@ -77,10 +100,14 @@ export function Director() {
     sceneState.frozen = dev.freeze;
     sceneState.time = time;
     sceneState.dt = dt;
-    const S = scroll.S;
-    sceneState.S = S;
     const L = layout.current;
     const reduced = typeof window !== "undefined" && document.documentElement.hasAttribute("data-reduced");
+    // The film follows the scroll with a little weight of its own (on top of
+    // Lenis), so a flick of the wheel becomes a glide, never a jolt.
+    if (s.S < 0 || dev.freeze || reduced || Math.abs(scroll.S - s.S) > 3) s.S = scroll.S;
+    else s.S += (scroll.S - s.S) * (1 - Math.exp(-dt * 4.5));
+    const S = s.S;
+    sceneState.S = S;
 
     evaluate(S, time, L, sceneState);
     const cam = sceneState.cam;
@@ -238,6 +265,13 @@ export function Director() {
     ctx.bandLift = plan.bandLift;
     ctx.split = plan.split;
 
+    // Rigid while the stone is whole (F0/F5/F6 at rest): the intact stone must
+    // never wobble apart. Released quickly when it breaks, re-locked gently.
+    const whole = plan.a === plan.b && (plan.a === "F0" || plan.a === "F5" || plan.a === "F6");
+    s.rigid += ((whole ? 1 : 0) - s.rigid) * (1 - Math.exp(-dt * (whole ? 2.2 : 9)));
+    const snap = !s.springsLive || reduced || dev.freeze;
+    const loose = 1 - s.rigid;
+
     const frags = stone.frags;
     for (let i = 0; i < frags.length; i++) {
       const f = frags[i];
@@ -277,6 +311,47 @@ export function Director() {
         P.quat.copy(A.quat);
         P.scale.copy(A.scale);
       }
+
+      // Suspended pieces breathe: a slow float and a drift of rotation, so a
+      // formation is never frozen — it hangs in the air.
+      const sp = springs[i];
+      if (loose > 0.001 && !reduced) {
+        const ph = sp.phase;
+        P.pos.x += 0.035 * loose * Math.sin(time * 0.61 + ph);
+        P.pos.y += 0.05 * loose * Math.sin(time * 0.47 + ph * 1.3);
+        P.pos.z += 0.035 * loose * Math.cos(time * 0.53 + ph * 0.7);
+        driftAxis.set(Math.sin(ph), Math.cos(ph * 1.7), Math.sin(ph * 0.9)).normalize();
+        drift.setFromAxisAngle(driftAxis, 0.07 * loose * Math.sin(time * 0.33 + ph));
+        P.quat.multiply(drift);
+      }
+
+      // Spring toward the target; blend back to the exact target while rigid.
+      if (snap) {
+        sp.pos.copy(P.pos);
+        sp.vel.set(0, 0, 0);
+        sp.quat.copy(P.quat);
+        sp.scale.copy(P.scale);
+      } else {
+        const w = sp.omega;
+        const ax = w * w * (P.pos.x - sp.pos.x) - 2 * w * sp.vel.x;
+        const ay = w * w * (P.pos.y - sp.pos.y) - 2 * w * sp.vel.y;
+        const az = w * w * (P.pos.z - sp.pos.z) - 2 * w * sp.vel.z;
+        sp.vel.x += ax * dt;
+        sp.vel.y += ay * dt;
+        sp.vel.z += az * dt;
+        sp.pos.addScaledVector(sp.vel, dt);
+        sp.quat.slerp(P.quat, 1 - Math.exp(-dt * w * 0.85));
+        sp.scale.lerp(P.scale, 1 - Math.exp(-dt * w));
+      }
+      if (s.rigid > 0.001) {
+        P.pos.lerpVectors(sp.pos, P.pos, s.rigid);
+        P.quat.slerpQuaternions(sp.quat, P.quat, s.rigid);
+        P.scale.lerpVectors(sp.scale, P.scale, s.rigid);
+      } else {
+        P.pos.copy(sp.pos);
+        P.quat.copy(sp.quat);
+        P.scale.copy(sp.scale);
+      }
       poseMatrix(P, M);
 
       // Glow / flash / fade.
@@ -289,8 +364,7 @@ export function Director() {
         glow = fo < 0 ? lerp(0.25, 0.5, all) : f.tier === fo ? 1 : 0.25;
       } else if (plan.glowMode === 2) {
         // Unseated pieces carry the light; seating heals the cut.
-        const sp = plan.seat[f.group];
-        glow = 1 - sp;
+        glow = 1 - plan.seat[f.group];
         flash = Math.max(flash, s.seatFlash[f.group]);
       } else if (plan.glowMode === 3) {
         glow = f.piece === "crown" ? 0 : 1;
@@ -299,12 +373,7 @@ export function Director() {
       fragTex.writeFrag(i, M, glow, flash, fade);
     }
     fragTex.writeDone();
-
-    /* ---- ch02 tier anchors (the leader lines' targets) ------------------ */
-    for (let t = 0; t < 4; t++) {
-      sceneState.tiers.anchors[t].set(TIER_X[0] - 0.55, TIER_Y(t), 0).add(sceneState.stone.home);
-      if (t === sceneState.tiers.focus) sceneState.tiers.anchors[t].x += 0.15 * s.slide.x;
-    }
+    s.springsLive = true;
   }, PRIORITY.director);
 
   return null;

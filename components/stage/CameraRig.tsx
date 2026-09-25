@@ -6,7 +6,8 @@ import * as THREE from "three";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { spring, springSnap, springTo, type Spring } from "@/lib/springs";
 
-const OMEGA = 5.5;
+/** Low on purpose: a heavy, floating camera that glides into every framing. */
+const OMEGA = 3.2;
 
 /**
  * Applies sceneState.cam to the camera through critically damped springs

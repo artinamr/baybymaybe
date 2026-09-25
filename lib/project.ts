@@ -10,7 +10,7 @@ import { STONE } from "./geo/types";
  * (CONTRACTS §3 E5):
  *   · the ch01 inversion clip (letters flip ink → paper exactly where the black
  *     stone passes behind them)
- *   · the ch02 leader lines from each layer row to its lit floor
+ *   · the ch02 layer rows' focus (the ring the scroll or the pointer has lit)
  *   · the specimen card's live camera readout
  *   · --stone-x / --stone-y (the paper's radial lift follows the stone)
  *   · the ch06 bookend clip and the mark-lock flag
@@ -58,20 +58,14 @@ function convexHull(p: { x: number; y: number }[]) {
 }
 
 let inversionEls: HTMLElement[] | null = null;
-let leaderPaths: SVGPathElement[] = [];
-let leaderDots: SVGCircleElement[] = [];
 let tierRows: HTMLElement[] = [];
 let readoutEls: HTMLElement[] = [];
-let leadersSvg: SVGSVGElement | null = null;
 let lastQuery = 0;
 
 function query(now: number) {
   if (inversionEls && now - lastQuery < 1000) return;
   lastQuery = now;
   inversionEls = Array.from(document.querySelectorAll<HTMLElement>("[data-inversion]"));
-  leadersSvg = document.querySelector<SVGSVGElement>("#leaders");
-  leaderPaths = [0, 1, 2, 3].map((i) => document.querySelector<SVGPathElement>(`[data-leader="${i}"]`)).filter(Boolean) as SVGPathElement[];
-  leaderDots = [0, 1, 2, 3].map((i) => document.querySelector<SVGCircleElement>(`[data-leader-dot="${i}"]`)).filter(Boolean) as SVGCircleElement[];
   tierRows = [0, 1, 2, 3].map((i) => document.querySelector<HTMLElement>(`[data-tier-row="${i}"]`)).filter(Boolean) as HTMLElement[];
   readoutEls = Array.from(document.querySelectorAll<HTMLElement>("[data-readout]"));
 }
@@ -115,34 +109,11 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
     write("inv", poly, (val) => inversionEls!.forEach((el) => (el.style.clipPath = val)));
   }
 
-  /* ---- ch02 leader lines ------------------------------------------------- */
-  if (leadersSvg) {
-    const on = sceneState.tiers.visible && S > 3.25 && S < 4.55 && scroll.vw > 767;
-    write("leaders-on", on ? "1" : "0", (val) => leadersSvg!.setAttribute("data-on", val));
-    if (on) {
-      for (let i = 0; i < 4; i++) {
-        const row = tierRows[i];
-        const path = leaderPaths[i];
-        const dot = leaderDots[i];
-        if (!row || !path || !dot) continue;
-        const r = row.getBoundingClientRect();
-        const a = project(sceneState.tiers.anchors[i], camera, W, H);
-        const x1 = r.right + 12;
-        const y1 = r.top + r.height / 2;
-        const d = `M${x1.toFixed(1)} ${y1.toFixed(1)} L${a.x.toFixed(1)} ${a.y.toFixed(1)}`;
-        write(`lp${i}`, d, (val) => path.setAttribute("d", val));
-        write(`ld${i}`, `${a.x.toFixed(1)},${a.y.toFixed(1)}`, () => {
-          dot.setAttribute("cx", a.x.toFixed(1));
-          dot.setAttribute("cy", a.y.toFixed(1));
-        });
-        const f = sceneState.tiers.focus === i ? "1" : "0";
-        write(`lf${i}`, f, (val) => {
-          path.setAttribute("data-focus", val);
-          dot.setAttribute("data-focus", val);
-          row.setAttribute("data-focus", val);
-        });
-      }
-    }
+  /* ---- ch02: the focused ring's row reads ink, the others step back ---- */
+  for (let i = 0; i < tierRows.length; i++) {
+    const row = tierRows[i];
+    const f = sceneState.tiers.visible && sceneState.tiers.focus === i ? "1" : "0";
+    write(`lf${i}`, f, (val) => row.setAttribute("data-focus", val));
   }
 
   /* ---- specimen readout (≤ 10 Hz) --------------------------------------- */

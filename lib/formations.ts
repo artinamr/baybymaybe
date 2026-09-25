@@ -57,14 +57,14 @@ type Prep = {
   /** F1 */
   burst: THREE.Vector3;
   spin: THREE.Quaternion;
-  /** F2 */
-  tierPos: THREE.Vector3;
-  tierQuat: THREE.Quaternion;
-  /** F3 */
-  nodePos: THREE.Vector3;
-  nodeQuat: THREE.Quaternion;
-  tumbleAxis: THREE.Vector3;
+  /** F2 — slot in its tier's ring, and the blade's base orientation (cut face → +X, long axis up). */
+  ringSlot: number;
+  bladeQ: THREE.Quaternion;
+  /** F3 — orbit index/count in its ring, base orientation (cut face → +X, long axis along the orbit). */
   role: 0 | 1 | 2; // P, W, bridge
+  orbitK: number;
+  orbitN: number;
+  orbitQ: THREE.Quaternion;
   /** 0..1 distance from the crack origin (explode stagger). */
   crackK: number;
   rand: number;
@@ -72,56 +72,57 @@ type Prep = {
 
 let prep: Prep[] = [];
 
-export const TIER_Y = (t: number) => -1.45 + 0.95 * t;
-export const TIER_X = [-0.72, 0, 0.72];
-export const TIER_Z = [-0.31, 0.31];
-export const TIER_SCALE = new THREE.Vector3(1.1, 0.55, 1.1);
-export const CLUSTER_P = new THREE.Vector3(-1.3, 0, 0);
-export const CLUSTER_W = new THREE.Vector3(1.3, 0, 0);
+/* F2 — THE CORE: four rings of six blades, stacked and counter-rotating, lit from within. */
+export const TIER_Y = (t: number) => -1.6 + 1.05 * t;
+const RING_R = [1.5, 1.34, 1.18, 1.02];
+const BLADE_SCALE = 0.82;
+const RING_W = [0.16, -0.12, 0.1, -0.075];
+/* F3 — THE ARMILLARY: two tilted orbits (product, workspace) and three bridges at the heart. */
+const ORBIT_R = 2.0;
+const ORBIT_SCALE = 0.8;
+const ORBIT_P = new THREE.Quaternion().setFromEuler(new THREE.Euler((30 * Math.PI) / 180, 0, (18 * Math.PI) / 180));
+const ORBIT_W = new THREE.Quaternion().setFromEuler(new THREE.Euler((-30 * Math.PI) / 180, 0, (-18 * Math.PI) / 180));
+const ORBIT_SPEED = [0.14, -0.11, 0.3];
+const X = new THREE.Vector3(1, 0, 0);
+const NEG_X = new THREE.Vector3(-1, 0, 0);
+const Z = new THREE.Vector3(0, 0, 1);
+
+/**
+ * Base orientation: cut face → −X (it will face the ring's axis — the light is
+ * INSIDE, the polished black faces outside), then roll about X so the long
+ * axis lies along `along`.
+ */
+function bladeBase(f: FragInfo, along: THREE.Vector3): THREE.Quaternion {
+  const q = new THREE.Quaternion().setFromUnitVectors(f.cutNormal, NEG_X);
+  const la = f.longAxis.clone().applyQuaternion(q);
+  // Project onto the YZ plane and roll it onto `along` (also in YZ).
+  const cur = Math.atan2(la.z, la.y);
+  const want = Math.atan2(along.z, along.y);
+  return new THREE.Quaternion().setFromAxisAngle(X, cur - want).multiply(q);
+}
 
 /** Build the per-fragment constants. Deterministic; call once with getStone().frags. */
 export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3): void {
   const rand = mulberry32(0x5b3df0);
   const maxCrack = Math.max(...frags.map((f) => f.centroid.distanceTo(crackOrigin)));
 
-  // F2: six slots per tier, filled by centroid x so neighbours stay neighbours.
-  const tierSlots = new Map<number, THREE.Vector3>();
+  // F2: each tier's six fragments take ring slots in the order they sat around
+  // the stone, so neighbours in the stone stay neighbours in the ring.
+  const slotOf = new Map<number, number>();
   for (let t = 0; t < 4; t++) {
-    const inTier = frags.filter((f) => f.tier === t).sort((a, b) => a.centroid.x - b.centroid.x || a.centroid.z - b.centroid.z);
-    inTier.forEach((f, k) => {
-      const col = Math.min(2, Math.floor(k / 2));
-      const row = k % 2;
-      tierSlots.set(f.index, new THREE.Vector3(TIER_X[col], TIER_Y(t), TIER_Z[row]));
-    });
+    const inTier = frags.filter((f) => f.tier === t).sort((a, b) => Math.atan2(a.centroid.z, a.centroid.x) - Math.atan2(b.centroid.z, b.centroid.x));
+    inTier.forEach((f, k) => slotOf.set(f.index, k));
   }
 
   // F3: roles. Bridges = the three W fragments nearest the stone's axis.
   const wIdx = frags.filter((f) => f.cluster === "W").sort((a, b) => Math.abs(a.centroid.x) - Math.abs(b.centroid.x));
   const bridges = new Set(wIdx.slice(0, 3).map((f) => f.index));
-  // Poisson-disk nodes in each cluster's ellipsoid (1.0, 0.8, 0.8).
-  const placed: THREE.Vector3[] = [];
-  const place = (center: THREE.Vector3, r: [number, number, number]) => {
-    let best = new THREE.Vector3();
-    let bestD = -1;
-    for (let k = 0; k < 60; k++) {
-      let x = 0,
-        y = 0,
-        z = 0;
-      do {
-        x = rand() * 2 - 1;
-        y = rand() * 2 - 1;
-        z = rand() * 2 - 1;
-      } while (x * x + y * y + z * z > 1);
-      const p = new THREE.Vector3(center.x + x * r[0], center.y + y * r[1], center.z + z * r[2]);
-      const d = placed.length ? Math.min(...placed.map((q) => q.distanceTo(p))) : 9;
-      if (d > bestD) {
-        bestD = d;
-        best = p;
-      }
-    }
-    placed.push(best);
-    return best;
-  };
+  const roleOf = (f: FragInfo): 0 | 1 | 2 => (bridges.has(f.index) ? 2 : f.cluster === "P" ? 0 : 1);
+  const orbitIdx = new Map<number, [number, number]>();
+  for (const role of [0, 1, 2] as const) {
+    const members = frags.filter((f) => roleOf(f) === role).sort((a, b) => a.centroid.y - b.centroid.y);
+    members.forEach((f, k) => orbitIdx.set(f.index, [k, members.length]));
+  }
 
   prep = frags.map((f) => {
     const axis = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize();
@@ -130,33 +131,16 @@ export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3)
     if (f.piece === "crown") burst.y += 0.6;
     if (f.piece === "bladeL") burst.x -= 0.5;
     if (f.piece === "bladeR") burst.x += 0.5;
-
-    // Floor plate: cut face → +Y, then the long axis along X.
-    const up = new THREE.Quaternion().setFromUnitVectors(f.cutNormal, Y);
-    const la = f.longAxis.clone().applyQuaternion(up);
-    const yaw = new THREE.Quaternion().setFromAxisAngle(Y, -Math.atan2(-la.z, la.x));
-    const tierQuat = yaw.multiply(up);
-
-    const role: 0 | 1 | 2 = bridges.has(f.index) ? 2 : f.cluster === "P" ? 0 : 1;
-    const nodePos =
-      role === 2
-        ? place(new THREE.Vector3(0, (rand() - 0.5) * 0.6, (rand() - 0.5) * 0.4), [0.25, 0.35, 0.3])
-        : place(role === 0 ? CLUSTER_P : CLUSTER_W, [1.0, 0.8, 0.8]);
-    // Cut faces point outward from the cluster centre, so the lit faces read.
-    const centre = role === 0 ? CLUSTER_P : role === 1 ? CLUSTER_W : new THREE.Vector3();
-    const outDir = nodePos.clone().sub(centre);
-    if (outDir.lengthSq() < 1e-4) outDir.set(0, 1, 0);
-    const nodeQuat = new THREE.Quaternion().setFromUnitVectors(f.cutNormal, outDir.normalize());
-
+    const [orbitK, orbitN] = orbitIdx.get(f.index) ?? [0, 1];
     return {
       burst,
       spin,
-      tierPos: tierSlots.get(f.index) ?? new THREE.Vector3(),
-      tierQuat,
-      nodePos,
-      nodeQuat,
-      tumbleAxis: new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize(),
-      role,
+      ringSlot: slotOf.get(f.index) ?? 0,
+      bladeQ: bladeBase(f, Y),
+      role: roleOf(f),
+      orbitK,
+      orbitN,
+      orbitQ: bladeBase(f, Z),
       crackK: f.centroid.distanceTo(crackOrigin) / maxCrack,
       rand: rand(),
     };
@@ -189,17 +173,34 @@ export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Po
       return;
     }
     case "F2": {
-      out.pos.copy(homeA).add(p.tierPos);
-      if (f.tier === ctx.focusTier) out.pos.x += 0.15 * ctx.focusSlide;
-      out.quat.copy(p.tierQuat);
-      out.scale.copy(TIER_SCALE);
+      // A ring of blades, cut faces out, turning; the focused ring opens out.
+      const t = f.tier;
+      const focus = t === ctx.focusTier ? ctx.focusSlide : 0;
+      const th = (p.ringSlot / 6) * Math.PI * 2 + t * 0.52 + RING_W[t] * ctx.time;
+      const R = RING_R[t] + 0.22 * focus;
+      out.pos.set(homeA.x + R * Math.cos(th), homeA.y + TIER_Y(t) + 0.06 * focus, homeA.z + R * Math.sin(th));
+      _q.setFromAxisAngle(Y, -th);
+      out.quat.copy(_q).multiply(p.bladeQ);
+      out.scale.setScalar(BLADE_SCALE);
       return;
     }
     case "F3": {
-      out.pos.copy(homeA).add(p.nodePos);
-      _q.setFromAxisAngle(p.tumbleAxis, ((4 * Math.PI) / 180) * ctx.time + p.rand * 6.283);
-      out.quat.copy(_q).multiply(p.nodeQuat);
-      out.scale.setScalar(1.25);
+      if (p.role === 2) {
+        // The bridges: a small slow triangle at the heart where the orbits cross.
+        const th = (p.orbitK / p.orbitN) * Math.PI * 2 + ORBIT_SPEED[2] * ctx.time;
+        out.pos.set(homeA.x + 0.42 * Math.cos(th), homeA.y + (p.orbitK - 1) * 0.2, homeA.z + 0.42 * Math.sin(th));
+        _q.setFromAxisAngle(Y, -th);
+        out.quat.copy(_q).multiply(p.bladeQ);
+        out.scale.setScalar(ORBIT_SCALE);
+        return;
+      }
+      const ring = p.role === 0 ? ORBIT_P : ORBIT_W;
+      const th = (p.orbitK / p.orbitN) * Math.PI * 2 + ORBIT_SPEED[p.role] * ctx.time;
+      _v.set(ORBIT_R * Math.cos(th), 0, ORBIT_R * Math.sin(th)).applyQuaternion(ring);
+      out.pos.copy(homeA).add(_v);
+      _q.setFromAxisAngle(Y, -th);
+      out.quat.copy(ring).multiply(_q).multiply(p.orbitQ);
+      out.scale.setScalar(ORBIT_SCALE);
       return;
     }
     case "F4": {

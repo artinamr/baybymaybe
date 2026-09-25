@@ -123,7 +123,10 @@ export function Graph() {
         stain = Math.max(stain, time < tEnd ? 1 : Math.exp(-(time - tEnd) / 1.2));
       }
       for (let k = 0; k < 3; k++) col[k] = INK[k] + (INDIGO[k] - INK[k]) * stain;
-      put(graph.edgeA[e], graph.edgeB[e], 0, g, col, 0.08 + 0.3 * stain, 1.0, 0);
+      // No standing hairlines (they read as a wireframe): an edge exists only
+      // as the afterglow of light that has just travelled along it.
+      if (stain < 0.02) continue;
+      put(graph.edgeA[e], graph.edgeB[e], 0, g, col, 0.5 * stain, 1.4, 0);
     }
 
     // Walkers: a bright head and a fading tail, carried onto the previous edge.

@@ -141,19 +141,6 @@ function SpecimenCard() {
   );
 }
 
-function LeaderLines() {
-  return (
-    <svg id="leaders" aria-hidden data-on="0">
-      {[0, 1, 2, 3].map((i) => (
-        <g key={i}>
-          <path data-leader={i} d="M0 0" />
-          <circle data-leader-dot={i} r="4" cx="-10" cy="-10" />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <div className="menu-sheet" data-open={open || undefined} aria-hidden={!open}>
@@ -188,7 +175,6 @@ export function Chrome() {
       <Nav onMenu={() => setMenu(true)} />
       <ChapterIndex />
       <SpecimenCard />
-      <LeaderLines />
       <MobileMenu open={menu} onClose={() => setMenu(false)} />
       <div className="grain" aria-hidden />
     </>

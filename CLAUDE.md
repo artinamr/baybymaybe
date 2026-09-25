@@ -62,6 +62,26 @@ frame, veins waking) → settle into ch01. ch01 → ch02 dives INTO the burst so
 fragments fly past the lens (fov 46), then pulls out to the floors. The stone
 and camera always turn the same way relative to each other.
 
+## Motion system (2026-09-26: "not smooth, not premium … like a wireframe")
+
+- **No stop-and-go.** Camera keys are NOT eased one by one (that stopped the
+  camera dead at every key). The camera is one Hermite spline through the
+  keys (`lib/choreo.ts`, C1, holds only where a channel repeats), the
+  corridor is one continuous path, and CameraRig damps with ω 3.2 (heavy).
+- **Weight.** The Director runs its own damped scroll clock (ω 4.5 on top of
+  Lenis), and every fragment follows its target on its own critically damped
+  spring (ω 3.4–6), with a gentle float + rotational drift while suspended.
+  The intact stone (F0/F5/F6 at rest) is blended back to RIGID — it must
+  never wobble apart. `&freeze=1` snaps everything for screenshots.
+- **Sculpture, not diagram.** Rejected as "wireframe": the ch02 grid lines,
+  leader lines, flat floor plates and standing graph hairlines. ch02 is now
+  a tower of four counter-rotating rings of blades; ch03 an armillary of two
+  tilted orbits + three bridges; light between shards exists only as a
+  fading trail. Cut faces point INWARD (black glass outside, light within).
+- **Type moves with the stone:** reveals are 1.3–1.4 s expo-out with a
+  blur-to-sharp focus pull and 110 ms stagger; exits are quicker and upward.
+- The chapter card is a hero-only beat; it bows out once you scroll.
+
 ## Typography (after the "texts are terrible" note)
 
 - **Display: Bodoni Moda** (`--font-bodoni`, opsz axis) for the hero line, every

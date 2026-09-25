@@ -25,8 +25,6 @@ type Key = {
   dist: number;
   fov: number;
   pp: [number, number];
-  /** Ease INTO this key from the previous one. */
-  ease?: (t: number) => number;
 };
 
 /** Per-fragment blend plan the Director executes. */
@@ -58,13 +56,21 @@ export const plan = {
 };
 
 const HOME_B_Z = -52;
-const CORRIDOR = { z0: 4.0, z1: -41, y0: 1.3, y1: 0.4, S0: 8.2, S1: 10.1 };
+const CORRIDOR = { S0: 7.2, S1: 10.6, walkIn: 8.2, walkOut: 10.1, z0: 4.0, z1: -41, y0: 1.3, y1: 0.4 };
 const STATIONS_Z = [-14, -22, -30, -38];
 
 function heightOf(k: { dist: number; fov: number }) {
   return 2 * k.dist * Math.tan((k.fov * DEG) / 2);
 }
 
+export const smoother = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
+
+/**
+ * Camera keys. They are NOT eased one by one: the camera runs on one
+ * continuous Hermite spline through them, so it never stops at a key while
+ * you scroll — velocity carries through every beat (the "single shot" feel).
+ * 7.2 → 10.6 is the corridor, a position-driven path between two spline runs.
+ */
 function keys(L: Layout): Key[] {
   const mob = L.mode === "mobile";
   const heroD = L.hero.dist;
@@ -74,46 +80,114 @@ function keys(L: Layout): Key[] {
   const D = (d: number) => (mob ? d / 0.55 : d);
   return [
     { S: 0, pivot: [0, STONE.centerY, 0], az: 0, el: 4, dist: heroD, fov: 30, pp: heroPP },
-    // LOOK UP — the camera cranes below the girdle and looks up at the
-    // monument while the lens widens: the stone becomes architecture.
-    { S: 0.5, pivot: [0, -0.3, 0], az: -40, el: -9, dist: heroD * 0.8, fov: 36, pp: mob ? [0.5, 0.36] : [0.6, 0.5], ease: easeInOutSine },
-    // THE PASS — close, wide lens, the stone filling the frame as the camera
-    // swings round it; highlights race across the facets.
-    { S: 1.0, pivot: [0, 0.02, 0], az: -110, el: 3, dist: heroD * 0.5, fov: 44, pp: [0.5, 0.5], ease: easeInOutSine },
-    { S: 1.7, pivot: [mob ? 0 : 1.8, STONE.centerY, 0], az: -12, el: 8, dist: D(8.0), fov: 30, pp: pp(0.62, 0.5), ease: easeInOutCubic },
-    // INTO THE BURST — as the stone breaks, the camera dives into it and the
-    // fragments fly past the lens, then it pulls out to the four floors.
-    { S: 2.45, pivot: [0, -0.3, 0], az: 12, el: 4, dist: D(2.7), fov: 46, pp: [0.5, 0.5], ease: easeInOutSine },
-    { S: 3.4, pivot: [0, -0.1, 0], az: 24, el: 13, dist: D(11), fov: 28, pp: pp(0.66, 0.52), ease: easeInOutCubic },
-    { S: 4.6, pivot: [0, -0.1, 0], az: 40, el: 22, dist: D(11), fov: 28, pp: pp(0.66, 0.5), ease: easeInOutSine },
-    { S: 5.9, pivot: [0, 0, 0], az: -70, el: 7, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5), ease: easeInOutCubic },
-    { S: 7.2, pivot: [0, 0, 0], az: 0, el: 7, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5), ease: easeInOutSine },
-    // 7.2 → 10.6 is the corridor (position-driven), handled below.
-    { S: 10.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 10, el: 9, dist: D(7.7), fov: 30, pp: pp(0.66, 0.52), ease: easeInOutSine },
-    { S: 11.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 15, dist: D(7.3), fov: 30, pp: pp(0.66, 0.52), ease: easeInOutSine },
-    { S: 12.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 20, dist: D(L.fit(0.62, 30)), fov: 30, pp: pp(0.66, 0.5), ease: easeInOutSine },
-    { S: 12.8, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5), ease: easeInOutSine },
+    // LOOK UP — the camera cranes below the girdle and looks up at the monument.
+    { S: 0.5, pivot: [0, -0.3, 0], az: -40, el: -9, dist: heroD * 0.8, fov: 36, pp: mob ? [0.5, 0.36] : [0.6, 0.5] },
+    // THE PASS — close, wide lens, the stone filling the frame.
+    { S: 1.0, pivot: [0, 0.02, 0], az: -108, el: 3, dist: heroD * 0.5, fov: 44, pp: [0.5, 0.5] },
+    { S: 1.7, pivot: [mob ? 0 : 1.8, STONE.centerY, 0], az: -12, el: 8, dist: D(8.0), fov: 30, pp: pp(0.62, 0.5) },
+    // INTO THE BURST — the fragments fly past the lens.
+    { S: 2.45, pivot: [0, -0.3, 0], az: 12, el: 4, dist: D(2.7), fov: 46, pp: [0.5, 0.5] },
+    // THE CORE — a slow orbit round the turning tower of rings.
+    { S: 3.4, pivot: [0, -0.05, 0], az: 30, el: 12, dist: D(10.2), fov: 30, pp: pp(0.66, 0.5) },
+    { S: 4.6, pivot: [0, -0.05, 0], az: 78, el: 20, dist: D(10.6), fov: 30, pp: pp(0.66, 0.5) },
+    // THE ARMILLARY — swing round to face it from the left of frame.
+    { S: 5.9, pivot: [0, 0, 0], az: -35, el: 9, dist: D(10.2), fov: 30, pp: pp(0.33, 0.5) },
+    { S: 7.2, pivot: [0, 0, 0], az: 0, el: 7, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5) },
+    { S: 10.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 10, el: 9, dist: D(7.7), fov: 30, pp: pp(0.66, 0.52) },
+    { S: 11.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 15, dist: D(7.3), fov: 30, pp: pp(0.66, 0.52) },
+    { S: 12.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 20, dist: D(L.fit(0.62, 30)), fov: 30, pp: pp(0.66, 0.5) },
+    { S: 12.8, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
     { S: 12.96, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
-    { S: 13.15, pivot: [0, -0.741, HOME_B_Z], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46), ease: easeInOutSine },
+    { S: 13.15, pivot: [0, -0.741, HOME_B_Z], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
     { S: 13.5, pivot: [0, -0.741, HOME_B_Z], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
-    { S: 13.8, pivot: [0, -0.741, HOME_B_Z], az: 90, el: 32.91, dist: D(17.9), fov: 16, pp: mob ? [0.5, 0.36] : [0.71, 0.395], ease: easeInOutCubic },
+    { S: 13.8, pivot: [0, -0.741, HOME_B_Z], az: 90, el: 32.91, dist: D(17.9), fov: 16, pp: mob ? [0.5, 0.36] : [0.71, 0.395] },
   ];
 }
 
-let cachedFor = "";
-let cachedKeys: Key[] = [];
+/* ------------------------------------------------------------------------ */
+/* Hermite spline over the key channels                                      */
+/* ------------------------------------------------------------------------ */
 
-function keysFor(L: Layout): Key[] {
-  const id = `${L.vw}x${L.vh}:${L.mode}:${L.hero.dist.toFixed(3)}`;
-  if (id !== cachedFor) {
-    cachedFor = id;
-    cachedKeys = keys(L);
+/** Channels: pivot xyz, az, el, log visible height, fov, pp x/y. */
+const NCH = 9;
+type Spline = { S: number[]; v: number[][]; m: number[][] };
+
+function toChannels(k: Key): number[] {
+  return [k.pivot[0], k.pivot[1], k.pivot[2], k.az, k.el, Math.log(heightOf(k)), k.fov, k.pp[0], k.pp[1]];
+}
+
+/**
+ * Tangents by finite differences over NON-uniform key spacing, so the path is
+ * C1 through every key. A key equal to a neighbour on a channel is a HOLD —
+ * zero tangent there, so the finale's pauses never overshoot.
+ */
+function buildSpline(K: Key[]): Spline {
+  const S = K.map((k) => k.S);
+  const v = K.map(toChannels);
+  const m = v.map((row, j) =>
+    row.map((x, c) => {
+      const prev = j > 0 ? v[j - 1][c] : x;
+      const next = j < v.length - 1 ? v[j + 1][c] : x;
+      if (Math.abs(x - prev) < 1e-6 || Math.abs(x - next) < 1e-6) return 0;
+      const s0 = j > 0 ? S[j - 1] : S[j];
+      const s1 = j < S.length - 1 ? S[j + 1] : S[j];
+      return (next - prev) / Math.max(1e-4, s1 - s0);
+    })
+  );
+  return { S, v, m };
+}
+
+const _row = new Array<number>(NCH).fill(0);
+
+function sampleSpline(sp: Spline, S: number, out: number[]): number[] {
+  const n = sp.S.length;
+  if (S <= sp.S[0]) {
+    for (let c = 0; c < NCH; c++) out[c] = sp.v[0][c];
+    return out;
   }
-  return cachedKeys;
+  if (S >= sp.S[n - 1]) {
+    for (let c = 0; c < NCH; c++) out[c] = sp.v[n - 1][c];
+    return out;
+  }
+  let i = 0;
+  while (i < n - 2 && S >= sp.S[i + 1]) i++;
+  const d = sp.S[i + 1] - sp.S[i];
+  const t = (S - sp.S[i]) / d;
+  const t2 = t * t;
+  const t3 = t2 * t;
+  const h00 = 2 * t3 - 3 * t2 + 1;
+  const h10 = t3 - 2 * t2 + t;
+  const h01 = -2 * t3 + 3 * t2;
+  const h11 = t3 - t2;
+  for (let c = 0; c < NCH; c++) {
+    out[c] = h00 * sp.v[i][c] + h10 * d * sp.m[i][c] + h01 * sp.v[i + 1][c] + h11 * d * sp.m[i + 1][c];
+  }
+  return out;
+}
+
+let cachedFor = "";
+let splineA: Spline | null = null; // 0 → 7.2
+let splineB: Spline | null = null; // 10.6 → end
+let keyAt72: Key | null = null;
+let keyAt106: Key | null = null;
+
+function splinesFor(L: Layout) {
+  const id = `${L.vw}x${L.vh}:${L.mode}:${L.hero.dist.toFixed(3)}`;
+  if (id !== cachedFor || !splineA || !splineB || !keyAt72 || !keyAt106) {
+    cachedFor = id;
+    const K = keys(L);
+    splineA = buildSpline(K.filter((k) => k.S <= CORRIDOR.S0));
+    splineB = buildSpline(K.filter((k) => k.S >= CORRIDOR.S1));
+    keyAt72 = K.find((k) => k.S === CORRIDOR.S0)!;
+    keyAt106 = K.find((k) => k.S === CORRIDOR.S1)!;
+  }
+  return { A: splineA, B: splineB, k72: keyAt72, k106: keyAt106 };
 }
 
 const _a = new THREE.Vector3();
 const _b = new THREE.Vector3();
+const _in = new THREE.Vector3();
+const _out = new THREE.Vector3();
 
 function orbitPos(pivot: THREE.Vector3, az: number, el: number, dist: number, out: THREE.Vector3) {
   return out.set(
@@ -123,114 +197,112 @@ function orbitPos(pivot: THREE.Vector3, az: number, el: number, dist: number, ou
   );
 }
 
-/** Camera z along the ch04 corridor, keyed so each station stands beside its row. */
-function corridorZ(S: number): number {
-  const rs = measured.rowS;
-  const pts: [number, number][] = [[CORRIDOR.S0, CORRIDOR.z0]];
-  if (rs.length === 4 && rs.every((v, i) => i === 0 || v > rs[i - 1])) {
-    rs.forEach((r, i) => pts.push([THREE.MathUtils.clamp(r, CORRIDOR.S0 + 0.05, CORRIDOR.S1 - 0.05), STATIONS_Z[i] + 7]));
-  } else {
-    STATIONS_Z.forEach((z, i) => pts.push([lerp(CORRIDOR.S0, CORRIDOR.S1, (i + 1) / 5), z + 7]));
-  }
-  pts.push([CORRIDOR.S1, CORRIDOR.z1]);
-  if (S <= pts[0][0]) return pts[0][1];
-  for (let i = 0; i < pts.length - 1; i++) {
-    if (S <= pts[i + 1][0]) return lerp(pts[i][1], pts[i + 1][1], easeInOutSine((S - pts[i][0]) / Math.max(1e-4, pts[i + 1][0] - pts[i][0])));
-  }
-  return pts[pts.length - 1][1];
-}
-
-function corridor(S: number, pos: THREE.Vector3, target: THREE.Vector3) {
-  const z = corridorZ(S);
-  const k = clamp01((z - CORRIDOR.z0) / (CORRIDOR.z1 - CORRIDOR.z0));
-  pos.set(0.25 * Math.sin(0.18 * z), lerp(CORRIDOR.y0, CORRIDOR.y1, k), z);
-  target.set(pos.x + 0.8, pos.y - 0.3, pos.z - 10);
-}
-
-function writeOrbit(out: SceneState, k: { pivot: number[]; az: number; el: number; dist: number; fov: number; pp: number[] }) {
+function writeOrbitRow(out: SceneState, r: number[]) {
   const c = out.cam;
   c.path = false;
-  c.pivot.set(k.pivot[0], k.pivot[1], k.pivot[2]);
-  c.az = k.az * DEG;
-  c.el = k.el * DEG;
-  c.dist = k.dist;
-  c.fov = k.fov;
-  c.ppx = k.pp[0];
-  c.ppy = k.pp[1];
+  c.pivot.set(r[0], r[1], r[2]);
+  c.az = r[3] * DEG;
+  c.el = r[4] * DEG;
+  c.fov = r[6];
+  c.dist = Math.exp(r[5]) / (2 * Math.tan((c.fov * DEG) / 2));
+  c.ppx = r[7];
+  c.ppy = r[8];
+  c.roll = 0;
   orbitPos(c.pivot, c.az, c.el, c.dist, c.pos);
   c.target.copy(c.pivot);
 }
 
-const tmpKey = { pivot: [0, 0, 0], az: 0, el: 0, dist: 0, fov: 30, pp: [0.5, 0.5] };
+/** Monotone C1 interpolation through (x, y) points — no overshoot, no stops. */
+function hermite1(xs: number[], ys: number[], x: number): number {
+  const n = xs.length;
+  if (x <= xs[0]) return ys[0];
+  if (x >= xs[n - 1]) return ys[n - 1];
+  let i = 0;
+  while (i < n - 2 && x >= xs[i + 1]) i++;
+  const slope = (j: number) => {
+    if (j <= 0 || j >= n - 1) return (ys[Math.min(n - 1, j + 1)] - ys[Math.max(0, j - 1)]) / (xs[Math.min(n - 1, j + 1)] - xs[Math.max(0, j - 1)]);
+    const a = (ys[j] - ys[j - 1]) / (xs[j] - xs[j - 1]);
+    const b = (ys[j + 1] - ys[j]) / (xs[j + 1] - xs[j]);
+    return a * b <= 0 ? 0 : (2 * a * b) / (a + b); // harmonic mean keeps it monotone
+  };
+  const d = xs[i + 1] - xs[i];
+  const t = (x - xs[i]) / d;
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return (2 * t3 - 3 * t2 + 1) * ys[i] + (t3 - 2 * t2 + t) * d * slope(i) + (-2 * t3 + 3 * t2) * ys[i + 1] + (t3 - t2) * d * slope(i + 1);
+}
+
+const corrS: number[] = [];
+const corrZ: number[] = [];
+
+/** Camera z along the corridor, keyed so each station stands beside its row. */
+function corridorZ(S: number, zIn: number, zOut: number): number {
+  corrS.length = 0;
+  corrZ.length = 0;
+  corrS.push(CORRIDOR.S0, CORRIDOR.walkIn);
+  corrZ.push(zIn, CORRIDOR.z0);
+  const rs = measured.rowS;
+  if (rs.length === 4 && rs.every((v, i) => i === 0 || v > rs[i - 1])) {
+    rs.forEach((r, i) => {
+      corrS.push(THREE.MathUtils.clamp(r, CORRIDOR.walkIn + 0.05 * (i + 1), CORRIDOR.walkOut - 0.05 * (4 - i)));
+      corrZ.push(STATIONS_Z[i] + 7);
+    });
+  } else {
+    STATIONS_Z.forEach((z, i) => {
+      corrS.push(lerp(CORRIDOR.walkIn, CORRIDOR.walkOut, (i + 1) / 5));
+      corrZ.push(z + 7);
+    });
+  }
+  corrS.push(CORRIDOR.walkOut, CORRIDOR.S1);
+  corrZ.push(CORRIDOR.z1, zOut);
+  return hermite1(corrS, corrZ, S);
+}
+
+/**
+ * The corridor as ONE continuous move: from the armillary framing, walk into
+ * the field, pass the four station stones, arrive at the reforming stone —
+ * position and aim blend smoothly into the orbit framings at both ends.
+ */
+function evalCorridor(S: number, L: Layout, out: SceneState, k72: Key, k106: Key) {
+  const c = out.cam;
+  orbitPos(_a.set(...k72.pivot), k72.az * DEG, k72.el * DEG, k72.dist, _in);
+  orbitPos(_b.set(...k106.pivot), k106.az * DEG, k106.el * DEG, k106.dist, _out);
+
+  const z = corridorZ(S, _in.z, _out.z);
+  const k = clamp01((z - CORRIDOR.z0) / (CORRIDOR.z1 - CORRIDOR.z0));
+  const wIn = smoother(range(S, CORRIDOR.S0, CORRIDOR.walkIn));
+  const wOut = smoother(range(S, CORRIDOR.walkOut, CORRIDOR.S1));
+
+  const walkX = 0.25 * Math.sin(0.18 * z);
+  const walkY = lerp(CORRIDOR.y0, CORRIDOR.y1, k);
+  const x = lerp(lerp(_in.x, walkX, wIn), _out.x, wOut);
+  const y = lerp(lerp(_in.y, walkY, wIn), _out.y, wOut);
+  c.pos.set(x, y, z);
+
+  // Aim: the armillary's pivot → down the aisle → the reforming stone.
+  _a.set(...k72.pivot);
+  _b.set(x + 0.8, y - 0.3, z - 10);
+  c.target.lerpVectors(_a, _b, wIn);
+  _b.set(...k106.pivot);
+  c.target.lerp(_b, wOut);
+
+  const walkPP: [number, number] = L.mode === "mobile" ? [0.5, 0.34] : [0.7, 0.48];
+  c.fov = lerp(lerp(k72.fov, 34, wIn), k106.fov, wOut);
+  c.ppx = lerp(lerp(k72.pp[0], walkPP[0], wIn), k106.pp[0], wOut);
+  c.ppy = lerp(lerp(k72.pp[1], walkPP[1], wIn), k106.pp[1], wOut);
+  c.path = true;
+  c.roll = 0;
+  c.pivot.copy(c.target);
+  c.dist = c.pos.distanceTo(c.target);
+}
 
 function evalCamera(S: number, L: Layout, out: SceneState) {
-  const K = keysFor(L);
-  const c = out.cam;
-  const k72 = K.find((k) => k.S === 7.2)!;
-  const k106 = K.find((k) => k.S === 10.6)!;
-
-  // The corridor: orbit → path (7.2–8.2), path (8.2–10.1), path → orbit (10.1–10.6).
-  if (S > 7.2 && S < 10.6) {
-    const fovPath = 34;
-    const ppPath: [number, number] = L.mode === "mobile" ? [0.5, 0.34] : [0.7, 0.48];
-    c.path = true;
-    c.roll = 0;
-    if (S < 8.2) {
-      const t = easeInOutSine(range(S, 7.2, 8.2));
-      writeOrbit(out, k72);
-      _a.copy(c.pos);
-      _b.copy(c.target);
-      corridor(8.2, c.pos, c.target);
-      c.pos.lerpVectors(_a, c.pos, t);
-      c.target.lerpVectors(_b, c.target, t);
-      c.fov = lerp(k72.fov, fovPath, t);
-      c.ppx = lerp(k72.pp[0], ppPath[0], t);
-      c.ppy = lerp(k72.pp[1], ppPath[1], t);
-    } else if (S <= 10.1) {
-      corridor(S, c.pos, c.target);
-      c.fov = fovPath;
-      c.ppx = ppPath[0];
-      c.ppy = ppPath[1];
-    } else {
-      const t = easeInOutSine(range(S, 10.1, 10.6));
-      corridor(10.1, _a, _b);
-      writeOrbit(out, k106);
-      c.pos.lerpVectors(_a, c.pos, t);
-      c.target.lerpVectors(_b, c.target, t);
-      c.fov = lerp(fovPath, k106.fov, t);
-      c.ppx = lerp(ppPath[0], k106.pp[0], t);
-      c.ppy = lerp(ppPath[1], k106.pp[1], t);
-    }
-    c.path = true;
-    c.pivot.copy(c.target);
-    c.dist = c.pos.distanceTo(c.target);
+  const sp = splinesFor(L);
+  if (S > CORRIDOR.S0 && S < CORRIDOR.S1) {
+    evalCorridor(S, L, out, sp.k72, sp.k106);
     return;
   }
-
-  let i = 0;
-  while (i < K.length - 1 && S >= K[i + 1].S) i++;
-  const a = K[i];
-  const b = K[Math.min(i + 1, K.length - 1)];
-  if (a === b || S <= a.S) {
-    writeOrbit(out, a);
-    c.roll = 0;
-    return;
-  }
-  const raw = clamp01((S - a.S) / (b.S - a.S));
-  const t = (b.ease ?? easeInOutSine)(raw);
-  const fov = lerp(a.fov, b.fov, t);
-  const h = Math.exp(lerp(Math.log(heightOf(a)), Math.log(heightOf(b)), t));
-  tmpKey.pivot[0] = lerp(a.pivot[0], b.pivot[0], t);
-  tmpKey.pivot[1] = lerp(a.pivot[1], b.pivot[1], t);
-  tmpKey.pivot[2] = lerp(a.pivot[2], b.pivot[2], t);
-  tmpKey.az = lerp(a.az, b.az, t);
-  tmpKey.el = lerp(a.el, b.el, t);
-  tmpKey.fov = fov;
-  tmpKey.dist = h / (2 * Math.tan((fov * DEG) / 2));
-  tmpKey.pp[0] = lerp(a.pp[0], b.pp[0], t);
-  tmpKey.pp[1] = lerp(a.pp[1], b.pp[1], t);
-  writeOrbit(out, tmpKey);
-  c.roll = 0;
+  writeOrbitRow(out, sampleSpline(S <= CORRIDOR.S0 ? sp.A : sp.B, S, _row));
 }
 
 /**
@@ -246,8 +318,8 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   plan.lift = 0.32 * Math.sin(Math.PI * easeInOutSine(range(S, 0.1, 1.8)));
   out.stone.home.set(0, S < 7.7 ? plan.lift : 0, S < 7.7 ? 0 : HOME_B_Z);
   out.stone.visible = true;
-  let yaw = 20;
-  if (S >= 1.0) yaw = lerp(20, 200, easeInOutSine(range(S, 1.0, 1.7)));
+  // One continuous half-turn across the whole hero → ch01 pass (never pausing).
+  let yaw = 20 + 180 * smoother(range(S, 0.05, 1.75));
   if (S >= 7.7) yaw = lerp(45, 90, easeInOutSine(range(S, 10.6, 11.6)));
   plan.yaw = yaw * DEG;
   plan.pitch = 0;

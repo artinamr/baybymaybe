@@ -23,13 +23,6 @@ export function Order() {
     <Section
       id="order"
       labelledBy="order-title"
-      back={
-        <div className="grid12" aria-hidden>
-          {Array.from({ length: 11 }, (_, i) => (
-            <span key={i} style={{ "--i": i } as CSSProperties} />
-          ))}
-        </div>
-      }
     >
       <div className="col-left">
         <Marker n="02">Digital infrastructure</Marker>

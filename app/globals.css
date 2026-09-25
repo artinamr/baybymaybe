@@ -289,41 +289,59 @@ html[data-intro-skip] .intro-mask > span {
   overflow: clip;
   overflow-clip-margin: 0.14em;
 }
+/* Type moves with the same weight as the stone: long expo-out rises, a soft
+   focus-pull from a slight blur, a generous stagger — and a quiet, quicker
+   exit upward. */
 .rv-in {
   display: inline-block;
   transform: none;
-  transition: transform 900ms var(--ease-line) calc(var(--i, 0) * 90ms), opacity 600ms ease calc(var(--i, 0) * 90ms);
+  filter: blur(0);
+  transition:
+    transform 1400ms var(--ease-expo) calc(var(--i, 0) * 110ms),
+    opacity 900ms ease calc(var(--i, 0) * 110ms),
+    filter 1200ms var(--ease-expo) calc(var(--i, 0) * 110ms);
 }
 .rv-fade {
-  transition: transform 800ms var(--ease-expo) calc(var(--i, 0) * 90ms), opacity 700ms ease calc(var(--i, 0) * 90ms);
+  filter: blur(0);
+  transition:
+    transform 1300ms var(--ease-expo) calc(var(--i, 0) * 110ms),
+    opacity 1000ms ease calc(var(--i, 0) * 110ms),
+    filter 1100ms var(--ease-expo) calc(var(--i, 0) * 110ms);
 }
 .rv-wipe {
   clip-path: inset(0 0 0 0);
-  transition: clip-path 1100ms var(--ease-expo) 60ms, transform 1100ms var(--ease-expo) 60ms;
+  transition: clip-path 1500ms var(--ease-expo) 80ms, transform 1500ms var(--ease-expo) 80ms, filter 1300ms var(--ease-expo) 80ms;
 }
 /* 140%: the Didone's tall line box plus the mask's clip margin would let the
    tops of waiting glyphs peek out at a smaller offset. */
 .chapter[data-state="before"] .rv-in {
-  transform: translateY(140%) skewY(3deg);
+  transform: translateY(140%) skewY(4deg);
+  filter: blur(6px);
 }
 .chapter[data-state="before"] .rv-fade {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(28px);
+  filter: blur(6px);
 }
 .chapter[data-state="before"] .rv-wipe {
   clip-path: inset(0 0 100% 0);
-  transform: translateY(24px);
+  transform: translateY(32px);
+  filter: blur(4px);
 }
 .chapter[data-state="after"] .rv-in,
 .chapter[data-state="after"] .rv-fade,
 .chapter[data-state="after"] .rv-wipe {
   opacity: 0;
+  filter: blur(6px);
   transform: translateY(-30%);
-  transition: transform 450ms ease-in, opacity 450ms ease-in;
+  transition:
+    transform 700ms cubic-bezier(0.7, 0, 0.84, 0),
+    opacity 600ms ease-in,
+    filter 700ms ease-in;
 }
 .chapter[data-state="after"] .rv-wipe,
 .chapter[data-state="after"] .rv-fade {
-  transform: translateY(-24px);
+  transform: translateY(-28px);
 }
 
 /* ---- shared type ----
@@ -582,21 +600,6 @@ html[data-intro-skip] .intro-mask > span {
   right: calc(var(--g) + 40px);
 }
 
-.grid12 {
-  position: absolute;
-  inset: 0 var(--g);
-}
-.grid12 > span {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  left: calc((var(--i) + 1) * 100% / 12);
-  background: rgba(10, 11, 16, 0.06);
-  transform-origin: top;
-  transform: scaleY(calc(clamp(0, (var(--s, 0) - var(--i) * 0.012) * 4, 1) * clamp(0, (1.65 - var(--s, 0)) * 5, 1)));
-}
-
 .layers {
   display: flex;
   flex-direction: column;
@@ -636,36 +639,6 @@ html[data-intro-skip] .intro-mask > span {
 }
 .layer[data-focus="1"] .layer-n {
   color: var(--indigo);
-}
-
-#leaders {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 5;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 400ms ease;
-}
-#leaders[data-on="1"] {
-  opacity: 1;
-}
-#leaders path {
-  fill: none;
-  stroke: rgba(10, 11, 16, 0.3);
-  stroke-width: 1;
-  transition: stroke 300ms ease;
-}
-#leaders circle {
-  fill: rgba(10, 11, 16, 0.55);
-  transition: fill 300ms ease;
-}
-#leaders [data-focus="1"] {
-  stroke: var(--indigo);
-}
-#leaders circle[data-focus="1"] {
-  fill: var(--indigo);
 }
 
 /* ==========================================================================
@@ -1356,7 +1329,10 @@ a:focus-visible .swap-b {
   border: 1px solid rgba(10, 11, 16, 0.08);
   transition: opacity 400ms ease, transform 500ms var(--ease-expo);
 }
-html[data-clip] .specimen {
+/* The card belongs to the hero's opening; once the film starts moving it
+   bows out so every chapter frame is just type and the stone. */
+html[data-clip] .specimen,
+html[data-scrolled] .specimen {
   opacity: 0;
   transform: translateY(20px);
   pointer-events: none;
@@ -1671,8 +1647,7 @@ html[data-nowebgl] .pot-fill {
   .f-col {
     grid-column: span 1;
   }
-  .specimen,
-  #leaders {
+  .specimen {
     display: none;
   }
 }
