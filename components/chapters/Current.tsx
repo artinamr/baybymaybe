@@ -45,7 +45,7 @@ export function Current() {
           <Line i={0}>AI that does</Line> <Line i={1}>real work.</Line>
         </h2>
         <p className="body-l rv-fade" style={{ "--i": 2 } as CSSProperties}>
-          Not a chatbot bolted to the corner. We build intelligence into your product and into the way your team works.
+          Intelligence, made useful. Connected to your product, your people and the way your business works.
         </p>
         <div className="beats rv-fade" style={{ "--i": 3 } as CSSProperties}>
           {BLOCKS.map((b, k) => (

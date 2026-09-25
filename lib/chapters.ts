@@ -84,7 +84,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Method",
     vh: 220,
     sticky: true,
-    jumpS: 10.6,
+    jumpS: 11.0,
     specimen: { name: "Method", line: "Discover, architect, build, automate." },
   },
   {

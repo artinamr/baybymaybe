@@ -38,6 +38,7 @@ export function Stone() {
     return m;
   }, []);
   const mirror = useRef<THREE.Mesh>(null);
+  const group = useRef<THREE.Group>(null);
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const ndc = useMemo(() => new THREE.Vector2(), []);
   const hits = useMemo<THREE.Intersection[]>(() => [], []);
@@ -52,6 +53,7 @@ export function Stone() {
 
   useFrame(() => {
     syncObsidianUniforms();
+    if (group.current) group.current.visible = sceneState.S < 2.85 || sceneState.S > 10.35;
 
     const m = mirror.current;
     if (m) {
@@ -85,7 +87,7 @@ export function Stone() {
   }, PRIORITY.scene);
 
   return (
-    <group>
+    <group ref={group}>
       <mesh geometry={build.geometry} material={mats.solid} frustumCulled={false} renderOrder={1} />
       <mesh geometry={build.geometry} material={mats.fade} frustumCulled={false} renderOrder={3} />
       <mesh

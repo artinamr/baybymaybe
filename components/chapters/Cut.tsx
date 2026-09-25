@@ -10,8 +10,7 @@ import { Section, Marker } from "./Section";
 function Statement({ inverted = false }: { inverted?: boolean }) {
   return (
     <p className={`statement ${inverted ? "is-inverted" : ""}`} aria-hidden={inverted || undefined}>
-      We build the digital infrastructure your business runs on — and the <span className="accent">intelligence</span> that
-      makes it work harder.
+      Considered design.<br />Powerful engineering.<br />A little more <span className="accent">possibility.</span>
     </p>
   );
 }
@@ -30,8 +29,8 @@ export function Cut() {
           </div>
         </div>
         <p className="cut-body rv-fade" style={{ "--i": 3 } as CSSProperties}>
-          Websites, web platforms and AI automation — designed, engineered and maintained by one team, so nothing gets lost
-          between strategy, design, code and intelligence.
+          From the first impression to the systems behind it. We bring websites, platforms and AI together — designed,
+          built and cared for by one studio.
         </p>
       </div>
     </Section>

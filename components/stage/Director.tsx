@@ -72,7 +72,8 @@ export function Director() {
   useFrame((_, rawDt) => {
     const s = st.current;
     const dt = Math.min(rawDt, 1 / 20);
-    s.time = dev.freeze ? FROZEN_TIME_S : s.time + dt;
+    const motionReduced = typeof window !== "undefined" && document.documentElement.hasAttribute("data-reduced");
+    s.time = dev.freeze ? FROZEN_TIME_S : motionReduced ? 0 : s.time + dt;
     const time = s.time;
     sceneState.frozen = dev.freeze;
     sceneState.time = time;
@@ -114,8 +115,8 @@ export function Director() {
     }
     // Idle yaw + pointer tilt in the hero; a slow breath in the finale.
     const idle = reduced || dev.freeze ? 0 : 18 * DEG * Math.sin((2 * Math.PI * time) / 38);
-    const pYaw = pointer.has ? 4 * DEG * pointer.nx : 0;
-    const pPitch = pointer.has ? 2 * DEG * pointer.ny : 0;
+    const pYaw = pointer.has && !reduced ? 2 * DEG * pointer.nx : 0;
+    const pPitch = pointer.has && !reduced ? 1 * DEG * pointer.ny : 0;
     springTo(s.yawSpring, (idle + pYaw) * heroK * introK, 4.5, dt);
     const pitchIdle = reduced ? 0 : 0.8 * DEG * Math.sin((2 * Math.PI * time) / 51);
     const finaleK = S > 11.6 ? range(S, 11.6, 12.0) * (1 - range(S, 12.6, 12.7)) : 0;
@@ -124,7 +125,7 @@ export function Director() {
     // Look-dev: `?yaw=<deg>` pins the stone's rotation (screenshots per angle).
     if (devYaw !== null) yaw = devYaw * DEG;
     // The mark lock: pointer tilt ≤ ±1.5° so it breathes but never breaks.
-    if (S >= 12.6) yaw += (pointer.has ? 1.5 * DEG * pointer.nx : 0) * (1 - range(S - 12.6, 0.3, 0.5));
+    if (S >= 12.6 && !reduced) yaw += (pointer.has ? 1.5 * DEG * pointer.nx : 0) * (1 - range(S - 12.6, 0.3, 0.5));
     const bob = reduced ? 0 : 0.004 * Math.sin((2 * Math.PI * time) / 9) * heroK;
     euler.set(s.pitchSpring.x, yaw, 0, "YXZ");
     quat.setFromEuler(euler);
@@ -276,6 +277,12 @@ export function Director() {
         P.pos.copy(A.pos);
         P.quat.copy(A.quat);
         P.scale.copy(A.scale);
+      }
+      // The monolith hands off to the solid sculptures and returns for the finale.
+      const presence = S < 3 ? 1 - easeInOutSine(range(S, 2.05, 2.85)) : easeInOutSine(range(S, 10.45, 10.95));
+      if (presence < 1) {
+        P.pos.sub(sceneState.stone.home).multiplyScalar(presence).add(sceneState.stone.home);
+        P.scale.multiplyScalar(Math.max(0.0001, presence));
       }
       poseMatrix(P, M);
 

@@ -34,7 +34,7 @@ export function Order() {
       <div className="col-left">
         <Marker n="02">Digital infrastructure</Marker>
         <h2 id="order-title" className="h2">
-          <Line i={0}>Websites and platforms,</Line> <Line i={1}>built like infrastructure.</Line>
+          <Line i={0}>Beautiful outside.</Line> <Line i={1}>Powerful underneath.</Line>
         </h2>
         <p className="body-l rv-fade" style={{ "--i": 2 } as CSSProperties}>
           Fast, secure and simple to change. We design and engineer the whole stack — from the interface your customers touch

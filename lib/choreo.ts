@@ -76,14 +76,14 @@ function keys(L: Layout): Key[] {
     { S: 0, pivot: [0, STONE.centerY, 0], az: 0, el: 4, dist: heroD, fov: 30, pp: heroPP },
     // LOOK UP — the camera cranes below the girdle and looks up at the
     // monument while the lens widens: the stone becomes architecture.
-    { S: 0.5, pivot: [0, -0.3, 0], az: -40, el: -9, dist: heroD * 0.8, fov: 36, pp: mob ? [0.5, 0.36] : [0.6, 0.5], ease: easeInOutSine },
+    { S: 0.5, pivot: [0, -0.3, 0], az: -8, el: 6, dist: heroD * 0.96, fov: 30, pp: mob ? [0.5, 0.32] : [0.65, 0.5], ease: easeInOutSine },
     // THE PASS — close, wide lens, the stone filling the frame as the camera
     // swings round it; highlights race across the facets.
-    { S: 1.0, pivot: [0, 0.02, 0], az: -110, el: 3, dist: heroD * 0.5, fov: 44, pp: [0.5, 0.5], ease: easeInOutSine },
-    { S: 1.7, pivot: [mob ? 0 : 1.8, STONE.centerY, 0], az: -12, el: 8, dist: D(8.0), fov: 30, pp: pp(0.62, 0.5), ease: easeInOutCubic },
+    { S: 1.0, pivot: [0, STONE.centerY, 0], az: -18, el: 8, dist: D(8.8), fov: 30, pp: pp(0.73, 0.5), ease: easeInOutSine },
+    { S: 1.7, pivot: [0, STONE.centerY, 0], az: -30, el: 10, dist: D(8.8), fov: 30, pp: pp(0.73, 0.5), ease: easeInOutSine },
     // INTO THE BURST — as the stone breaks, the camera dives into it and the
     // fragments fly past the lens, then it pulls out to the four floors.
-    { S: 2.45, pivot: [0, -0.3, 0], az: 12, el: 4, dist: D(2.7), fov: 46, pp: [0.5, 0.5], ease: easeInOutSine },
+    { S: 2.45, pivot: [0, STONE.centerY, 0], az: -40, el: 12, dist: D(8.8), fov: 30, pp: pp(0.72, 0.5), ease: easeInOutSine },
     { S: 3.4, pivot: [0, -0.1, 0], az: 24, el: 13, dist: D(11), fov: 28, pp: pp(0.66, 0.52), ease: easeInOutCubic },
     { S: 4.6, pivot: [0, -0.1, 0], az: 40, el: 22, dist: D(11), fov: 28, pp: pp(0.66, 0.5), ease: easeInOutSine },
     { S: 5.9, pivot: [0, 0, 0], az: -70, el: 7, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5), ease: easeInOutCubic },
@@ -247,7 +247,7 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   out.stone.home.set(0, S < 7.7 ? plan.lift : 0, S < 7.7 ? 0 : HOME_B_Z);
   out.stone.visible = true;
   let yaw = 20;
-  if (S >= 1.0) yaw = lerp(20, 200, easeInOutSine(range(S, 1.0, 1.7)));
+  if (S >= 1.0) yaw = lerp(20, 45, easeInOutSine(range(S, 1.0, 2.85)));
   if (S >= 7.7) yaw = lerp(45, 90, easeInOutSine(range(S, 10.6, 11.6)));
   plan.yaw = yaw * DEG;
   plan.pitch = 0;
@@ -305,6 +305,8 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
     plan.split = plan.bandLift;
     plan.glowMode = 3;
   }
+  if (S < 3) set("F0", "F0", 0, 0);
+  if (S > 10.35 && S < 12.6) set("F5", "F5", 0, 0);
   for (let g = 0; g < 4; g++) plan.seat[g] = range(S, plan.seatS0 + g * plan.seatLen, plan.seatS0 + (g + 1) * plan.seatLen);
   out.formation.a = plan.a;
   out.formation.b = plan.b;

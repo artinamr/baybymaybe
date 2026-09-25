@@ -54,6 +54,9 @@ export function CameraRig() {
       cam.setViewOffset(size.width, size.height, (0.5 - ppx) * size.width, (0.5 - ppy) * size.height, size.width, size.height);
       cam.updateProjectionMatrix();
     }
+    // Screen-space sculptures and the DOM bridge read this camera in the same frame.
+    // Refresh now to avoid a one-frame wobble while the camera is moving.
+    cam.updateMatrixWorld();
   }, PRIORITY.camera);
 
   return null;
