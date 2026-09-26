@@ -102,10 +102,15 @@ void main() {
   vec2 p = vWorld.xz;
   float d = sea(p);
   // Billows: bump the surface by the cloud density, light it low from the side.
-  float e = 1.4;
-  float dx = sea(p + vec2(e, 0.0)) - d;
-  float dz = sea(p + vec2(0.0, e)) - d;
-  vec3 n = normalize(vec3(-dx * 7.0, 1.0, -dz * 7.0));
+  // The slope comes from screen-space derivatives (one density sample, not
+  // three): solve for d/dx, d/dz from how d and the world move per pixel.
+  vec2 wx = dFdx(p);
+  vec2 wy = dFdy(p);
+  float det = wx.x * wy.y - wx.y * wy.x;
+  vec2 g = abs(det) > 1e-8 ? vec2(dFdx(d) * wy.y - dFdy(d) * wx.y, dFdy(d) * wx.x - dFdx(d) * wy.x) / det : vec2(0.0);
+  // Far off a pixel spans metres: keep the slope to what a 1.4 m step would see.
+  g = clamp(g * 1.4, -0.12, 0.12);
+  vec3 n = normalize(vec3(-g.x * 7.0, 1.0, -g.y * 7.0));
   float lit = clamp(dot(n, normalize(uSun)), 0.0, 1.0);
   float body = smoothstep(0.34, 0.66, d);
   // Tops: sunlit white; valleys: a cool blue-grey depth.
@@ -187,9 +192,17 @@ ${NOISE}
 uniform float uFade;
 uniform float uRipple;
 uniform vec2 uRippleC;
+uniform vec3 uShadow; // x, z, radius
+uniform float uShadowA;
 varying vec3 vWorld;
 varying float vDist;
 void main() {
+  // The stone's shadow: soft and wide while it is high, dark and tight as it lands.
+  float sh = 0.0;
+  if (uShadowA > 0.001) {
+    float r = length(vWorld.xz - uShadow.xy) / max(uShadow.z, 1e-3);
+    sh = uShadowA * (1.0 - smoothstep(0.15, 1.0, r));
+  }
   // The crust: large soft patches and a finer grain, barely there.
   float n = envFbm(vWorld.xz * 0.018) * 0.65 + envFbm(vWorld.xz * 0.11 + 7.3) * 0.35;
   vec3 crust = mix(vec3(0.905, 0.903, 0.897), vec3(0.972, 0.97, 0.964), n);
@@ -206,13 +219,23 @@ void main() {
     col = mix(col, vec3(0.8, 0.81, 0.83), ring * 0.8);
     a = max(a, uFade * ring * 0.35);
   }
+  // The shadow over the crust (premultiplied: ink over whatever is there).
+  vec3 pm = col * a;
+  pm = pm * (1.0 - sh) + vec3(0.04, 0.045, 0.06) * sh;
+  a = a + sh * (1.0 - a);
   if (a < 0.003) discard;
-  gl_FragColor = vec4(col * a, a);
+  gl_FragColor = vec4(pm, a);
 }
 `;
 
 export function createFlatMaterial(): THREE.ShaderMaterial {
-  return premul(FLAT_FRAG, { uFade: { value: 0 }, uRipple: { value: 0 }, uRippleC: { value: new THREE.Vector2() } });
+  return premul(FLAT_FRAG, {
+    uFade: { value: 0 },
+    uRipple: { value: 0 },
+    uRippleC: { value: new THREE.Vector2() },
+    uShadow: { value: new THREE.Vector3() },
+    uShadowA: { value: 0 },
+  });
 }
 
 /* ------------------------------------------------------------------------ */

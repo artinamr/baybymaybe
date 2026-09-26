@@ -38,6 +38,14 @@ export function CameraRig() {
 
     cam.position.set(out[0], out[1], out[2]);
     target.set(out[3], out[4], out[5]);
+    // The landing's jolt: a few frames of decaying shake, scaled to the framing.
+    if (c.shake > 0.002) {
+      const t = performance.now() / 1000;
+      const amp = c.shake * 0.012 * cam.position.distanceTo(target);
+      cam.position.x += amp * Math.sin(t * 71.3);
+      cam.position.y += amp * Math.sin(t * 57.1 + 1.3);
+      cam.position.z += amp * Math.sin(t * 63.7 + 2.1);
+    }
     cam.up.set(0, 1, 0);
     cam.lookAt(target);
 

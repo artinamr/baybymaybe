@@ -28,20 +28,27 @@ import { bus, pointer, ready, ui } from "@/lib/stores";
 export function Stone() {
   const { camera } = useThree();
   const build = useMemo(() => getStone(), []);
-  const mats = useMemo(
-    () => ({
+  const mats = useMemo(() => {
+    // The reflection is drawn twice: depth first, then colour only where it is
+    // the nearest surface — so it reads as a reflected stone, not an x-ray of
+    // every inner face blended together.
+    const mirrorDepth = createObsidian({ frag: true, reflection: true });
+    mirrorDepth.colorWrite = false;
+    mirrorDepth.depthWrite = true;
+    return {
       solid: createObsidian({ frag: true }),
       fade: createObsidian({ frag: true, fadePass: true }),
       mirror: createObsidian({ frag: true, reflection: true }),
-    }),
-    []
-  );
+      mirrorDepth,
+    };
+  }, []);
   const proxy = useMemo(() => {
     const m = new THREE.Mesh(stoneHullGeometry(), new THREE.MeshBasicMaterial());
     m.matrixAutoUpdate = false;
     return m;
   }, []);
   const mirror = useRef<THREE.Mesh>(null);
+  const mirrorDepth = useRef<THREE.Mesh>(null);
   const ray = useMemo(() => new THREE.Raycaster(), []);
   const ndc = useMemo(() => new THREE.Vector2(), []);
   const hits = useMemo<THREE.Intersection[]>(() => [], []);
@@ -57,8 +64,8 @@ export function Stone() {
   useFrame(() => {
     syncObsidianUniforms();
 
-    const m = mirror.current;
-    if (m) {
+    for (const m of [mirror.current, mirrorDepth.current]) {
+      if (!m) continue;
       // Mirror about y = floorY: y' = 2·floorY − y.
       m.matrix.makeScale(1, -1, 1);
       m.matrix.elements[13] = 2 * sceneState.u.floorY;
@@ -102,6 +109,14 @@ export function Stone() {
     <group>
       <mesh geometry={build.geometry} material={mats.solid} frustumCulled={false} renderOrder={1} />
       <mesh geometry={build.geometry} material={mats.fade} frustumCulled={false} renderOrder={3} />
+      <mesh
+        ref={mirrorDepth}
+        geometry={build.geometry}
+        material={mats.mirrorDepth}
+        frustumCulled={false}
+        matrixAutoUpdate={false}
+        renderOrder={-1}
+      />
       <mesh
         ref={mirror}
         geometry={build.geometry}

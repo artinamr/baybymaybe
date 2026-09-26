@@ -40,7 +40,7 @@ export function Why() {
         const v = String(k);
         if (el.dataset.claim !== v) el.dataset.claim = v;
         // Inside the colossus the headline steps back and the claim rides on glass.
-        const inside = S > 7.12 && S < 8.42 ? "1" : "0";
+        const inside = S > 7.74 && S < 8.95 ? "1" : "0";
         if (el.dataset.inside !== inside) el.dataset.inside = inside;
         const p = Math.max(0, Math.min(1, (S - WHY_S[0]) / (WHY_S[3] - WHY_S[0])));
         el.style.setProperty("--claim-p", p.toFixed(4));

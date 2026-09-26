@@ -16,12 +16,11 @@ import { mulberry32 } from "./ease";
  *                   (crown up, blades apart); the core glowing in the middle
  *   F2  monument    PLATFORMS: the stone rebuilt at 2.25× over the cloud sea,
  *                   course by course from the culet up, open joints
- *   F3  flow        AI AUTOMATION as a working system, alive in time: leads
- *                   sweep in out of the distance, circle the glowing core on a
- *                   tilted ring and are decided at its front — LIT (qualified,
- *                   filed into the rising column) or dark (dropped into the clouds)
- *   F8  gathered    every lead drawn into the core, which swells with light (the
- *                   flood out of the sky starts here)
+ *   F3  sort        AI AUTOMATION, driven by the scroll: the monument is taken
+ *                   apart from the top, one piece after another; each takes a
+ *                   slow turn round the glowing core and is decided at its
+ *                   front — LIT and filed into a column that builds up beside
+ *                   the core, or dark and let down into the clouds
  *   F7  colossus    WHY: the stone at colossal scale on the salt flat. It
  *                   BURSTS in slow motion — every piece carried out from the
  *                   heart to twice its distance, a hollow round the burning
@@ -55,8 +54,10 @@ export type FormationCtx = {
   coreSpin: number;
   /** F2/F3: the sculpture leans toward the cursor, about its centre. */
   tilt: THREE.Quaternion;
-  /** F3: the flow's clock (seconds, integrated by the Director — the cursor can hurry it). */
+  /** Time-based life (seconds, integrated by the Director — the cursor can hurry it). */
   flowT: number;
+  /** F3: how far the sort has got, 0..1 (scroll). */
+  ai: number;
   /** F4: 0..1 how far apart the exploded view is held (breathes a little). */
   explode: number;
   /** F7: where the camera is (the stone opens toward it), and how open it may be (0..1). */
@@ -69,38 +70,36 @@ export const MONUMENT_C = new THREE.Vector3(0, 1.3, 0);
 export const MONUMENT_K = 2.25;
 /** Open joints: every shard sits this much further out than in the stone. */
 const JOINT = 0.11;
-/* The flow (F3): the core, screen-right and toward-the-camera at that point of
-   the film (the camera's azimuth there is FLOW_AZ), the ring, the column.
-   Everything stays right of the chapter's type: in from the far upper right,
-   round the core by its left, out to the column on the right. */
-export const FLOW_C = new THREE.Vector3(0.2, 1.1, 0);
-export const FLOW_AZ_DEG = -270;
-const FLOW_AZ = (FLOW_AZ_DEG * Math.PI) / 180;
-export const FLOW_DIR = new THREE.Vector3(Math.cos(FLOW_AZ), 0, -Math.sin(FLOW_AZ));
-const FLOW_DEPTH = new THREE.Vector3(Math.sin(FLOW_AZ), 0, Math.cos(FLOW_AZ));
-const FLOW_PERIOD = 10.5;
-const FLOW_SCALE = 0.9;
-const RING_R = 1.3;
+/* The sort (F3): round the monument's core, seen with the camera at SORT_AZ —
+   the ring round the core, the column the chosen pieces build to its right. */
+export const SORT_C = MONUMENT_C.clone();
+export const SORT_AZ_DEG = -268;
+const SORT_AZ = (SORT_AZ_DEG * Math.PI) / 180;
+/** Screen-right and toward-the-camera at that point of the film. */
+export const SORT_DIR = new THREE.Vector3(Math.cos(SORT_AZ), 0, -Math.sin(SORT_AZ));
+const SORT_DEPTH = new THREE.Vector3(Math.sin(SORT_AZ), 0, Math.cos(SORT_AZ));
+const LEAD_SCALE = 0.95;
 /** A lead's longest extent, whatever shard carries it. */
 const LEAD_LEN = 0.62;
-const RING_TILT = (24 * Math.PI) / 180;
-/** Phase marks of one lead's cycle: arrive · round the ring · (qualified) into the column · rise. */
-const U_RING = 0.42;
-const U_DECIDE = 0.62;
-const U_COLUMN = 0.7;
-const COLUMN_C = FLOW_C.clone().addScaledVector(FLOW_DIR, 1.95).addScaledVector(FLOW_DEPTH, 0.45);
-const COLUMN_BASE = -1.3;
-const COLUMN_RISE = 3.8;
+const RING_R = 1.55;
+const RING_TILT = (22 * Math.PI) / 180;
+/** One piece's passage: out of the monument · round the core · to its fate. */
+const P_RING = 0.32;
+const P_DECIDE = 0.68;
+/** How long one piece's passage takes, as a share of the sort. */
+const SORT_DUR = 0.34;
+const COLUMN_C = SORT_C.clone().addScaledVector(SORT_DIR, 2.45).addScaledVector(SORT_DEPTH, 0.3);
+const COLUMN_BASE = -1.9;
+const COLUMN_STEP = 0.34;
 /* The core's size in each form. */
 const CORE_IN_MONUMENT = 0.95;
-const CORE_IN_FLOW = 0.72;
-const CORE_GATHERED = 1.25;
+const CORE_IN_SORT = 0.8;
 /* F4: how far apart the exploded view holds (× distance from the heart), and the mark's cuts. */
 const EXPLODE_K = 1.3;
 const CUT_OPEN = { crown: 0.46, band: 0.2, blade: 0.32 };
 
 /* THE SALT FLAT and the colossus on it (F7). The flat lies far below the sky's
-   cloud sea; the film cuts to it under a flood of light. */
+   cloud sea; the stone falls through the cloud to it, growing as it falls. */
 export const FLAT_Y = -60;
 export const COL_K = 7;
 /** The colossus's origin: its culet just touches the flat. */
@@ -133,13 +132,15 @@ type Prep = {
   /** F2: place in the monument (before its turn), course 0..3 from the culet up. */
   tilePos: THREE.Vector3;
   course: number;
-  /** F3: the lead's lane, phase, fate, tumble axis, and the filed orientation. */
-  flowPhase: number;
-  laneY: number;
-  laneZ: number;
+  /** F3: when this piece leaves the monument (0..1 of the sort), its fate, its slot in the column. */
+  sortK: number;
   qualified: boolean;
-  /** F3: scale that brings this shard to a lead's common size. */
+  slot: number;
+  /** F3: where on the ring it enters (rad), and the scale that brings it to a lead's common size. */
+  entry: number;
   unit: number;
+  /** The girdle band: a thin plate that reads as a line wherever it travels alone. */
+  thin: boolean;
   tumble: THREE.Vector3;
   filedQ: THREE.Quaternion;
   /** F4: offset from the heart in the exploded view (stone object space). */
@@ -177,10 +178,11 @@ export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3)
   const byHeight = shards.map((f) => f.index).sort((a, b) => frags[a].centroid.y - frags[b].centroid.y);
   const courseOf = new Map<number, number>();
   byHeight.forEach((fi, k) => courseOf.set(fi, Math.min(3, Math.floor((k * 4) / byHeight.length))));
-  // F3: leads evenly spread round the cycle; a third of them qualify.
-  const flowOrder = shards.map((f) => f.index).sort((a, b) => frags[a].centroid.x - frags[b].centroid.x);
-  const flowK = new Map<number, number>();
-  flowOrder.forEach((fi, k) => flowK.set(fi, k));
+  // F3: the monument is taken apart from the top down; a third of the pieces qualify.
+  const sortOrder = byHeight.slice().reverse();
+  const sortK = new Map<number, number>();
+  sortOrder.forEach((fi, k) => sortK.set(fi, k));
+  let slots = 0;
 
   prep = frags.map((f) => {
     const axis = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize();
@@ -190,10 +192,11 @@ export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3)
     if (f.piece === "bladeL") burst.x -= 0.5;
     if (f.piece === "bladeR") burst.x += 0.5;
     const r = rand();
-    const k = flowK.get(f.index) ?? 0;
+    const k = sortK.get(f.index) ?? 0;
     const tumble = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize();
-    const laneY = (rand() - 0.5) * 3.2;
-    const laneZ = (rand() - 0.5) * 4.0;
+    const qualified = f.index !== CORE && k % 3 === 1;
+    const slot = qualified ? slots++ : -1;
+    const entry = (rand() - 0.5) * 0.9;
     // The exploded view: along the shard's own line from the heart, further for
     // the far ones, and the mark's cuts opened — crown up, blades apart.
     const explodeOff = f.centroid.clone().sub(stoneMid).multiplyScalar(EXPLODE_K);
@@ -206,15 +209,15 @@ export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3)
       spin,
       tilePos: f.index === CORE ? new THREE.Vector3() : f.centroid.clone().sub(stoneMid).multiplyScalar(MONUMENT_K * (1 + JOINT)),
       course: courseOf.get(f.index) ?? 0,
-      // The qualified keep exact spacing (the column reads as filed); the rest drift.
-      flowPhase: (k + (k % 3 === 1 ? 0 : 0.35 * rand())) / SHARD_COUNT,
-      laneY,
-      laneZ,
-      qualified: k % 3 === 1,
+      sortK: k / Math.max(1, SHARD_COUNT - 1),
+      qualified,
+      slot,
+      entry,
       unit: f.index === CORE ? 1 : Math.min(1.5, Math.max(0.45, LEAD_LEN / Math.max(0.05, f.length))),
+      thin: f.piece === "band",
       tumble,
       // Filed: the polished cut face turned to the camera, long axis level.
-      filedQ: faceTo(f, FLOW_DEPTH, FLOW_DIR),
+      filedQ: faceTo(f, SORT_DEPTH, SORT_DIR),
       explodeOff,
       crackK: f.index === CORE ? 0 : f.centroid.distanceTo(crackOrigin) / maxCrack,
       radK: f.index === CORE ? 0 : f.centroid.distanceTo(stoneMid) / maxRad,
@@ -240,7 +243,7 @@ function tiltAbout(out: Pose, centre: THREE.Vector3, tilt: THREE.Quaternion) {
  * right after fragTarget. Leads come and go by SCALE, never by alpha: a
  * half-faded shard reads as white ghost glass.
  */
-export const fx = { fade: 0, glow: 1, flash: 0, lit: 0, open: 0 };
+export const fx = { fade: 0, glow: 1, flash: 0, lit: 0, open: 0, scan: 0 };
 
 const smooth = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 
@@ -248,9 +251,9 @@ const smooth = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 function ringPoint(phi: number, out: THREE.Vector3) {
   const c = Math.cos(phi);
   return out
-    .copy(FLOW_C)
-    .addScaledVector(FLOW_DIR, RING_R * Math.sin(phi))
-    .addScaledVector(FLOW_DEPTH, -RING_R * c * Math.cos(RING_TILT))
+    .copy(SORT_C)
+    .addScaledVector(SORT_DIR, RING_R * Math.sin(phi))
+    .addScaledVector(SORT_DEPTH, -RING_R * c * Math.cos(RING_TILT))
     .addScaledVector(Y, RING_R * c * Math.sin(RING_TILT));
 }
 
@@ -267,79 +270,87 @@ function bezier(t: number, out: THREE.Vector3) {
     .addScaledVector(_b2, 3 * s * t * t)
     .addScaledVector(_b3, t * t * t);
 }
+/** Ease in and out, with a gentle middle: every leg starts and lands softly. */
+const glide = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * x * (x * (x * 6 - 15) + 10));
 
-/** Ring speed (world units per unit of u) — the arrival and the exits match it. */
-const RING_V = (RING_R * Math.PI) / (U_DECIDE - U_RING);
+/** The monument's pose of a piece (F2) — where the sort takes it from. */
+function monumentPose(p: Prep, ctx: FormationCtx, out: Pose) {
+  _q.setFromAxisAngle(Y, ctx.monumentYaw);
+  _v.copy(p.tilePos).applyQuaternion(_q);
+  out.pos.copy(MONUMENT_C).add(_v);
+  out.quat.copy(_q);
+  out.scale.setScalar(MONUMENT_K);
+  tiltAbout(out, MONUMENT_C, ctx.tilt);
+}
 
-/** F3 — one lead's place in the flow at the flow clock `t`. */
-function flowTarget(p: Prep, ctx: FormationCtx, out: Pose) {
-  const u = (((ctx.flowT / FLOW_PERIOD + p.flowPhase) % 1) + 1) % 1;
-  fx.glow = 0.22;
-  // Every lead the same size, whatever its shard: the leads read as units, the column as filed.
-  const size = FLOW_SCALE * p.unit;
-  out.scale.setScalar(size);
-  _q.setFromAxisAngle(p.tumble, ctx.flowT * 0.5 + p.rand * 6.28);
-  if (u < U_RING) {
-    // Arriving: one long curve in out of the distance (far behind the core, up
-    // and to the right), slowing into the back of the ring at the ring's pace.
-    const t = u / U_RING;
-    _b0.copy(FLOW_C)
-      .addScaledVector(FLOW_DEPTH, -18)
-      .addScaledVector(FLOW_DIR, 3 + p.laneZ * 0.5)
-      .addScaledVector(Y, 2 + p.laneY * 0.5);
-    ringPoint(0, _b3).addScaledVector(Y, p.laneY * 0.06);
-    // End tangent along the ring (−DIR at its back), speed RING_V.
-    _b2.copy(_b3).addScaledVector(FLOW_DIR, (RING_V * U_RING) / 3);
-    _b1.copy(_b2).sub(_b0).normalize().multiplyScalar(7).add(_b0);
-    bezier(t, out.pos);
-    out.quat.copy(_q);
-    out.scale.setScalar(size * Math.max(0.002, smooth(t / 0.18)));
+/**
+ * F3 — one piece's passage in the sort, driven by the scroll (ctx.ai): lifted
+ * out of the monument and carried to the ring; a slow half turn round the
+ * core, decided at its front (the scan); then filed into the column — lit —
+ * or let down into the clouds.
+ */
+function sortTarget(p: Prep, ctx: FormationCtx, out: Pose) {
+  const start = p.sortK * (1 - SORT_DUR);
+  const t = Math.min(1, Math.max(0, (ctx.ai - start) / SORT_DUR));
+  // The girdle plate steps out once it leaves the monument (and back in as the stone re-forms).
+  const size = LEAD_SCALE * p.unit * (p.thin ? 0.002 : 1);
+  _q2.setFromAxisAngle(p.tumble, 1.2 * t + p.rand * 6.28);
+  if (t <= 0) {
+    monumentPose(p, ctx, out);
+    fx.glow = 0.6;
     return;
   }
-  if (u < U_DECIDE) {
-    // Round the core by its left — the AI greets, asks, screens — decided at the front.
-    const k = (u - U_RING) / (U_DECIDE - U_RING);
-    ringPoint(-Math.PI * k, out.pos).addScaledVector(Y, p.laneY * 0.06 * (1 - k));
-    out.quat.copy(_q);
-    if (p.qualified) out.quat.slerp(p.filedQ, smooth((k - 0.45) / 0.55));
-    fx.flash = smooth((k - 0.55) / 0.45);
-    fx.glow = p.qualified ? 0.22 + 0.78 * smooth((k - 0.6) / 0.4) : 0.22;
-    if (p.qualified) fx.lit = smooth((k - 0.7) / 0.3);
+  if (t < P_RING) {
+    // Lifted out of its course and carried round to the back of the ring.
+    const k = glide(t / P_RING);
+    monumentPose(p, ctx, out);
+    _b0.copy(out.pos);
+    _b1.copy(out.pos).sub(SORT_C).multiplyScalar(0.55).add(out.pos).addScaledVector(Y, 0.8);
+    ringPoint(p.entry, _b3);
+    _b2.copy(_b3).addScaledVector(SORT_DIR, 1.1).addScaledVector(Y, 0.5);
+    bezier(k, out.pos);
+    out.quat.slerp(_q2, k);
+    out.scale.setScalar(MONUMENT_K + (size - MONUMENT_K) * k);
+    fx.glow = 0.4;
     return;
   }
+  if (t < P_DECIDE) {
+    // Round the core by its left — slowly — and decided at the front.
+    const k = (t - P_RING) / (P_DECIDE - P_RING);
+    const phi = p.entry + (-Math.PI - p.entry) * glide(k);
+    ringPoint(phi, out.pos);
+    out.quat.copy(_q2);
+    if (p.qualified) out.quat.slerp(p.filedQ, glide((k - 0.5) / 0.5));
+    out.scale.setScalar(size);
+    fx.scan = Math.exp(-Math.pow((k - 0.86) / 0.12, 2));
+    fx.flash = fx.scan;
+    fx.glow = p.qualified ? 0.25 + 0.75 * glide((k - 0.7) / 0.3) : 0.25;
+    if (p.qualified) fx.lit = glide((k - 0.78) / 0.22);
+    return;
+  }
+  const k = glide((t - P_DECIDE) / (1 - P_DECIDE));
   ringPoint(-Math.PI, _b0);
   if (p.qualified) {
-    // Qualified: carried on to the right, filed into the column, which rises for you.
+    // Filed into the column, which builds up beside the core.
+    _b3.copy(COLUMN_C).addScaledVector(Y, COLUMN_BASE + COLUMN_STEP * p.slot);
+    _b1.copy(_b0).addScaledVector(SORT_DIR, 0.9).addScaledVector(Y, -0.2);
+    _b2.copy(_b3).addScaledVector(SORT_DEPTH, 0.6).addScaledVector(Y, 0.35);
+    bezier(k, out.pos);
     out.quat.copy(p.filedQ);
+    out.scale.setScalar(size);
     fx.glow = 1;
     fx.lit = 1;
-    fx.flash = 1 - smooth((u - U_DECIDE) / 0.1);
-    const riseV = COLUMN_RISE / (1 - U_COLUMN);
-    if (u < U_COLUMN) {
-      const t = (u - U_DECIDE) / (U_COLUMN - U_DECIDE);
-      _b1.copy(_b0).addScaledVector(FLOW_DIR, (RING_V * (U_COLUMN - U_DECIDE)) / 3);
-      _b3.copy(COLUMN_C).addScaledVector(Y, COLUMN_BASE);
-      _b2.copy(_b3).addScaledVector(Y, (-riseV * (U_COLUMN - U_DECIDE)) / 3);
-      bezier(t, out.pos);
-      return;
-    }
-    const k = (u - U_COLUMN) / (1 - U_COLUMN);
-    out.pos.copy(COLUMN_C).addScaledVector(Y, COLUMN_BASE + COLUMN_RISE * k);
-    out.scale.setScalar(size * Math.max(0.002, 1 - smooth((k - 0.8) / 0.2)));
     return;
   }
-  // The noise: goes dark at the front and drops away into the cloud sea.
-  const d = u - U_DECIDE;
+  // The noise: let down, turning slowly, into the clouds.
   out.pos
     .copy(_b0)
-    .addScaledVector(FLOW_DIR, (RING_V / 9) * (1 - Math.exp(-9 * d)))
-    .addScaledVector(FLOW_DEPTH, 1.6 * d)
-    .addScaledVector(Y, -80 * d * d);
-  _q.setFromAxisAngle(p.tumble, ctx.flowT * 1.1 + p.rand * 6.28);
-  out.quat.copy(_q);
-  fx.glow = 0.06;
-  fx.flash = 1 - smooth(d / 0.06);
-  out.scale.setScalar(size * Math.max(0.002, 1 - smooth(d / 0.3)));
+    .addScaledVector(SORT_DEPTH, 0.8 * k)
+    .addScaledVector(SORT_DIR, -0.4 * k)
+    .addScaledVector(Y, -7.5 * k * k);
+  out.quat.copy(_q2);
+  out.scale.setScalar(size * Math.max(0.002, 1 - glide((k - 0.55) / 0.45)));
+  fx.glow = 0.08;
 }
 
 /**
@@ -354,7 +365,11 @@ function colossusTarget(f: FragInfo, p: Prep, ctx: FormationCtx, out: Pose) {
   _v.copy(f.centroid).multiplyScalar(K).applyQuaternion(ctx.stoneQuat).add(ctx.home);
   out.quat.copy(ctx.stoneQuat);
   out.scale.setScalar(K);
-  if (ctx.open > 1e-4) {
+  // Each piece on its own beat: the outer shell leaves first and seats last.
+  const d = 0.42 * (1 - p.radK);
+  const open = Math.min(1, Math.max(0, (ctx.open - d) / (1 - d)));
+  fx.open = open;
+  if (open > 1e-4) {
     _c.copy(stoneMid).multiplyScalar(K).applyQuaternion(ctx.stoneQuat).add(ctx.home);
     _d.copy(_v).sub(_c);
     _cd.copy(ctx.camPos).sub(_c);
@@ -375,12 +390,11 @@ function colossusTarget(f: FragInfo, p: Prep, ctx: FormationCtx, out: Pose) {
     const dl = Math.max(1e-3, _d.length());
     const pushH = Math.max(0, HOLLOW_R * K - dl) + EXPAND * dl;
     _off.addScaledVector(_d, pushH / dl);
-    _v.addScaledVector(_off, ctx.open);
+    const e = glide(open);
+    _v.addScaledVector(_off, e);
     // Each piece turns on itself as it flies out — the burst has spin.
-    const g = ctx.open * Math.min(1, (pushT + pushH) / (0.35 * K));
-    _q2.setFromAxisAngle(p.tumble, 0.55 * ctx.open * (0.5 + p.rand));
+    _q2.setFromAxisAngle(p.tumble, 0.55 * e * (0.5 + p.rand));
     out.quat.multiply(_q2);
-    fx.open = g;
   }
   out.pos.copy(_v);
 }
@@ -395,15 +409,10 @@ function coreTarget(F: Formation, ctx: FormationCtx, out: Pose) {
       tiltAbout(out, MONUMENT_C, ctx.tilt);
       return;
     case "F3":
-      out.pos.copy(FLOW_C);
+      out.pos.copy(SORT_C);
       out.quat.setFromAxisAngle(Y, ctx.coreSpin * 1.6);
-      out.scale.setScalar(CORE_IN_FLOW);
-      tiltAbout(out, FLOW_C, ctx.tilt);
-      return;
-    case "F8":
-      out.pos.copy(FLOW_C);
-      out.quat.setFromAxisAngle(Y, ctx.coreSpin * 2.4);
-      out.scale.setScalar(CORE_GATHERED);
+      out.scale.setScalar(CORE_IN_MONUMENT + (CORE_IN_SORT - CORE_IN_MONUMENT) * glide(ctx.ai * 3));
+      tiltAbout(out, SORT_C, ctx.tilt);
       return;
     case "F4":
       _v.copy(stoneMid).applyQuaternion(ctx.stoneQuat);
@@ -480,18 +489,8 @@ export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Po
       return;
     }
     case "F3":
-      flowTarget(p, ctx, out);
+      sortTarget(p, ctx, out);
       return;
-    case "F8": {
-      // Drawn into the heart: a last tight turn round it, then gone into the light.
-      _v.copy(p.tumble).multiplyScalar(0.12);
-      out.pos.copy(FLOW_C).add(_v);
-      _q.setFromAxisAngle(p.tumble, ctx.flowT * 2 + p.rand * 6.28);
-      out.quat.copy(_q);
-      out.scale.setScalar(0.002);
-      fx.lit = 1;
-      return;
-    }
     case "F7":
       colossusTarget(f, p, ctx, out);
       return;

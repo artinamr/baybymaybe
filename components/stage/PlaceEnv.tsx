@@ -20,6 +20,10 @@ import { story } from "@/lib/story";
  * Facets facing the camera stay dark (glass reflects ~8% head-on); the ones
  * turned away catch the horizon as bright bands — which is what makes black
  * glass read as glass.
+ *
+ * Past the statement the room also TURNS with the scroll, so the highlights
+ * sweep across the glass the way a product film's lights do — with a quicker
+ * sweep as the stone finishes assembling and as it lands.
  */
 
 type Stops = { nadir: number; below: number; horizon: number; above: number; zenith: number; tint: [number, number, number] };
@@ -57,6 +61,12 @@ function room(stops: Stops, sun: THREE.Vector3 | null, sunPower: number): THREE.
   return scene;
 }
 
+/** 0 → 1 across [a, b], eased both ends. */
+function sweep(S: number, a: number, b: number) {
+  const t = Math.min(1, Math.max(0, (S - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+}
+
 export function PlaceEnv() {
   const { gl, scene } = useThree();
   const tex = useRef<{ studio: THREE.Texture | null; sky: THREE.Texture | null; flat: THREE.Texture | null }>({ studio: null, sky: null, flat: null });
@@ -89,6 +99,12 @@ export function PlaceEnv() {
       else if (env.sky > 0.5 && t.sky) want = t.sky;
     }
     if (want && scene.environment !== want) scene.environment = want;
+    const S = sceneState.S;
+    const turn =
+      story.phase === "closed"
+        ? 0.32 * Math.max(0, S - 2.2) + 1.1 * sweep(S, 3.9, 4.15) + 1.3 * sweep(S, 7.0, 7.4) + 0.9 * sweep(S, 9.7, 10.6)
+        : 0;
+    scene.environmentRotation.set(0, turn, 0);
   }, PRIORITY.scene);
 
   return null;

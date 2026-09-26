@@ -7,7 +7,9 @@ import * as THREE from "three";
 import { perf, ready } from "@/lib/stores";
 import { Scene } from "./Scene";
 
-const DPR_TIERS = [1.5, 1.25, 1.1, 1.0];
+// The canvas carries only the 3D (the type is DOM and stays crisp at any DPR);
+// glass at 1.3× is indistinguishable from 1.5× and a third cheaper.
+const DPR_TIERS = [1.3, 1.15, 1.0, 0.9];
 
 /** Compile every program once the stone + env exist, so no shader hitches mid-scroll. */
 function Compile() {

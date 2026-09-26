@@ -184,7 +184,7 @@ export function initScroll(): () => void {
  * round the core · the colossus closed · let's talk · the page end.
  * (Chapter jumpS values sit on these — keep them in sync.)
  */
-const REST_STATIC = [0, 1.62, 3.45, 4.02, 4.86, 5.42, 6.55, 7.45, 7.95, 8.72, 9.95];
+const REST_STATIC = [0, 1.62, 3.45, 4.02, 4.86, 5.45, 5.95, 7.4, 8.15, 8.55, 9.3, 10.75];
 const restPts: number[] = [];
 
 function anchors(): number[] {

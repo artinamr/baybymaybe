@@ -3,10 +3,10 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { evaluate, M0, plan } from "@/lib/choreo";
+import { evaluate, LAND_S, M0, plan } from "@/lib/choreo";
 import { evaluateStory } from "@/lib/storyFilm";
 import { story } from "@/lib/story";
-import { blendPose, FLOW_C, fragTarget, fx, MONUMENT_C, pose, poseMatrix, prepareFormations, prepared, type FormationCtx } from "@/lib/formations";
+import { blendPose, COL_C, fragTarget, fx, MONUMENT_C, pose, poseMatrix, prepareFormations, prepared, SORT_C, type FormationCtx } from "@/lib/formations";
 import { CORE } from "@/lib/geo/types";
 import { getStone } from "@/lib/geo/crystal";
 import { fragTex } from "@/lib/fragTex";
@@ -65,6 +65,7 @@ export function Director() {
       coreSpin: 0,
       tilt,
       flowT: 0,
+      ai: 0,
       explode: 1,
       camPos: new THREE.Vector3(),
       open: 0,
@@ -98,6 +99,9 @@ export function Director() {
     lastS: 0,
     /** The hero's quiet invitation: a thread of light down a ridge every few seconds. */
     lastIdleThread: 0,
+    /** When the stone last touched down on the flat, and last shattered (−1: not yet). */
+    landT0: -1,
+    breakT0: -1,
     /** The 3D's own scroll clock: follows scroll.S with weight (−1 = not started). */
     S: -1,
     /** 1 while the stone is whole (fragments locked rigid), easing to 0 when it breaks. */
@@ -131,6 +135,8 @@ export function Director() {
         flash: 0,
         /** How far the cursor has lifted this shard out of its form (spring). */
         lift: spring(0),
+        /** The colossus: how open this piece was last frame (it flashes as it seats). */
+        lastOpen: 0,
       })),
     [stone]
   );
@@ -285,6 +291,15 @@ export function Director() {
       }
     } else u.pulseAmp = 0;
 
+    // TOUCH-DOWN: a jolt through the camera, the seams flaring. (The shatter
+    // hits too, more lightly.)
+    if (!inStory && s.lastS < LAND_S && S >= LAND_S && !still) s.landT0 = time;
+    if (S < LAND_S - 0.05) s.landT0 = -1;
+    if (!inStory && s.lastS < 2.3 && S >= 2.3 && !still) s.breakT0 = time;
+    const landK = s.landT0 >= 0 ? Math.exp(-(time - s.landT0) / 0.28) : 0;
+    const breakK = s.breakT0 >= 0 ? 0.45 * Math.exp(-(time - s.breakT0) / 0.22) : 0;
+    sceneState.cam.shake = Math.max(landK, breakK);
+    u.seam += 0.8 * landK;
     s.lastS = S;
 
     /* ---- the forms' own life -------------------------------------------- */
@@ -293,13 +308,14 @@ export function Director() {
     ctx.home.copy(plan.home);
     ctx.K = plan.K;
     ctx.explode = plan.explode + (still ? 0 : 0.025 * Math.sin(time * 0.9));
+    ctx.ai = plan.ai;
     ctx.open = plan.open;
     ctx.camPos.copy(cam.pos);
     ctx.monumentYaw = plan.monumentYaw + (still ? 0 : 0.035 * time);
 
     // The flow runs on its own clock; a quick sweep of the cursor hurries it
     // (and spins the core); the whole sculpture leans toward the pointer.
-    const inSculpt = !inStory && S > 2.85 && S < 5.98;
+    const inSculpt = !inStory && S > 2.85 && S < 6.3;
     if (pointer.has) {
       const speed = Math.hypot(pointer.x - s.px, pointer.y - s.py) / Math.max(dt, 1e-3);
       s.px = pointer.x;
@@ -347,6 +363,11 @@ export function Director() {
 
     // The cursor lifts shards out of the exploded view, the monument and the flow.
     const holdForm = plan.a === plan.b && (plan.a === "F2" || plan.a === "F3" || plan.a === "F4");
+    // The sort: how much the core is judging right now (it flares as it decides).
+    let scanSum = 0;
+    // The colossus: a wave of light running out from the core through the burst.
+    const wavePeriod = 2.6;
+    const waveR = ctx.K * (0.4 + 3.4 * (((time % wavePeriod) + wavePeriod) % wavePeriod) / wavePeriod);
 
     const frags = stone.frags;
     for (let i = 0; i < frags.length; i++) {
@@ -360,6 +381,7 @@ export function Director() {
       let fxFlash = fx.flash;
       let fxLit = fx.lit;
       const fxOpen = fx.open;
+      if (plan.a === "F3" && plan.b === "F3") scanSum += fx.scan;
       let m = plan.mix;
       if (plan.a !== plan.b) {
         // Per-fragment stagger inside the window.
@@ -420,6 +442,11 @@ export function Director() {
         P.scale.copy(A.scale);
         sp.lastM = 1;
       }
+      // The colossus closing: each piece flashes as it seats back into place.
+      if (plan.a === "F7" && !isCore) {
+        if (sp.lastOpen > 0.02 && fxOpen <= 0.0005 && !still) sp.flash = 1;
+        sp.lastOpen = fxOpen;
+      } else sp.lastOpen = 0;
       sp.flash *= Math.exp(-dt / 0.5);
 
       // Suspended pieces breathe: a slow float and a drift of rotation.
@@ -445,7 +472,7 @@ export function Director() {
       }
       springTo(sp.lift, near, near > sp.lift.x ? 7 : 3, dt);
       if (sp.lift.x > 0.001) {
-        liftDir.copy(P.pos).sub(plan.a === "F3" ? FLOW_C : plan.a === "F4" ? v.set(0, -0.464, 0) : MONUMENT_C);
+        liftDir.copy(P.pos).sub(plan.a === "F3" ? SORT_C : plan.a === "F4" ? v.set(0, -0.464, 0) : MONUMENT_C);
         if (liftDir.lengthSq() < 1e-6) liftDir.set(0, 1, 0);
         liftDir.normalize();
         P.pos.addScaledVector(liftDir, 0.42 * sp.lift.x);
@@ -515,19 +542,21 @@ export function Director() {
         glow = fxGlow;
         flash = Math.max(flash, fxFlash);
         fade = fxFade;
-        boost = 2.4 * fxLit;
+        boost = 3.2 * fxLit;
       } else if (plan.glowMode === 3) {
         // The exploded view: every cut face a window onto the light inside;
         // seating heals the cut.
-        glow = plan.a === "F4" && plan.b === "F0" ? 1 - 0.75 * easeInOutCubic(m) : 1;
+        glow = plan.b === "F0" && plan.a !== "F0" ? 1 - 0.75 * easeInOutCubic(m) : 1;
+        if (plan.a === "F3") boost = 2.4 * fxLit * (1 - easeInOutCubic(m));
       } else if (plan.glowMode === 6) {
-        // The colossus: the walls light a little as they stand aside.
-        glow = 0.3 + 0.4 * fxOpen;
-      } else if (plan.glowMode === 7) {
-        // Into the light: the leads burn as they are drawn in.
-        glow = 1;
-        boost = 2.4 * Math.max(fxLit, m);
-        flash = Math.max(flash, m * m);
+        // The colossus: the walls light a little as they stand aside, and a
+        // wave of light runs out from the core through every piece — INSIDE
+        // the glass (the core's own light), never a flat wash on the cuts.
+        glow = 0.25 + 0.25 * fxOpen;
+        if (fxOpen > 0.001 && !isCore) {
+          const dW = (P.pos.distanceTo(COL_C) - waveR) / (0.5 * ctx.K);
+          boost = 1.5 * fxOpen * Math.exp(-dW * dW);
+        }
       }
       if (isCore) {
         // The core: hidden inside the whole stone; laid bare by the burst; the
@@ -540,11 +569,13 @@ export function Director() {
           (plan.a === "F7" && plan.open < 0.01);
         let lvl = 2.6;
         if (plan.glowMode === 1) lvl = 3.6;
-        else if (plan.glowMode === 2) lvl = 5 + 1.2 * Math.sin(time * 1.6);
+        else if (plan.glowMode === 2) lvl = 2.6 + 0.4 * Math.sin(time * 1.6) + 1.8 * Math.min(1, scanSum);
         else if (plan.glowMode === 3) lvl = 2.8;
-        // (The flood carries the white; the core stays glass, burning indigo.)
-        else if (plan.glowMode === 7) lvl = 4.2 + 1.6 * m;
-        else if (plan.glowMode === 6) lvl = 1.1 + 1.5 * plan.open + 0.3 * plan.open * Math.sin(time * 1.3);
+        else if (plan.glowMode === 6) {
+          // It beats with the waves it sends out.
+          const beat = Math.exp(-Math.pow(((time % wavePeriod) + wavePeriod) % wavePeriod, 2) / 0.02);
+          lvl = 1.1 + 1.5 * plan.open + 1.6 * plan.open * beat;
+        }
         boost = hidden ? 0 : lvl;
         glow = 1;
         flash = 0;

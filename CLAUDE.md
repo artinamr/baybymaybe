@@ -42,27 +42,29 @@ interfaces are **`docs/CONTRACTS.md`**. Read both before changing the 3D.
   about that later". Untouched in round 10; it still works (click the stone).
 - **Methodology** is its own page (`app/methodology/`).
 
-**THE HOME FILM (round 10).** One polished obsidian stone, shaped from the
+**THE HOME FILM (round 11).** One polished obsidian stone, shaped from the
 Nerodyn mark, fractured into 40 SHARDS (the mark's cuts + an anisotropic
 Voronoi — `lib/geo/crystal.ts`) plus the CORE: a small whole copy of the
-stone that lives inside it, full of light (fragment 40, code `CORE`). What
-igloo.inc does: objects ASSEMBLE, SHATTER, RESHAPE; each section is a
-different PLACE. So:
+stone that lives inside it, full of light (fragment 40, code `CORE`). One
+unbroken shot — no cuts, no white-outs:
 
 | S | place (`Places.tsx`, `sceneState.env`) | formation (lib/formations.ts) |
 |---|-------|------------------------------|
 | 0–1 | the studio (paper, mirror floor) | F0 the stone; look up, the pass |
 | 1–2.25 | the studio | F0 behind the statement (letters invert where it passes — lib/project.ts clip) |
-| 2.25–2.85 | → the SKY (cloud sea rolls in from below) | F1 THE SHATTER, the camera pulling back so the burst stays framed |
-| 2.85–3.95 | the sky | WEBSITES: F4 the EXPLODED VIEW (every shard turned back to its place, held apart; crown up, blades apart; the girdle plate steps out), then assembly from the heart out, each shard flashing as it seats |
-| 4.1–4.9 | the sky | PLATFORMS: F2 the MONUMENT course by course; a band of light rises through it when complete (`u.riseY/riseAmp`) |
-| 4.92–5.62 | the sky | AI AUTOMATION: F3 the FLOW (leads circle the core; the qualified light up and file into the column; the noise drops) |
-| 5.62–5.98 | the sky | F8 every lead drawn into the core; the camera follows it in |
-| 5.8–6.42 | the FLOOD of light (`env.flood`) — THE CUT at 6.05 (`cam.cut`: rig + shards snap) | — |
-| 6.05–8.6 | the SALT FLAT (`FLAT_Y`; its sky is the page, #field keyed to --flat/--horizon) | F7 the COLOSSUS (×7): far off, approached; it BURSTS in slow motion (every piece to ~2× its distance, a hollow round the core, the glass between core and camera standing aside); the camera flies in, orbits the core, pulls out as it closes; a ring runs across the flat |
-| 8.6– | the flat | F7 closed — LET'S TALK |
+| 2.25–2.85 | → the SKY (cloud sea rolls in from below) | F1 THE SHATTER (a light jolt), the camera pulling back so the burst stays framed |
+| 2.85–3.95 | the sky | WEBSITES: F4 EXPLODED VIEW (a scan of light rises through it), assembly from the heart out, each shard flashing as it seats |
+| 4.1–4.9 | the sky | PLATFORMS: F2 MONUMENT course by course; a band of light rises through it (`u.riseY/riseAmp`) |
+| 4.95–5.95 | the sky | AI AUTOMATION: F3 THE SORT, SCROLL-DRIVEN (`plan.ai`): the monument taken apart from the top; each piece a slow turn round the core, decided at its front (the core flares as it judges) — lit and filed into a column that builds up, or let down into the cloud |
+| 5.95–6.3 | the sky | every piece home into the stone (F3→F0, from the heart out) |
+| 6.3–7.05 | down THROUGH the cloud deck (puffs, haze) to the SALT FLAT | THE FALL: F0 with home and scale K interpolated (`fallAt`), turning 170°, growing ×7, its shadow gathering on the flat |
+| 7.05 | the flat | TOUCH-DOWN: a ring across the flat, light up through the seams and the glass, a camera jolt |
+| 7.05–9.15 | the flat (its sky is the page: #field keyed to --flat/--horizon) | F7 the COLOSSUS: bursts (outer shell first), the camera flies in and round the core — waves of light run out through the pieces (inside the glass) — and out as it closes, each piece flashing as it seats (outer last) |
+| 9.3– | the flat, down at its own level | LET'S TALK: the colossus and its reflection (a true mirror now: depth pre-pass, `u.reflLen`), lifting off it and turning |
 
-Rest frames (auto-framing): 0 · 1.62 · 3.45 · 4.02 · 4.86 · 5.42 · 6.55 · 7.45 · 7.95 · 8.72 · 9.95 · the end.
+Rest frames (auto-framing): 0 · 1.62 · 3.45 · 4.02 · 4.86 · 5.45 · 5.95 · 7.4 · 8.15 · 8.55 · 9.3 · 10.75 · the end.
+The lighting TURNS with the scroll past the statement (`scene.environmentRotation`,
+PlaceEnv.tsx), with quick sweeps after assembly, on touch-down and at the end.
 
 **Client verdicts:** 2026-09-25 "bg and animations perfect for now" (round 5)
 → round 6 (armillary, light streams, standing-stone field) REJECTED: ch02–03
@@ -82,7 +84,12 @@ ring); build "not too bad" but wants more detail and a fuller frame; why
 "super crazy"; audit "not bad" but framing; the lake backgrounds disliked
 ("less viewable but not plain white"); transitions "terrible … out of frame …
 not smooth"; bring back the long statement; "it's just a black shard with
-repetitive shit — flip the table". Typography is still owed a pass.
+repetitive shit — flip the table". → round 10 verdict: hero→statement and
+the statement "okay/fine"; build has potential, likes "when it gets bigger and
+builds up into a bigger one", but not smooth enough and the AI flow "too fast,
+not smooth"; the build→why white-flood cut "absolute crap"; why's fly-in/out
+liked but wants more; the finale needs better, crazier framing; everything
+more "Apple level, igloo.inc level". Typography is still owed a pass.
 `preview-card.mp4` is MOTION ONLY.
 
 ## The stone's surface (2026-09-25: "shape great, texture really bad at some angles")
@@ -135,8 +142,17 @@ way relative to each other.
   pass behind words (inside the colossus) the words ride a frosted pane.
 - **Never lose the subject.** Every transition keeps its subject framed (the
   camera pulls back WITH a burst; the colossus opens toward the camera so
-  the camera always looks at its core). Place changes happen under the flood
-  (one hard cut, `CUT_S`), never as a camera flight across empty space.
+  the camera always looks at its core). Places change around the subject
+  (the stone falls through the cloud deck to the flat) — never by a cut or a
+  white-out (the round-10 flood was "absolute crap").
+- **Smoothness is frame time first.** Judge motion at a real DPR
+  (`hitch.mjs`-style: 1.5× display, vsync, count frames > 20 ms). The canvas
+  renders at ≤ 1.3× (type is DOM); the glass march is 7 steps with optional
+  terms skipped when off; the cloud sea's billow normal comes from
+  screen-space derivatives. The monument dropped to 30 fps before that.
+- **No flat indigo washes.** Light "events" (waves, scans, lit leads) go
+  INSIDE the glass via the per-piece core boost (texel 7 w, centred on each
+  piece's centroid) — never through `flash` on cut faces over whole pieces.
 - **Weight.** The Director runs its own damped scroll clock (ω 4.5 on top of
   Lenis), and every shard follows its target on its own critically damped
   spring (ω 3.6–6), with a gentle float + rotational drift while suspended.
@@ -149,7 +165,8 @@ way relative to each other.
   faces; the round-7 eight-piece rig and the dark night chapter ("plain",
   "just going to black"); the round-8 plain / void / floods / halo /
   specimens (removed in round 9); the round-9 lake, its mountains and the
-  build column ("absolute shit"); the rotating ring of words by the hero
+  build column ("absolute shit"); the round-10 white flood out of the core and
+  the time-driven lead flow ("too fast"); the rotating ring of words by the hero
   stone; distant obsidian "peaks" in the sky (tried in round 10 — they read
   as grey slabs, i.e. coffins). Tiling shards onto a giant surface read as
   a lumpy clump — the monument is the stone at scale with open joints instead.

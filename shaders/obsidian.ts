@@ -103,6 +103,7 @@ export const obsidianUniforms: {
   uRiseAmp: U<number>;
   /** The stone's scale: the reflection fades over a distance that grows with it. */
   uReflK: U<number>;
+  uReflLen: U<number>;
   /** The stone's bounding planes (object, n·x ≤ w) and each piece's cut bounds (yMin, yMax, xSign). */
   uHull: U<THREE.Vector4[]>;
   uPieceBox: U<THREE.Vector3[]>;
@@ -135,6 +136,7 @@ export const obsidianUniforms: {
   uRiseY: { value: -2 },
   uRiseAmp: { value: 0 },
   uReflK: { value: 1 },
+  uReflLen: { value: 1.1 },
   uHull: { value: HULL },
   uPieceBox: { value: pieceBounds() },
 };
@@ -189,6 +191,7 @@ export function syncObsidianUniforms(): void {
   U.uRiseY.value = u.riseY;
   U.uRiseAmp.value = u.riseAmp;
   U.uReflK.value = s.stone.scale;
+  U.uReflLen.value = u.reflLen;
   planeAbove.constant = -u.floorY;
   planeBelow.constant = u.floorY;
 }
@@ -328,6 +331,7 @@ uniform float uWake;
 uniform float uRiseY;
 uniform float uRiseAmp;
 uniform float uReflK;
+uniform float uReflLen;
 uniform vec4 uHull[16];
 varying vec3 vObs;
 varying float vKind;
@@ -446,17 +450,24 @@ float obsGlowField(vec3 p) {
   float drift = 0.7 + 0.3 * sin(dot(p, vec3(2.1, 1.3, 1.7)) + uTime * 0.4);
   // Floors of light inside the glass at the level cuts: when the stack parts,
   // each section wells up with light from its centre.
-  float fy = exp(-p.y * p.y * 55.0) + exp(-(p.y + 0.6) * (p.y + 0.6) * 55.0) + exp(-(p.y + 1.22) * (p.y + 1.22) * 55.0);
-  float floors = uFloors * fy * exp(-dot(p.xz, p.xz) * 2.6) * (0.75 + 0.25 * drift);
+  float floors = 0.0;
+  if (uFloors > 0.001) {
+    float fy = exp(-p.y * p.y * 55.0) + exp(-(p.y + 0.6) * (p.y + 0.6) * 55.0) + exp(-(p.y + 1.22) * (p.y + 1.22) * 55.0);
+    floors = uFloors * fy * exp(-dot(p.xz, p.xz) * 2.6) * (0.75 + 0.25 * drift);
+  }
   // A fragment full of light (the core crystal, a chosen lead): luminous
   // through its whole body, centred on its own middle.
   vec3 hc = p - vFragC;
   float full = vFx.w * 0.1 * exp(-dot(hc, hc) * 0.8) * (0.8 + 0.2 * drift);
   // Awake: a broad light from the stone's middle, breathing, filling the glass.
-  vec3 wc = p - vec3(0.0, -0.55, 0.0);
-  float awake = uWake * exp(-dot(wc, wc) * 1.6) * (0.75 + 0.25 * sin(uTime * 1.3 + p.y * 2.0));
+  float awake = 0.0;
+  if (uWake > 0.001) {
+    vec3 wc = p - vec3(0.0, -0.55, 0.0);
+    awake = uWake * exp(-dot(wc, wc) * 1.6) * (0.75 + 0.25 * sin(uTime * 1.3 + p.y * 2.0));
+  }
   // A band of light rising through the glass (the monument powering up).
-  float rise = uRiseAmp * exp(-(p.y - uRiseY) * (p.y - uRiseY) * 30.0) * (0.7 + 0.3 * drift);
+  float rise = 0.0;
+  if (uRiseAmp > 0.001) rise = uRiseAmp * exp(-(p.y - uRiseY) * (p.y - uRiseY) * 30.0) * (0.7 + 0.3 * drift);
   return heart * drift * 0.16 + floors * 1.1 + full + awake * 0.55 + rise * 0.9;
 }
 
@@ -476,8 +487,8 @@ vec3 obsInterior(vec3 ro, vec3 rd, bool full) {
   // Veins at depth.
   float lines = 0.0;
   float heat = 0.0;
-  for (int k = 0; k < 4; k++) {
-    float d = 0.04 + 0.14 * float(k) + 0.03 * float(k * k);
+  for (int k = 0; k < 3; k++) {
+    float d = 0.04 + 0.16 * float(k) + 0.04 * float(k * k);
     float inside = 1.0 - smoothstep(tMax - 0.03, tMax, d);
     float T = exp(-2.4 * d);
     vec3 pk = ro + rd * d;
@@ -502,7 +513,7 @@ vec3 obsInterior(vec3 ro, vec3 rd, bool full) {
     if (i >= N) break;
     vec3 p = ro + rd * ((float(i) + jit) * dt);
     glow += obsGlowField(p) * T * dt;
-    cur += obsCursor(p) * T * dt;
+    if (uCursorAmt > 0.001) cur += obsCursor(p) * T * dt;
     T *= k;
   }
   // (light, depth-heat, the cursor's light — weighted separately by the caller)
@@ -695,7 +706,7 @@ const FRAG_TAIL = /* glsl */ `
   #ifdef OBS_REFLECT
     // A mirror floor reflects only what stands above it.
     if (vWorldY > uFloorY + 1e-3) discard;
-    obsA *= 0.16 * (1.0 - smoothstep(0.0, 1.1 * uReflK, uFloorY - vWorldY)) * uReflect;
+    obsA *= 0.16 * (1.0 - smoothstep(0.0, uReflLen * uReflK, uFloorY - vWorldY)) * uReflect;
     obsRgb *= 0.85;
   #endif
   if (obsA < 0.004) discard;
@@ -759,7 +770,7 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
 
   const defines: Record<string, string> = { ...(m.defines as Record<string, string>) };
   if (frag) defines.OBS_FRAG = "";
-  defines.OBS_STEPS = String(o.steps ?? 10);
+  defines.OBS_STEPS = String(o.steps ?? 7);
   if (reflection) defines.OBS_REFLECT = "";
   if (instanced) defines.OBS_INSTANCED = "";
   if (fadePass) defines.OBS_FADEPASS = "";

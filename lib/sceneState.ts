@@ -54,6 +54,8 @@ export const sceneState = {
     path: false,
     /** A hard cut (under a full flood of light): the rig and the shards jump to their goals. */
     cut: false,
+    /** 0..1 a short, decaying jolt (the landing), applied by the rig. */
+    shake: 0,
     pos: new THREE.Vector3(0, 0, 7.25),
     target: new THREE.Vector3(0, -0.464, 0),
   },
@@ -120,8 +122,10 @@ export const sceneState = {
     /** Alpha fog, view-space depth (world units). */
     fogNear: 60,
     fogFar: 90,
-    /** Reflection strength 0..1 (floor mirror copies). */
+    /** Reflection strength (floor mirror copies; above 1 on the flat at the end — a true mirror). */
     reflect: 1,
+    /** How far below the floor the reflection reaches, in stone heights × scale. */
+    reflLen: 1.1,
     /** Floor height for reflections / ground effects this frame (world y). */
     floorY: -1.975,
     /** Ground mist: screen-space cutoff (0..1 from top; canvas pixels below this y are not drawn by mist) + alpha. */

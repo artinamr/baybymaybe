@@ -756,9 +756,9 @@ html[data-intro-skip] .intro-mask > span {
 /* Inside the colossus the claim rides on a pane of frosted glass — ink never
    lands on black glass. Over the flat the pane is invisible. */
 [data-inside="1"] .why-claims {
-  background-color: color-mix(in oklab, var(--paper) 64%, transparent);
-  -webkit-backdrop-filter: blur(22px) saturate(1.25);
-  backdrop-filter: blur(22px) saturate(1.25);
+  background-color: color-mix(in oklab, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border-color: color-mix(in oklab, var(--ink) 7%, transparent);
   box-shadow: 0 30px 80px -40px color-mix(in oklab, var(--ink) 45%, transparent);
 }

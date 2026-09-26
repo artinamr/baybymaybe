@@ -43,6 +43,12 @@ function puffs(): Puff[] {
     const s = 34 + rand() * 30;
     out.push({ x: Math.cos(ang) * r, y: CLOUD_Y + s * 0.28, z: Math.sin(ang) * r, s, a: 0.78 + rand() * 0.2 });
   }
+  // The deck the stone falls through: billows round its line and the camera's.
+  for (let i = 0; i < 16; i++) {
+    const ang = rand() * Math.PI * 2;
+    const r = 2 + rand() * 22;
+    out.push({ x: Math.cos(ang) * r, y: CLOUD_Y - 1 - rand() * 9, z: Math.sin(ang) * r, s: 8 + rand() * 12, a: 0.8 });
+  }
   return out;
 }
 
@@ -89,7 +95,7 @@ export function Places() {
     }
     const pg = puffGroup.current;
     if (pg) {
-      const amount = Math.max(env.sky, env.inCloud);
+      const amount = Math.max(env.sky, env.inCloud * 1.2);
       pg.visible = amount > 0.002 && perf.tier < 3;
       if (pg.visible) {
         pg.children.forEach((child, i) => {
@@ -125,6 +131,12 @@ export function Places() {
       flatMat.uniforms.uFade.value = env.flat;
       flatMat.uniforms.uRipple.value = env.ripple;
       flatMat.uniforms.uRippleC.value.set(COL_HOME.x, COL_HOME.z);
+      // The stone's shadow on the flat as it falls and stands.
+      const home = sceneState.stone.home;
+      const K = sceneState.stone.scale;
+      const h = Math.max(0, home.y - 1.94 * K - FLAT_Y);
+      flatMat.uniforms.uShadow.value.set(home.x, home.z, K * (0.75 + 0.035 * h));
+      flatMat.uniforms.uShadowA.value = env.flat * 0.32 * Math.exp(-h / 30);
     }
     // THE FLOOD
     const fl = flood.current;

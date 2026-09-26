@@ -57,7 +57,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     id: "build",
     num: "02",
     label: "What we build",
-    vh: 350,
+    vh: 430,
     sticky: true,
     jumpS: 3.45,
     // The type waits for the shatter to play out on its own.
@@ -68,9 +68,11 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     id: "why",
     num: "03",
     label: "Why Nerodyn",
-    vh: 330,
+    vh: 320,
     sticky: true,
-    jumpS: 6.55,
+    jumpS: 7.4,
+    // The type waits for the stone to land.
+    revealAt: -0.05,
     specimen: { name: "Why Nerodyn", line: "One team builds it. You own it." },
   },
   {
@@ -79,7 +81,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Let's talk",
     vh: 220,
     sticky: true,
-    jumpS: 9.95,
+    jumpS: 10.75,
     specimen: { name: "Let's talk", line: "A free, honest audit of what you have." },
   },
 ];
@@ -93,9 +95,9 @@ export const CHAPTERS: ChapterDef[] = (() => {
   });
 })();
 
-/** Total page height in vh (1180). */
+/** Total page height in vh (1250). */
 export const PAGE_VH = CHAPTERS.reduce((a, c) => a + c.vh, 0);
-/** Maximum reachable S (page height − one viewport), 10.8. */
+/** Maximum reachable S (page height − one viewport), 11.5. */
 export const S_MAX = PAGE_VH / 100 - 1;
 
 export const CHAPTER_INDEX: Record<ChapterId, number> = Object.fromEntries(
