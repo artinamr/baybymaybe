@@ -131,9 +131,9 @@ function keys(L: Layout): Key[] {
     // THE CUT — it opens along the mark; the camera leans in and round.
     { S: 2.45, pivot: [mob ? 0 : 1.25, -0.15, 0], az: 24, el: 10, dist: D(7.4), fov: 30, pp: pp(0.64, 0.5) },
     // THE STACK — rise to the top layer, then crane down the four as they are read.
-    { S: 3.35, pivot: [0, 0.78, 0], az: 40, el: 15, dist: D(10.4), fov: 30, pp: pp(0.66, 0.47) },
-    { S: 4.35, pivot: [0, -0.42, 0], az: 68, el: 5, dist: D(10.4), fov: 30, pp: pp(0.66, 0.53) },
-    { S: 4.72, pivot: [0, 0.1, 0], az: 80, el: 9, dist: D(11.8), fov: 30, pp: pp(0.66, 0.5) },
+    { S: 3.35, pivot: [0, 0.7, 0], az: 40, el: 26, dist: D(10.4), fov: 30, pp: pp(0.66, 0.47) },
+    { S: 4.35, pivot: [0, -0.42, 0], az: 68, el: 17, dist: D(10.4), fov: 30, pp: pp(0.66, 0.53) },
+    { S: 4.72, pivot: [0, 0.1, 0], az: 80, el: 15, dist: D(11.8), fov: 30, pp: pp(0.66, 0.5) },
     // THE BOOK — swing round to face the opening pages, framed on the left.
     // Eye level: the thin plates (band, the sections' tops) read edge-on, as lines of light.
     { S: 5.65, pivot: [0, -0.15, 0], az: 16, el: 3, dist: D(10.6), fov: 30, pp: pp(0.34, 0.5) },
@@ -518,6 +518,8 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   u.inner = 0.32 + 0.3 * Math.sin(Math.PI * range(S, 0.45, 1.6)) + 0.75 * u.dusk;
 
   u.spill = Math.max(0.8 * open, 0.55 * film.book, S >= M0 ? 0.4 * range(s6, 0.5, 0.62) : 0);
+  // The level cuts light from within as the stack parts, and while the column builds.
+  u.floors = 1.2 * smoother(range(S, 2.45, 2.9)) * (1 - smoother(range(S, 4.8, 5.3))) + 0.9 * film.column;
 
   // Alpha fog: none until the long mirror, then its haze, clear again for the build.
   if (S < 7.2) {

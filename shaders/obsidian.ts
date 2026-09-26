@@ -94,6 +94,8 @@ export const obsidianUniforms: {
   uCursorAmt: U<number>;
   /** 0..1 night (ch03): signals in the glass run faster and brighter. */
   uNight: U<number>;
+  /** Floors of light at the level cuts (the stack, the build). */
+  uFloors: U<number>;
   /** The stone's bounding planes (object, n·x ≤ w) and each piece's cut bounds (yMin, yMax, xSign). */
   uHull: U<THREE.Vector4[]>;
   uPieceBox: U<THREE.Vector3[]>;
@@ -121,6 +123,7 @@ export const obsidianUniforms: {
   uCursorP: { value: Array.from({ length: 8 }, () => new THREE.Vector4(0, -0.4, 0, 0)) },
   uCursorAmt: { value: 0 },
   uNight: { value: 0 },
+  uFloors: { value: 0 },
   uHull: { value: HULL },
   uPieceBox: { value: pieceBounds() },
 };
@@ -170,6 +173,7 @@ export function syncObsidianUniforms(): void {
   for (let i = 0; i < 8; i++) U.uCursorP.value[i].copy(u.cursorPiece[i]);
   U.uCursorAmt.value = u.cursorAmt;
   U.uNight.value = u.dusk;
+  U.uFloors.value = u.floors;
   planeAbove.constant = -u.floorY;
   planeBelow.constant = u.floorY;
 }
@@ -302,6 +306,7 @@ uniform float uInner;
 uniform float uLevelSeam;
 uniform float uCursorAmt;
 uniform float uNight;
+uniform float uFloors;
 uniform vec4 uHull[16];
 varying vec3 vObs;
 varying float vKind;
@@ -417,10 +422,14 @@ float obsGlowField(vec3 p) {
   vec3 h = p - vec3(0.0, -0.62, 0.0);
   float heart = exp(-(dot(h.xz, h.xz) * 7.0 + h.y * h.y * 2.4));
   float drift = 0.6 + 0.4 * obsNoise(p * 2.3 + vec3(0.0, uTime * 0.12, 0.0));
-  return heart * drift * 0.16 + obsCursor(p) * 1.25;
+  // Floors of light inside the glass at the level cuts: when the stack parts,
+  // each section wells up with light from its centre.
+  float fy = exp(-p.y * p.y * 55.0) + exp(-(p.y + 0.6) * (p.y + 0.6) * 55.0) + exp(-(p.y + 1.22) * (p.y + 1.22) * 55.0);
+  float floors = uFloors * fy * exp(-dot(p.xz, p.xz) * 2.6) * (0.75 + 0.25 * drift);
+  return heart * drift * 0.16 + floors * 1.1;
 }
 
-vec2 obsInterior(vec3 ro, vec3 rd, bool full) {
+vec3 obsInterior(vec3 ro, vec3 rd, bool full) {
   float tMax = 2.2;
   for (int i = 0; i < 16; i++) {
     vec4 pl = uHull[i];
@@ -431,7 +440,7 @@ vec2 obsInterior(vec3 ro, vec3 rd, bool full) {
   else if (rd.y < -1e-4) tMax = min(tMax, (vPieceBox.x - ro.y) / rd.y);
   if (vPieceBox.z * rd.x < -1e-4) tMax = min(tMax, -ro.x / rd.x);
   tMax = clamp(tMax, 0.0, 2.2);
-  if (tMax < 0.004) return vec2(0.0);
+  if (tMax < 0.004) return vec3(0.0);
 
   // Veins at depth.
   float lines = 0.0;
@@ -455,15 +464,18 @@ vec2 obsInterior(vec3 ro, vec3 rd, bool full) {
   float dt = tMax / float(N);
   float jit = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
   float glow = 0.0;
+  float cur = 0.0;
   float T = 1.0;
   float k = exp(-2.2 * dt);
   for (int i = 0; i < OBS_STEPS; i++) {
     if (i >= N) break;
     vec3 p = ro + rd * ((float(i) + jit) * dt);
     glow += obsGlowField(p) * T * dt;
+    cur += obsCursor(p) * T * dt;
     T *= k;
   }
-  return vec2(lines * 0.95 + glow, heat * 0.95 + glow * 0.4);
+  // (light, depth-heat, the cursor's light — weighted separately by the caller)
+  return vec3(lines * 0.95 + glow, heat * 0.95 + glow * 0.4, cur * 1.25);
 }
 #endif
 `;
@@ -595,11 +607,13 @@ const FRAG_EMISSIVE = /* glsl */ `
       vec3 obsNo = normalize(transpose(vObjToView) * normal);
       vec3 obsRi = refract(obsRd, obsNo, 0.671);
       if (dot(obsRi, obsRi) < 1e-4) obsRi = obsRd;
-      vec2 obsIn = obsInterior(vObs - obsNo * 0.002, normalize(obsRi), obsCut > 0.5);
+      vec3 obsIn = obsInterior(vObs - obsNo * 0.002, normalize(obsRi), obsCut > 0.5);
       // Fresnel: at grazing angles the surface is a mirror and hides the inside.
       float obsFr = pow(1.0 - clamp(dot(-obsRd, obsNo), 0.0, 1.0), 4.0);
-      float obsL = obsIn.x * obsWin * (1.0 - 0.85 * obsFr);
-      float obsH = clamp(obsIn.y / max(obsIn.x, 1e-4), 0.0, 1.0);
+      // The cursor's light reads through the outer faces too — the stone answers the hand.
+      float obsCurW = (obsCut > 0.5 ? 1.2 : 0.62) * (1.0 - vFx.z);
+      float obsL = (obsIn.x * obsWin + obsIn.z * obsCurW) * (1.0 - 0.85 * obsFr);
+      float obsH = clamp((obsIn.y + obsIn.z * 0.6) / max(obsIn.x + obsIn.z, 1e-4), 0.0, 1.0);
       // Deep indigo in the depths, brand indigo where it gathers, never lighter than #6B4BFF.
       vec3 obsDeep = vec3(0.035, 0.016, 0.34);
       vec3 obsHot = vec3(0.147, 0.068, 1.0);

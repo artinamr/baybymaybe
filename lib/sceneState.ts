@@ -100,6 +100,8 @@ export const sceneState = {
     inner: 0.3,
     /** 0..1 dusk: the page darkens and the stone becomes the light (ch03). */
     dusk: 0,
+    /** Floors of light inside the glass at the level cuts (the stack, the build). */
+    floors: 0,
     /**
      * The light that follows the cursor, per piece: where the cursor's ray passes
      * closest to the piece's heart, in stone object space (xyz), and how near the
