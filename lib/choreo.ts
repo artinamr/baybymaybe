@@ -230,9 +230,9 @@ function keys(L: Layout): Key[] {
     { S: 8.9, pivot: CC, az: -640, el: 2, dist: 24, fov: 38, pp: [0.52, 0.5] },
     { S: 9.3, pivot: CC, az: -646, el: 2, dist: D(46), fov: 32, pp: pp(0.6, 0.5) },
     // LET'S TALK — down to the flat's own level: the colossus and its reflection.
-    { S: 9.9, pivot: [COL_C.x, FLAT_Y + 1.2, COL_C.z], az: -652, el: 0.6, dist: flatD(96), fov: 30, pp: mob ? [0.5, 0.3] : [0.66, 0.45] },
-    { S: M0 + 0.5, pivot: [COL_C.x, FLAT_Y + 1.6, COL_C.z], az: -646, el: 0.6, dist: flatD(92), fov: 30, pp: mob ? [0.5, 0.3] : [0.66, 0.43] },
-    { S: M0 + 1.25, pivot: [COL_C.x, FLAT_Y + 3.2, COL_C.z], az: -636, el: 1.2, dist: flatD(100), fov: 30, pp: mob ? [0.5, 0.28] : [0.68, 0.41] },
+    { S: 9.9, pivot: [COL_C.x, FLAT_Y + 1.2, COL_C.z], az: -652, el: 0.6, dist: flatD(108), fov: 30, pp: mob ? [0.5, 0.3] : [0.66, 0.45] },
+    { S: M0 + 0.5, pivot: [COL_C.x, FLAT_Y + 1.6, COL_C.z], az: -646, el: 0.6, dist: mob ? flatD(92) : 122, fov: 30, pp: mob ? [0.5, 0.3] : [0.66, 0.42] },
+    { S: M0 + 1.25, pivot: [COL_C.x, FLAT_Y + 3.2, COL_C.z], az: -636, el: 1.2, dist: mob ? flatD(100) : 130, fov: 30, pp: mob ? [0.5, 0.28] : [0.68, 0.41] },
   ];
 }
 
