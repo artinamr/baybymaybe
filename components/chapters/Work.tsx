@@ -14,9 +14,10 @@ const ROWS = [
 ];
 
 /**
- * 04 · SELECTED WORK. The list flows natively while the camera walks an aisle
- * of standing stones; each row has a station stone that glints when its row is
- * centred or hovered.
+ * 04 · SELECTED WORK. The list flows natively while the camera walks the long
+ * mirror; each row brings one layer of the stone down into frame as a
+ * specimen, which travels with the camera while the row is read and glows
+ * when it is centred or hovered.
  */
 export function Work() {
   return (

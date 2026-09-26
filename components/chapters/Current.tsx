@@ -20,9 +20,10 @@ const BLOCKS = [
 ];
 
 /**
- * 03 · AI AUTOMATION. Mirrored: the constellation holds the left of the frame,
- * the copy the right. Two beats share one slot and cross-fade at S 6.55, in
- * step with the light moving from the product cluster to the workspace one.
+ * 03 · AI AUTOMATION — the night chapter. Mirrored: the stone, opened like a
+ * book, holds the left of the frame, the copy the right. Two beats share one
+ * slot and cross-fade at S 6.55, in step with the pages: the product page opens
+ * widest first, then the workspace page.
  */
 export function Current() {
   const ref = useRef<HTMLDivElement>(null);

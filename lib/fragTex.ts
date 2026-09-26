@@ -1,7 +1,7 @@
 /**
  * PER-FRAGMENT TRANSFORM TEXTURE — contract (docs/SPEC.md §4.3).
  *
- * The whole stone is ONE draw call: 24 fragments merged into one geometry,
+ * The whole stone is ONE draw call: its 8 pieces merged into one geometry,
  * each vertex tagged with `aFrag`. Each fragment's transform lives in one row of
  * an RGBA32F DataTexture (8 texels × FRAG_COUNT rows) — a uniform array could
  * overflow the vertex-uniform limit on an iGPU.
@@ -33,7 +33,7 @@ texture.minFilter = THREE.NearestFilter;
 texture.generateMipmaps = false;
 texture.needsUpdate = true;
 
-/** CPU mirror of each fragment's current world matrix (read by Graph, Flakes, the bridge). */
+/** CPU mirror of each piece's current world matrix. */
 const fragWorld: THREE.Matrix4[] = Array.from({ length: FRAG_COUNT }, () => new THREE.Matrix4());
 /** CPU mirror of each fragment's current world position (its centroid). */
 const fragPos: THREE.Vector3[] = Array.from({ length: FRAG_COUNT }, () => new THREE.Vector3());

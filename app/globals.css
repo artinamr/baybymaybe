@@ -8,15 +8,30 @@
    ========================================================================== */
 
 :root {
-  --paper: #f6f5f2;
-  --paper-2: #eceae5;
-  --ink: #0a0b10;
+  /* Day and night. --dusk (0..1, written by lib/project.ts from the film)
+     takes the page into night for ch03 — the stone becomes the light — and
+     back: the night spreads OUT OF THE STONE as a widening circle (#field),
+     and draws back into it at dawn. --dusk-ui switches the type and chrome as
+     the circle passes them. Every colour below derives from --paper / --ink,
+     so the whole page follows. */
+  --dusk: 0;
+  --dusk-ui: 0;
+  --paper-day: #f6f5f2;
+  --ink-day: #0a0b10;
+  --night: #0b0a11;
+  --night-ink: #eeecf4;
+  --paper: color-mix(in oklab, var(--paper-day), var(--night) calc(var(--dusk-ui) * 100%));
+  --paper-2: color-mix(in oklab, #eceae5, #16141f calc(var(--dusk-ui) * 100%));
+  /* The paper lifts to white behind the stone by day; by night the stone throws a deep indigo aura. */
+  --dusk-aura: 0;
+  --lift: color-mix(in oklab, #fbfaf8, #1d1646 calc(var(--dusk-aura) * 100%));
+  --ink: color-mix(in oklab, var(--ink-day), var(--night-ink) calc(var(--dusk-ui) * 100%));
   --indigo: #5b3df0;
   --indigo-hi: #6b4bff;
   --indigo-lo: #4b2fdb;
-  --muted: rgba(10, 11, 16, 0.66);
-  --hair: rgba(10, 11, 16, 0.1);
-  --hair-soft: rgba(10, 11, 16, 0.06);
+  --muted: color-mix(in oklab, var(--ink) 66%, transparent);
+  --hair: color-mix(in oklab, var(--ink) 10%, transparent);
+  --hair-soft: color-mix(in oklab, var(--ink) 6%, transparent);
 
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-line: cubic-bezier(0.19, 1, 0.22, 1);
@@ -135,9 +150,13 @@ a {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(38vw 48vh at var(--stone-x, 62vw) var(--stone-y, 50vh), #fbfaf8 0%, rgba(251, 250, 248, 0) 70%),
-    radial-gradient(140vw 120vh at 50% 45%, rgba(246, 245, 242, 0) 60%, rgba(10, 11, 16, 0.025) 100%),
-    var(--paper);
+    radial-gradient(38vw 48vh at var(--stone-x, 62vw) var(--stone-y, 50vh), var(--lift) 0%, color-mix(in oklab, var(--lift) 0%, transparent) 70%),
+    radial-gradient(140vw 120vh at 50% 45%, color-mix(in oklab, var(--paper) 0%, transparent) 60%, color-mix(in oklab, var(--ink) 2.5%, transparent) 100%),
+    radial-gradient(
+      circle at var(--stone-x, 62vw) var(--stone-y, 50vh),
+      var(--night) calc(var(--dusk) * 165vmax - 24vmax),
+      var(--paper-day) calc(var(--dusk) * 165vmax)
+    );
 }
 #field-card {
   position: fixed;
@@ -165,8 +184,8 @@ a {
   bottom: 11%;
   left: 40%;
   border-radius: 28px;
-  border: 1px solid rgba(10, 11, 16, 0.1);
-  box-shadow: 0 40px 90px -40px rgba(10, 11, 16, 0.22);
+  border: 1px solid color-mix(in oklab, var(--ink) 10%, transparent);
+  box-shadow: 0 40px 90px -40px color-mix(in oklab, var(--ink) 22%, transparent);
   opacity: 0;
 }
 
@@ -354,7 +373,7 @@ html[data-intro-skip] .intro-mask > span {
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.005em;
-  color: rgba(10, 11, 16, 0.6);
+  color: color-mix(in oklab, var(--ink) 60%, transparent);
 }
 .marker-n {
   font-variant-numeric: tabular-nums;
@@ -382,7 +401,7 @@ html[data-intro-skip] .intro-mask > span {
   line-height: 1.6;
   letter-spacing: -0.003em;
   max-width: 40ch;
-  color: rgba(10, 11, 16, 0.72);
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
 }
 .accent {
   color: var(--indigo);
@@ -498,7 +517,7 @@ html[data-intro-skip] .intro-mask > span {
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.005em;
-  color: rgba(10, 11, 16, 0.6);
+  color: color-mix(in oklab, var(--ink) 60%, transparent);
 }
 .hero-desc {
   position: absolute;
@@ -507,7 +526,7 @@ html[data-intro-skip] .intro-mask > span {
   max-width: min(var(--desc-width, 374px), 40ch);
   font-size: 15px;
   line-height: 1.55;
-  color: rgba(10, 11, 16, 0.72);
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
   pointer-events: auto;
 }
 .hero-ctas {
@@ -568,13 +587,13 @@ html[data-intro-skip] .intro-mask > span {
   max-width: 44ch;
   font-size: 16px;
   line-height: 1.6;
-  color: rgba(10, 11, 16, 0.72);
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
 }
 .cut-caption {
   position: absolute;
   right: calc(var(--g) + 48px);
   bottom: calc(var(--vh) * 8);
-  color: rgba(10, 11, 16, 0.5);
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
 }
 
 /* ==========================================================================
@@ -620,7 +639,7 @@ html[data-intro-skip] .intro-mask > span {
   padding-top: 6px;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: rgba(10, 11, 16, 0.45);
+  color: color-mix(in oklab, var(--ink) 45%, transparent);
 }
 .layer-name {
   font-family: var(--display);
@@ -632,7 +651,7 @@ html[data-intro-skip] .intro-mask > span {
 .layer-line {
   font-size: 15px;
   line-height: 1.4;
-  color: rgba(10, 11, 16, 0.66);
+  color: color-mix(in oklab, var(--ink) 66%, transparent);
 }
 .layers:has([data-focus="1"]) .layer:not([data-focus="1"]) {
   opacity: 0.4;
@@ -677,13 +696,13 @@ html[data-intro-skip] .intro-mask > span {
   font-size: 16px;
   line-height: 1.55;
   max-width: 38ch;
-  color: rgba(10, 11, 16, 0.72);
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
 }
 .beat-items li {
   font-size: 15px;
   padding: 8px 0;
   border-top: 1px solid var(--hair-soft);
-  color: rgba(10, 11, 16, 0.72);
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
 }
 [data-beat="a"] .beat[data-key="b"],
 [data-beat="b"] .beat[data-key="a"] {
@@ -761,7 +780,7 @@ html[data-intro-skip] .intro-mask > span {
 }
 .row-scope {
   font-size: 16px;
-  color: rgba(10, 11, 16, 0.72);
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
   max-width: 44ch;
 }
 .row-meta {
@@ -769,7 +788,7 @@ html[data-intro-skip] .intro-mask > span {
   gap: 14px;
   align-items: center;
   font-size: 13px;
-  color: rgba(10, 11, 16, 0.55);
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
 }
 .chip {
   font-size: 12px;
@@ -823,7 +842,7 @@ html[data-intro-skip] .intro-mask > span {
   font-variant-numeric: lining-nums;
 }
 .step-n-o {
-  color: rgba(10, 11, 16, 0.18);
+  color: color-mix(in oklab, var(--ink) 18%, transparent);
 }
 .step-n-f {
   position: absolute;
@@ -847,7 +866,7 @@ html[data-intro-skip] .intro-mask > span {
 .step-body {
   font-size: 15px;
   line-height: 1.45;
-  color: rgba(10, 11, 16, 0.68);
+  color: color-mix(in oklab, var(--ink) 68%, transparent);
   max-width: 34ch;
 }
 .steps[data-step="-1"] .step,
@@ -907,7 +926,7 @@ html[data-intro-skip] .intro-mask > span {
   max-width: 44ch;
   font-size: 17px;
   line-height: 1.5;
-  color: rgba(10, 11, 16, 0.75);
+  color: color-mix(in oklab, var(--ink) 75%, transparent);
 }
 .mark-ctas {
   position: absolute;
@@ -1008,7 +1027,7 @@ html[data-intro-skip] .intro-mask > span {
 .f-h {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(10, 11, 16, 0.5);
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
   margin-bottom: 4px;
 }
 
@@ -1038,7 +1057,7 @@ html[data-intro-skip] .intro-mask > span {
   inset: 0 0 -36px 0;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(to bottom, var(--paper) 0%, var(--paper) 45%, rgba(246, 245, 242, 0) 100%);
+  background: linear-gradient(to bottom, var(--paper) 0%, var(--paper) 45%, color-mix(in oklab, var(--paper) 0%, transparent) 100%);
   opacity: var(--nav-veil, 0);
   transition: opacity 400ms ease;
 }
@@ -1085,7 +1104,7 @@ html[data-mark] .nav-mark .lm-right {
 .nav-link {
   font-size: 13px;
   font-weight: 500;
-  color: rgba(10, 11, 16, 0.72);
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
   letter-spacing: 0.01em;
 }
 .nav-menu {
@@ -1217,7 +1236,7 @@ a:focus-visible .swap-b {
   height: 48px;
   padding: 0 20px;
   border-radius: 999px;
-  border: 1px solid rgba(10, 11, 16, 0.16);
+  border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent);
   font-size: 15px;
   font-weight: 500;
   overflow: hidden;
@@ -1271,7 +1290,7 @@ a:focus-visible .swap-b {
 }
 .index-num {
   font-size: 10.5px;
-  color: rgba(10, 11, 16, 0.42);
+  color: color-mix(in oklab, var(--ink) 42%, transparent);
   transition: color 300ms ease;
 }
 .index-tick {
@@ -1279,7 +1298,7 @@ a:focus-visible .swap-b {
   display: block;
   width: 16px;
   height: 1px;
-  background: rgba(10, 11, 16, 0.25);
+  background: color-mix(in oklab, var(--ink) 25%, transparent);
   transform-origin: right;
   transition: width 400ms var(--ease-expo);
 }
@@ -1323,10 +1342,10 @@ a:focus-visible .swap-b {
   z-index: 30;
   padding: 16px 18px;
   border-radius: 14px;
-  background: rgba(246, 245, 242, 0.72);
+  background: color-mix(in oklab, var(--paper) 72%, transparent);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(10, 11, 16, 0.08);
+  border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
   transition: opacity 400ms ease, transform 500ms var(--ease-expo);
 }
 /* The card belongs to the hero's opening; once the film starts moving it
@@ -1350,7 +1369,7 @@ html[data-scrolled] .specimen {
   gap: 8px;
   font-size: 12px;
   font-weight: 500;
-  color: rgba(10, 11, 16, 0.55);
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
 }
 .specimen-n {
   font-variant-numeric: tabular-nums;
@@ -1368,7 +1387,7 @@ html[data-scrolled] .specimen {
   margin-top: 6px;
   font-size: 13px;
   line-height: 1.45;
-  color: rgba(10, 11, 16, 0.68);
+  color: color-mix(in oklab, var(--ink) 68%, transparent);
 }
 .specimen-next {
   margin-top: 12px;
@@ -1377,7 +1396,7 @@ html[data-scrolled] .specimen {
   gap: 10px;
   font-size: 12px;
   font-weight: 500;
-  color: rgba(10, 11, 16, 0.7);
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
 }
 .specimen-next:hover {
   color: var(--indigo);
@@ -1386,7 +1405,7 @@ html[data-scrolled] .specimen {
   position: relative;
   width: 24px;
   height: 1px;
-  background: rgba(10, 11, 16, 0.2);
+  background: color-mix(in oklab, var(--ink) 20%, transparent);
   overflow: hidden;
 }
 .cue-line > span {

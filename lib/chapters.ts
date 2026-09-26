@@ -82,9 +82,9 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     id: "method",
     num: "05",
     label: "Method",
-    vh: 220,
+    vh: 320,
     sticky: true,
-    jumpS: 10.81,
+    jumpS: 10.62,
     specimen: { name: "Method", line: "Discover, architect, build, automate." },
   },
   {
@@ -93,7 +93,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Contact",
     vh: 220,
     sticky: true,
-    jumpS: 13.32,
+    jumpS: 14.32,
     specimen: { name: "Contact", line: "We reply to every message personally." },
   },
 ];
@@ -107,9 +107,9 @@ export const CHAPTERS: ChapterDef[] = (() => {
   });
 })();
 
-/** Total page height in vh (1480). */
+/** Total page height in vh (1580). */
 export const PAGE_VH = CHAPTERS.reduce((a, c) => a + c.vh, 0);
-/** Maximum reachable S (page height − one viewport), 13.8. */
+/** Maximum reachable S (page height − one viewport), 14.8. */
 export const S_MAX = PAGE_VH / 100 - 1;
 
 export const CHAPTER_INDEX: Record<ChapterId, number> = Object.fromEntries(

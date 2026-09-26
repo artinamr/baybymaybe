@@ -18,13 +18,11 @@ export const PRIORITY = {
   director: -50,
   /** CameraRig: apply sceneState.cam to the camera (+ view offset). */
   camera: -40,
-  /** Everything else that reads sceneState (materials, graph, field, flakes, mist…). */
+  /** Everything else that reads sceneState (materials, ground, mist…). */
   scene: -30,
   /** lib/project.ts bridge: project to screen, write DOM (after camera, before render). */
   bridge: -10,
 } as const;
-
-export type Formation = "F0" | "F1" | "F2" | "F3" | "F4" | "F5" | "F6";
 
 export const sceneState = {
   /** Global scroll coordinate this frame. */
@@ -55,7 +53,7 @@ export const sceneState = {
     target: new THREE.Vector3(0, -0.464, 0),
   },
 
-  /** The assembled stone's placement (formations F0/F1/F5/F6 compose on top of it). */
+  /** The intact stone's placement (the rig composes every piece on top of it). */
   stone: {
     home: new THREE.Vector3(0, 0, 0),
     /** radians */
@@ -67,13 +65,12 @@ export const sceneState = {
     visible: true,
   },
 
-  /** Formation blend the Director is currently evaluating (informational). */
-  formation: { a: "F0" as Formation, b: "F0" as Formation, mix: 0 },
-
   /** Material uniforms the Director drives (shaders/obsidian.ts copies these each frame). */
   u: {
     /** 0..1 mark seams lit on outer faces (aCrack == 2 edges). */
     seam: 0,
+    /** 0..1 level seams lit on outer faces (aCrack == 3 edges) — just before the stack parts. */
+    levelSeam: 0,
     /** Travelling seam pulse: world-space centre + amplitude. */
     pulsePos: new THREE.Vector3(0, 0, 0),
     pulseAmp: 0,
@@ -99,39 +96,21 @@ export const sceneState = {
     cursorLight: 8,
     /** Indigo veins of light on the stone's outer faces, 0..1 (choreo). */
     vein: 1,
+    /** The light inside the glass, seen through the outer faces (0 none … ~1.2 dusk). */
+    inner: 0.3,
+    /** 0..1 dusk: the page darkens and the stone becomes the light (ch03). */
+    dusk: 0,
+    /**
+     * The light that follows the cursor, per piece: where the cursor's ray passes
+     * closest to the piece's heart, in stone object space (xyz), and how near the
+     * ray passes (w, 0..1). cursorAmt is the global level (pointer active, chapter).
+     */
+    cursorPiece: Array.from({ length: 8 }, () => new THREE.Vector4(0, -0.4, 0, 0)),
+    cursorAmt: 0,
   },
 
-  /** ch02: world-space left anchor of each tier (0 bottom … 3 top) for the leader lines; focused tier. */
-  tiers: {
-    anchors: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()],
-    focus: -1,
-    visible: false,
-  },
-
-  /** ch03 constellation. grow 0..1 (edges), beat 0 none · 1 A (product) · 2 B (workspace). */
-  graph: { visible: false, grow: 0, beat: 0, fade: 0 },
-
-  /**
-   * The ch02/ch03 sculptures' live motion, integrated by the Director and read
-   * by both the fragments (formations) and the light streams, so shards and
-   * light always turn together.
-   */
-  sculpt: {
-    tilt: new THREE.Quaternion(),
-    ringPhase: [0, 0, 0, 0],
-    orbitPhase: [0, 0, 0],
-    /** 0.. how hard the cursor is stirring the sculpture. */
-    stir: 0,
-  },
-
-  /** Light streams: overall opacity, and tower (0) → orbits (1) morph. */
-  streams: { fade: 0, morph: 0 },
-
-  /** ch04 standing-stone field. */
-  field: { visible: false, fade: 0 },
-
-  /** Flakes (48 chips shed from the cracks). */
-  flakes: { visible: false, amount: 0 },
+  /** ch02: the focused layer (0 tips … 3 crown, −1 none) while the stack is formed. */
+  tiers: { focus: -1, visible: false },
 
   /**
    * Stage clip for the ch06 BOOKEND (the intro clip is pure CSS). Insets in % of the

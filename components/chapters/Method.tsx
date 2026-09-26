@@ -3,7 +3,7 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { Section, Marker, Line } from "./Section";
 import { onScrollFrame } from "@/lib/scroll";
-import { chapter } from "@/lib/chapters";
+import { METHOD } from "@/lib/choreo";
 
 const STEPS = [
   { n: "01", title: "Discover", body: "We learn the business, the people and the systems before we design anything." },
@@ -13,22 +13,21 @@ const STEPS = [
 ];
 
 /**
- * 05 · METHOD. Each step lights as its group of fragments seats back into the
- * stone (from the point up): the four steps and the four seatings are the
- * same four beats.
+ * 05 · METHOD. The four layers gather over the mirror, then build the stone
+ * from the point up — one layer per step, each landing with a flash: the four
+ * steps and the four seats are the same four beats.
  */
 export function Method() {
   const ref = useRef<HTMLOListElement>(null);
   useEffect(() => {
-    const S0 = chapter("method").S0;
     return onScrollFrame((S) => {
       const el = ref.current;
       if (!el) return;
-      // Seating windows: 10.6 + 0.225·k (SPEC §5 ch05).
-      const k = Math.max(0, Math.min(3, Math.floor((S - 10.6) / 0.225)));
-      const v = String(S < 10.45 ? -1 : k);
+      // One step per seat: step k lights as layer k starts down onto the stone.
+      const k = Math.max(0, Math.min(3, Math.floor((S - METHOD.t0 + 0.08) / METHOD.step)));
+      const v = String(S < METHOD.t0 - 0.2 ? -1 : k);
       if (el.dataset.step !== v) el.dataset.step = v;
-      el.style.setProperty("--fill", Math.max(0, Math.min(1, (S - S0) / 1.2)).toFixed(3));
+      el.style.setProperty("--fill", Math.max(0, Math.min(1, (S - METHOD.t0 + 0.08) / (4 * METHOD.step))).toFixed(3));
     });
   }, []);
 

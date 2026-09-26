@@ -184,11 +184,12 @@ export function initScroll(): () => void {
 /**
  * The film's composed frames, in S. When you stop scrolling between two of
  * them, the page glides on to one — the way igloo.inc finishes a move for you:
- * hero · the statement over the stone · each lit ring of the core · each beat
- * of the armillary · each work row (measured) · each seating of the method ·
- * the stone before the last cut · the mark · the footer.
+ * hero · the statement over the stone · the opened cut · each layer of the
+ * stack · the whole stack · each page of the book · each work row (measured) ·
+ * the gathered column · each seat of the build · the mark · the footer.
+ * (Chapter jumpS values sit on these — keep them in sync.)
  */
-const REST_STATIC = [0, 1.62, 3.52, 3.76, 3.99, 4.23, 6.2, 6.88, 10.81, 11.04, 11.26, 11.48, 12.72, 13.32];
+const REST_STATIC = [0, 1.62, 2.5, 3.52, 3.76, 3.99, 4.23, 4.56, 6.2, 6.88, 10.62, 11.1, 11.55, 12.0, 12.45, 13.72, 14.32];
 const restPts: number[] = [];
 
 function anchors(): number[] {

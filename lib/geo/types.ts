@@ -40,7 +40,18 @@ export const MARK = {
 export const HOME_A: readonly [number, number, number] = [0, 0, 0];
 export const HOME_B: readonly [number, number, number] = [0, 0, -52];
 
-export const FRAG_COUNT = 24;
+/**
+ * THE ANATOMY — eight pieces, every cut deliberate (no random fracture):
+ *   0 crown   · 1 band            (the mark's own cuts: y = bandH, y = 0)
+ *   2–4 blade L, top → tip        (the mark's x = 0 cut, then two LEVEL cuts
+ *   5–7 blade R, top → tip         across the pavilion at LEVEL_Y)
+ * Layers (the stack, the four work specimens, the method's build order):
+ *   3 crown + band · 2 top blades · 1 middle blades · 0 the tips.
+ */
+export const FRAG_COUNT = 8;
+
+/** The two level cuts across the pavilion (object y). */
+export const LEVEL_Y = [-0.6, -1.22] as const;
 
 export type Piece = "crown" | "band" | "bladeL" | "bladeR";
 
@@ -59,12 +70,10 @@ export type FragInfo = {
   longAxis: THREE.Vector3;
   /** Extent along longAxis (for layout of formations). */
   length: number;
-  /** 0..3 by volume, largest = 0 (ch02 floor assignment). */
-  tier: number;
-  /** 0..3 method seating order from the culet up; group 3 = band + crown (ch05). */
-  group: number;
-  /** ch03 cluster: P (product) or W (workspace). */
-  cluster: "P" | "W";
+  /** 0 tips · 1 middle blades · 2 top blades · 3 crown + band. */
+  layer: number;
+  /** −1 left blade · 0 on the axis (crown, band) · +1 right blade. */
+  side: -1 | 0 | 1;
   /** Bounding radius about the centroid. */
   radius: number;
 };
@@ -82,7 +91,7 @@ export type FragInfo = {
  *                   (a thread running down meridian r just animates uThreadHead 0→1)
  *   aBary     vec3  barycentric (1,0,0)/(0,1,0)/(0,0,1) per triangle corner
  *   aCrack    vec3  per corner k: type of the triangle edge OPPOSITE corner k
- *                   (0 none/internal diagonal · 1 Voronoi boundary · 2 primary mark cut)
+ *                   (0 none/internal diagonal · 2 primary mark cut · 3 level cut)
  *   aObj      vec3  position in intact-stone object space
  *   aFaceC    vec3  cut-face centroid (object space; 0 for non-cut)
  *   aFaceR    float cut-face radius (max distance centroid→boundary; 0 for non-cut)

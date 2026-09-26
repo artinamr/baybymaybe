@@ -10,7 +10,8 @@ import { STONE } from "./geo/types";
  * (CONTRACTS §3 E5):
  *   · the ch01 inversion clip (letters flip ink → paper exactly where the black
  *     stone passes behind them)
- *   · the ch02 layer rows' focus (the ring the scroll or the pointer has lit)
+ *   · the ch02 layer rows' focus (the layer the scroll or the pointer has lit)
+ *   · --dusk (ch03 turns the page to night)
  *   · the specimen card's live camera readout
  *   · --stone-x / --stone-y (the paper's radial lift follows the stone)
  *   · the ch06 bookend clip and the mark-lock flag
@@ -87,6 +88,19 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
   write("stone", `${c.x.toFixed(0)},${c.y.toFixed(0)}`, () => {
     root.style.setProperty("--stone-x", `${c.x.toFixed(0)}px`);
     root.style.setProperty("--stone-y", `${c.y.toFixed(0)}px`);
+  });
+
+  /* ---- dusk: the page follows the film into night and back (ch03) ------- */
+  const dusk = sceneState.u.dusk;
+  write("dusk", dusk.toFixed(3), (val) => {
+    root.style.setProperty("--dusk", val);
+    // Type and chrome turn as the circle of night passes them; the aura round
+    // the stone turns indigo as soon as the night leaves it.
+    const t = Math.min(1, Math.max(0, (dusk - 0.26) / 0.3));
+    root.style.setProperty("--dusk-ui", (t * t * (3 - 2 * t)).toFixed(3));
+    const a = Math.min(1, dusk / 0.2);
+    root.style.setProperty("--dusk-aura", (a * a * (3 - 2 * a)).toFixed(3));
+    root.toggleAttribute("data-dusk", dusk > 0.6);
   });
 
   /* ---- ch01 inversion ----------------------------------------------------- */

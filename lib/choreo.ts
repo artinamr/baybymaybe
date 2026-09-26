@@ -1,20 +1,31 @@
 import * as THREE from "three";
 import type { Layout } from "./layout";
-import type { Formation, SceneState } from "./sceneState";
+import type { SceneState } from "./sceneState";
 import { measured, ui } from "./stores";
 import { DEG, clamp01, easeInOutCubic, easeInOutSine, lerp, range } from "./ease";
-import { STONE } from "./geo/types";
+import { HOME_B, STONE } from "./geo/types";
+import { chapter } from "./chapters";
+import { createRig } from "./formations";
 
 /**
- * THE FILM — every scroll-driven value of the 3D, as a pure function of S
- * (docs/SPEC.md §5–6). Time-based events (threads, pulses, flashes, idle
- * motion, the intro) live in the Director; this file only answers "where is
- * everything at scroll position S".
+ * THE FILM — every scroll-driven value of the 3D, as a pure function of S.
+ * Time-based life (dials drifting, the cursor, flashes, springs) lives in the
+ * Director; this file only answers "where is everything at scroll position S".
+ *
+ * ONE STONE, SEVEN PLACES. The same eight pieces, never a new prop; what
+ * changes is the place and the camera:
+ *   00  the stone on its mirror                          (studio, paper)
+ *   01  it looks down on you, then the mark's cut opens   (the light inside)
+ *   02  the stack — four layers, the camera cranes down   (architecture)
+ *   03  the book — the blades open on their spine          (dusk: the stone is the light)
+ *   04  the specimens — each layer out in the world        (the long mirror)
+ *   05  they gather and build the stone, layer on layer    (slow, four beats)
+ *   06  from one angle it is the mark                      (the logo)
  *
  * Camera keys are interpolated in a framing-preserving space: visible height
  * at the pivot (log), fov (linear), azimuth/elevation (linear, direction as
- * written), principal point (linear). Distance is derived — so every dolly-zoom
- * (the finale's flattening onto the mark) holds its framing by construction.
+ * written), principal point (linear). Distance is derived — so every
+ * dolly-zoom (the finale's flattening onto the mark) holds its framing.
  */
 
 type Key = {
@@ -27,45 +38,68 @@ type Key = {
   pp: [number, number];
 };
 
-/** Per-fragment blend plan the Director executes. */
-export const plan = {
-  a: "F0" as Formation,
-  b: "F0" as Formation,
-  /** Window-local progress 0..1 (the Director staggers it per fragment). */
-  mix: 0,
-  /** 0 none · 1 from the crack origin · 2 by tier · 3 top-down · 4 random · 5 by method group */
-  stagger: 0,
-  /** Bézier arc strength. */
-  arc: 0.35,
-  gap: 0,
-  /** The stone rising off its reflection during the hero → ch01 pass (world y). */
-  lift: 0,
-  crownLift: 0,
-  bandLift: 0,
-  split: 0,
-  /** Stone rotation for stone-relative forms (radians). */
+/** The rig's degrees of freedom, eased by the film (the Director adds life). */
+export const rig = createRig();
+
+/** Per-S facts the Director turns into light and life. */
+export const film = {
+  /** Stone yaw (radians) before the Director's idle / pointer terms. */
   yaw: 20 * DEG,
-  pitch: 0,
-  /** Glow mode for per-fragment cut glow: 0 uniform · 1 tier focus · 2 seating heal · 3 mark · 4 armillary beat */
-  glowMode: 0,
-  /**
-   * Transitions SPIRAL: while pieces travel between two formations they are
-   * swept round the vertical axis through a centre by swirl·sin(π·progress) —
-   * the change reads as a vortex, not a slide. 0 = straight.
-   */
-  swirl: 0,
-  /** Swirl centre: 0 = HOME_A, 1 = HOME_B. */
-  swirlAt: 0,
-  /** F5 window start (seating) and per-group length, in S. */
-  seatS0: 10.6,
-  seatLen: 0.225,
-  /** ch05 seating progress per group (0..1) for flashes/heal. */
+  /** The build site's yaw (radians) — layers that have gathered are posed with it. */
+  yawB: 45 * DEG,
+  /** Hero rise off the reflection (world y). */
+  lift: 0,
+  /** 0..1 how far the stack is formed (dials drift only while it is). */
+  stack: 0,
+  /** 0..1 the mark's cut is open (ch01). */
+  open: 0,
+  /** ch02 focused layer from the scroll (−1 none) and "all layers lit". */
+  focus: -1,
+  allLit: 0,
+  /** 0..1 the book is open; beat 0 → product (left page), 1 → workspace (right). */
+  book: 0,
+  beat: 0,
+  /** 0..1 per layer: at its specimen station (ch04). */
+  station: [0, 0, 0, 0],
+  /** ch05: 0..1 per layer, seated into the stone (build order: tips first). */
   seat: [0, 0, 0, 0],
+  /** ch05: 0..1 the four layers hang as an exploded column at HOME_B. */
+  column: 0,
+  /** ch06: crown fade. */
+  crownFade: 0,
+  /** 1 while every piece is exactly in the intact stone (the rig must stay rigid). */
+  whole: 1,
+  /** Which glow recipe the Director applies: 0 cut · 1 stack · 2 book · 3 specimens · 4 build · 5 mark. */
+  glow: 0,
 };
 
-const HOME_B_Z = -52;
+/** Rows (ch04) → which layer stands at that row's station. */
+export const ROW_LAYER = [3, 0, 2, 1];
+
+/** Vertical offsets of the four layers in the stack (stone units, tips → crown). */
+export const STACK_Y = [-0.66, -0.22, 0.2, 0.62];
+/** The same four layers hanging above their seats at HOME_B before they build. */
+const COLUMN_Y = [0.3, 0.64, 1.0, 1.42];
+
+/** ch05 — METHOD. The gather, then one seat per step, long enough to watch. */
+export const METHOD = { t0: 10.75, step: 0.45, seatLen: 0.3 };
+/** Top of ch06 (the finale keys hang off it). */
+export const M0 = chapter("mark").S0;
+
+const HOME_B_Z = HOME_B[2];
 const CORRIDOR = { S0: 7.2, S1: 10.6, walkIn: 8.2, walkOut: 10.1, z0: 4.0, z1: -41, y0: 1.3, y1: 0.4 };
 const STATIONS_Z = [-14, -22, -30, -38];
+/** Specimens float at eye level just right of the walk, where the camera's aim puts them at the right third. */
+const STATIONS_X = [1.1, 1.35, 1.1, 1.35];
+/** How far ahead of the camera a specimen floats while its row is read. */
+const SPECIMEN_AHEAD = 7.4;
+/** Where the layers wait, travelling with the walk above the frame. */
+const WAIT_AHEAD = 18;
+const WAIT_Y = 8.5;
+const WAIT_X = [-2.2, 3.4, -1.0, 4.2];
+const STATION_Y = 0.15;
+/** Stack rises clear of the floor (world y) while it is formed. */
+const STACK_LIFT = 0.62;
 
 function heightOf(k: { dist: number; fov: number }) {
   return 2 * k.dist * Math.tan((k.fov * DEG) / 2);
@@ -86,6 +120,7 @@ function keys(L: Layout): Key[] {
   // Mobile: the 3D lives in a top band (pp y 0.30), framed 0.55× as tall.
   const pp = (x: number, y: number): [number, number] => (mob ? [0.5, 0.3] : [x, y]);
   const D = (d: number) => (mob ? d / 0.55 : d);
+  const B = HOME_B_Z;
   return [
     { S: 0, pivot: [0, STONE.centerY, 0], az: 0, el: 4, dist: heroD, fov: 30, pp: heroPP },
     // LOOK UP — the camera cranes below the girdle and looks up at the monument.
@@ -93,24 +128,28 @@ function keys(L: Layout): Key[] {
     // THE PASS — close, wide lens, the stone filling the frame.
     { S: 1.0, pivot: [0, 0.02, 0], az: -108, el: 3, dist: heroD * 0.5, fov: 44, pp: [0.5, 0.5] },
     { S: 1.7, pivot: [mob ? 0 : 1.8, STONE.centerY, 0], az: -12, el: 8, dist: D(8.0), fov: 30, pp: pp(0.62, 0.5) },
-    // INTO THE BURST — the fragments fly past the lens.
-    { S: 2.45, pivot: [0, -0.3, 0], az: 12, el: 4, dist: D(2.7), fov: 46, pp: [0.5, 0.5] },
-    // THE CORE — a slow orbit round the turning tower of rings.
-    { S: 3.4, pivot: [0, -0.05, 0], az: 30, el: 12, dist: D(10.2), fov: 30, pp: pp(0.66, 0.5) },
-    { S: 4.6, pivot: [0, -0.05, 0], az: 78, el: 20, dist: D(10.6), fov: 30, pp: pp(0.66, 0.5) },
-    // THE ARMILLARY — frame it on the left early, before the copy arrives on the right…
-    { S: 5.3, pivot: [0, 0, 0], az: 12, el: 13, dist: D(11.2), fov: 30, pp: pp(0.34, 0.5) },
-    // …then swing round it.
-    { S: 5.9, pivot: [0, 0, 0], az: -35, el: 9, dist: D(10.2), fov: 30, pp: pp(0.33, 0.5) },
-    { S: 7.2, pivot: [0, 0, 0], az: 0, el: 7, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5) },
-    { S: 10.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 10, el: 9, dist: D(7.7), fov: 30, pp: pp(0.66, 0.52) },
-    { S: 11.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 15, dist: D(7.3), fov: 30, pp: pp(0.66, 0.52) },
-    { S: 12.6, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 20, dist: D(L.fit(0.62, 30)), fov: 30, pp: pp(0.66, 0.5) },
-    { S: 12.8, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
-    { S: 12.96, pivot: [0, STONE.centerY, HOME_B_Z], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
-    { S: 13.15, pivot: [0, -0.741, HOME_B_Z], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
-    { S: 13.5, pivot: [0, -0.741, HOME_B_Z], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
-    { S: 13.8, pivot: [0, -0.741, HOME_B_Z], az: 90, el: 32.91, dist: D(17.9), fov: 16, pp: mob ? [0.5, 0.36] : [0.71, 0.395] },
+    // THE CUT — it opens along the mark; the camera leans in and round.
+    { S: 2.45, pivot: [mob ? 0 : 1.25, -0.15, 0], az: 24, el: 10, dist: D(7.4), fov: 30, pp: pp(0.64, 0.5) },
+    // THE STACK — rise to the top layer, then crane down the four as they are read.
+    { S: 3.35, pivot: [0, 0.78, 0], az: 40, el: 15, dist: D(10.4), fov: 30, pp: pp(0.66, 0.47) },
+    { S: 4.35, pivot: [0, -0.42, 0], az: 68, el: 5, dist: D(10.4), fov: 30, pp: pp(0.66, 0.53) },
+    { S: 4.72, pivot: [0, 0.1, 0], az: 80, el: 9, dist: D(11.8), fov: 30, pp: pp(0.66, 0.5) },
+    // THE BOOK — swing round to face the opening pages, framed on the left.
+    // Eye level: the thin plates (band, the sections' tops) read edge-on, as lines of light.
+    { S: 5.65, pivot: [0, -0.15, 0], az: 16, el: 3, dist: D(10.6), fov: 30, pp: pp(0.34, 0.5) },
+    { S: 6.4, pivot: [0, -0.12, 0], az: 4, el: 1.5, dist: D(9.9), fov: 30, pp: pp(0.34, 0.5) },
+    { S: 7.2, pivot: [0, 0, 0], az: 0, el: 5, dist: D(10.7), fov: 30, pp: pp(0.31, 0.5) },
+    // THE BUILD — the column hangs at HOME_B; the camera circles as it builds.
+    { S: 10.6, pivot: [0, 0.22, B], az: 10, el: 9, dist: D(11.2), fov: 30, pp: pp(0.66, 0.5) },
+    { S: 11.6, pivot: [0, 0.18, B], az: 40, el: 11, dist: D(10.6), fov: 30, pp: pp(0.66, 0.5) },
+    { S: 12.3, pivot: [0, 0.02, B], az: 62, el: 12, dist: D(9.8), fov: 30, pp: pp(0.66, 0.51) },
+    { S: M0 - 1.0, pivot: [0, STONE.centerY, B], az: 90, el: 15, dist: D(7.3), fov: 30, pp: pp(0.66, 0.52) },
+    { S: M0, pivot: [0, STONE.centerY, B], az: 90, el: 20, dist: D(L.fit(0.62, 30)), fov: 30, pp: pp(0.66, 0.5) },
+    { S: M0 + 0.2, pivot: [0, STONE.centerY, B], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
+    { S: M0 + 0.36, pivot: [0, STONE.centerY, B], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
+    { S: M0 + 0.55, pivot: [0, -0.741, B], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
+    { S: M0 + 0.9, pivot: [0, -0.741, B], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
+    { S: M0 + 1.2, pivot: [0, -0.741, B], az: 90, el: 32.91, dist: D(17.9), fov: 16, pp: mob ? [0.5, 0.36] : [0.71, 0.395] },
   ];
 }
 
@@ -315,163 +354,195 @@ function evalCamera(S: number, L: Layout, out: SceneState) {
   writeOrbitRow(out, sampleSpline(S <= CORRIDOR.S0 ? sp.A : sp.B, S, _row));
 }
 
+
+/** The corridor camera's z at scroll position s (for specimens that travel with it). */
+function camZAt(s: number, L: Layout): number {
+  const sp = splinesFor(L);
+  orbitPos(_a.set(...sp.k72.pivot), sp.k72.az * DEG, sp.k72.el * DEG, sp.k72.dist, _in);
+  orbitPos(_b.set(...sp.k106.pivot), sp.k106.az * DEG, sp.k106.el * DEG, sp.k106.dist, _out);
+  return corridorZ(s, _in.z, _out.z);
+}
+
+/** A work row's S (ch04): measured once the list is laid out, else evenly spaced. */
+function rowS(i: number): number {
+  const rs = measured.rowS;
+  if (rs.length === 4 && rs.every((v, k) => k === 0 || v > rs[k - 1])) return rs[i];
+  return lerp(CORRIDOR.walkIn, CORRIDOR.walkOut, (i + 1) / 5);
+}
+
+/** When the pieces leave the stone for their stations, and when they leave the stations to gather. */
+const DEPART = 7.58;
+const DEPART_LEN = 0.62;
+const GATHER_LEN = 0.55;
+/** From here on the stone itself is at HOME_B: every layer has left its station for the column. */
+function homeSwitch(): number {
+  return rowS(3) + 0.1 + GATHER_LEN + 0.02;
+}
+
 /**
- * Fill every scroll-driven field of sceneState (+ the fragment blend plan).
+ * Fill every scroll-driven field of sceneState + the rig + the film facts.
  * Pure in (S, L) except for reading ui.focusTier / measured.rowS.
  */
 export function evaluate(S: number, _time: number, L: Layout, out: SceneState): void {
   evalCamera(S, L, out);
   const u = out.u;
+  const r = rig;
+  const c = out.cam;
+  const mob = L.mode === "mobile";
 
-  /* ---- stone placement ---------------------------------------------- */
-  // Rises 0.32 off its reflection through the pass and settles back before it breaks.
-  plan.lift = 0.32 * Math.sin(Math.PI * easeInOutSine(range(S, 0.1, 1.8)));
-  out.stone.home.set(0, S < 7.7 ? plan.lift : 0, S < 7.7 ? 0 : HOME_B_Z);
-  out.stone.visible = true;
-  // One continuous half-turn across the whole hero → ch01 pass (never pausing).
-  let yaw = 20 + 180 * smoother(range(S, 0.05, 1.75));
-  if (S >= 7.7) yaw = lerp(45, 90, easeInOutSine(range(S, 10.6, 11.6)));
-  plan.yaw = yaw * DEG;
-  plan.pitch = 0;
+  /* ---- the anatomy's gestures ---------------------------------------- */
+  film.lift = 0.32 * Math.sin(Math.PI * easeInOutSine(range(S, 0.1, 1.8)));
+  const open = smoother(range(S, 1.9, 2.5)) * (1 - smoother(range(S, 2.62, 3.3)));
+  film.stack = smoother(range(S, 2.62, 3.35)) * (1 - smoother(range(S, 4.72, 5.3)));
+  film.book = smoother(range(S, 5.25, 5.95)) * (1 - smoother(range(S, 7.1, 7.62)));
+  film.beat = smoother(range(S, 6.4, 6.72));
+  r.open = open;
+  film.open = open;
 
-  /* ---- formations ---------------------------------------------------- */
-  plan.gap = 0;
-  plan.crownLift = 0;
-  plan.bandLift = 0;
-  plan.split = 0;
-  plan.arc = 0.35;
-  plan.glowMode = 0;
-  plan.swirl = 0;
-  plan.swirlAt = 0;
-  plan.stagger = 0;
-  plan.mix = 0;
-  const set = (a: Formation, b: Formation, mix: number, stagger: number) => {
-    plan.a = a;
-    plan.b = b;
-    plan.mix = mix;
-    plan.stagger = stagger;
-  };
-  if (S < 2.0) {
-    set("F0", "F0", 0, 0);
-    plan.gap = 0.004 * easeInOutSine(range(S, 1.82, 2.0));
-  } else if (S < 3.0) {
-    plan.gap = 0.004;
-    set("F0", "F1", range(S, 2.0, 3.0), 1);
-    plan.arc = 0.5;
-  } else if (S < 3.4) {
-    set("F1", "F2", range(S, 3.0, 3.4), 2);
-    plan.swirl = 1.3;
-    plan.arc = 0.25;
-  } else if (S < 4.6) {
-    set("F2", "F2", 0, 0);
-    plan.glowMode = 1;
-  } else if (S < 5.6) {
-    set("F2", "F3", range(S, 4.6, 5.6), 3);
-    plan.swirl = -1.8;
-    plan.arc = 0.3;
-  } else if (S < 7.2) {
-    set("F3", "F3", 0, 0);
-    plan.glowMode = 4;
-  } else if (S < 8.2) {
-    set("F3", "F4", range(S, 7.2, 8.2), 4);
-    plan.arc = 0.15;
-  } else if (S < 10.6) {
-    set("F4", "F4", 0, 0);
-  } else if (S < 11.5) {
-    set("F4", "F5", range(S, 10.6, 11.5), 5);
-    plan.swirl = 1.1;
-    plan.swirlAt = 1;
-    plan.arc = 0.4;
-    plan.glowMode = 2;
-  } else if (S < 12.6) {
-    set("F5", "F5", 0, 0);
-    plan.glowMode = 2;
-  } else {
-    const s = S - 12.6;
-    set("F6", "F6", 0, 0);
-    plan.crownLift = easeInOutSine(range(s, 0.22, 0.36));
-    plan.bandLift = easeInOutSine(range(s, 0.5, 0.62));
-    plan.split = plan.bandLift;
-    plan.glowMode = 3;
+  // Seats (ch05), in build order: the tips first, the crown last.
+  for (let k = 0; k < 4; k++) {
+    const a = METHOD.t0 + METHOD.step * k;
+    film.seat[k] = smoother(range(S, a, a + METHOD.seatLen));
   }
-  for (let g = 0; g < 4; g++) plan.seat[g] = range(S, plan.seatS0 + g * plan.seatLen, plan.seatS0 + (g + 1) * plan.seatLen);
-  out.formation.a = plan.a;
-  out.formation.b = plan.b;
-  out.formation.mix = plan.mix;
+  const HOME_SWITCH = homeSwitch();
+
+  /* ---- place + turn ---------------------------------------------------- */
+  const yawB = lerp(45, 90, easeInOutSine(range(S, 10.6, M0 - 1.0)));
+  film.yawB = yawB * DEG;
+  r.homeB.set(HOME_B[0], HOME_B[1], HOME_B[2]);
+  let yaw: number;
+  if (S < HOME_SWITCH) {
+    // One continuous story of turns: the half-turn of the pass, a little more
+    // as the cut opens, a slow turn while the stack is read, then round to
+    // face the camera as the book opens.
+    yaw = 20 + 180 * smoother(range(S, 0.05, 1.75)) + 25 * smoother(range(S, 1.9, 2.6)) + 55 * smoother(range(S, 2.62, 4.7));
+    const toBook = smoother(range(S, 4.72, 5.6));
+    if (toBook > 0) yaw = lerp(yaw, 360 + c.az / DEG - 12, toBook);
+    r.home.set(0, film.lift + STACK_LIFT * film.stack, 0);
+  } else {
+    yaw = yawB;
+    r.home.copy(r.homeB);
+  }
+  film.yaw = yaw * DEG;
+
+  // Which layers are posed from the build site: those that have left their station.
+  film.column = 0;
+  for (let row = 0; row < 4; row++) {
+    const Lr = ROW_LAYER[row];
+    r.atB[Lr] = S >= HOME_SWITCH || S >= rowS(row) + 0.1 ? 1 : 0;
+    film.column = Math.max(film.column, r.atB[Lr] * (1 - film.seat[Lr]));
+  }
+
+  for (let k = 0; k < 4; k++) {
+    r.layerY[k] = r.atB[k] ? COLUMN_Y[k] * (1 - film.seat[k]) : STACK_Y[k] * film.stack;
+    r.layerOut[k] = 0; // the Director springs the focused layer out
+  }
+
+  // The book: product (left page) opens widest first, then workspace (right).
+  const bookDeg = (a: number, b: number) => lerp(a, b, film.beat) * DEG * film.book;
+  r.bookL = bookDeg(80, 52);
+  r.bookR = bookDeg(52, 80);
+  r.bookLift = 0.5 * film.book;
+
+  // Stations (ch04). The four layers lift off the stone together and wait high
+  // above and ahead of the walk, out of frame, travelling with it. As its row
+  // comes up, a layer swoops down to eye level at the right third and floats
+  // WITH the camera while the row is read — one specimen in frame at a time —
+  // then it flies on ahead to the column where the stone will be built.
+  for (let row = 0; row < 4; row++) {
+    const Lr = ROW_LAYER[row];
+    const rs = rowS(row);
+    const dep = DEPART + 0.08 * row;
+    const back = rs + 0.1;
+    const w = smoother(range(S, dep, dep + DEPART_LEN)) * (1 - smoother(range(S, back, back + GATHER_LEN)));
+    film.station[Lr] = w;
+    r.station[Lr] = w;
+    const a = smoother(range(S, rs - 0.62, rs - 0.2));
+    const z = w > 0 ? camZAt(S, L) - lerp(WAIT_AHEAD, SPECIMEN_AHEAD, a) : STATIONS_Z[row];
+    // Phones: the specimen floats centred in the top band, above the row's text.
+    const sx = mob ? 0.2 + 0.1 * (row % 2) : STATIONS_X[row];
+    const sy = mob ? 1.45 : STATION_Y;
+    r.stationPos[Lr].set(lerp(WAIT_X[row], sx, a), lerp(WAIT_Y, sy, a), z);
+    if (S < back) r.stationArc[Lr].set(0.9 * (row % 2 ? 1 : -1), 1.2, 0);
+    else r.stationArc[Lr].set(0.4, 1.1, 0);
+  }
+  // Specimens read at one size: the slender tips are shown largest, the crown smallest.
+  const ms = mob ? 0.5 : 1;
+  r.stationScale[0] = 1.95 * ms;
+  r.stationScale[1] = 1.5 * ms;
+  r.stationScale[2] = 1.28 * ms;
+  r.stationScale[3] = 1.22 * ms;
+
+  // The finale's mark.
+  const s6 = S - M0;
+  r.crownLift = S >= M0 ? easeInOutSine(range(s6, 0.22, 0.36)) : 0;
+  r.bandLift = S >= M0 ? easeInOutSine(range(s6, 0.5, 0.62)) : 0;
+  r.split = r.bandLift;
+  film.crownFade = S >= M0 ? easeInOutSine(range(s6, 0.22, 0.36)) : 0;
+
+  const loose = Math.max(open, film.stack, film.book, film.column, film.station[0], film.station[1], film.station[2], film.station[3]);
+  film.whole = loose < 1e-4 ? 1 : 0;
+
+  // Toward the camera, flat — the direction a focused layer slides out.
+  r.outDir.set(c.pos.x - r.home.x, 0, c.pos.z - r.home.z);
+  if (r.outDir.lengthSq() < 1e-6) r.outDir.set(0, 0, 1);
+  r.outDir.normalize();
+
+  /* ---- which light recipe ---------------------------------------------- */
+  film.glow = S < 2.62 ? 0 : S < 5.0 ? 1 : S < 7.4 ? 2 : S < HOME_SWITCH ? 3 : S < M0 ? 4 : 5;
+  let focus = -1;
+  if (S >= 3.4 && S < 4.35) focus = 3 - Math.min(3, Math.floor((S - 3.4) / 0.2375));
+  if (ui.focusTier >= 0 && film.stack > 0.5) focus = ui.focusTier;
+  film.focus = focus;
+  film.allLit = range(S, 4.35, 4.45) * (1 - range(S, 4.75, 4.9));
+  out.tiers.visible = film.stack > 0.5;
+  out.tiers.focus = focus;
 
   /* ---- material uniforms --------------------------------------------- */
-  // Seams: the mark's three cuts light just before the stone opens.
-  let seam = range(S, 1.7, 1.82);
-  seam = lerp(seam, 0.3, range(S, 2.0, 3.0));
-  seam *= 1 - range(S, 3.0, 3.4);
-  if (S >= 12.6) seam = 0.6 * range(S - 12.6, 0.5, 0.62);
+  // The mark's seams light just before the cut opens; the level seams before the stack parts.
+  let seam = range(S, 1.7, 1.82) * (1 - range(S, 2.5, 2.9));
+  if (S >= M0) seam = 0.6 * range(s6, 0.5, 0.62);
   u.seam = seam;
+  u.levelSeam = range(S, 2.42, 2.6) * (1 - range(S, 3.0, 3.35));
 
-  let glow = 0;
-  if (S < 2.0) glow = 0.4 * range(S, 1.82, 2.0);
-  else if (S < 3.0) glow = lerp(0.4, 0.6, range(S, 2.0, 3.0));
-  else if (S < 4.6) glow = lerp(0.6, 1.0, range(S, 3.0, 3.4));
-  else if (S < 7.2) glow = lerp(1.0, 0.6, range(S, 4.6, 5.6));
-  else if (S < 10.6) glow = lerp(0.6, 0.35, range(S, 7.2, 8.2));
-  else if (S < 12.6) glow = lerp(0.35, 0, range(S, 11.5, 12.4));
-  else glow = 0.35 * range(S - 12.6, 0.5, 0.62);
+  // How much light the cut faces show (per-piece levels come from the Director).
+  let glow = smoother(range(S, 1.78, 2.3));
+  if (S >= 10.6) glow = lerp(1, 0.5, range(S, METHOD.t0 + 3 * METHOD.step, M0 - 0.9));
+  if (S >= M0) glow = 0.35 * range(s6, 0.5, 0.62);
   u.cutGlow = glow;
 
-  u.spill = S < 3 ? Math.sin(Math.PI * range(S, 1.82, 2.7)) * range(S, 1.82, 1.9) : S >= 12.6 ? 0.4 * range(S - 12.6, 0.5, 0.62) : 0;
+  // The light inside, seen through the black outer faces: a breath in the
+  // hero, stronger at the pass, and at dusk the stone becomes the light.
+  // Night spreads out of the stone (a widening circle, see #field) and draws back into it.
+  u.dusk = smoother(range(S, 5.12, 5.66)) * (1 - smoother(range(S, 7.22, 7.72)));
+  u.inner = 0.32 + 0.3 * Math.sin(Math.PI * range(S, 0.45, 1.6)) + 0.75 * u.dusk;
 
-  // Alpha fog: none until the stream, then the field's mist, clear again for the mark.
+  u.spill = Math.max(0.8 * open, 0.55 * film.book, S >= M0 ? 0.4 * range(s6, 0.5, 0.62) : 0);
+
+  // Alpha fog: none until the long mirror, then its haze, clear again for the build.
   if (S < 7.2) {
     u.fogNear = 60;
     u.fogFar = 90;
   } else if (S < 10.6) {
+    // Distant specimens melt into the haze; near ones stay crisp black glass.
     const t = easeInOutSine(range(S, 7.2, 8.2));
-    u.fogNear = lerp(60, 6, t);
-    u.fogFar = lerp(90, 26, t);
-  } else if (S < 12.6) {
-    const t = range(S, 10.6, 11.0);
-    u.fogNear = lerp(6, 10, t);
-    u.fogFar = lerp(26, 34, t);
-    const c = range(S, 12.0, 12.6);
-    u.fogNear = lerp(u.fogNear, 60, c);
-    u.fogFar = lerp(u.fogFar, 90, c);
+    u.fogNear = lerp(60, 16, t);
+    u.fogFar = lerp(90, 42, t);
   } else {
-    u.fogNear = 60;
-    u.fogFar = 90;
+    const t = range(S, 10.6, 11.2);
+    u.fogNear = lerp(16, 60, t);
+    u.fogFar = lerp(42, 90, t);
   }
 
-  // The veins wake as the camera passes close, then settle.
   u.vein = 1 + 0.9 * Math.sin(Math.PI * range(S, 0.45, 1.6));
-  u.reflect = S > 3 && S < 7.2 ? 0.5 : 1;
+  u.reflect = 1 - 0.6 * film.stack;
   u.floorY = STONE.floorY;
   u.mistAlpha = 1 - range(S, 0.5, 1.1);
   u.mistClipY = L.hero.mistClipY;
-  u.cursorLight = S > 3 && S < 7.2 ? 4 : 8;
-
-  /* ---- chapter worlds ------------------------------------------------ */
-  out.tiers.visible = S > 3.0 && S < 4.7;
-  let focus = -1;
-  if (S >= 3.4 && S < 4.35) focus = Math.min(3, Math.floor((S - 3.4) / 0.2375));
-  if (ui.focusTier >= 0 && out.tiers.visible) focus = ui.focusTier;
-  out.tiers.focus = focus;
-
-  out.graph.visible = S > 5.45 && S < 7.45;
-  out.graph.grow = range(S, 5.6, 5.9);
-  out.graph.beat = S < 5.9 ? 0 : S < 6.55 ? 1 : S < 7.2 ? 2 : 0;
-  out.graph.fade = range(S, 5.45, 5.6) * (1 - range(S, 7.2, 7.4));
-
-  out.field.visible = S > 7.2 && S < 11.2;
-  out.field.fade = range(S, 7.2, 7.8) * (1 - range(S, 10.8, 11.2));
-
-  out.flakes.visible = S > 1.95 && S < 11.5;
-  out.flakes.amount = range(S, 1.95, 2.4) * (1 - range(S, 10.9, 11.5));
-
-  // Light streams: rise with the tower, morph from its rings into the two
-  // orbits with the fragments (4.6–5.6), and stream away with them at 7.2.
-  out.streams.fade = smoother(range(S, 3.05, 3.55)) * (1 - smoother(range(S, 7.15, 7.75)));
-  out.streams.morph = smoother(range(S, 4.65, 5.65));
+  // At night the light that follows the cursor is INSIDE the glass; the area light bows out.
+  u.cursorLight = (8 - 4 * film.stack) * (1 - u.dusk);
 
   /* ---- the bookend clip + mark lock ---------------------------------- */
-  const s6 = S - 12.6;
   const k = easeInOutCubic(range(s6, 0.9, 1.2));
   const cl = out.clip;
   cl.active = k > 0.001;

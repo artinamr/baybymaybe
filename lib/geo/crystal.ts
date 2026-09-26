@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { ConvexHull } from "three/addons/math/ConvexHull.js";
-import { FRAG_COUNT, STONE, type FragInfo, type Piece, type StoneBuild } from "./types";
+import { FRAG_COUNT, LEVEL_Y, STONE, type FragInfo, type Piece, type StoneBuild } from "./types";
 
 /**
  * THE STONE — geometry (docs/SPEC.md §4.1–4.2).
@@ -12,12 +12,13 @@ import { FRAG_COUNT, STONE, type FragInfo, type Piece, type StoneBuild } from ".
  *    round-over that carries a crisp moving highlight) and facets stay
  *    perfectly flat. Verified on the real GPU in the prior pass.
  *
- * 2. The fracture clips that rounded surface, polygon by polygon, into 24
- *    convex cells: first the mark's own cuts (y = bandH, y = 0, x = 0 through
- *    the pavilion) → crown, band, two blades; then an anisotropic Voronoi
- *    inside the crown and blades so the pieces splinter along Y like obsidian.
- *    Cut faces are rebuilt as caps: the cross-section of the rounded solid on
- *    each cut plane, clipped by the cell's other planes.
+ * 2. The anatomy clips that rounded surface, polygon by polygon, into EIGHT
+ *    convex pieces — no random fracture, every cut deliberate: the mark's own
+ *    cuts (y = bandH, y = 0, x = 0 through the pavilion) → crown, band, two
+ *    blades; then two LEVEL cuts across the pavilion, so each blade is three
+ *    stacked pieces. Cut faces are rebuilt as caps: the cross-section of the
+ *    rounded solid on each cut plane, clipped by the cell's other planes, so the
+ *    pieces meet with no seam when closed.
  *
  * Everything is deterministic and runs in Node (scripts/fracture-check.mjs).
  */
@@ -150,8 +151,8 @@ export function polysToGeometry(polys: Poly[]): THREE.BufferGeometry {
 /* Clipping                                                                  */
 /* ------------------------------------------------------------------------ */
 
-/** Half-space n·x ≤ d. `type` 1 Voronoi · 2 primary mark cut. */
-type Plane = { n: THREE.Vector3; d: number; type: 1 | 2 };
+/** Half-space n·x ≤ d. `type` 2 primary mark cut · 3 level cut. */
+type Plane = { n: THREE.Vector3; d: number; type: 2 | 3 };
 
 const side = (pl: Plane, p: THREE.Vector3) => pl.n.dot(p) - pl.d;
 
@@ -231,32 +232,25 @@ function crossSection(surface: Poly[], n: THREE.Vector3, d: number): THREE.Vecto
 
 type Cell = { piece: Piece; planes: Plane[] };
 
-const PIECE_PLANES: Record<Piece, Plane[]> = {
-  crown: [{ n: new THREE.Vector3(0, -1, 0), d: -B, type: 2 }],
-  band: [
-    { n: new THREE.Vector3(0, 1, 0), d: B, type: 2 },
-    { n: new THREE.Vector3(0, -1, 0), d: 0, type: 2 },
-  ],
-  bladeL: [
-    { n: new THREE.Vector3(0, 1, 0), d: 0, type: 2 },
-    { n: new THREE.Vector3(1, 0, 0), d: 0, type: 2 },
-  ],
-  bladeR: [
-    { n: new THREE.Vector3(0, 1, 0), d: 0, type: 2 },
-    { n: new THREE.Vector3(-1, 0, 0), d: 0, type: 2 },
-  ],
-};
+const [LV0, LV1] = LEVEL_Y;
+const UP = (d: number, type: 2 | 3): Plane => ({ n: new THREE.Vector3(0, 1, 0), d, type }); //  y ≤ d
+const DOWN = (d: number, type: 2 | 3): Plane => ({ n: new THREE.Vector3(0, -1, 0), d: -d, type }); // y ≥ d
+const LEFT: Plane = { n: new THREE.Vector3(1, 0, 0), d: 0, type: 2 }; //  x ≤ 0
+const RIGHT: Plane = { n: new THREE.Vector3(-1, 0, 0), d: 0, type: 2 }; // x ≥ 0
 
-/** Anisotropic metric: distances along Y count 0.55× → cells elongate along Y. */
-const M2 = new THREE.Vector3(1, 0.55 * 0.55, 1);
-
-function voronoiPlane(si: THREE.Vector3, sj: THREE.Vector3): Plane {
-  // |M(x−si)|² ≤ |M(x−sj)|²  ⇔  2x·M²(sj−si) ≤ |Msj|² − |Msi|²
-  const n = sj.clone().sub(si).multiply(M2);
-  const len = n.length();
-  const d = (sj.clone().multiply(sj).dot(M2) - si.clone().multiply(si).dot(M2)) / 2;
-  return { n: n.divideScalar(len), d: d / len, type: 1 };
-}
+/** The eight cells, in fragment order (see types.ts THE ANATOMY). */
+const CELLS: Cell[] = [
+  { piece: "crown", planes: [DOWN(B, 2)] },
+  { piece: "band", planes: [UP(B, 2), DOWN(0, 2)] },
+  { piece: "bladeL", planes: [UP(0, 2), LEFT, DOWN(LV0, 3)] },
+  { piece: "bladeL", planes: [UP(LV0, 3), LEFT, DOWN(LV1, 3)] },
+  { piece: "bladeL", planes: [UP(LV1, 3), LEFT] },
+  { piece: "bladeR", planes: [UP(0, 2), RIGHT, DOWN(LV0, 3)] },
+  { piece: "bladeR", planes: [UP(LV0, 3), RIGHT, DOWN(LV1, 3)] },
+  { piece: "bladeR", planes: [UP(LV1, 3), RIGHT] },
+];
+const LAYER = [3, 3, 2, 1, 0, 2, 1, 0];
+const SIDE: (-1 | 0 | 1)[] = [0, 0, -1, -1, -1, 1, 1, 1];
 
 type Built = {
   polys: Poly[]; // surface + caps, object space
@@ -308,54 +302,14 @@ function buildCell(surface: Poly[], cell: Cell): Built | null {
       c.z += ((a.z + b.z + d.z) * v6) / 24;
     }
   }
-  if (vol < 1e-6) return null;
+  if (vol < 1e-7) return null;
   c.divideScalar(vol);
   return { polys, caps, volume: vol, centroid: c };
 }
 
 /* ------------------------------------------------------------------------ */
-/* Seeds                                                                     */
-/* ------------------------------------------------------------------------ */
-
-function insidePolytope(p: THREE.Vector3, faces: { n: THREE.Vector3; d: number }[], margin: number) {
-  return faces.every((f) => f.n.dot(p) <= f.d - margin);
-}
-
-function pieceSeeds(piece: Piece, count: number, rand: () => number, faces: { n: THREE.Vector3; d: number }[]): THREE.Vector3[] {
-  const yLo = piece === "crown" ? B + 0.02 : STONE.culet[1] + 0.12;
-  const yHi = piece === "crown" ? STONE.apex[1] - 0.12 : -0.02;
-  const xLo = piece === "bladeR" ? 0.015 : -H;
-  const xHi = piece === "bladeL" ? -0.015 : H;
-  // Poisson-ish: best of k candidates (farthest from existing seeds, anisotropic).
-  const seeds: THREE.Vector3[] = [];
-  const dist = (a: THREE.Vector3, b: THREE.Vector3) => Math.hypot(a.x - b.x, (a.y - b.y) * 0.55, a.z - b.z);
-  let guard = 0;
-  while (seeds.length < count && guard++ < 4000) {
-    let best: THREE.Vector3 | null = null;
-    let bestD = -1;
-    for (let k = 0; k < 24; k++) {
-      const p = new THREE.Vector3(
-        THREE.MathUtils.lerp(xLo, xHi, rand()),
-        THREE.MathUtils.lerp(yLo, yHi, rand()),
-        THREE.MathUtils.lerp(-H, H, rand())
-      );
-      if (!insidePolytope(p, faces, 0.03)) continue;
-      const d = seeds.length ? Math.min(...seeds.map((s) => dist(s, p))) : 1;
-      if (d > bestD) {
-        bestD = d;
-        best = p;
-      }
-    }
-    if (best) seeds.push(best);
-  }
-  return seeds;
-}
-
-/* ------------------------------------------------------------------------ */
 /* Build                                                                     */
 /* ------------------------------------------------------------------------ */
-
-const SEEDS: Record<Piece, number> = { crown: 5, band: 0, bladeL: 9, bladeR: 9 };
 
 function meridian(r: number): THREE.Vector3[] {
   return [new THREE.Vector3(...STONE.apex), corner(r, B), corner(r, 0), new THREE.Vector3(...STONE.culet)];
@@ -405,54 +359,16 @@ function principalAxis(pts: THREE.Vector3[], c: THREE.Vector3): { axis: THREE.Ve
   return { axis: v, length: hi - lo };
 }
 
+
 function buildStone(): StoneBuild {
   const defining = definingPoints();
   const surface = roundedPolys(defining, STONE.bevel, 3);
-  const faces = hullFaces(defining).map((f) => ({ n: f.normal, d: f.normal.dot(f.tri[0]) }));
 
-  // Cells: pieces, then Voronoi inside pieces. Re-roll a piece's seeds until no
-  // cell is a sliver (< 0.4 × the piece's mean volume).
   const cells: Built[] = [];
-  const cellPiece: Piece[] = [];
-  const pieces: Piece[] = ["bladeL", "bladeR", "band", "crown"];
-  for (const piece of pieces) {
-    const base = PIECE_PLANES[piece];
-    const n = SEEDS[piece];
-    if (n === 0) {
-      const b = buildCell(surface, { piece, planes: base });
-      if (b) {
-        cells.push(b);
-        cellPiece.push(piece);
-      }
-      continue;
-    }
-    let chosen: Built[] | null = null;
-    let fallback: Built[] = [];
-    let fallbackScore = -1;
-    for (let attempt = 0; attempt < 24 && !chosen; attempt++) {
-      const rand = mulberry32(0x5b3df0 + attempt * 7919 + piece.length * 131);
-      const seeds = pieceSeeds(piece, n, rand, faces);
-      if (seeds.length < n) continue;
-      const built: Built[] = [];
-      for (let i = 0; i < seeds.length; i++) {
-        const planes = [...base];
-        for (let j = 0; j < seeds.length; j++) if (j !== i) planes.push(voronoiPlane(seeds[i], seeds[j]));
-        const b = buildCell(surface, { piece, planes });
-        if (b) built.push(b);
-      }
-      if (built.length < n) continue;
-      const mean = built.reduce((a, b) => a + b.volume, 0) / built.length;
-      const minRatio = Math.min(...built.map((b) => b.volume)) / mean;
-      if (minRatio >= 0.4) chosen = built;
-      else if (minRatio > fallbackScore) {
-        fallbackScore = minRatio;
-        fallback = built;
-      }
-    }
-    for (const b of chosen ?? fallback) {
-      cells.push(b);
-      cellPiece.push(piece);
-    }
+  for (const cell of CELLS) {
+    const b = buildCell(surface, cell);
+    if (!b) throw new Error(`crystal: empty cell ${cell.piece}`);
+    cells.push(b);
   }
   if (cells.length !== FRAG_COUNT) {
     throw new Error(`crystal: expected ${FRAG_COUNT} fragments, built ${cells.length}`);
@@ -460,19 +376,6 @@ function buildStone(): StoneBuild {
 
   // Per-fragment facts.
   const core = new THREE.Vector3(0, -0.3, 0);
-  const order = cells.map((_, i) => i).sort((a, b) => cells[b].volume - cells[a].volume);
-  const tierOf = new Array<number>(cells.length);
-  order.forEach((ci, rank) => (tierOf[ci] = Math.min(3, Math.floor((rank * 4) / cells.length))));
-  // Method groups from the culet up: blades in thirds by height, band + crown last.
-  const bladeIdx = cells.map((_, i) => i).filter((i) => cellPiece[i] === "bladeL" || cellPiece[i] === "bladeR");
-  bladeIdx.sort((a, b) => cells[a].centroid.y - cells[b].centroid.y);
-  const groupOf = new Array<number>(cells.length).fill(3);
-  bladeIdx.forEach((ci, k) => (groupOf[ci] = Math.min(2, Math.floor((k * 3) / bladeIdx.length))));
-  // Clusters: P = left blade + the crown's −x half; W = the rest.
-  const clusterOf = cells.map((c, i): "P" | "W" =>
-    cellPiece[i] === "bladeL" || (cellPiece[i] === "crown" && c.centroid.x < 0) ? "P" : "W"
-  );
-
   const frags: FragInfo[] = cells.map((c, i) => {
     const verts = c.polys.flatMap((p) => p.v.map((v) => v.p));
     const pa = principalAxis(verts, c.centroid);
@@ -497,14 +400,13 @@ function buildStone(): StoneBuild {
       index: i,
       centroid: c.centroid.clone(),
       volume: c.volume,
-      piece: cellPiece[i],
+      piece: CELLS[i].piece,
       cutNormal: largest ? largest.plane.n.clone() : new THREE.Vector3(0, 1, 0),
       out: out.normalize(),
       longAxis: pa.axis,
       length: pa.length,
-      tier: tierOf[i],
-      group: groupOf[i],
-      cluster: clusterOf[i],
+      layer: LAYER[i],
+      side: SIDE[i],
       radius: Math.max(...verts.map((v) => v.distanceTo(c.centroid))),
     };
   });
@@ -534,9 +436,7 @@ function buildStone(): StoneBuild {
   const onPlane = (p: THREE.Vector3, pl: Plane) => Math.abs(side(pl, p)) < 1e-5;
 
   cells.forEach((cell, fi) => {
-    const planes = [...PIECE_PLANES[cellPiece[fi]]];
-    // Recover this cell's Voronoi planes from its caps (same objects).
-    for (const cap of cell.caps) if (!planes.includes(cap.plane)) planes.push(cap.plane);
+    const planes = CELLS[fi].planes;
     const ctr = cell.centroid;
     for (const poly of cell.polys) {
       // Cap metadata (object space).
@@ -630,4 +530,34 @@ export function getStone(): StoneBuild {
 export function stoneHullGeometry(): THREE.BufferGeometry {
   if (!hullCache) hullCache = polysToGeometry(roundedPolys(definingPoints(), STONE.bevel, 1));
   return hullCache;
+}
+
+/**
+ * The intact stone's bounding planes (object space, n·x ≤ w, pushed out by the
+ * bevel) — the interior shader finds where a ray inside the glass leaves it.
+ */
+export function hullPlanes(): THREE.Vector4[] {
+  const out: THREE.Vector4[] = [];
+  for (const f of hullFaces(definingPoints())) {
+    const w = f.normal.dot(f.tri[0]) + STONE.bevel;
+    if (out.some((p) => Math.abs(p.x - f.normal.x) + Math.abs(p.y - f.normal.y) + Math.abs(p.z - f.normal.z) < 1e-4)) continue;
+    out.push(new THREE.Vector4(f.normal.x, f.normal.y, f.normal.z, w));
+  }
+  return out;
+}
+
+/** Each piece's cut bounds: (yMin, yMax, xSign) — xSign −1 keeps x ≤ 0, +1 keeps x ≥ 0, 0 none. */
+export function pieceBounds(): THREE.Vector3[] {
+  return CELLS.map((c) => {
+    let yMin = -10;
+    let yMax = 10;
+    let xs = 0;
+    for (const pl of c.planes) {
+      if (pl.n.y > 0.5) yMax = pl.d;
+      else if (pl.n.y < -0.5) yMin = -pl.d;
+      else if (pl.n.x > 0.5) xs = -1;
+      else if (pl.n.x < -0.5) xs = 1;
+    }
+    return new THREE.Vector3(yMin, yMax, xs);
+  });
 }

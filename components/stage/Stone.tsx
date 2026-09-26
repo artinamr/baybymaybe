@@ -6,10 +6,11 @@ import * as THREE from "three";
 import { getStone, stoneHullGeometry } from "@/lib/geo/crystal";
 import { createObsidian, syncObsidianUniforms } from "@/shaders/obsidian";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
+import { film, M0 } from "@/lib/choreo";
 import { bus, pointer, ready, ui } from "@/lib/stores";
 
 /**
- * THE STONE — one merged geometry of 24 fragments, three draws:
+ * THE STONE — one merged geometry of its eight pieces, three draws:
  *   solid    the opaque pass (discards fragments whose fade is in flight)
  *   fade     the blended pass that draws exactly those (the finale's crown)
  *   mirror   a faint reflection below the floor
@@ -64,7 +65,7 @@ export function Stone() {
 
     // Hover only while the stone is whole enough for the proxy to be true.
     const S = sceneState.S;
-    const whole = S < 1.6 || S > 11.55;
+    const whole = film.whole > 0.5 && S < M0 + 0.2;
     if (pointer.has && pointer.lastMove !== lastMove.current) {
       lastMove.current = pointer.lastMove;
       let on = false;

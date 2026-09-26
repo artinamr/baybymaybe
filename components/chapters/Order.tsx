@@ -14,9 +14,10 @@ const LAYERS = [
 ];
 
 /**
- * 02 · DIGITAL INFRASTRUCTURE. The fragments settle into four lit floors; each
- * layer row draws a leader line to its floor (lib/project.ts), and hovering a
- * row lights that floor at any scroll position.
+ * 02 · DIGITAL INFRASTRUCTURE. The stone parts into its four layers — the
+ * stack — and the camera cranes down it as the rows are read, top to bottom;
+ * the row in focus lights its layer and slides it out, and hovering a row does
+ * the same at any scroll position.
  */
 export function Order() {
   return (
