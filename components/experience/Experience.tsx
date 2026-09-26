@@ -6,6 +6,8 @@ import { advance } from "@react-three/fiber";
 import { getLenis, initScroll, updateScroll } from "@/lib/scroll";
 import { bus, intro, ready, scroll } from "@/lib/stores";
 import { atToS, dev } from "@/lib/dev";
+import { openStory, story, updateStory } from "@/lib/story";
+import { devNum } from "@/lib/dev";
 
 const StageCanvas = dynamic(() => import("@/components/stage/StageCanvas"), { ssr: false });
 
@@ -54,6 +56,22 @@ export function Experience({ children }: { children: ReactNode }) {
       else window.scrollTo(0, y);
     }
 
+    // A link to `/#story` (the methodology page's nav) opens the story once the intro has played.
+    if (window.location.hash === "#story") {
+      const off = bus.on("intro:done", () => {
+        off();
+        window.setTimeout(openStory, 300);
+      });
+    }
+    // Look-dev: `?story=<P>` opens the story at that point of its film.
+    const storyAt = devNum("story");
+    if (storyAt !== null) {
+      window.setTimeout(() => {
+        openStory();
+        story.P = story.target = storyAt;
+      }, 400);
+    }
+
     const t0 = performance.now();
     let skipAt = -1;
     const start = (t: number) => {
@@ -69,10 +87,14 @@ export function Experience({ children }: { children: ReactNode }) {
     };
 
     let raf = 0;
+    let lastT = -1;
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
       if (document.hidden) return;
+      const dt = lastT < 0 ? 1 / 60 : Math.min(0.05, (t - lastT) / 1000);
+      lastT = t;
       updateScroll(t);
+      updateStory(dt);
 
       if (intro.state === "wait") {
         const all = ready.fonts && ready.stone && ready.env && ready.compiled;

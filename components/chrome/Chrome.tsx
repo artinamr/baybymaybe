@@ -5,12 +5,16 @@ import { CHAPTERS, type ChapterId } from "@/lib/chapters";
 import { onScrollFrame, scrollToChapter, scrollToS, useActiveChapter } from "@/lib/scroll";
 import { LogoMark } from "./LogoMark";
 import { GhostPill } from "./Pills";
+import { openStory } from "@/lib/story";
 
-const NAV: { id: ChapterId; label: string }[] = [
-  { id: "order", label: "Infrastructure" },
-  { id: "current", label: "AI automation" },
-  { id: "field", label: "Work" },
-  { id: "method", label: "Method" },
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+/** The nav: two chapters of this page, the story, and the methodology page. */
+const NAV: { id?: ChapterId; label: string; href?: string; story?: boolean }[] = [
+  { id: "build", label: "What we build" },
+  { id: "why", label: "Why Nerodyn" },
+  { label: "The story", story: true },
+  { label: "Methodology", href: `${BASE}/methodology/` },
 ];
 
 function SwapLabel({ children }: { children: string }) {
@@ -43,21 +47,23 @@ function Nav({ onMenu }: { onMenu: () => void }) {
       <nav className="nav-links" aria-label="Chapters">
         {NAV.map((l, i) => (
           <a
-            key={l.id}
-            href={`#${l.id}`}
+            key={l.label}
+            href={l.href ?? (l.id ? `#${l.id}` : "#story")}
             className="nav-link intro intro-drop"
             style={{ "--d": `${440 + i * 50}ms` } as CSSProperties}
             onClick={(e) => {
+              if (l.href) return;
               e.preventDefault();
-              scrollToChapter(l.id);
+              if (l.story) openStory();
+              else if (l.id) scrollToChapter(l.id);
             }}
           >
             <SwapLabel>{l.label}</SwapLabel>
           </a>
         ))}
         <span className="intro intro-drop" style={{ "--d": "680ms" } as CSSProperties}>
-          <GhostPill small onClick={() => scrollToChapter("mark")}>
-            Start a project
+          <GhostPill small onClick={() => scrollToChapter("audit")}>
+            Free audit
           </GhostPill>
         </span>
       </nav>
@@ -87,7 +93,7 @@ function ChapterIndex() {
   return (
     <>
     <p className="index-counter mono" aria-hidden>
-      {CHAPTERS[active].num}/06
+      {CHAPTERS[active].num}/0{CHAPTERS.length - 1}
       <span className="index-rail">
         <span />
       </span>
@@ -122,7 +128,7 @@ function SpecimenCard() {
       <div className="specimen-roll" key={c.id}>
         <p className="specimen-top">
           <span className="specimen-n">
-            {c.num} / 06
+            {c.num} / 0{CHAPTERS.length - 1}
           </span>
           <span>{c.label}</span>
         </p>
@@ -163,6 +169,21 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
             <span className="mono">{c.num}</span> {c.label}
           </a>
         ))}
+        <a
+          href="#story"
+          style={{ "--i": CHAPTERS.length - 1 } as CSSProperties}
+          tabIndex={open ? 0 : -1}
+          onClick={(e) => {
+            e.preventDefault();
+            onClose();
+            openStory();
+          }}
+        >
+          <span className="mono">↗</span> The story
+        </a>
+        <a href={`${BASE}/methodology/`} style={{ "--i": CHAPTERS.length } as CSSProperties} tabIndex={open ? 0 : -1}>
+          <span className="mono">↗</span> Methodology
+        </a>
       </nav>
     </div>
   );

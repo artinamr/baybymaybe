@@ -1,12 +1,10 @@
 import { Experience } from "@/components/experience/Experience";
 import { Chrome } from "@/components/chrome/Chrome";
 import { Hero } from "@/components/chapters/Hero";
-import { Cut } from "@/components/chapters/Cut";
-import { Order } from "@/components/chapters/Order";
-import { Current } from "@/components/chapters/Current";
-import { Work } from "@/components/chapters/Work";
-import { Method } from "@/components/chapters/Method";
-import { Mark } from "@/components/chapters/Mark";
+import { Build } from "@/components/chapters/Build";
+import { Why } from "@/components/chapters/Why";
+import { Audit } from "@/components/chapters/Audit";
+import { StoryMode } from "@/components/story/StoryMode";
 
 export default function Home() {
   return (
@@ -14,13 +12,11 @@ export default function Home() {
       <Chrome />
       <main id="main">
         <Hero />
-        <Cut />
-        <Order />
-        <Current />
-        <Work />
-        <Method />
-        <Mark />
+        <Build />
+        <Why />
+        <Audit />
       </main>
+      <StoryMode />
     </Experience>
   );
 }

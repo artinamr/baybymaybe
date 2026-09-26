@@ -25,27 +25,43 @@ The client asked for a FULL-SITE rebuild: white theme, a sharp obsidian stone in
 The full art-direction spec is **`docs/SPEC.md`**; module boundaries and
 interfaces are **`docs/CONTRACTS.md`**. Read both before changing the 3D.
 
-**THE FILM (round 8, 2026-09-26) — "shatter · reshape · stack, through
-changing places".** One polished obsidian stone, shaped from the Nerodyn mark,
-fractured into 40 SHARDS (the mark's cuts + an anisotropic Voronoi —
-`lib/geo/crystal.ts`) plus the CORE: a small whole copy of the stone that
-lives inside it, full of light (fragment 40, code `CORE`). What igloo.inc does
-(studied frame by frame in the browser): objects ASSEMBLE from many pieces,
-SHATTER, RESHAPE; each section is a different PLACE; fog / light floods carry
-the camera between places. So:
+**SITE SHAPE (round 9, 2026-09-26 — "the page is too long … like UXBERT
+Labs, a story mode … four sections … go above and beyond").**
+- **Home = four sections** (`lib/chapters.ts`, page 920vh, S_MAX 8.2):
+  potential (hero) · build ("What we build": Design / Infrastructure / AI
+  automation) · why ("Why Nerodyn": 14 days · 100% · 0 retainers · 48 hours)
+  · audit ("Let's talk." + footer). Everything else lives on other pages.
+- **Story mode** (`lib/story.ts`, `lib/storyFilm.ts`,
+  `components/story/StoryMode.tsx`): clicking the hero stone (or "Enter the
+  story", the nav's "The story", `/#story`) opens a UXBERT-style story of why
+  Nerodyn exists — six chapters (Potential · The first meeting · Seconds · The
+  cut · The light inside · Yours) on its own clock P with its own camera
+  spline over the same stone; decoding titles, typed copy, a chapter rail,
+  click-and-hold / wheel / arrows / Escape. Lenis stops while it's open;
+  closing rewinds the film to the hero. Story copy sits on a soft paper veil
+  (never ink on black glass).
+- **Methodology** is its own page (`app/methodology/`): editorial timeline
+  (Day 01 → 14), typical agency vs Nerodyn, principles, audit CTA.
 
-| S | place | formation (lib/formations.ts) |
+**THE HOME FILM (round 9).** One polished obsidian stone, shaped from the
+Nerodyn mark, fractured into 40 SHARDS (the mark's cuts + an anisotropic
+Voronoi — `lib/geo/crystal.ts`) plus the CORE: a small whole copy of the
+stone that lives inside it, full of light (fragment 40, code `CORE`). What
+igloo.inc does: objects ASSEMBLE, SHATTER, RESHAPE; each section is a
+different PLACE. So:
+
+| S | place (`Places.tsx`, `sceneState.env`) | formation (lib/formations.ts) |
 |---|-------|------------------------------|
-| 0–2 | the studio (paper, mirror floor) | F0 the stone; look up, the pass, seams light |
-| 2–2.9 | — | F1 it SHATTERS; the camera dives through the burst, the core laid bare |
-| ~2.8 | fog flood | — |
-| 3–4.75 | the PLAIN (pale dunes + far hills in haze, `Places.tsx`) | F2 the MONUMENT: the shards spiral in and rebuild the stone at 2.25×, course by course from the culet up (the stack — rows light foundation → interface), open joints, the core glowing inside, each shard flashing as it locks in |
-| 4.75–7.4 | the plain | F3 the HALO: the monument bursts open into two tilted orbits (product, workspace) round the glowing core |
-| ~7.6 | flood of light | the camera flies INTO the core |
-| 8–10 | the VOID (grey cloud banks + backdrop) | F4 SPECIMENS: four crystal druses of ten shards rise one by one on a vertical conveyor, one per work row |
-| ~10.4 | fog flood | — |
-| 10.4–13.6 | the studio | F5 the BUILD: a column over the mirror, one group per step (0.45 S), from the culet up |
-| 13.6– | the studio | F6 the mark |
+| 0–0.7 | the studio (paper, mirror floor) | F0 the stone; look up, the pass, seams light |
+| 0.7–1.3 | → the SKY (a cloud sea below, puffs) | F1 it SHATTERS; the camera dives through the burst — no type yet |
+| 1.3–2.05 | the sky | F1→F0 the shards re-form the stone (DESIGN; type reveals at 1.46) |
+| 2.05–3.0 | the sky | F2 the MONUMENT: the stone rebuilt at 2.25×, course by course, open joints, core glowing (INFRASTRUCTURE) |
+| 3.0–3.64 | the sky | F3 the FLOW (AI AUTOMATION): leads sweep in from the distance, circle the core on a tilted ring, are decided at its front — the qualified LIGHT (full of light, like the core) and file into a rising column on the right; the noise goes dark and drops into the clouds |
+| 3.64–4.4 | down THROUGH the cloud (haze) to the LAKE | the shards rain down |
+| 4.4–6.8 | the LAKE (still water, a far range + its reflection, camera low over the water) | F5 the BUILD column, one group seated per number of "Why" |
+| 6.8– | the lake | F6 the mark ("Let's talk.") |
+
+Rest frames (auto-framing): 0 · 1.85 · 2.95 · 3.5 · 5.35 · 7.55 · the end.
 
 **Client verdicts:** 2026-09-25 "bg and animations perfect for now" (round 5)
 → round 6 (armillary, light streams, standing-stone field) REJECTED: ch02–03
@@ -57,7 +73,10 @@ rotating around the stupid shape", and it had removed the SHATTER — "the only
 good animation". Wanted: igloo-like story with CHANGING ENVIRONMENTS, "shatter,
 reshape, stacks" — "not just going to black or three pieces and back to one".
 "Crazy doesn't mean a ton of particles — the few you have must be very
-polished." Typography is still owed a pass. `preview-card.mp4` is MOTION ONLY.
+polished." → round 9: page too long; wanted a story mode (UXBERT Labs), four
+home sections, methodology on its own page, and transitions / environments
+that are creative and never sloppy. Typography is still owed a pass.
+`preview-card.mp4` is MOTION ONLY.
 
 ## The stone's surface (2026-09-25: "shape great, texture really bad at some angles")
 
@@ -99,8 +118,13 @@ way relative to each other.
 
 - **No stop-and-go.** Camera keys are NOT eased one by one (that stopped the
   camera dead at every key). The camera is one Hermite spline through the
-  keys (`lib/choreo.ts`, C1, holds only where a channel repeats), the
-  corridor is one continuous path, and CameraRig damps with ω 3.2 (heavy).
+  keys (`lib/choreo.ts`, C1) with MONOTONE (Fritsch–Butland) tangents — a
+  channel never overshoots a key (plain finite differences sank the camera
+  two units past the lake after the dive and cropped the column) — and
+  CameraRig damps with ω 3.2 (heavy).
+- **Keep the 3D off the type.** Nothing crosses a chapter's text column: the
+  burst plays before the build type reveals; the flow lives right of it; no
+  lead ever travels screen-left through the headline.
 - **Weight.** The Director runs its own damped scroll clock (ω 4.5 on top of
   Lenis), and every shard follows its target on its own critically damped
   spring (ω 3.6–6), with a gentle float + rotational drift while suspended.
@@ -111,8 +135,14 @@ way relative to each other.
   hairlines ("wireframe"); light-stream particles and cursor-parting
   ("crap"); the standing-stone field ("coffins"); flakes; flat emissive cut
   faces; the round-7 eight-piece rig and the dark night chapter ("plain",
-  "just going to black"). Tiling shards onto a giant surface read as a lumpy
-  clump — the monument is the stone at scale with open joints instead.
+  "just going to black"); the round-8 plain / void / floods / halo /
+  specimens (removed in round 9). Tiling shards onto a giant surface read as
+  a lumpy clump — the monument is the stone at scale with open joints instead.
+- **Billboards** (cloud puffs) fade to zero well inside their card — a card
+  edge in the sky reads as a straight line.
+- **A piece "full of light"** (texel 7 `w`) glows about its OWN rest centroid
+  (carried in the normal-matrix texels' `w`), so any shard can be lit, not
+  only ones near the stone's middle.
 - **Type moves with the stone:** reveals are 1.3–1.4 s expo-out with a
   blur-to-sharp focus pull and 110 ms stagger; exits are quicker and upward.
 - The chapter card is a hero-only beat; it bows out once you scroll.
@@ -131,12 +161,13 @@ way relative to each other.
   monument / halo / specimens and glow (pull a stone from the wall); the
   sculpture leans toward the pointer; a fast sweep STIRS the halo's orbits;
   the beat's orbit runs faster.
-- **Places + floods** (`components/stage/Places.tsx`, `shaders/env.ts`,
-  `sceneState.env`): the plain's terrain and the void's cloud banks fade in
-  only under a flood; everything is premultiplied alpha over the paper DOM
-  (fog as alpha), so the page stays white where nothing is drawn. The
-  `--dusk` CSS machinery (colours derived from `--paper`/`--ink`) is dormant
-  (dusk 0) — never hard-code rgba ink/paper in globals.css.
+- **Places** (`components/stage/Places.tsx`, `shaders/env.ts`,
+  `sceneState.env`): the sky (cloud-sea plane + puff billboards + a `--sky`
+  DOM tint), inside the cloud (haze), the lake (hills + mirrored copy + water
+  plane). Everything is premultiplied alpha over the paper DOM (fog as
+  alpha), so the page stays white where nothing is drawn. The `--dusk` CSS
+  machinery (colours derived from `--paper`/`--ink`) is dormant (dusk 0) —
+  never hard-code rgba ink/paper in globals.css.
 - Vein lines FADE when a pixel spans too much of their period (fwidth) —
   edge-on faces otherwise alias into zebra stripes.
 
@@ -187,9 +218,11 @@ way relative to each other.
 - **The in-app browser pane renders on the real GPU** (ANGLE/D3D11, AMD Radeon).
 - **Headless Chrome ALSO uses the real GPU** with
   `--use-angle=d3d11 --ignore-gpu-blocklist --enable-gpu` — exact-size,
-  real-material screenshots at any viewport. Use `?at=<chapter>:<s>&freeze=1`
-  (lib/dev.ts) to land on a chapter with time frozen. SwiftShader is no longer
-  the only headless option — don't fall back to it for material judgements.
+  real-material screenshots at any viewport. Use `?at=<S>&freeze=1`
+  (lib/dev.ts) to land on a point of the film with time frozen (drop
+  `freeze` to see time-based life, e.g. the flow), and `?story=<P>&freeze=1`
+  for a point of the story film. SwiftShader is no longer the only headless
+  option — don't fall back to it for material judgements.
 
 ## Gotchas (each cost real time)
 

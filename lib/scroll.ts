@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import Lenis from "lenis";
 import { CHAPTERS, chapter, type ChapterId } from "./chapters";
-import { bus, intro, measured, pointer, scroll, type ChapterState } from "./stores";
+import { bus, intro, pointer, scroll, type ChapterState } from "./stores";
 import { computeLayout, invalidateTextMetrics, layout, type Layout } from "./layout";
 import { easeInOutCubic, easeInOutQuart } from "./ease";
 
@@ -108,11 +108,6 @@ function relayout(force = false) {
     writeLayoutVars(layout.current);
   }
   sections = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
-  const y = window.scrollY;
-  measured.rowS = Array.from(document.querySelectorAll<HTMLElement>("[data-row]")).map((el) => {
-    const r = el.getBoundingClientRect();
-    return (r.top + y + r.height / 2 - scroll.vh / 2) / scroll.vh;
-  });
 }
 
 /**
@@ -184,18 +179,18 @@ export function initScroll(): () => void {
 /**
  * The film's composed frames, in S. When you stop scrolling between two of
  * them, the page glides on to one — the way igloo.inc finishes a move for you:
- * hero · the statement over the stone · the opened cut · each layer of the
- * stack · the whole stack · each page of the book · each work row (measured) ·
- * the gathered column · each seat of the build · the mark · the footer.
+ * the hero · design (the stone re-formed above the clouds) · infrastructure
+ * (the monument complete) · AI automation (the flow) · why (the build on the
+ * lake, all four seats lit) · the mark · the page end.
  * (Chapter jumpS values sit on these — keep them in sync.)
  */
-const REST_STATIC = [0, 1.62, 3.47, 3.8, 4.13, 4.52, 6.2, 6.88, 10.62, 11.1, 11.55, 12.0, 12.45, 13.72, 14.32];
+const REST_STATIC = [0, 1.85, 2.95, 3.5, 5.35, 7.55];
 const restPts: number[] = [];
 
 function anchors(): number[] {
   restPts.length = 0;
   for (const s of REST_STATIC) restPts.push(s);
-  for (const r of measured.rowS) if (r > 7.3 && r < 10.5) restPts.push(r);
+
   restPts.push(Math.max(0, (document.documentElement.scrollHeight - window.innerHeight) / Math.max(1, scroll.vh)));
   restPts.sort((a, b) => a - b);
   return restPts;
@@ -257,7 +252,7 @@ function autoFrame(now: number) {
 function stateFor(i: number, s: number): ChapterState {
   const c = CHAPTERS[i];
   const end = c.sticky ? c.holdEnd + 0.45 : c.vh / 100 - 0.4;
-  if (s < -0.35) return "before";
+  if (s < (c.revealAt ?? -0.35)) return "before";
   if (s > end) return "after";
   return "active";
 }
@@ -319,10 +314,6 @@ export function scrollToChapter(id: ChapterId): void {
   scrollToS(chapter(id).jumpS);
 }
 
-/** "Hear the story": into the thesis, slow and even. */
-export function hearTheStory(): void {
-  scrollToS(chapter("cut").jumpS, 2.4, easeInOutCubic);
-}
 
 function subscribe(cb: () => void) {
   return bus.on("chapter", cb);

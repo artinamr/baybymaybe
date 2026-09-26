@@ -4,13 +4,15 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { evaluate, M0, plan } from "@/lib/choreo";
-import { blendPose, fragTarget, MONUMENT_C, ORBIT_SPEED, pose, poseMatrix, prepareFormations, prepared, type FormationCtx } from "@/lib/formations";
+import { evaluateStory } from "@/lib/storyFilm";
+import { story } from "@/lib/story";
+import { blendPose, FLOW_C, fragTarget, fx, MONUMENT_C, pose, poseMatrix, prepareFormations, prepared, type FormationCtx } from "@/lib/formations";
 import { CORE } from "@/lib/geo/types";
 import { getStone } from "@/lib/geo/crystal";
 import { fragTex } from "@/lib/fragTex";
 import { layout } from "@/lib/layout";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
-import { bus, intro, measured, pointer, scroll, ui } from "@/lib/stores";
+import { bus, intro, pointer, scroll, ui } from "@/lib/stores";
 import { dev, devNum, FROZEN_TIME_S } from "@/lib/dev";
 import { DEG, clamp01, easeInOutCubic, easeInOutSine, easeIntro, easeOutSine, lerp, range } from "@/lib/ease";
 import { spring, springTo } from "@/lib/springs";
@@ -20,9 +22,9 @@ import { spring, springTo } from "@/lib/springs";
  *
  *  1. evaluate(S): camera keys, places, the formation plan, uniforms.
  *  2. Layers the TIME-based life on top: the load intro, Ken Burns, idle yaw
- *     and pointer tilt, the ridge thread, seam pulses, the halo's orbits (with
- *     the beat and the cursor's stir), the lean toward the pointer, the lock-in
- *     flash of every shard as it lands, the seat flashes.
+ *     and pointer tilt, the ridge thread, seam pulses, the flow's clock (a fast
+ *     sweep of the cursor hurries it), the core's turn, the lean toward the
+ *     pointer, the lock-in flash of every shard as it lands, the seat flashes.
  *  3. Blends every fragment between two formations (staggered, on arcs,
  *     spiralling), gives it weight (its own critically damped spring), lifts
  *     the shards near the cursor out of their form, and writes its world
@@ -40,7 +42,10 @@ const PULSE_MS = 1100;
 export function Director() {
   const { camera, size } = useThree();
   const stone = useMemo(() => getStone(), []);
-  useMemo(() => prepareFormations(stone.frags, stone.crackOrigin), [stone]);
+  useMemo(() => {
+    prepareFormations(stone.frags, stone.crackOrigin);
+    fragTex.setCentres(stone.frags);
+  }, [stone]);
 
   const A = useMemo(pose, []);
   const Bp = useMemo(pose, []);
@@ -48,25 +53,24 @@ export function Director() {
   const M = useMemo(() => new THREE.Matrix4(), []);
   const quat = useMemo(() => new THREE.Quaternion(), []);
   const euler = useMemo(() => new THREE.Euler(0, 0, 0, "YXZ"), []);
-  const orbitPhase = useMemo(() => [0, 0, 0], []);
   const tilt = useMemo(() => new THREE.Quaternion(), []);
+  const buildQuat = useMemo(() => new THREE.Quaternion(), []);
   const ctx = useMemo<FormationCtx>(
     () => ({
       stoneQuat: quat,
       gap: 0,
       lift: 0,
       monumentYaw: 0,
-      orbitPhase,
+      coreSpin: 0,
       tilt,
-      conveyor: 0,
-      specSpin: 0,
+      flowT: 0,
       seat: [0, 0, 0, 0],
-      buildQuat: quat,
+      buildQuat,
       crownLift: 0,
       bandLift: 0,
       split: 0,
     }),
-    [quat, orbitPhase, tilt]
+    [quat, tilt, buildQuat]
   );
   const tiltEuler = useMemo(() => new THREE.Euler(), []);
   const swirlQ = useMemo(() => new THREE.Quaternion(), []);
@@ -105,12 +109,10 @@ export function Director() {
     py: 0,
     stirT: 0,
     stir: 0,
-    mP: 1,
-    mW: 1,
+
     tiltX: spring(0),
     tiltY: spring(0),
     cursorAmt: spring(0),
-    glint: [0, 0, 0, 0],
   });
 
   // Every fragment follows its target on its own critically damped spring —
@@ -154,17 +156,20 @@ export function Director() {
     const S = s.S;
     sceneState.S = S;
 
-    evaluate(S, time, L, sceneState);
+    // Story mode replaces the scroll's film with the story's (same stone, same camera rig).
+    const inStory = story.phase !== "closed";
+    if (inStory) evaluateStory(story.P, time, L, sceneState);
+    else evaluate(S, time, L, sceneState);
     const cam = sceneState.cam;
 
     /* ---- intro + hero life (fades out as the hero scrolls away) ------- */
-    const heroK = 1 - range(S, 0.2, 0.8);
+    const heroK = inStory ? 0 : 1 - range(S, 0.2, 0.8);
     let introK = 1;
     if (intro.state === "wait") introK = 0;
     else if (intro.state === "run" && !intro.skipped && !dev.freeze) introK = easeIntro(clamp01(intro.ms / INTRO_MS));
     if (reduced) introK = 1;
     let yaw = plan.yaw;
-    if (S < 1.0 && !cam.path) {
+    if (S < 1.0 && !cam.path && !inStory) {
       // Intro: the product shot becomes a monument — pull back, recentre, turn.
       const dollyIn = lerp(1.28, 1, introK);
       const introMs = intro.state === "wait" ? 0 : intro.ms;
@@ -295,17 +300,15 @@ export function Director() {
     ctx.gap = plan.gap;
     ctx.lift = plan.lift;
     ctx.monumentYaw = plan.monumentYaw + (still ? 0 : 0.035 * time);
-    ctx.conveyor = plan.conveyor;
-    ctx.specSpin = still ? 0.9 : 0.9 + 0.18 * time;
+    buildQuat.setFromAxisAngle(Y_AXIS, plan.buildYaw);
     for (let g = 0; g < 4; g++) ctx.seat[g] = plan.seat[g];
     ctx.crownLift = plan.crownLift;
     ctx.bandLift = plan.bandLift;
     ctx.split = plan.split;
 
-    // The halo's orbits spin on their own; the beat's orbit runs faster; a
-    // quick sweep of the cursor stirs them; the whole sculpture leans toward
-    // the pointer.
-    const inSculpt = S > 2.95 && S < 7.5;
+    // The flow runs on its own clock; a quick sweep of the cursor hurries it
+    // (and spins the core); the whole sculpture leans toward the pointer.
+    const inSculpt = S > 1.3 && S < 3.9;
     if (pointer.has) {
       const speed = Math.hypot(pointer.x - s.px, pointer.y - s.py) / Math.max(dt, 1e-3);
       s.px = pointer.x;
@@ -314,16 +317,13 @@ export function Director() {
     }
     s.stir += (s.stirT - s.stir) * (1 - Math.exp(-dt * (s.stirT > s.stir ? 5 : 1.1)));
     s.stirT *= Math.exp(-dt * 5);
-    const beat = plan.beat;
-    s.mP += ((beat === 1 ? 1.9 : beat === 2 ? 0.55 : 1) - s.mP) * (1 - Math.exp(-dt * 2));
-    s.mW += ((beat === 2 ? 1.9 : beat === 1 ? 0.55 : 1) - s.mW) * (1 - Math.exp(-dt * 2));
     const stirK = 1 + 2.2 * s.stir;
     if (still) {
-      for (let r = 0; r < 3; r++) orbitPhase[r] = ORBIT_SPEED[r] * FROZEN_TIME_S;
+      ctx.flowT = 4.2;
+      ctx.coreSpin = 1.2;
     } else {
-      orbitPhase[0] += ORBIT_SPEED[0] * s.mP * stirK * dt;
-      orbitPhase[1] += ORBIT_SPEED[1] * s.mW * stirK * dt;
-      orbitPhase[2] += ORBIT_SPEED[2] * stirK * dt;
+      ctx.flowT += dt * stirK;
+      ctx.coreSpin += 0.22 * stirK * dt;
     }
     const lean = inSculpt && pointer.has && !reduced ? 1 : 0;
     springTo(s.tiltX, -pointer.ny * 0.16 * lean + (still ? 0 : 0.04 * Math.sin(time * 0.21)), 3, dt);
@@ -337,7 +337,7 @@ export function Director() {
     const aspect = size.width / Math.max(1, size.height);
 
     // The light inside the glass follows the cursor (level here; where, per piece, below).
-    const wantCursor = pointer.has && !still && S < 10.4 && performance.now() - pointer.lastMove < 6000 ? 1 : 0;
+    const wantCursor = pointer.has && !still && S < 4.2 && performance.now() - pointer.lastMove < 6000 ? 1 : 0;
     springTo(s.cursorAmt, wantCursor * (inSculpt ? 1 : 0.6), 3, dt);
     u.cursorAmt = s.cursorAmt.x;
     if (pointer.has) {
@@ -353,22 +353,8 @@ export function Director() {
     const snap = !s.springsLive || still;
     const loose = 1 - s.rigid;
 
-    // The active specimen (ch04): the hovered row, else the row nearest the viewport centre.
-    let activeRow = ui.focusRow;
-    if (activeRow < 0) {
-      let bd = 0.3;
-      measured.rowS.forEach((r, i) => {
-        const dd = Math.abs(scroll.S - r);
-        if (dd < bd) {
-          bd = dd;
-          activeRow = i;
-        }
-      });
-    }
-    for (let k = 0; k < 4; k++) s.glint[k] += ((k === activeRow ? 1 : 0) - s.glint[k]) * Math.min(1, dt * 4);
-
-    // The cursor lifts shards out of the monument / halo / specimens.
-    const holdForm = plan.a === plan.b && (plan.a === "F2" || plan.a === "F3" || plan.a === "F4");
+    // The cursor lifts shards out of the monument and the flow.
+    const holdForm = plan.a === plan.b && (plan.a === "F2" || plan.a === "F3");
 
     const frags = stone.frags;
     for (let i = 0; i < frags.length; i++) {
@@ -377,6 +363,10 @@ export function Director() {
       const isCore = i === CORE;
       const sp = springs[i];
       fragTarget(plan.a, f, ctx, A);
+      let fxFade = fx.fade;
+      let fxGlow = fx.glow;
+      let fxFlash = fx.flash;
+      let fxLit = fx.lit;
       let m = plan.mix;
       if (plan.a !== plan.b) {
         // Per-fragment stagger inside the window.
@@ -395,14 +385,19 @@ export function Director() {
             d = 0.4 * pr.rand;
             span = 0.6;
             break;
-          case 4:
-            d = 0.1 * pr.spec + 0.2 * pr.rand;
-            span = 0.6;
+          case 6:
+            // Re-forming: the far pieces arrive first, the crack closes last.
+            d = 0.3 * (1 - pr.crackK);
+            span = 0.7;
             break;
         }
         if (plan.stagger !== 2) m = clamp01((m - d) / span);
         fragTarget(plan.b, f, ctx, Bp);
         const e = easeInOutCubic(m);
+        fxFade = lerp(fxFade, fx.fade, e);
+        fxGlow = lerp(fxGlow, fx.glow, e);
+        fxFlash = lerp(fxFlash, fx.flash, e);
+        fxLit = lerp(fxLit, fx.lit, e);
         blendPose(A, Bp, e, f.out, plan.arc, P);
         // The spiral: swept round the vertical axis mid-flight, straight at both ends.
         if (plan.swirl !== 0) {
@@ -452,8 +447,7 @@ export function Director() {
       }
       springTo(sp.lift, near, near > sp.lift.x ? 7 : 3, dt);
       if (sp.lift.x > 0.001) {
-        if (plan.a === "F4") liftDir.set(P.pos.x, 0, P.pos.z);
-        else liftDir.copy(P.pos).sub(MONUMENT_C);
+        liftDir.copy(P.pos).sub(plan.a === "F3" ? FLOW_C : MONUMENT_C);
         if (liftDir.lengthSq() < 1e-6) liftDir.set(0, 1, 0);
         liftDir.normalize();
         P.pos.addScaledVector(liftDir, 0.42 * sp.lift.x);
@@ -518,10 +512,12 @@ export function Director() {
         const fo = sceneState.tiers.focus;
         glow = lerp(pr.course === fo ? 1 : 0.45, 1, plan.complete);
       } else if (plan.glowMode === 2) {
-        // The halo: the orbit of the current beat carries the light.
-        glow = beat === 0 ? 0.75 : (pr.orbit === 0) === (beat === 1) ? 1 : 0.3;
-      } else if (plan.glowMode === 3) {
-        glow = 0.45 + 0.55 * s.glint[pr.spec];
+        // The flow: dark leads, a flash at the core, the qualified stay lit —
+        // full of light through every face, like the core that chose them.
+        glow = fxGlow;
+        flash = Math.max(flash, fxFlash);
+        fade = fxFade;
+        boost = 2.4 * fxLit;
       } else if (plan.glowMode === 4) {
         // Unseated pieces carry the light; seating heals the cut.
         const g = Math.max(0, f.group);
@@ -531,9 +527,13 @@ export function Director() {
         glow = f.piece === "crown" ? 0 : 1;
         if (f.piece === "crown") fade = easeInOutSine(range(S - M0, 0.22, 0.36));
       }
+      if (plan.glowMode === 4 && plan.a === "F3") {
+        fade = fxFade * (1 - m);
+        boost = 2.4 * fxLit;
+      }
       if (isCore) {
-        // The core: hidden inside the whole stone; laid bare by the burst; the light of the monument and the halo.
-        const shown = (plan.a === "F0" && plan.b === "F0") || plan.a === "F5" || plan.a === "F6" ? 0 : 1;
+        // The core: hidden inside the whole stone; laid bare by the burst; the light of the monument; the AI.
+        const shown = (plan.a === "F0" && plan.b === "F0") || (plan.a === "F1" && plan.b === "F0" && m > 0.95) || plan.a === "F5" || plan.a === "F6" ? 0 : 1;
         boost = shown * (plan.glowMode === 2 ? 5 + 1.2 * Math.sin(time * 1.6) : plan.glowMode === 1 ? 3.6 : 2.6);
         glow = 1;
         flash = 0;

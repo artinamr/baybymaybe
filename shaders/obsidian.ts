@@ -96,6 +96,8 @@ export const obsidianUniforms: {
   uNight: U<number>;
   /** Floors of light at the level cuts (the stack, the build). */
   uFloors: U<number>;
+  /** 0..1 the light inside wakes and fills the whole stone (the story's "light inside"). */
+  uWake: U<number>;
   /** The stone's bounding planes (object, n·x ≤ w) and each piece's cut bounds (yMin, yMax, xSign). */
   uHull: U<THREE.Vector4[]>;
   uPieceBox: U<THREE.Vector3[]>;
@@ -124,6 +126,7 @@ export const obsidianUniforms: {
   uCursorAmt: { value: 0 },
   uNight: { value: 0 },
   uFloors: { value: 0 },
+  uWake: { value: 0 },
   uHull: { value: HULL },
   uPieceBox: { value: pieceBounds() },
 };
@@ -174,6 +177,7 @@ export function syncObsidianUniforms(): void {
   U.uCursorAmt.value = u.cursorAmt;
   U.uNight.value = u.dusk;
   U.uFloors.value = u.floors;
+  U.uWake.value = u.wake;
   planeAbove.constant = -u.floorY;
   planeBelow.constant = u.floorY;
 }
@@ -212,6 +216,7 @@ varying float vWorldY;  // final world y (after the mesh matrix) — the reflect
   varying mat3 vObjToView; // stone object frame → view (facet undulation stays glued to the glass)
   uniform vec3 uPieceBox[${FRAG_COUNT}];
   varying vec3 vPieceBox;  // this piece's cut bounds (yMin, yMax, xSign) for the interior march
+  varying vec3 vFragC;     // this piece's rest centroid (object space): a piece full of light centres on it
   uniform vec4 uCursorP[${FRAG_COUNT}];
   varying vec4 vCursorP;   // the cursor's light inside this piece (object space) + nearness
 #endif
@@ -234,10 +239,11 @@ const VERT_NORMAL = /* glsl */ `
     texelFetch(uFragTex, ivec2(3, obsRow), 0));
   // Formations scale non-uniformly (floor plates), so normals take the real
   // inverse-transpose the Director baked, not the model 3×3.
-  mat3 obsNormalM = mat3(
-    texelFetch(uFragTex, ivec2(4, obsRow), 0).xyz,
-    texelFetch(uFragTex, ivec2(5, obsRow), 0).xyz,
-    texelFetch(uFragTex, ivec2(6, obsRow), 0).xyz);
+  vec4 obsN0 = texelFetch(uFragTex, ivec2(4, obsRow), 0);
+  vec4 obsN1 = texelFetch(uFragTex, ivec2(5, obsRow), 0);
+  vec4 obsN2 = texelFetch(uFragTex, ivec2(6, obsRow), 0);
+  mat3 obsNormalM = mat3(obsN0.xyz, obsN1.xyz, obsN2.xyz);
+  vFragC = vec3(obsN0.w, obsN1.w, obsN2.w);
   vFx = texelFetch(uFragTex, ivec2(7, obsRow), 0);
   objectNormal = obsNormalM * objectNormal;
 #endif
@@ -307,6 +313,7 @@ uniform float uLevelSeam;
 uniform float uCursorAmt;
 uniform float uNight;
 uniform float uFloors;
+uniform float uWake;
 uniform vec4 uHull[16];
 varying vec3 vObs;
 varying float vKind;
@@ -325,6 +332,7 @@ varying float vWorldY;
   varying vec3 vViewObj;
   varying mat3 vObjToView;
   varying vec3 vPieceBox;
+  varying vec3 vFragC;
   varying vec4 vCursorP;
 #endif
 #ifdef OBS_INSTANCED
@@ -426,10 +434,14 @@ float obsGlowField(vec3 p) {
   // each section wells up with light from its centre.
   float fy = exp(-p.y * p.y * 55.0) + exp(-(p.y + 0.6) * (p.y + 0.6) * 55.0) + exp(-(p.y + 1.22) * (p.y + 1.22) * 55.0);
   float floors = uFloors * fy * exp(-dot(p.xz, p.xz) * 2.6) * (0.75 + 0.25 * drift);
-  // A fragment full of light (the core crystal): luminous through its whole body.
-  vec3 hc = p - vec3(0.0, -0.464, 0.0);
+  // A fragment full of light (the core crystal, a chosen lead): luminous
+  // through its whole body, centred on its own middle.
+  vec3 hc = p - vFragC;
   float full = vFx.w * 0.1 * exp(-dot(hc, hc) * 0.8) * (0.8 + 0.2 * drift);
-  return heart * drift * 0.16 + floors * 1.1 + full;
+  // Awake: a broad light from the stone's middle, breathing, filling the glass.
+  vec3 wc = p - vec3(0.0, -0.55, 0.0);
+  float awake = uWake * exp(-dot(wc, wc) * 1.6) * (0.75 + 0.25 * sin(uTime * 1.3 + p.y * 2.0));
+  return heart * drift * 0.16 + floors * 1.1 + full + awake * 0.55;
 }
 
 vec3 obsInterior(vec3 ro, vec3 rd, bool full) {
@@ -604,7 +616,7 @@ const FRAG_EMISSIVE = /* glsl */ `
     // The light inside: strong through a polished cut (a window into the
     // glass), faint through the outer faces (dark glass, mostly reflection).
     // vFx.w: a fragment full of light seen through its outer faces (the core).
-    float obsWin = obsCut > 0.5 ? vFx.x * uCutGlow * 1.2 + vFx.y * 0.8 : uInner * (0.55 + 0.45 * vFx.x) * 0.2 + vFx.w * 0.34;
+    float obsWin = obsCut > 0.5 ? vFx.x * uCutGlow * 1.2 + vFx.y * 0.8 : uInner * (0.55 + 0.45 * vFx.x) * 0.2 + vFx.w * 0.34 + uWake * 0.9;
     obsWin *= 1.0 - vFx.z;
     if (obsWin > 0.002) {
       vec3 obsRd = normalize(vViewObj);
@@ -615,7 +627,7 @@ const FRAG_EMISSIVE = /* glsl */ `
       // Fresnel: at grazing angles the surface is a mirror and hides the inside.
       float obsFr = pow(1.0 - clamp(dot(-obsRd, obsNo), 0.0, 1.0), 4.0);
       // The cursor's light reads through the outer faces too — the stone answers the hand.
-      float obsCurW = (obsCut > 0.5 ? 1.2 : 0.62) * (1.0 - vFx.z);
+      float obsCurW = (obsCut > 0.5 ? 1.2 : 0.4) * (1.0 - vFx.z);
       float obsL = (obsIn.x * obsWin + obsIn.z * obsCurW) * (1.0 - 0.85 * obsFr);
       float obsH = clamp((obsIn.y + obsIn.z * 0.6) / max(obsIn.x + obsIn.z, 1e-4), 0.0, 1.0);
       // Deep indigo in the depths, brand indigo where it gathers, never lighter than #6B4BFF.

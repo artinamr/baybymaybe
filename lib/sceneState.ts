@@ -74,12 +74,13 @@ export const sceneState = {
   /**
    * THE PLACES (lib/choreo.ts): how present each environment is, 0..1, and the
    * fog floods that carry the film from one to the next.
-   *   mirror  the studio's mirror floor (hero, the build, the mark)
+   *   mirror  a mirror floor (the studio; the lake)
+   *   sky     the sea of cloud below (what we build) · inCloud: passing through it · lake: the world below
    *   plain   the pale plain in haze (the monument, the halo)
    *   void    drifting fog, no ground (the specimens)
    *   flood   a full-screen fog flood; floodLight: the flood into the heart's light
    */
-  env: { mirror: 1, plain: 0, void: 0, flood: 0, floodLight: 0 },
+  env: { mirror: 1, sky: 0, inCloud: 0, lake: 0, plain: 0, void: 0, flood: 0, floodLight: 0 },
 
   /** Material uniforms the Director drives (shaders/obsidian.ts copies these each frame). */
   u: {
@@ -118,6 +119,8 @@ export const sceneState = {
     dusk: 0,
     /** Floors of light inside the glass at the level cuts (the stack, the build). */
     floors: 0,
+    /** 0..1 the light inside wakes and fills the whole stone. */
+    wake: 0,
     /**
      * The light that follows the cursor, per piece: where the cursor's ray passes
      * closest to the piece's heart, in stone object space (xyz), and how near the

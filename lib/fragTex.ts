@@ -8,7 +8,8 @@
  *
  * Row i (fragment i):
  *   texel 0..3  model matrix columns  (fragment-local → WORLD)
- *   texel 4..6  normal matrix columns (inverse-transpose of the model 3×3; w unused)
+ *   texel 4..6  normal matrix columns (inverse-transpose of the model 3×3);
+ *               their w's carry the fragment's rest centroid (stone object space)
  *   texel 7     (glow, flash, fade, core)
  *                 glow  0..1  cut-face indigo level for this fragment
  *                 flash 0..1  transient flash (walker arrival, seating)
@@ -42,6 +43,13 @@ const fragPos: THREE.Vector3[] = Array.from({ length: FRAG_COUNT }, () => new TH
 const fragFx: Float32Array = new Float32Array(FRAG_COUNT * 3);
 
 const _n = new THREE.Matrix3();
+/** Rest centroids (stone object space), written once — the light that fills a piece centres on it. */
+const centres = new Float32Array(FRAG_COUNT * 3);
+function setCentres(list: { centroid: THREE.Vector3 }[]) {
+  list.forEach((f, i) => {
+    if (i < FRAG_COUNT) f.centroid.toArray(centres, i * 3);
+  });
+}
 
 /** Write fragment i. Allocation-free. Call writeDone() once after the last write of the frame. */
 function writeFrag(i: number, model: THREE.Matrix4, glow: number, flash: number, fade: number, core = 0) {
@@ -53,15 +61,15 @@ function writeFrag(i: number, model: THREE.Matrix4, glow: number, flash: number,
   data[o + 16] = n[0];
   data[o + 17] = n[1];
   data[o + 18] = n[2];
-  data[o + 19] = 0;
+  data[o + 19] = centres[i * 3];
   data[o + 20] = n[3];
   data[o + 21] = n[4];
   data[o + 22] = n[5];
-  data[o + 23] = 0;
+  data[o + 23] = centres[i * 3 + 1];
   data[o + 24] = n[6];
   data[o + 25] = n[7];
   data[o + 26] = n[8];
-  data[o + 27] = 0;
+  data[o + 27] = centres[i * 3 + 2];
   data[o + 28] = glow;
   data[o + 29] = flash;
   data[o + 30] = fade;
@@ -83,6 +91,7 @@ export const fragTex = {
   count: FRAG_COUNT,
   writeFrag,
   writeDone,
+  setCentres,
   fragWorld,
   fragPos,
   fragFx,

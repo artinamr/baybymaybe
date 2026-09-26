@@ -8,7 +8,7 @@
  * global S keys in the choreography hold at every viewport.
  */
 
-export type ChapterId = "potential" | "cut" | "order" | "current" | "field" | "method" | "mark";
+export type ChapterId = "potential" | "build" | "why" | "audit";
 
 export type ChapterDef = {
   id: ChapterId;
@@ -30,6 +30,8 @@ export type ChapterDef = {
   jumpS: number;
   /** Specimen card copy for this chapter. */
   specimen: { name: string; line: string };
+  /** Local s at which the chapter's type reveals (default −0.35: as it scrolls in). */
+  revealAt?: number;
 };
 
 const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
@@ -40,61 +42,36 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     vh: 100,
     sticky: false,
     jumpS: 0,
-    specimen: { name: "Nerodyn", line: "Websites, platforms and AI automation — one studio." },
+    specimen: { name: "Nerodyn", line: "Digital infrastructure and AI automation — one team." },
   },
   {
-    id: "cut",
+    id: "build",
     num: "01",
-    label: "Studio",
-    vh: 200,
+    label: "What we build",
+    vh: 360,
     sticky: true,
-    jumpS: 1.62,
-    specimen: { name: "The studio", line: "Two disciplines, one team." },
+    jumpS: 1.85,
+    // The type waits for the sky: it arrives after the burst, not over it.
+    revealAt: 0.46,
+    specimen: { name: "What we build", line: "Design, infrastructure, AI automation." },
   },
   {
-    id: "order",
+    id: "why",
     num: "02",
-    label: "Infrastructure",
-    vh: 260,
+    label: "Why Nerodyn",
+    vh: 220,
     sticky: true,
-    jumpS: 3.47,
-    specimen: { name: "Digital infrastructure", line: "Interface, platform, data and foundation." },
+    jumpS: 5.35,
+    specimen: { name: "Why Nerodyn", line: "Fourteen days. Yours outright." },
   },
   {
-    id: "current",
+    id: "audit",
     num: "03",
-    label: "AI automation",
-    vh: 260,
+    label: "Free audit",
+    vh: 240,
     sticky: true,
-    jumpS: 6.2,
-    specimen: { name: "AI automation", line: "In your product, and in your workspace." },
-  },
-  {
-    id: "field",
-    num: "04",
-    label: "Work",
-    vh: 220,
-    sticky: false,
-    jumpS: 8.3,
-    specimen: { name: "Selected work", line: "Case studies in preparation." },
-  },
-  {
-    id: "method",
-    num: "05",
-    label: "Method",
-    vh: 320,
-    sticky: true,
-    jumpS: 10.62,
-    specimen: { name: "Method", line: "Discover, architect, build, automate." },
-  },
-  {
-    id: "mark",
-    num: "06",
-    label: "Contact",
-    vh: 220,
-    sticky: true,
-    jumpS: 14.32,
-    specimen: { name: "Contact", line: "We reply to every message personally." },
+    jumpS: 7.55,
+    specimen: { name: "Free audit", line: "An honest read in 48 hours." },
   },
 ];
 
@@ -107,9 +84,9 @@ export const CHAPTERS: ChapterDef[] = (() => {
   });
 })();
 
-/** Total page height in vh (1580). */
+/** Total page height in vh (920). */
 export const PAGE_VH = CHAPTERS.reduce((a, c) => a + c.vh, 0);
-/** Maximum reachable S (page height − one viewport), 14.8. */
+/** Maximum reachable S (page height − one viewport), 8.2. */
 export const S_MAX = PAGE_VH / 100 - 1;
 
 export const CHAPTER_INDEX: Record<ChapterId, number> = Object.fromEntries(

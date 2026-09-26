@@ -88,6 +88,10 @@ export type BusEvents = {
   "mark:lock": void;
   /** Pointer entered / left the stone (raycast). */
   "stone:hover": { on: boolean };
+  /** Story mode opened / began closing; its chapter changed (−1 entering, STORY.length = the closing card); it closed. */
+  story: { open: boolean };
+  "story:chapter": { k: number };
+  "story:closed": Record<string, never>;
 };
 
 type Handler<T> = (payload: T) => void;
@@ -122,11 +126,6 @@ export const bus = createBus<BusEvents>();
  */
 export const ready = { fonts: false, stone: false, env: false, compiled: false };
 
-/**
- * DOM measurements the 3D needs, written by lib/scroll.ts on resize / layout change.
- *   rowS[i] — the global S at which ch04 work row i's centre crosses the viewport centre.
- */
-export const measured = { rowS: [] as number[] };
 
 /** GPU performance tier from StageCanvas's PerformanceMonitor: 0 best … 3 lowest (SPEC §11). */
 export const perf = { tier: 0 };

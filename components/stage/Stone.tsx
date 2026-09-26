@@ -7,6 +7,9 @@ import { getStone, stoneHullGeometry } from "@/lib/geo/crystal";
 import { createObsidian, syncObsidianUniforms } from "@/shaders/obsidian";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { M0 } from "@/lib/choreo";
+import { openStory, story } from "@/lib/story";
+
+let clickBound = false;
 import { bus, pointer, ready, ui } from "@/lib/stores";
 
 /**
@@ -65,7 +68,7 @@ export function Stone() {
 
     // Hover only while the stone is whole enough for the proxy to be true.
     const S = sceneState.S;
-    const whole = S < 1.6 || (S > M0 - 0.9 && S < M0 + 0.2);
+    const whole = S < 0.6 || (S > M0 - 0.9 && S < M0 + 0.2);
     if (pointer.has && pointer.lastMove !== lastMove.current) {
       lastMove.current = pointer.lastMove;
       let on = false;
@@ -81,6 +84,15 @@ export function Stone() {
         ui.hoverStone = on;
         bus.emit("stone:hover", { on });
         document.documentElement.toggleAttribute("data-stone-hover", on);
+        if (!clickBound) {
+          // The stone is the door to the story: a click on it (in the hero) opens it.
+          clickBound = true;
+          window.addEventListener("click", (e) => {
+            if (!ui.hoverStone || story.phase !== "closed" || sceneState.S > 0.4) return;
+            if ((e.target as HTMLElement | null)?.closest("a, button, input, textarea")) return;
+            openStory();
+          });
+        }
       }
     }
   }, PRIORITY.scene);

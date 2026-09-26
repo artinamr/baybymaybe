@@ -729,24 +729,8 @@ export function computeLayout(vw: number, vh: number): Layout {
 
   /* ---- per-chapter principal points (SPEC §6; mobile: 3D in a top band) ---- */
   const pp: Record<ChapterId, [number, number]> = mobile
-    ? {
-        potential: [axisX, ppy],
-        cut: [0.5, 0.3],
-        order: [0.5, 0.3],
-        current: [0.5, 0.3],
-        field: [0.5, 0.3],
-        method: [0.5, 0.3],
-        mark: [0.5, 0.3],
-      }
-    : {
-        potential: [axisX, ppy],
-        cut: [0.62, 0.5],
-        order: [0.66, 0.52],
-        current: [0.31, 0.5],
-        field: [0.7, 0.48],
-        method: [0.66, 0.52],
-        mark: [0.66, 0.5],
-      };
+    ? { potential: [axisX, ppy], build: [0.5, 0.3], why: [0.5, 0.3], audit: [0.5, 0.3] }
+    : { potential: [axisX, ppy], build: [0.64, 0.5], why: [0.66, 0.5], audit: [0.66, 0.5] };
 
   return {
     vw: W,

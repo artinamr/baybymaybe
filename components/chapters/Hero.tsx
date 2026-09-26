@@ -4,7 +4,8 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { Section } from "./Section";
 import { Pill, GhostPill } from "@/components/chrome/Pills";
 import { bus, intro } from "@/lib/stores";
-import { hearTheStory, scrollToChapter } from "@/lib/scroll";
+import { scrollToChapter } from "@/lib/scroll";
+import { openStory } from "@/lib/story";
 
 const d = (ms: number, extra?: Record<string, string>) => ({ "--d": `${ms}ms`, ...extra }) as CSSProperties;
 
@@ -78,19 +79,30 @@ export function Hero() {
         </span>
       </p>
       <p className="hero-desc intro intro-rise" style={d(1100)}>
-        We design, build and run high-performance websites and platforms — and put AI to work inside them, and inside your
-        team.
+        We engineer the digital infrastructure and AI automation that wins serious buyers — then handles them for you.
+        Built fast. Owned outright.
       </p>
       <div className="hero-ctas">
         <span className="intro intro-rise" style={d(1180)}>
-          <Pill onClick={hearTheStory} live>
-            Hear the story
+          <Pill onClick={openStory} live>
+            Enter the story
           </Pill>
         </span>
         <span className="intro intro-rise" style={d(1260)}>
-          <GhostPill onClick={() => scrollToChapter("mark")}>Start a project</GhostPill>
+          <GhostPill onClick={() => scrollToChapter("audit")}>Request an audit</GhostPill>
         </span>
       </div>
+      <button type="button" className="story-cue intro" style={d(1600)} onClick={openStory} aria-label="Enter the story">
+        <svg viewBox="0 0 120 120" aria-hidden>
+          <defs>
+            <path id="story-ring" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0" />
+          </defs>
+          <text>
+            <textPath href="#story-ring">WHY NERODYN EXISTS · ENTER THE STORY · </textPath>
+          </text>
+        </svg>
+        <span className="story-cue-dot" aria-hidden />
+      </button>
     </Section>
   );
 }

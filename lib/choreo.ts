@@ -1,37 +1,31 @@
 import * as THREE from "three";
 import type { Layout } from "./layout";
 import type { Formation, SceneState } from "./sceneState";
-import { measured, ui } from "./stores";
+import { ui } from "./stores";
 import { DEG, easeInOutCubic, easeInOutSine, lerp, range } from "./ease";
 import { STONE } from "./geo/types";
 import { chapter } from "./chapters";
-import { MONUMENT_C } from "./formations";
+import { FLOW_C, FLOW_DIR, LAKE_HOME, MONUMENT_C } from "./formations";
 
 /**
- * THE FILM — every scroll-driven value of the 3D, as a pure function of S.
- * Time-based life (orbits, the cursor, flashes, springs) lives in the
- * Director; this file only answers "where is everything at scroll position S".
+ * THE FILM — every scroll-driven value of the home page's 3D, as a pure
+ * function of S. Time-based life (the flow, the core, the cursor, flashes,
+ * springs) lives in the Director.
  *
- * SHATTER · RESHAPE · STACK, through changing places (igloo.inc's lesson):
+ * FOUR SECTIONS, THREE PLACES, ONE CONTINUOUS SHOT (the camera orbits ~270°
+ * from the hero to the mark and never cuts):
  *
- *   00  THE STUDIO   the stone on its mirror; the camera looks up at it, passes
- *   01               it — and it SHATTERS; the camera dives through the burst
- *        ~ a fog flood carries us out ~
- *   02  THE PLAIN    a pale plain in haze: the shards swirl in and RESHAPE into
- *                    the stone again at monument scale, laid course by course
- *                    from the culet up (the stack: foundation → interface), the
- *                    core glowing inside through the joints
- *   03               the monument BURSTS OPEN into two orbits round the core —
- *                    product, workspace; the camera flies into its light
- *        ~ a flood of light ~
- *   04  THE VOID     drifting fog; the shards regroup into four crystal
- *                    specimens that rise one by one on a vertical conveyor
- *        ~ a fog flood ~
- *   05  THE STUDIO   the shards fall back and BUILD the stone, group by group
- *   06               from one angle it is the logo
- *
- * Camera keys run on one C1 Hermite spline (never stopping at a key); the
- * places switch under the floods.
+ *   HERO           THE STUDIO — the stone on its mirror.
+ *   WHAT WE BUILD  it SHATTERS; the camera dives through the burst and comes
+ *                  out in THE SKY, over a sea of cloud, where the shards
+ *                  re-form the stone (DESIGN), rebuild it at monument scale
+ *                  course by course (INFRASTRUCTURE), then become a working
+ *                  system — leads streaming past the glowing core, the
+ *                  qualified filed into a stack, the noise falling away (AI).
+ *   WHY NERODYN    the shards fall like rain; the camera sinks through the
+ *                  cloud to THE LAKE below, where they build the stone again,
+ *                  one step per number (14 days · owned · no retainers · audit).
+ *   FREE AUDIT     from one angle the stone IS the logo.
  */
 
 type Key = {
@@ -50,7 +44,7 @@ export const plan = {
   b: "F0" as Formation,
   /** Window-local progress 0..1 (the Director staggers it per fragment). */
   mix: 0,
-  /** 0 none · 1 from the crack origin · 2 by course (explicit windows) · 3 random · 4 by spec · 5 by build group */
+  /** 0 none · 1 from the crack origin · 2 by course · 3 random · 6 toward the crack origin (re-forming) */
   stagger: 0,
   /** Bézier arc strength. */
   arc: 0.35,
@@ -59,37 +53,38 @@ export const plan = {
   crownLift: 0,
   bandLift: 0,
   split: 0,
-  /** Stone rotation for stone-relative forms (radians). */
+  /** Stone rotation (radians): the hero/sky stone, and the stone over the lake. */
   yaw: 20 * DEG,
-  /** Glow recipe: 0 plain · 1 monument · 2 halo beats · 3 specimens · 4 build · 5 mark */
+  buildYaw: -200 * DEG,
+  /** Glow recipe: 0 plain · 1 monument · 2 flow · 4 build · 5 mark */
   glowMode: 0,
   /** Transitions SPIRAL: swept round the vertical axis through `swirlC` by swirl·sin(π·progress). */
   swirl: 0,
   swirlC: new THREE.Vector3(),
-  /** F2 assembly: per-course progress 0..1 (courses land one after another). */
+  /** F2 assembly: per-course progress 0..1. */
   course: [0, 0, 0, 0],
-  /** Course being laid (−1 none) — the ch02 row in focus. */
-  laying: -1,
   /** 0..1 all courses laid (the monument lights up). */
   complete: 0,
-  /** ch03 beat: 0 none · 1 product · 2 workspace. */
-  beat: 0,
-  /** ch04 conveyor progress. */
-  conveyor: -1,
-  /** ch05 seat progress per build group. */
+  /** F5 seat progress per build group. */
   seat: [0, 0, 0, 0],
   /** The monument's scroll-driven turn (rad). */
   monumentYaw: 0,
+  /** Which of the three disciplines is in view (0 design · 1 infrastructure · 2 AI; −1 none). */
+  discipline: -1,
+  /** Which WHY number has landed (−1 none … 3). */
+  step: -1,
 };
 
-/** ch05 — METHOD: one seat per step, long enough to watch. */
-export const METHOD = { t0: 10.75, step: 0.45, seatLen: 0.3 };
-/** Top of ch06 (the finale keys hang off it). */
-export const M0 = chapter("mark").S0;
-/** The monument's courses land in these windows (S): foundation, data, platform, interface. */
-export const COURSE_S0 = 3.05;
-export const COURSE_STEP = 0.33;
-const COURSE_LEN = 0.42;
+/** The build over the lake: one seat per WHY number. */
+export const METHOD = { t0: 4.45, step: 0.2, seatLen: 0.18 };
+/** Top of the last section (the finale keys hang off it). */
+export const M0 = chapter("audit").S0;
+/** The monument's courses. */
+const COURSE_S0 = 2.05;
+const COURSE_STEP = 0.17;
+const COURSE_LEN = 0.32;
+/** The three disciplines' windows in S (the text beats follow them). */
+export const DISCIPLINE_S = [1.45, 1.98, 2.98, 3.62];
 
 function heightOf(k: { dist: number; fov: number }) {
   return 2 * k.dist * Math.tan((k.fov * DEG) / 2);
@@ -109,44 +104,44 @@ function keys(L: Layout): Key[] {
   // Mobile: the 3D lives in a top band (pp y 0.30), framed 0.55× as tall.
   const pp = (x: number, y: number): [number, number] => (mob ? [0.5, 0.3] : [x, y]);
   const D = (d: number) => (mob ? d / 0.55 : d);
+  const LY = LAKE_HOME.y;
   const MC: [number, number, number] = [MONUMENT_C.x, MONUMENT_C.y, MONUMENT_C.z];
+  // The flow's frame: beside the type on a desktop; on a phone, centred between
+  // the ring (left of the core) and the column (right of it).
+  const FC: [number, number, number] = mob
+    ? [FLOW_C.x + FLOW_DIR.x * 0.5, FLOW_C.y, FLOW_C.z + FLOW_DIR.z * 0.5]
+    : [FLOW_C.x + 0.4, FLOW_C.y, FLOW_C.z];
   return [
     { S: 0, pivot: [0, STONE.centerY, 0], az: 0, el: 4, dist: heroD, fov: 30, pp: heroPP },
-    // LOOK UP — the camera cranes below the girdle and looks up at the monument.
-    { S: 0.5, pivot: [0, -0.3, 0], az: -40, el: -9, dist: heroD * 0.8, fov: 36, pp: mob ? [0.5, 0.36] : [0.6, 0.5] },
-    // THE PASS — close, wide lens, the stone filling the frame.
-    { S: 1.0, pivot: [0, 0.02, 0], az: -108, el: 3, dist: heroD * 0.5, fov: 44, pp: [0.5, 0.5] },
-    { S: 1.7, pivot: [mob ? 0 : 1.8, STONE.centerY, 0], az: -12, el: 8, dist: D(8.0), fov: 30, pp: pp(0.62, 0.5) },
-    // INTO THE BURST — the shards fly past the lens.
-    { S: 2.45, pivot: [0, -0.3, 0], az: 12, el: 4, dist: D(2.7), fov: 46, pp: [0.5, 0.5] },
-    // THE PLAIN — out of the fog: the shards gathering far off, over the plain…
-    { S: 3.02, pivot: [0, 1.4, 0], az: 22, el: 6, dist: D(28), fov: 30, pp: pp(0.64, 0.5) },
-    // …closer, low, as the foundation course lands…
-    { S: 3.45, pivot: [0, 0.4, 0], az: 30, el: 5, dist: D(19.5), fov: 30, pp: pp(0.66, 0.5) },
-    // …craning up with the courses…
-    { S: 4.2, pivot: [0, 3.3, 0], az: 48, el: 10, dist: D(18.5), fov: 30, pp: pp(0.66, 0.5) },
-    // …the whole monument, lit.
-    { S: 4.62, pivot: MC, az: 60, el: 8, dist: D(21), fov: 30, pp: pp(0.66, 0.5) },
-    // THE HALO — swing round to face it, framed on the left.
-    { S: 5.6, pivot: MC, az: 18, el: 5, dist: D(16.5), fov: 30, pp: pp(0.33, 0.5) },
-    { S: 6.4, pivot: MC, az: 6, el: 3, dist: D(15.5), fov: 30, pp: pp(0.33, 0.5) },
-    { S: 7.1, pivot: MC, az: -4, el: 2, dist: D(15), fov: 30, pp: pp(0.34, 0.5) },
-    // INTO THE CORE — the lens widens as we fly into its light.
-    { S: 7.7, pivot: MC, az: -10, el: 1, dist: 1.5, fov: 52, pp: [0.5, 0.5] },
-    // THE VOID — the specimens rise past on the right.
-    { S: 8.05, pivot: [0, 0, 0], az: 22, el: 4, dist: D(9.6), fov: 30, pp: pp(0.66, 0.5) },
-    { S: 10.0, pivot: [0, 0, 0], az: -8, el: 6, dist: D(9.6), fov: 30, pp: pp(0.66, 0.5) },
-    // THE BUILD — the column hangs over the mirror; the camera circles as it builds.
-    { S: 10.6, pivot: [0, 0.25, 0], az: 10, el: 9, dist: D(11.2), fov: 30, pp: pp(0.66, 0.5) },
-    { S: 11.6, pivot: [0, 0.18, 0], az: 40, el: 11, dist: D(10.6), fov: 30, pp: pp(0.66, 0.5) },
-    { S: 12.3, pivot: [0, 0.02, 0], az: 62, el: 12, dist: D(9.8), fov: 30, pp: pp(0.66, 0.51) },
-    { S: M0 - 1.0, pivot: [0, STONE.centerY, 0], az: 90, el: 15, dist: D(7.3), fov: 30, pp: pp(0.66, 0.52) },
-    { S: M0, pivot: [0, STONE.centerY, 0], az: 90, el: 20, dist: D(L.fit(0.62, 30)), fov: 30, pp: pp(0.66, 0.5) },
-    { S: M0 + 0.2, pivot: [0, STONE.centerY, 0], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
-    { S: M0 + 0.36, pivot: [0, STONE.centerY, 0], az: 90, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
-    { S: M0 + 0.55, pivot: [0, -0.741, 0], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
-    { S: M0 + 0.9, pivot: [0, -0.741, 0], az: 90, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
-    { S: M0 + 1.2, pivot: [0, -0.741, 0], az: 90, el: 32.91, dist: D(17.9), fov: 16, pp: mob ? [0.5, 0.36] : [0.71, 0.395] },
+    // The camera sinks a little and looks up at the monument…
+    { S: 0.3, pivot: [0, -0.3, 0], az: -22, el: -6, dist: heroD * 0.86, fov: 34, pp: mob ? [0.5, 0.36] : [0.6, 0.5] },
+    // …closes in as its seams light…
+    { S: 0.64, pivot: [0, -0.1, 0], az: -62, el: 1, dist: heroD * 0.56, fov: 40, pp: [0.52, 0.5] },
+    // …and dives INTO the burst: the shards fly past the lens.
+    { S: 1.0, pivot: [0, -0.3, 0], az: -98, el: 4, dist: 2.5, fov: 48, pp: [0.5, 0.5] },
+    // THE SKY — out over the cloud sea; the shards re-form the stone (DESIGN).
+    { S: 1.36, pivot: [0, -0.15, 0], az: -128, el: 16, dist: D(9.8), fov: 32, pp: pp(0.64, 0.52) },
+    { S: 1.9, pivot: [0, -0.35, 0], az: -150, el: 9, dist: D(8.0), fov: 30, pp: pp(0.64, 0.5) },
+    // INFRASTRUCTURE — the monument, laid course by course.
+    { S: 2.45, pivot: [0, 0.9, 0], az: -174, el: 8, dist: D(19), fov: 30, pp: pp(0.66, 0.5) },
+    { S: 2.95, pivot: MC, az: -192, el: 10, dist: D(20), fov: 30, pp: pp(0.66, 0.5) },
+    // AI AUTOMATION — the flow, seen side-on so it runs left to right.
+    { S: 3.35, pivot: FC, az: -208, el: 6, dist: D(12.5), fov: 30, pp: pp(0.62, 0.5) },
+    { S: 3.62, pivot: FC, az: -214, el: 5, dist: D(12), fov: 30, pp: pp(0.62, 0.5) },
+    // THROUGH THE CLOUD — the camera sinks with the falling shards.
+    { S: 3.98, pivot: [0, -11, 0], az: -226, el: -3, dist: 7, fov: 42, pp: [0.5, 0.5] },
+    // THE LAKE — the column hangs over the water; it builds as the numbers land.
+    // Low over the water: the range and its reflection behind the stone.
+    { S: 4.4, pivot: [0, LY + 0.5, 0], az: -238, el: 5, dist: D(12.5), fov: 30, pp: pp(0.66, 0.5) },
+    { S: 5.05, pivot: [0, LY + 0.1, 0], az: -254, el: 4, dist: D(10.5), fov: 30, pp: pp(0.66, 0.5) },
+    { S: M0 - 1.0, pivot: [0, LY + STONE.centerY, 0], az: -270, el: 6, dist: D(8.2), fov: 30, pp: pp(0.66, 0.52) },
+    // THE MARK.
+    { S: M0, pivot: [0, LY + STONE.centerY, 0], az: -270, el: 20, dist: D(L.fit(0.62, 30)), fov: 30, pp: pp(0.66, 0.5) },
+    { S: M0 + 0.2, pivot: [0, LY + STONE.centerY, 0], az: -270, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
+    { S: M0 + 0.36, pivot: [0, LY + STONE.centerY, 0], az: -270, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
+    { S: M0 + 0.55, pivot: [0, LY - 0.741, 0], az: -270, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
+    { S: M0 + 0.9, pivot: [0, LY - 0.741, 0], az: -270, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
+    { S: M0 + 1.2, pivot: [0, LY - 0.741, 0], az: -270, el: 32.91, dist: D(17.9), fov: 16, pp: mob ? [0.5, 0.36] : [0.71, 0.395] },
   ];
 }
 
@@ -163,21 +158,26 @@ function toChannels(k: Key): number[] {
 }
 
 /**
- * Tangents by finite differences over NON-uniform key spacing, so the path is
- * C1 through every key. A key equal to a neighbour on a channel is a HOLD —
- * zero tangent there, so the finale's pauses never overshoot.
+ * MONOTONE tangents (Fritsch–Butland, weighted harmonic mean of the two
+ * secants over non-uniform spacing): the path is C1 through every key and no
+ * channel ever overshoots one — a fast dive (through the cloud) lands on the
+ * next frame instead of sinking past it. A key that turns a channel round, or
+ * equals a neighbour (a HOLD), gets a zero tangent there.
  */
-function buildSpline(K: Key[]): Spline {
+export function buildSpline(K: Key[]): Spline {
   const S = K.map((k) => k.S);
   const v = K.map(toChannels);
   const m = v.map((row, j) =>
     row.map((x, c) => {
-      const prev = j > 0 ? v[j - 1][c] : x;
-      const next = j < v.length - 1 ? v[j + 1][c] : x;
-      if (Math.abs(x - prev) < 1e-6 || Math.abs(x - next) < 1e-6) return 0;
-      const s0 = j > 0 ? S[j - 1] : S[j];
-      const s1 = j < S.length - 1 ? S[j + 1] : S[j];
-      return (next - prev) / Math.max(1e-4, s1 - s0);
+      if (j === 0 || j === v.length - 1) return 0;
+      const h0 = Math.max(1e-4, S[j] - S[j - 1]);
+      const h1 = Math.max(1e-4, S[j + 1] - S[j]);
+      const d0 = (x - v[j - 1][c]) / h0;
+      const d1 = (v[j + 1][c] - x) / h1;
+      if (Math.abs(d0) < 1e-6 || Math.abs(d1) < 1e-6 || d0 * d1 < 0) return 0;
+      const w0 = 2 * h1 + h0;
+      const w1 = h1 + 2 * h0;
+      return (w0 + w1) / (w0 / d0 + w1 / d1);
     })
   );
   return { S, v, m };
@@ -185,7 +185,7 @@ function buildSpline(K: Key[]): Spline {
 
 const _row = new Array<number>(NCH).fill(0);
 
-function sampleSpline(sp: Spline, S: number, out: number[]): number[] {
+export function sampleSpline(sp: Spline, S: number, out: number[] = _row): number[] {
   const n = sp.S.length;
   if (S <= sp.S[0]) {
     for (let c = 0; c < NCH; c++) out[c] = sp.v[0][c];
@@ -211,6 +211,8 @@ function sampleSpline(sp: Spline, S: number, out: number[]): number[] {
   return out;
 }
 
+export type { Key, Spline };
+
 let cachedFor = "";
 let spline: Spline | null = null;
 
@@ -231,8 +233,8 @@ function orbitPos(pivot: THREE.Vector3, az: number, el: number, dist: number, ou
   );
 }
 
-function evalCamera(S: number, L: Layout, out: SceneState) {
-  const r = sampleSpline(splineFor(L), S, _row);
+/** Write a sampled spline row into the camera state. */
+export function writeCamera(r: number[], out: SceneState): void {
   const c = out.cam;
   c.path = false;
   c.pivot.set(r[0], r[1], r[2]);
@@ -247,70 +249,24 @@ function evalCamera(S: number, L: Layout, out: SceneState) {
   c.target.copy(c.pivot);
 }
 
-/** Monotone C1 interpolation through (x, y) points — no overshoot, no stops. */
-function hermite1(xs: number[], ys: number[], x: number): number {
-  const n = xs.length;
-  if (x <= xs[0]) return ys[0];
-  if (x >= xs[n - 1]) return ys[n - 1];
-  let i = 0;
-  while (i < n - 2 && x >= xs[i + 1]) i++;
-  const slope = (j: number) => {
-    if (j <= 0 || j >= n - 1) return (ys[Math.min(n - 1, j + 1)] - ys[Math.max(0, j - 1)]) / (xs[Math.min(n - 1, j + 1)] - xs[Math.max(0, j - 1)]);
-    const a = (ys[j] - ys[j - 1]) / (xs[j] - xs[j - 1]);
-    const b = (ys[j + 1] - ys[j]) / (xs[j + 1] - xs[j]);
-    return a * b <= 0 ? 0 : (2 * a * b) / (a + b);
-  };
-  const d = xs[i + 1] - xs[i];
-  const t = (x - xs[i]) / d;
-  const t2 = t * t;
-  const t3 = t2 * t;
-  return (2 * t3 - 3 * t2 + 1) * ys[i] + (t3 - 2 * t2 + t) * d * slope(i) + (-2 * t3 + 3 * t2) * ys[i + 1] + (t3 - t2) * d * slope(i + 1);
-}
-
-/** A work row's S (ch04): measured once the list is laid out, else evenly spaced. */
-export function rowS(i: number): number {
-  const rs = measured.rowS;
-  if (rs.length === 4 && rs.every((v, k) => k === 0 || v > rs[k - 1])) return rs[i];
-  return 8.4 + 0.42 * i;
-}
-
-const convS: number[] = [];
-const convY: number[] = [];
-
-/** ch04 conveyor: specimen i is centred when row i is. Rises steadily before and after. */
-function conveyorAt(S: number): number {
-  convS.length = 0;
-  convY.length = 0;
-  const lead = 0.42;
-  convS.push(rowS(0) - 1.2);
-  convY.push(-1.2 / lead);
-  for (let i = 0; i < 4; i++) {
-    convS.push(rowS(i));
-    convY.push(i);
-  }
-  convS.push(rowS(3) + 1.2);
-  convY.push(3 + 1.2 / lead);
-  return hermite1(convS, convY, S);
-}
-
 /**
  * Fill every scroll-driven field of sceneState (+ the fragment blend plan).
- * Pure in (S, L) except for reading ui.focusTier / measured.rowS.
+ * Pure in (S, L) except for reading ui.focusTier.
  */
 export function evaluate(S: number, _time: number, L: Layout, out: SceneState): void {
-  evalCamera(S, L, out);
+  writeCamera(sampleSpline(splineFor(L), S), out);
   const u = out.u;
   const env = out.env;
 
   /* ---- the stone ------------------------------------------------------ */
-  plan.lift = 0.32 * Math.sin(Math.PI * easeInOutSine(range(S, 0.1, 1.8)));
-  out.stone.home.set(0, S < 2.9 ? plan.lift : 0, 0);
+  plan.lift = 0.22 * Math.sin(Math.PI * easeInOutSine(range(S, 0.05, 0.7)));
+  out.stone.home.set(0, S < 1.2 ? plan.lift : 0, 0);
+  if (S >= 4.2) out.stone.home.copy(LAKE_HOME);
   out.stone.visible = true;
-  // The hero's half-turn; at the build the stone turns to meet the mark.
-  let yaw = 20 + 180 * smoother(range(S, 0.05, 1.75));
-  if (S >= 10.0) yaw = lerp(405, 450, easeInOutSine(range(S, 10.6, M0 - 1.0)));
-  plan.yaw = yaw * DEG;
-  plan.monumentYaw = 0.55 * (S - 3.0);
+  // The hero's slow turn, the re-formed stone turning in the sky, the stone over the lake meeting the mark.
+  plan.yaw = (20 - 80 * smoother(range(S, 0.05, 0.7)) - 70 * smoother(range(S, 1.2, 2.0))) * DEG;
+  plan.buildYaw = lerp(-200, -270, easeInOutSine(range(S, 4.4, M0 - 1.0))) * DEG;
+  plan.monumentYaw = 0.5 * (S - 2.0);
 
   /* ---- formations ---------------------------------------------------- */
   plan.gap = 0;
@@ -322,9 +278,7 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   plan.swirl = 0;
   plan.stagger = 0;
   plan.mix = 0;
-  plan.laying = -1;
   plan.complete = 0;
-  plan.beat = 0;
   const set = (a: Formation, b: Formation, mix: number, stagger: number) => {
     plan.a = a;
     plan.b = b;
@@ -339,60 +293,56 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
     const a = METHOD.t0 + METHOD.step * k;
     plan.seat[k] = smoother(range(S, a, a + METHOD.seatLen));
   }
-  plan.conveyor = conveyorAt(S);
+  plan.discipline = S < DISCIPLINE_S[0] || S >= DISCIPLINE_S[3] + 0.4 ? -1 : S < DISCIPLINE_S[1] ? 0 : S < DISCIPLINE_S[2] ? 1 : 2;
+  plan.step = -1;
+  for (let k = 0; k < 4; k++) if (S >= METHOD.t0 + METHOD.step * k + METHOD.seatLen * 0.5) plan.step = k;
 
-  if (S < 2.0) {
+  if (S < 0.7) {
     set("F0", "F0", 0, 0);
-    plan.gap = 0.004 * easeInOutSine(range(S, 1.82, 2.0));
-  } else if (S < 2.9) {
+    plan.gap = 0.004 * easeInOutSine(range(S, 0.58, 0.7));
+  } else if (S < 1.3) {
     // THE SHATTER.
     plan.gap = 0.004;
-    set("F0", "F1", range(S, 2.0, 2.9), 1);
+    set("F0", "F1", range(S, 0.7, 1.3), 1);
     plan.arc = 0.5;
-  } else if (S < COURSE_S0 + 3 * COURSE_STEP + COURSE_LEN) {
-    // THE STACK: course by course, spiralling in from the burst.
-    set("F1", "F2", 0, 2);
-    plan.swirl = 1.5;
-    plan.swirlC.copy(MONUMENT_C);
-    plan.arc = 0.3;
-    plan.glowMode = 1;
-    for (let k = 3; k >= 0; k--)
-      if (S >= COURSE_S0 + COURSE_STEP * k) {
-        plan.laying = k;
-        break;
-      }
-  } else if (S < 4.75) {
-    set("F2", "F2", 0, 0);
-    plan.glowMode = 1;
-    plan.complete = smoother(range(S, 4.46, 4.6));
-  } else if (S < 5.75) {
-    // The monument BURSTS OPEN round its core.
-    set("F2", "F3", range(S, 4.75, 5.75), 3);
-    plan.swirl = -1.7;
-    plan.swirlC.copy(MONUMENT_C);
-    plan.arc = 0.45;
-    plan.glowMode = 2;
-  } else if (S < 7.45) {
-    set("F3", "F3", 0, 0);
-    plan.glowMode = 2;
-    plan.beat = S < 5.9 ? 0 : S < 6.55 ? 1 : 2;
-  } else if (S < 8.15) {
-    // Through the light, the shards regroup into specimens.
-    set("F3", "F4", range(S, 7.45, 8.15), 4);
-    plan.arc = 0.25;
-    plan.glowMode = 3;
-  } else if (S < 10.05) {
-    set("F4", "F4", 0, 0);
-    plan.glowMode = 3;
-  } else if (S < 10.75) {
-    // The specimens break; the shards fall into the column over the mirror.
-    set("F4", "F5", range(S, 10.05, 10.75), 3);
-    plan.swirl = 1.2;
+  } else if (S < 1.78) {
+    // Out in the sky, the shards find each other again: DESIGN.
+    set("F1", "F0", range(S, 1.3, 1.78), 6);
+    plan.swirl = 0.9;
     plan.swirlC.set(0, 0, 0);
     plan.arc = 0.35;
+  } else if (S < COURSE_S0) {
+    set("F0", "F0", 0, 0);
+  } else if (S < COURSE_S0 + 3 * COURSE_STEP + COURSE_LEN) {
+    // INFRASTRUCTURE: the stone rebuilt at scale, course by course.
+    set("F0", "F2", 0, 2);
+    plan.swirl = 1.2;
+    plan.swirlC.copy(MONUMENT_C);
+    plan.arc = 0.25;
+    plan.glowMode = 1;
+  } else if (S < 3.0) {
+    set("F2", "F2", 0, 0);
+    plan.glowMode = 1;
+    plan.complete = smoother(range(S, 2.86, 2.96));
+  } else if (S < 3.32) {
+    // AI AUTOMATION: the monument comes apart into a working system.
+    set("F2", "F3", range(S, 3.0, 3.32), 3);
+    plan.swirl = -1.2;
+    plan.swirlC.copy(MONUMENT_C);
+    plan.arc = 0.3;
+    plan.glowMode = 2;
+  } else if (S < 3.64) {
+    set("F3", "F3", 0, 0);
+    plan.glowMode = 2;
+  } else if (S < 4.4) {
+    // The shards fall like rain through the cloud, down to the lake.
+    set("F3", "F5", range(S, 3.64, 4.4), 3);
+    plan.arc = 0.08;
+    plan.swirl = 0.7;
+    plan.swirlC.set(0, 0, 0);
     plan.glowMode = 4;
   } else if (S < M0) {
-    set("F5", "F5", 0, 5);
+    set("F5", "F5", 0, 0);
     plan.glowMode = 4;
   } else {
     const s = S - M0;
@@ -407,50 +357,49 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   out.formation.mix = plan.mix;
 
   /* ---- places --------------------------------------------------------- */
-  env.flood = Math.max(bump(S, 2.5, 2.8, 3.12), bump(S, 7.36, 7.6, 8.1), bump(S, 10.05, 10.4, 10.78));
-  env.mirror = 1 - smoother(range(S, 2.6, 2.78)) + smoother(range(S, 10.25, 10.45));
-  env.plain = smoother(range(S, 2.7, 2.88)) * (1 - smoother(range(S, 7.6, 7.78)));
-  env.void = smoother(range(S, 7.62, 7.82)) * (1 - smoother(range(S, 10.28, 10.46)));
-  // The flood into the core is light, not fog.
-  env.floodLight = bump(S, 7.36, 7.6, 8.1);
+  env.mirror = 1 - smoother(range(S, 0.74, 0.92)) + smoother(range(S, 4.12, 4.36));
+  env.sky = smoother(range(S, 0.8, 1.18)) * (1 - smoother(range(S, 3.9, 4.12)));
+  env.inCloud = bump(S, 3.72, 3.96, 4.2);
+  env.lake = smoother(range(S, 3.98, 4.28));
+  env.flood = 0;
+  env.floodLight = 0;
+  env.plain = 0;
+  env.void = 0;
 
   /* ---- material uniforms --------------------------------------------- */
-  let seam = range(S, 1.7, 1.82);
-  seam = lerp(seam, 0.3, range(S, 2.0, 2.9));
-  seam *= 1 - range(S, 2.9, 3.2);
+  let seam = range(S, 0.5, 0.62);
+  seam = lerp(seam, 0.3, range(S, 0.7, 1.3));
+  seam *= 1 - range(S, 1.3, 1.6);
   if (S >= M0) seam = 0.6 * range(S - M0, 0.5, 0.62);
   u.seam = seam;
   u.levelSeam = 0;
 
   let glow = 0;
-  if (S < 2.0) glow = 0.4 * range(S, 1.82, 2.0);
-  else if (S < M0) glow = S < 10.6 ? lerp(0.4, 1, range(S, 2.0, 2.6)) : lerp(1, 0.4, range(S, METHOD.t0 + 3 * METHOD.step, M0 - 0.9));
+  if (S < 0.7) glow = 0.4 * range(S, 0.6, 0.7);
+  else if (S < M0) glow = S < 4.4 ? lerp(0.4, 1, range(S, 0.7, 1.1)) : lerp(1, 0.4, range(S, 5.2, M0 - 0.9));
   else glow = 0.35 * range(S - M0, 0.5, 0.62);
   u.cutGlow = glow;
+  u.spill = S < 1 ? Math.sin(Math.PI * range(S, 0.6, 1.0)) * range(S, 0.6, 0.66) : S >= M0 ? 0.4 * range(S - M0, 0.5, 0.62) : 0;
 
-  u.spill = S < 3 ? Math.sin(Math.PI * range(S, 1.82, 2.7)) * range(S, 1.82, 1.9) : S >= M0 ? 0.4 * range(S - M0, 0.5, 0.62) : 0;
+  // Fog as alpha: the sky and the lake have depth; the studio is clear.
+  const deep = Math.max(env.sky, env.lake);
+  u.fogNear = lerp(60, 34, deep);
+  u.fogFar = lerp(90, 120, deep);
 
-  // Alpha fog: the plain and the void have depth; the studio is clear.
-  const deep = Math.max(env.plain, env.void);
-  u.fogNear = lerp(60, env.void > env.plain ? 11 : 26, deep);
-  u.fogFar = lerp(90, env.void > env.plain ? 30 : 70, deep);
-
-  u.vein = 1 + 0.9 * Math.sin(Math.PI * range(S, 0.45, 1.6));
+  u.vein = 1 + 0.9 * Math.sin(Math.PI * range(S, 0.3, 0.9));
   u.dusk = 0;
-  u.inner = 0.32 + 0.3 * Math.sin(Math.PI * range(S, 0.45, 1.6));
+  u.inner = 0.32 + 0.3 * Math.sin(Math.PI * range(S, 0.3, 0.9));
   u.floors = 0;
-  u.reflect = env.mirror;
-  u.floorY = STONE.floorY;
-  u.mistAlpha = 1 - range(S, 0.5, 1.1);
+  u.wake = 0;
+  u.reflect = Math.min(1, env.mirror);
+  u.floorY = S < 2.5 ? STONE.floorY : LAKE_HOME.y + STONE.floorY;
+  u.mistAlpha = 1 - range(S, 0.3, 0.8);
   u.mistClipY = L.hero.mistClipY;
-  u.cursorLight = S > 2.9 && S < 10.4 ? 4 : 8;
+  u.cursorLight = S > 1.2 && S < 4.4 ? 4 : 8;
 
   /* ---- chapter hooks ------------------------------------------------- */
-  out.tiers.visible = S > 2.95 && S < 4.75;
-  let focus = plan.laying;
-  if (plan.complete > 0.5) focus = -1;
-  if (ui.focusTier >= 0 && out.tiers.visible) focus = ui.focusTier;
-  out.tiers.focus = focus;
+  out.tiers.visible = false;
+  out.tiers.focus = ui.focusTier;
 
   /* ---- the bookend clip + mark lock ---------------------------------- */
   const s6 = S - M0;

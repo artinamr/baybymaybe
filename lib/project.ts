@@ -90,6 +90,9 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
     root.style.setProperty("--stone-y", `${c.y.toFixed(0)}px`);
   });
 
+  /* ---- the sky: the page's paper cools toward the top over the cloud sea -- */
+  write("sky", sceneState.env.sky.toFixed(3), (val) => root.style.setProperty("--sky", val));
+
   /* ---- dusk: the page follows the film into night and back (ch03) ------- */
   const dusk = sceneState.u.dusk;
   write("dusk", dusk.toFixed(3), (val) => {
