@@ -2,30 +2,37 @@ import * as THREE from "three";
 import type { Layout } from "./layout";
 import type { Formation, SceneState } from "./sceneState";
 import { ui } from "./stores";
-import { DEG, easeInOutCubic, easeInOutSine, lerp, range } from "./ease";
+import { DEG, easeInOutSine, lerp, range } from "./ease";
 import { STONE } from "./geo/types";
 import { chapter } from "./chapters";
-import { FLOW_C, FLOW_DIR, LAKE_HOME, MONUMENT_C } from "./formations";
+import { COL_C, COL_HOME, COL_K, FLAT_Y, FLOW_AZ_DEG, FLOW_C, FLOW_DIR, MONUMENT_C } from "./formations";
 
 /**
  * THE FILM — every scroll-driven value of the home page's 3D, as a pure
  * function of S. Time-based life (the flow, the core, the cursor, flashes,
  * springs) lives in the Director.
  *
- * FOUR SECTIONS, THREE PLACES, ONE CONTINUOUS SHOT (the camera orbits ~270°
- * from the hero to the mark and never cuts):
+ * FIVE SECTIONS, THREE PLACES, ONE SHOT (one cut, hidden in a flood of light):
  *
- *   HERO           THE STUDIO — the stone on its mirror.
- *   WHAT WE BUILD  it SHATTERS; the camera dives through the burst and comes
- *                  out in THE SKY, over a sea of cloud, where the shards
- *                  re-form the stone (DESIGN), rebuild it at monument scale
- *                  course by course (INFRASTRUCTURE), then become a working
- *                  system — leads streaming past the glowing core, the
- *                  qualified filed into a stack, the noise falling away (AI).
- *   WHY NERODYN    the shards fall like rain; the camera sinks through the
- *                  cloud to THE LAKE below, where they build the stone again,
- *                  one step per number (14 days · owned · no retainers · audit).
- *   FREE AUDIT     from one angle the stone IS the logo.
+ *   HERO          THE STUDIO — the stone on its mirror.
+ *   THE STUDIO    look up; the pass; the stone behind the statement, which
+ *                 inverts where the glass crosses it; a hairline of light, and
+ *                 it SHATTERS — the camera pulls back with the burst as the
+ *                 studio floor gives way to THE SKY, a sea of cloud rolling in
+ *                 beneath, far obsidian peaks in the haze.
+ *   WHAT WE BUILD websites: the burst resolves into an exploded view and
+ *                 assembles, inside out, every shard flashing as it locks.
+ *                 platforms: the stone rebuilt at monument scale, course by
+ *                 course, light rising through it when it is complete.
+ *                 AI automation: the leads circle the core and are decided.
+ *                 Then every lead is drawn into the core, the camera follows
+ *                 it in, and its light floods the frame —
+ *   WHY NERODYN   — and draws back over THE SALT FLAT, where the stone stands
+ *                 colossal. It opens toward the camera; the camera flies in,
+ *                 turns round the burning core inside, and pulls out the back
+ *                 as the glass closes in front of it. A ring runs out across
+ *                 the flat.
+ *   LET'S TALK    the colossus at rest, seams drawn in light.
  */
 
 type Key = {
@@ -44,19 +51,27 @@ export const plan = {
   b: "F0" as Formation,
   /** Window-local progress 0..1 (the Director staggers it per fragment). */
   mix: 0,
-  /** 0 none · 1 from the crack origin · 2 by course · 3 random · 6 toward the crack origin (re-forming) */
+  /**
+   * 0 none · 1 from the crack origin · 2 by course · 3 random ·
+   * 6 toward the crack origin (re-forming) · 7 from the heart out (assembly)
+   */
   stagger: 0,
   /** Bézier arc strength. */
   arc: 0.35,
   gap: 0,
   lift: 0,
-  crownLift: 0,
-  bandLift: 0,
-  split: 0,
-  /** Stone rotation (radians): the hero/sky stone, and the stone over the lake. */
+  /** Where the stone stands and how big it is. */
+  home: new THREE.Vector3(),
+  K: 1,
+  /** F4: how far apart the exploded view is held. */
+  explode: 1,
+  /** F7: how far the colossus may open toward the camera (0..1). */
+  open: 0,
+  /** A hard cut this frame (the rig and every shard jump to their goals). */
+  cut: false,
+  /** Stone rotation (radians). */
   yaw: 20 * DEG,
-  buildYaw: -200 * DEG,
-  /** Glow recipe: 0 plain · 1 monument · 2 flow · 4 build · 5 mark */
+  /** Glow recipe: 0 plain · 1 monument · 2 flow · 3 exploded/assembly · 6 colossus · 7 gathered */
   glowMode: 0,
   /** Transitions SPIRAL: swept round the vertical axis through `swirlC` by swirl·sin(π·progress). */
   swirl: 0,
@@ -65,26 +80,40 @@ export const plan = {
   course: [0, 0, 0, 0],
   /** 0..1 all courses laid (the monument lights up). */
   complete: 0,
-  /** F5 seat progress per build group. */
-  seat: [0, 0, 0, 0],
   /** The monument's scroll-driven turn (rad). */
   monumentYaw: 0,
-  /** Which of the three disciplines is in view (0 design · 1 infrastructure · 2 AI; −1 none). */
+  /** Which of the three disciplines is in view (0 websites · 1 platforms · 2 AI; −1 none). */
   discipline: -1,
-  /** Which WHY number has landed (−1 none … 3). */
+  /* Story-film fields (lib/storyFilm.ts writes them; the home film leaves them at rest). */
+  buildYaw: 0,
+  crownLift: 0,
+  bandLift: 0,
+  split: 0,
   step: -1,
 };
 
-/** The build over the lake: one seat per WHY number. */
-export const METHOD = { t0: 4.45, step: 0.2, seatLen: 0.18 };
-/** Top of the last section (the finale keys hang off it). */
+/** Top of the last section. */
 export const M0 = chapter("audit").S0;
-/** The monument's courses. */
-const COURSE_S0 = 2.05;
-const COURSE_STEP = 0.17;
-const COURSE_LEN = 0.32;
+/* The film's beats, in S. */
+const SHATTER = [2.25, 2.85];
+const EXPLODE = [2.85, 3.3];
+const ASSEMBLE = [3.6, 3.95];
+const COURSE_S0 = 4.1;
+const COURSE_STEP = 0.13;
+const COURSE_LEN = 0.28;
+const COURSE_END = COURSE_S0 + 3 * COURSE_STEP + COURSE_LEN;
+const FLOW = [4.92, 5.22];
+const GATHER = [5.62, 5.98];
+/** The flood: rises, holds white (the cut), draws back. */
+const FLOOD = [5.8, 6.0, 6.1, 6.42];
+export const CUT_S = 6.05;
+/** The colossus: bursts, is flown into and round, closes. */
+const OPEN = [6.92, 7.3, 8.02, 8.55];
+
 /** The three disciplines' windows in S (the text beats follow them). */
-export const DISCIPLINE_S = [1.45, 1.98, 2.98, 3.62];
+export const DISCIPLINE_S = [2.95, 4.03, 4.9, 5.6];
+/** The three WHY claims' windows in S. */
+export const WHY_S = [6.25, 7.08, 7.8, 8.7];
 
 function heightOf(k: { dist: number; fov: number }) {
   return 2 * k.dist * Math.tan((k.fov * DEG) / 2);
@@ -104,44 +133,62 @@ function keys(L: Layout): Key[] {
   // Mobile: the 3D lives in a top band (pp y 0.30), framed 0.55× as tall.
   const pp = (x: number, y: number): [number, number] => (mob ? [0.5, 0.3] : [x, y]);
   const D = (d: number) => (mob ? d / 0.55 : d);
-  const LY = LAKE_HOME.y;
+  const cY = STONE.centerY;
   const MC: [number, number, number] = [MONUMENT_C.x, MONUMENT_C.y, MONUMENT_C.z];
   // The flow's frame: beside the type on a desktop; on a phone, centred between
   // the ring (left of the core) and the column (right of it).
   const FC: [number, number, number] = mob
     ? [FLOW_C.x + FLOW_DIR.x * 0.5, FLOW_C.y, FLOW_C.z + FLOW_DIR.z * 0.5]
-    : [FLOW_C.x + 0.4, FLOW_C.y, FLOW_C.z];
+    : [FLOW_C.x - FLOW_DIR.x * 0.35, FLOW_C.y, FLOW_C.z - FLOW_DIR.z * 0.35];
+  const CC: [number, number, number] = [COL_C.x, COL_C.y, COL_C.z];
+  const FA = FLOW_AZ_DEG;
   return [
-    { S: 0, pivot: [0, STONE.centerY, 0], az: 0, el: 4, dist: heroD, fov: 30, pp: heroPP },
-    // The camera sinks a little and looks up at the monument…
+    { S: 0, pivot: [0, cY, 0], az: 0, el: 4, dist: heroD, fov: 30, pp: heroPP },
+    // LOOK UP: the camera sinks and looks up at the stone…
     { S: 0.3, pivot: [0, -0.3, 0], az: -22, el: -6, dist: heroD * 0.86, fov: 34, pp: mob ? [0.5, 0.36] : [0.6, 0.5] },
-    // …closes in as its seams light…
+    // …THE PASS: close, the stone filling the frame, the veins waking…
     { S: 0.64, pivot: [0, -0.1, 0], az: -62, el: 1, dist: heroD * 0.56, fov: 40, pp: [0.52, 0.5] },
-    // …and dives INTO the burst: the shards fly past the lens.
-    { S: 1.0, pivot: [0, -0.3, 0], az: -98, el: 4, dist: 2.5, fov: 48, pp: [0.5, 0.5] },
-    // THE SKY — out over the cloud sea; the shards re-form the stone (DESIGN).
-    { S: 1.36, pivot: [0, -0.15, 0], az: -128, el: 16, dist: D(9.8), fov: 32, pp: pp(0.64, 0.52) },
-    { S: 1.9, pivot: [0, -0.35, 0], az: -150, el: 9, dist: D(8.0), fov: 30, pp: pp(0.64, 0.5) },
-    // INFRASTRUCTURE — the monument, laid course by course.
-    { S: 2.45, pivot: [0, 0.9, 0], az: -174, el: 8, dist: D(19), fov: 30, pp: pp(0.66, 0.5) },
-    { S: 2.95, pivot: MC, az: -192, el: 10, dist: D(20), fov: 30, pp: pp(0.66, 0.5) },
+    // …and settles behind the statement (the letters invert where it passes).
+    { S: 1.2, pivot: [0, cY, 0], az: -100, el: 5, dist: D(8.3), fov: 30, pp: pp(0.4, 0.5) },
+    { S: 1.9, pivot: [0, cY, 0], az: -122, el: 8, dist: D(7.6), fov: 30, pp: pp(0.42, 0.5) },
+    // The hairline of light: the stone comes to the centre for the shatter.
+    { S: 2.25, pivot: [0, cY + 0.1, 0], az: -132, el: 7, dist: D(8.8), fov: 30, pp: [0.5, 0.5] },
+    // THE SHATTER — the camera pulls back with the burst; the sky rolls in below.
+    { S: 2.6, pivot: [0, cY + 0.55, 0], az: -142, el: 8, dist: D(14), fov: 32, pp: [0.5, 0.5] },
+    { S: 2.85, pivot: [0, cY + 0.5, 0], az: -152, el: 7, dist: D(16), fov: 32, pp: pp(0.58, 0.5) },
+    // WEBSITES — the exploded view, the cloud sea running to a horizon of far
+    // obsidian peaks behind it; then assembled.
+    { S: 3.25, pivot: [0, cY + 0.35, 0], az: -168, el: 6, dist: D(14.5), fov: 30, pp: pp(0.64, 0.5) },
+    { S: 3.6, pivot: [0, cY + 0.2, 0], az: -186, el: 5, dist: D(14), fov: 30, pp: pp(0.64, 0.5) },
+    { S: 3.95, pivot: [0, cY, 0], az: -200, el: 4, dist: D(8.8), fov: 30, pp: pp(0.64, 0.5) },
+    { S: 4.1, pivot: [0, cY, 0], az: -206, el: 4, dist: D(9.4), fov: 30, pp: pp(0.64, 0.5) },
+    // PLATFORMS — the monument, course by course, the camera low.
+    { S: 4.5, pivot: [0, 0.5, 0], az: -226, el: 3, dist: D(17.5), fov: 30, pp: pp(0.64, 0.5) },
+    { S: 4.9, pivot: MC, az: -244, el: 4, dist: D(18.5), fov: 30, pp: pp(0.64, 0.5) },
     // AI AUTOMATION — the flow, seen side-on so it runs left to right.
-    { S: 3.35, pivot: FC, az: -208, el: 6, dist: D(12.5), fov: 30, pp: pp(0.62, 0.5) },
-    { S: 3.62, pivot: FC, az: -214, el: 5, dist: D(12), fov: 30, pp: pp(0.62, 0.5) },
-    // THROUGH THE CLOUD — the camera sinks with the falling shards.
-    { S: 3.98, pivot: [0, -11, 0], az: -226, el: -3, dist: 7, fov: 42, pp: [0.5, 0.5] },
-    // THE LAKE — the column hangs over the water; it builds as the numbers land.
-    // Low over the water: the range and its reflection behind the stone.
-    { S: 4.4, pivot: [0, LY + 0.5, 0], az: -238, el: 5, dist: D(12.5), fov: 30, pp: pp(0.66, 0.5) },
-    { S: 5.05, pivot: [0, LY + 0.1, 0], az: -254, el: 4, dist: D(10.5), fov: 30, pp: pp(0.66, 0.5) },
-    { S: M0 - 1.0, pivot: [0, LY + STONE.centerY, 0], az: -270, el: 6, dist: D(8.2), fov: 30, pp: pp(0.66, 0.52) },
-    // THE MARK.
-    { S: M0, pivot: [0, LY + STONE.centerY, 0], az: -270, el: 20, dist: D(L.fit(0.62, 30)), fov: 30, pp: pp(0.66, 0.5) },
-    { S: M0 + 0.2, pivot: [0, LY + STONE.centerY, 0], az: -270, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
-    { S: M0 + 0.36, pivot: [0, LY + STONE.centerY, 0], az: -270, el: 26, dist: D(L.fit(0.62, 24)), fov: 24, pp: pp(0.66, 0.5) },
-    { S: M0 + 0.55, pivot: [0, LY - 0.741, 0], az: -270, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
-    { S: M0 + 0.9, pivot: [0, LY - 0.741, 0], az: -270, el: 32.91, dist: D(12.79), fov: 16, pp: pp(0.66, 0.46) },
-    { S: M0 + 1.2, pivot: [0, LY - 0.741, 0], az: -270, el: 32.91, dist: D(17.9), fov: 16, pp: mob ? [0.5, 0.36] : [0.71, 0.395] },
+    { S: 5.22, pivot: FC, az: FA + 4, el: 4, dist: D(12.5), fov: 30, pp: pp(0.62, 0.5) },
+    { S: 5.6, pivot: FC, az: FA - 2, el: 3, dist: D(12), fov: 30, pp: pp(0.62, 0.5) },
+    // INTO THE LIGHT — every lead drawn into the core; the camera follows them in.
+    { S: 5.98, pivot: [FLOW_C.x, FLOW_C.y, FLOW_C.z], az: FA - 10, el: 3, dist: 3.4, fov: 40, pp: [0.5, 0.5] },
+    // ——— the cut, under the flood ———
+    // THE SALT FLAT — the colossus far off, the camera low, looking up at it.
+    { S: CUT_S, pivot: CC, az: -360, el: -5, dist: D(84), fov: 30, pp: pp(0.6, 0.52) },
+    { S: 6.4, pivot: CC, az: -360, el: -4, dist: D(72), fov: 30, pp: pp(0.6, 0.52) },
+    { S: 6.8, pivot: CC, az: -353, el: -1, dist: D(40), fov: 32, pp: pp(0.58, 0.5) },
+    // It bursts, slow as a held breath, and the camera flies into it…
+    { S: 7.05, pivot: CC, az: -348, el: 2, dist: 30, fov: 36, pp: [0.54, 0.5] },
+    { S: 7.3, pivot: CC, az: -338, el: 4, dist: 15, fov: 46, pp: [0.5, 0.5] },
+    // …round the burning core, the burst all round it…
+    { S: 7.55, pivot: CC, az: -300, el: 6, dist: 8.5, fov: 50, pp: [0.5, 0.5] },
+    { S: 7.8, pivot: CC, az: -240, el: 5, dist: 8.2, fov: 50, pp: [0.5, 0.5] },
+    { S: 8.02, pivot: CC, az: -196, el: 4, dist: 10, fov: 46, pp: [0.5, 0.5] },
+    // …and out, the glass closing in front of it.
+    { S: 8.3, pivot: CC, az: -184, el: 2, dist: 22, fov: 38, pp: [0.52, 0.5] },
+    { S: 8.7, pivot: CC, az: -176, el: 2, dist: D(40), fov: 32, pp: pp(0.6, 0.5) },
+    // LET'S TALK — the colossus at rest (on a phone, small in the top band, clear of the words).
+    { S: 9.3, pivot: CC, az: -170, el: 3, dist: mob ? 58 / 0.4 : 58, fov: 30, pp: mob ? [0.5, 0.27] : [0.66, 0.5] },
+    { S: M0 + 0.4, pivot: CC, az: -165, el: 4, dist: mob ? 60 / 0.4 : 60, fov: 30, pp: mob ? [0.5, 0.27] : [0.66, 0.5] },
+    { S: M0 + 1.25, pivot: CC, az: -160, el: 5, dist: mob ? 64 / 0.4 : 64, fov: 30, pp: mob ? [0.5, 0.25] : [0.68, 0.46] },
   ];
 }
 
@@ -160,9 +207,10 @@ function toChannels(k: Key): number[] {
 /**
  * MONOTONE tangents (Fritsch–Butland, weighted harmonic mean of the two
  * secants over non-uniform spacing): the path is C1 through every key and no
- * channel ever overshoots one — a fast dive (through the cloud) lands on the
- * next frame instead of sinking past it. A key that turns a channel round, or
- * equals a neighbour (a HOLD), gets a zero tangent there.
+ * channel ever overshoots one — a fast move lands on the next frame instead of
+ * sinking past it. A key that turns a channel round, or equals a neighbour (a
+ * HOLD), gets a zero tangent there. A key at the cut starts a new spline
+ * segment: nothing is interpolated across it.
  */
 export function buildSpline(K: Key[]): Spline {
   const S = K.map((k) => k.S);
@@ -214,15 +262,19 @@ export function sampleSpline(sp: Spline, S: number, out: number[] = _row): numbe
 export type { Key, Spline };
 
 let cachedFor = "";
-let spline: Spline | null = null;
+let before: Spline | null = null;
+let after: Spline | null = null;
 
-function splineFor(L: Layout): Spline {
+/** Two splines — before and after the cut — so nothing is ever interpolated across it. */
+function splinesFor(L: Layout): [Spline, Spline] {
   const id = `${L.vw}x${L.vh}:${L.mode}:${L.hero.dist.toFixed(3)}`;
-  if (id !== cachedFor || !spline) {
+  if (id !== cachedFor || !before || !after) {
     cachedFor = id;
-    spline = buildSpline(keys(L));
+    const all = keys(L);
+    before = buildSpline(all.filter((k) => k.S < CUT_S));
+    after = buildSpline(all.filter((k) => k.S >= CUT_S));
   }
-  return spline;
+  return [before, after];
 }
 
 function orbitPos(pivot: THREE.Vector3, az: number, el: number, dist: number, out: THREE.Vector3) {
@@ -254,31 +306,46 @@ export function writeCamera(r: number[], out: SceneState): void {
  * Pure in (S, L) except for reading ui.focusTier.
  */
 export function evaluate(S: number, _time: number, L: Layout, out: SceneState): void {
-  writeCamera(sampleSpline(splineFor(L), S), out);
+  const [sp0, sp1] = splinesFor(L);
+  const flat = S >= CUT_S;
+  writeCamera(sampleSpline(flat ? sp1 : sp0, S), out);
+  out.cam.cut = Math.abs(S - CUT_S) < 0.035;
   const u = out.u;
   const env = out.env;
 
   /* ---- the stone ------------------------------------------------------ */
   plan.lift = 0.22 * Math.sin(Math.PI * easeInOutSine(range(S, 0.05, 0.7)));
-  out.stone.home.set(0, S < 1.2 ? plan.lift : 0, 0);
-  if (S >= 4.2) out.stone.home.copy(LAKE_HOME);
+  plan.cut = out.cam.cut;
+  if (flat) {
+    plan.home.copy(COL_HOME);
+    plan.K = COL_K;
+  } else {
+    plan.home.set(0, 0, 0);
+    plan.K = 1;
+  }
+  out.stone.home.copy(plan.home);
+  if (!flat && S < 1.2) out.stone.home.y = plan.lift;
+  out.stone.scale = plan.K;
   out.stone.visible = true;
-  // The hero's slow turn, the re-formed stone turning in the sky, the stone over the lake meeting the mark.
-  plan.yaw = (20 - 80 * smoother(range(S, 0.05, 0.7)) - 70 * smoother(range(S, 1.2, 2.0))) * DEG;
-  plan.buildYaw = lerp(-200, -270, easeInOutSine(range(S, 4.4, M0 - 1.0))) * DEG;
-  plan.monumentYaw = 0.5 * (S - 2.0);
+  // The hero's slow turn; the statement's; the turn of the re-made stone in
+  // the sky; the colossus faces the camera with a corner, like the hero.
+  if (!flat) {
+    plan.yaw = (20 - 80 * smoother(range(S, 0.05, 0.7)) - 40 * smoother(range(S, 1.0, 2.2)) - 50 * smoother(range(S, 3.3, 4.1))) * DEG;
+  } else {
+    plan.yaw = (20 + 12 * smoother(range(S, CUT_S, 7.2)) + 18 * smoother(range(S, 8.3, M0 + 1.2))) * DEG;
+  }
+  plan.monumentYaw = 0.5 * (S - COURSE_S0);
+  plan.explode = 1;
 
   /* ---- formations ---------------------------------------------------- */
   plan.gap = 0;
-  plan.crownLift = 0;
-  plan.bandLift = 0;
-  plan.split = 0;
   plan.arc = 0.35;
   plan.glowMode = 0;
   plan.swirl = 0;
   plan.stagger = 0;
   plan.mix = 0;
   plan.complete = 0;
+  plan.open = 0;
   const set = (a: Formation, b: Formation, mix: number, stagger: number) => {
     plan.a = a;
     plan.b = b;
@@ -289,129 +356,127 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
     const a = COURSE_S0 + COURSE_STEP * k;
     plan.course[k] = range(S, a, a + COURSE_LEN);
   }
-  for (let k = 0; k < 4; k++) {
-    const a = METHOD.t0 + METHOD.step * k;
-    plan.seat[k] = smoother(range(S, a, a + METHOD.seatLen));
-  }
-  plan.discipline = S < DISCIPLINE_S[0] || S >= DISCIPLINE_S[3] + 0.4 ? -1 : S < DISCIPLINE_S[1] ? 0 : S < DISCIPLINE_S[2] ? 1 : 2;
-  plan.step = -1;
-  for (let k = 0; k < 4; k++) if (S >= METHOD.t0 + METHOD.step * k + METHOD.seatLen * 0.5) plan.step = k;
+  plan.discipline = S < DISCIPLINE_S[0] || S >= DISCIPLINE_S[3] + 0.3 ? -1 : S < DISCIPLINE_S[1] ? 0 : S < DISCIPLINE_S[2] ? 1 : 2;
 
-  if (S < 0.7) {
+  if (S < SHATTER[0]) {
     set("F0", "F0", 0, 0);
-    plan.gap = 0.004 * easeInOutSine(range(S, 0.58, 0.7));
-  } else if (S < 1.3) {
+    // A hairline of light: the cracks open by a breath before it breaks.
+    plan.gap = 0.004 * easeInOutSine(range(S, 2.05, SHATTER[0]));
+  } else if (S < SHATTER[1]) {
     // THE SHATTER.
     plan.gap = 0.004;
-    set("F0", "F1", range(S, 0.7, 1.3), 1);
+    set("F0", "F1", range(S, SHATTER[0], SHATTER[1]), 1);
     plan.arc = 0.5;
-  } else if (S < 1.78) {
-    // Out in the sky, the shards find each other again: DESIGN.
-    set("F1", "F0", range(S, 1.3, 1.78), 6);
-    plan.swirl = 0.9;
-    plan.swirlC.set(0, 0, 0);
-    plan.arc = 0.35;
+  } else if (S < EXPLODE[1]) {
+    // The burst finds its order: every shard turns back to its place, held apart.
+    set("F1", "F4", range(S, EXPLODE[0], EXPLODE[1]), 6);
+    plan.swirl = 0.6;
+    plan.swirlC.set(0, STONE.centerY, 0);
+    plan.arc = 0.25;
+    plan.glowMode = 3;
+  } else if (S < ASSEMBLE[0]) {
+    set("F4", "F4", 0, 0);
+    plan.glowMode = 3;
+    // The exploded view breathes in a little as it waits.
+    plan.explode = 1 - 0.1 * smoother(range(S, EXPLODE[1], ASSEMBLE[0]));
+  } else if (S < ASSEMBLE[1]) {
+    // Assembly, from the heart out; each shard flashes as it seats.
+    plan.explode = 0.9;
+    set("F4", "F0", range(S, ASSEMBLE[0], ASSEMBLE[1]), 7);
+    plan.arc = 0.12;
+    plan.glowMode = 3;
   } else if (S < COURSE_S0) {
     set("F0", "F0", 0, 0);
-  } else if (S < COURSE_S0 + 3 * COURSE_STEP + COURSE_LEN) {
-    // INFRASTRUCTURE: the stone rebuilt at scale, course by course.
+  } else if (S < COURSE_END) {
+    // PLATFORMS: the stone rebuilt at scale, course by course.
     set("F0", "F2", 0, 2);
     plan.swirl = 1.2;
     plan.swirlC.copy(MONUMENT_C);
     plan.arc = 0.25;
     plan.glowMode = 1;
-  } else if (S < 3.0) {
+  } else if (S < FLOW[0]) {
     set("F2", "F2", 0, 0);
     plan.glowMode = 1;
-    plan.complete = smoother(range(S, 2.86, 2.96));
-  } else if (S < 3.32) {
+    plan.complete = smoother(range(S, COURSE_END, COURSE_END + 0.1));
+  } else if (S < FLOW[1]) {
     // AI AUTOMATION: the monument comes apart into a working system.
-    set("F2", "F3", range(S, 3.0, 3.32), 3);
-    plan.swirl = -1.2;
+    set("F2", "F3", range(S, FLOW[0], FLOW[1]), 3);
+    plan.swirl = -0.55;
     plan.swirlC.copy(MONUMENT_C);
-    plan.arc = 0.3;
+    plan.arc = 0.18;
     plan.glowMode = 2;
-  } else if (S < 3.64) {
+  } else if (S < GATHER[0]) {
     set("F3", "F3", 0, 0);
     plan.glowMode = 2;
-  } else if (S < 4.4) {
-    // The shards fall like rain through the cloud, down to the lake.
-    set("F3", "F5", range(S, 3.64, 4.4), 3);
-    plan.arc = 0.08;
-    plan.swirl = 0.7;
-    plan.swirlC.set(0, 0, 0);
-    plan.glowMode = 4;
-  } else if (S < M0) {
-    set("F5", "F5", 0, 0);
-    plan.glowMode = 4;
+  } else if (!flat) {
+    // INTO THE LIGHT: every lead drawn into the core.
+    set("F3", "F8", range(S, GATHER[0], GATHER[1]), 3);
+    plan.swirl = 1.6;
+    plan.swirlC.copy(FLOW_C);
+    plan.arc = 0.4;
+    plan.glowMode = 7;
   } else {
-    const s = S - M0;
-    set("F6", "F6", 0, 0);
-    plan.crownLift = easeInOutSine(range(s, 0.22, 0.36));
-    plan.bandLift = easeInOutSine(range(s, 0.5, 0.62));
-    plan.split = plan.bandLift;
-    plan.glowMode = 5;
+    // THE COLOSSUS: it opens toward the camera, and closes behind it.
+    set("F7", "F7", 0, 0);
+    plan.open = smoother(range(S, OPEN[0], OPEN[1])) * (1 - smoother(range(S, OPEN[2], OPEN[3])));
+    plan.glowMode = 6;
   }
   out.formation.a = plan.a;
   out.formation.b = plan.b;
   out.formation.mix = plan.mix;
 
   /* ---- places --------------------------------------------------------- */
-  env.mirror = 1 - smoother(range(S, 0.74, 0.92)) + smoother(range(S, 4.12, 4.36));
-  env.sky = smoother(range(S, 0.8, 1.18)) * (1 - smoother(range(S, 3.9, 4.12)));
-  env.inCloud = bump(S, 3.72, 3.96, 4.2);
-  env.lake = smoother(range(S, 3.98, 4.28));
-  env.flood = 0;
-  env.floodLight = 0;
+  env.mirror = flat ? 0 : 1 - smoother(range(S, 2.35, 2.62));
+  env.sky = flat ? 0 : smoother(range(S, 2.4, 2.85));
+  env.inCloud = 0;
+  env.flat = flat ? 1 : 0;
+  env.flood = smoother(range(S, FLOOD[0], FLOOD[1])) * (1 - smoother(range(S, FLOOD[2], FLOOD[3])));
+  env.floodX = 0.5;
+  env.floodY = 0.5;
+  env.ripple = range(S, 8.45, 9.4);
+  env.lake = 0;
   env.plain = 0;
   env.void = 0;
+  env.floodLight = 0;
 
   /* ---- material uniforms --------------------------------------------- */
-  let seam = range(S, 0.5, 0.62);
-  seam = lerp(seam, 0.3, range(S, 0.7, 1.3));
-  seam *= 1 - range(S, 1.3, 1.6);
-  if (S >= M0) seam = 0.6 * range(S - M0, 0.5, 0.62);
+  // Mark seams: they wake in the pass, burn before the shatter, and draw the
+  // colossus at rest.
+  let seam = 0.35 * range(S, 0.5, 0.62) * (1 - range(S, 1.0, 1.3)) + 0.9 * bump(S, 1.95, 2.2, 2.4);
+  if (flat) seam = 0.25 * bump(S, 6.4, 6.8, 7.1) + 0.55 * smoother(range(S, 8.6, 9.3));
   u.seam = seam;
   u.levelSeam = 0;
 
-  let glow = 0;
-  if (S < 0.7) glow = 0.4 * range(S, 0.6, 0.7);
-  else if (S < M0) glow = S < 4.4 ? lerp(0.4, 1, range(S, 0.7, 1.1)) : lerp(1, 0.4, range(S, 5.2, M0 - 0.9));
-  else glow = 0.35 * range(S - M0, 0.5, 0.62);
+  let glow = 0.4 * range(S, 2.0, 2.25);
+  if (S >= SHATTER[0] && !flat) glow = S < COURSE_S0 ? 1 : lerp(1, 0.7, range(S, 5.0, 5.6));
+  if (flat) glow = 0.3 + 0.35 * plan.open;
   u.cutGlow = glow;
-  u.spill = S < 1 ? Math.sin(Math.PI * range(S, 0.6, 1.0)) * range(S, 0.6, 0.66) : S >= M0 ? 0.4 * range(S - M0, 0.5, 0.62) : 0;
+  u.spill = flat ? 0.35 * smoother(range(S, 8.8, 9.4)) : 0.5 * bump(S, 2.0, 2.25, 2.5);
 
-  // Fog as alpha: the sky and the lake have depth; the studio is clear.
-  const deep = Math.max(env.sky, env.lake);
-  u.fogNear = lerp(60, 34, deep);
-  u.fogFar = lerp(90, 120, deep);
+  // Fog as alpha: the sky has depth; the flat stretches to a far horizon.
+  const deep = env.sky;
+  u.fogNear = flat ? 160 : lerp(60, 34, deep);
+  u.fogFar = flat ? 520 : lerp(90, 120, deep);
 
-  u.vein = 1 + 0.9 * Math.sin(Math.PI * range(S, 0.3, 0.9));
+  u.vein = 1 + 0.9 * Math.sin(Math.PI * range(S, 0.3, 0.9)) + 0.6 * bump(S, 1.7, 2.2, 2.5);
   u.dusk = 0;
-  u.inner = 0.32 + 0.3 * Math.sin(Math.PI * range(S, 0.3, 0.9));
+  u.inner = 0.32 + 0.3 * Math.sin(Math.PI * range(S, 0.3, 0.9)) + (flat ? 0.12 * plan.open : 0);
   u.floors = 0;
-  u.wake = 0;
-  u.reflect = Math.min(1, env.mirror);
-  u.floorY = S < 2.5 ? STONE.floorY : LAKE_HOME.y + STONE.floorY;
+  u.wake = flat ? 0 : 0.35 * bump(S, 1.9, 2.2, 2.45);
+  // A band of light rises through the monument when its last course lands.
+  u.riseY = lerp(-2.0, 1.1, range(S, COURSE_END, COURSE_END + 0.16));
+  u.riseAmp = bump(S, COURSE_END - 0.02, COURSE_END + 0.04, COURSE_END + 0.18);
+  u.reflect = Math.max(env.mirror, env.flat);
+  u.floorY = flat ? FLAT_Y : STONE.floorY;
   u.mistAlpha = 1 - range(S, 0.3, 0.8);
   u.mistClipY = L.hero.mistClipY;
-  u.cursorLight = S > 1.2 && S < 4.4 ? 4 : 8;
+  u.cursorLight = S > 2.3 && S < 6 ? 4 : 8;
 
   /* ---- chapter hooks ------------------------------------------------- */
   out.tiers.visible = false;
   out.tiers.focus = ui.focusTier;
 
-  /* ---- the bookend clip + mark lock ---------------------------------- */
-  const s6 = S - M0;
-  const k = easeInOutCubic(range(s6, 0.9, 1.2));
-  const cl = out.clip;
-  cl.active = k > 0.001;
-  cl.t = 9 * k;
-  cl.r = 4 * k;
-  cl.b = 30 * k;
-  cl.l = 46 * k;
-  cl.rad = 28 * k;
-  cl.tint = k;
-  cl.frame = k;
-  out.mark.lock = range(s6, 0.5, 0.62);
+  /* ---- no bookend clip; the mark lock is retired ---------------------- */
+  out.clip.active = false;
+  out.mark.lock = 0;
 }

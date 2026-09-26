@@ -25,7 +25,7 @@ export const PRIORITY = {
   bridge: -10,
 } as const;
 
-export type Formation = "F0" | "F1" | "F2" | "F3" | "F4" | "F5" | "F6";
+export type Formation = "F0" | "F1" | "F2" | "F3" | "F4" | "F7" | "F8";
 
 export const sceneState = {
   /** Global scroll coordinate this frame. */
@@ -52,6 +52,8 @@ export const sceneState = {
     ppy: 0.5,
     roll: 0,
     path: false,
+    /** A hard cut (under a full flood of light): the rig and the shards jump to their goals. */
+    cut: false,
     pos: new THREE.Vector3(0, 0, 7.25),
     target: new THREE.Vector3(0, -0.464, 0),
   },
@@ -63,8 +65,10 @@ export const sceneState = {
     yaw: 0.349,
     pitch: 0,
     bob: 0,
-    /** T(home)·R(yaw,pitch)·T(0,bob,0) — the intact stone's object→world. */
+    /** T(home)·R(yaw,pitch)·S(scale)·T(0,bob,0) — the intact stone's object→world. */
     matrix: new THREE.Matrix4(),
+    /** 1 in the studio and the sky; colossal on the salt flat. */
+    scale: 1,
     visible: true,
   },
 
@@ -73,14 +77,30 @@ export const sceneState = {
 
   /**
    * THE PLACES (lib/choreo.ts): how present each environment is, 0..1, and the
-   * fog floods that carry the film from one to the next.
-   *   mirror  a mirror floor (the studio; the lake)
-   *   sky     the sea of cloud below (what we build) · inCloud: passing through it · lake: the world below
-   *   plain   the pale plain in haze (the monument, the halo)
-   *   void    drifting fog, no ground (the specimens)
-   *   flood   a full-screen fog flood; floodLight: the flood into the heart's light
+   * flood of light that carries the film from the sky to the flat.
+   *   mirror  the studio's mirror floor
+   *   sky     the sea of cloud below, the far obsidian peaks (what we build)
+   *   inCloud passing through a bank of cloud
+   *   flat    the salt flat: a mirror to the horizon (why, let's talk)
+   *   flood   0..1 light pouring out of the core over the whole frame, from
+   *           (floodX, floodY) in screen fractions
+   *   ripple  0..1 a ring running out across the flat from the colossus
+   *   lake / plain / void / floodLight: retired places, always 0
    */
-  env: { mirror: 1, sky: 0, inCloud: 0, lake: 0, plain: 0, void: 0, flood: 0, floodLight: 0 },
+  env: {
+    mirror: 1,
+    sky: 0,
+    inCloud: 0,
+    flat: 0,
+    flood: 0,
+    floodX: 0.5,
+    floodY: 0.5,
+    ripple: 0,
+    lake: 0,
+    plain: 0,
+    void: 0,
+    floodLight: 0,
+  },
 
   /** Material uniforms the Director drives (shaders/obsidian.ts copies these each frame). */
   u: {
@@ -121,6 +141,9 @@ export const sceneState = {
     floors: 0,
     /** 0..1 the light inside wakes and fills the whole stone. */
     wake: 0,
+    /** A band of light rising through the glass: height in stone object space, and its strength. */
+    riseY: -2,
+    riseAmp: 0,
     /**
      * The light that follows the cursor, per piece: where the cursor's ray passes
      * closest to the piece's heart, in stone object space (xyz), and how near the

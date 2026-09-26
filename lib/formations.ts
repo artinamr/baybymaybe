@@ -1,26 +1,33 @@
 import * as THREE from "three";
 import { CORE_SCALE } from "./geo/crystal";
-import { CORE, HOME_A, MARK, SHARD_COUNT, STONE, type FragInfo } from "./geo/types";
+import { CORE, SHARD_COUNT, STONE, type FragInfo } from "./geo/types";
 import type { Formation } from "./sceneState";
 import { mulberry32 } from "./ease";
 
 /**
  * THE FORMS OF THE STONE (home film, lib/choreo.ts).
  *
- *   F0  intact      the stone (the core hidden inside it) — in the studio, and
- *                   again in the sky once it has re-formed (DESIGN)
+ *   F0  intact      the stone (the core hidden inside it), at any home and
+ *                   scale — the studio stone, the stone re-made in the sky
  *   F1  burst       it SHATTERS — forty shards thrown out, the core laid bare
- *   F2  monument    the shards rebuild the stone at 2.25× in the sky, course by
- *                   course from the culet up (INFRASTRUCTURE), open joints,
- *                   the core glowing inside
- *   F3  flow        AI AUTOMATION as a working system, alive in time: shards
- *                   (the leads) sweep in out of the distance, circle the
- *                   glowing core once on a tilted ring (the AI greets, asks,
- *                   screens) and are decided at its front: LIT — qualified,
- *                   filed into the column on the right that rises for you —
- *                   or dark, dropping away into the clouds (the noise)
- *   F5  build       over the lake: the stone rebuilt, group by group
- *   F6  mark        crown lifted away, band raised, blades split — the logo
+ *   F4  exploded    WEBSITES: the burst resolves into an exploded view — every
+ *                   shard turned back to its place in the stone and held apart
+ *                   along its own line from the heart; the mark's cuts open
+ *                   (crown up, blades apart); the core glowing in the middle
+ *   F2  monument    PLATFORMS: the stone rebuilt at 2.25× over the cloud sea,
+ *                   course by course from the culet up, open joints
+ *   F3  flow        AI AUTOMATION as a working system, alive in time: leads
+ *                   sweep in out of the distance, circle the glowing core on a
+ *                   tilted ring and are decided at its front — LIT (qualified,
+ *                   filed into the rising column) or dark (dropped into the clouds)
+ *   F8  gathered    every lead drawn into the core, which swells with light (the
+ *                   flood out of the sky starts here)
+ *   F7  colossus    WHY: the stone at colossal scale on the salt flat. It
+ *                   BURSTS in slow motion — every piece carried out from the
+ *                   heart to twice its distance, a hollow round the burning
+ *                   core, and the glass between the heart and the camera
+ *                   always standing aside — so the camera flies into the burst,
+ *                   turns round the core, and pulls out as it closes again
  *
  * Every pose is world space; blends happen between world poses (Director).
  */
@@ -34,6 +41,10 @@ export function pose(): Pose {
 export type FormationCtx = {
   /** The stone's current rotation (stone-relative forms). */
   stoneQuat: THREE.Quaternion;
+  /** Where the stone's origin stands (F0 / F1 / F4 / F7). */
+  home: THREE.Vector3;
+  /** The stone's scale (1 in the studio and the sky; colossal on the flat). */
+  K: number;
   /** F0: push along `out` (the cracks opening). */
   gap: number;
   /** F0/F1: how far the stone has risen off its reflection (world y). */
@@ -46,14 +57,11 @@ export type FormationCtx = {
   tilt: THREE.Quaternion;
   /** F3: the flow's clock (seconds, integrated by the Director — the cursor can hurry it). */
   flowT: number;
-  /** F5: 0..1 per build group — 0 hanging in the column, 1 seated. */
-  seat: number[];
-  /** F5/F6: the stone's rotation over the lake. */
-  buildQuat: THREE.Quaternion;
-  /** F6 progress terms 0..1. */
-  crownLift: number;
-  bandLift: number;
-  split: number;
+  /** F4: 0..1 how far apart the exploded view is held (breathes a little). */
+  explode: number;
+  /** F7: where the camera is (the stone opens toward it), and how open it may be (0..1). */
+  camPos: THREE.Vector3;
+  open: number;
 };
 
 /* The monument (F2) stands in the sky over the cloud sea. */
@@ -62,11 +70,12 @@ export const MONUMENT_K = 2.25;
 /** Open joints: every shard sits this much further out than in the stone. */
 const JOINT = 0.11;
 /* The flow (F3): the core, screen-right and toward-the-camera at that point of
-   the film (camera azimuth ≈ −210°), the ring, the column. Everything stays
-   right of the chapter's type: in from the far upper right, round the core by
-   its left, out to the column on the right. */
+   the film (the camera's azimuth there is FLOW_AZ), the ring, the column.
+   Everything stays right of the chapter's type: in from the far upper right,
+   round the core by its left, out to the column on the right. */
 export const FLOW_C = new THREE.Vector3(0.2, 1.1, 0);
-const FLOW_AZ = (-210 * Math.PI) / 180;
+export const FLOW_AZ_DEG = -270;
+const FLOW_AZ = (FLOW_AZ_DEG * Math.PI) / 180;
 export const FLOW_DIR = new THREE.Vector3(Math.cos(FLOW_AZ), 0, -Math.sin(FLOW_AZ));
 const FLOW_DEPTH = new THREE.Vector3(Math.sin(FLOW_AZ), 0, Math.cos(FLOW_AZ));
 const FLOW_PERIOD = 10.5;
@@ -82,20 +91,38 @@ const U_COLUMN = 0.7;
 const COLUMN_C = FLOW_C.clone().addScaledVector(FLOW_DIR, 1.95).addScaledVector(FLOW_DEPTH, 0.45);
 const COLUMN_BASE = -1.3;
 const COLUMN_RISE = 3.8;
-/* The lake: below the clouds; the stone is rebuilt standing on it. */
-export const LAKE_HOME = new THREE.Vector3(0, -32, 0);
 /* The core's size in each form. */
 const CORE_IN_MONUMENT = 0.95;
 const CORE_IN_FLOW = 0.72;
-/* The build column: groups hang above their seats (stone units), pushed out a little. */
-const COLUMN_Y = [0.34, 0.72, 1.12, 1.58];
+const CORE_GATHERED = 1.25;
+/* F4: how far apart the exploded view holds (× distance from the heart), and the mark's cuts. */
+const EXPLODE_K = 1.3;
+const CUT_OPEN = { crown: 0.46, band: 0.2, blade: 0.32 };
+
+/* THE SALT FLAT and the colossus on it (F7). The flat lies far below the sky's
+   cloud sea; the film cuts to it under a flood of light. */
+export const FLAT_Y = -60;
+export const COL_K = 7;
+/** The colossus's origin: its culet just touches the flat. */
+export const COL_HOME = new THREE.Vector3(0, FLAT_Y - STONE.floorY * COL_K, 0);
+/** The colossus's centre (world). */
+export const COL_C = new THREE.Vector3(0, COL_HOME.y + STONE.centerY * COL_K, 0);
+/* How it opens (stone units × K): the tunnel's radius toward the camera, the
+   hollow round the heart, and how far every joint opens. */
+const TUNNEL_R = 0.5;
+const HOLLOW_R = 1.25;
+const EXPAND = 1.05;
 
 const Y = new THREE.Vector3(0, 1, 0);
 const _v = new THREE.Vector3();
+const _c = new THREE.Vector3();
+const _d = new THREE.Vector3();
+const _cd = new THREE.Vector3();
+const _perp = new THREE.Vector3();
+const _off = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 const _q2 = new THREE.Quaternion();
-const homeA = new THREE.Vector3(...HOME_A);
 const stoneMid = new THREE.Vector3(0, STONE.centerY, 0);
 
 /** Per-fragment constants, precomputed once from FragInfo. */
@@ -115,8 +142,12 @@ type Prep = {
   unit: number;
   tumble: THREE.Vector3;
   filedQ: THREE.Quaternion;
+  /** F4: offset from the heart in the exploded view (stone object space). */
+  explodeOff: THREE.Vector3;
   /** 0..1 distance from the crack origin (burst stagger). */
   crackK: number;
+  /** 0..1 distance from the heart (assembly stagger: the inside first). */
+  radK: number;
   rand: number;
 };
 
@@ -140,6 +171,7 @@ export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3)
   const rand = mulberry32(0x5b3df0);
   const shards = frags.filter((f) => f.index < SHARD_COUNT);
   const maxCrack = Math.max(...shards.map((f) => f.centroid.distanceTo(crackOrigin)));
+  const maxRad = Math.max(...shards.map((f) => f.centroid.distanceTo(stoneMid)));
 
   // F2: courses are quartiles of height, from the culet up.
   const byHeight = shards.map((f) => f.index).sort((a, b) => frags[a].centroid.y - frags[b].centroid.y);
@@ -154,7 +186,7 @@ export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3)
     const axis = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize();
     const spin = new THREE.Quaternion().setFromAxisAngle(axis, (rand() * 40 * Math.PI) / 180);
     const burst = f.out.clone().multiplyScalar(1.1 + 1.6 * rand());
-    if (f.piece === "crown") burst.y += 0.7;
+    if (f.piece === "crown") burst.y += 0.42;
     if (f.piece === "bladeL") burst.x -= 0.5;
     if (f.piece === "bladeR") burst.x += 0.5;
     const r = rand();
@@ -162,6 +194,13 @@ export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3)
     const tumble = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize();
     const laneY = (rand() - 0.5) * 3.2;
     const laneZ = (rand() - 0.5) * 4.0;
+    // The exploded view: along the shard's own line from the heart, further for
+    // the far ones, and the mark's cuts opened — crown up, blades apart.
+    const explodeOff = f.centroid.clone().sub(stoneMid).multiplyScalar(EXPLODE_K);
+    if (f.piece === "crown") explodeOff.y += CUT_OPEN.crown;
+    if (f.piece === "band") explodeOff.y += CUT_OPEN.band;
+    if (f.piece === "bladeL") explodeOff.x -= CUT_OPEN.blade;
+    if (f.piece === "bladeR") explodeOff.x += CUT_OPEN.blade;
     return {
       burst,
       spin,
@@ -176,7 +215,9 @@ export function prepareFormations(frags: FragInfo[], crackOrigin: THREE.Vector3)
       tumble,
       // Filed: the polished cut face turned to the camera, long axis level.
       filedQ: faceTo(f, FLOW_DEPTH, FLOW_DIR),
+      explodeOff,
       crackK: f.index === CORE ? 0 : f.centroid.distanceTo(crackOrigin) / maxCrack,
+      radK: f.index === CORE ? 0 : f.centroid.distanceTo(stoneMid) / maxRad,
       rand: r,
     };
   });
@@ -195,10 +236,11 @@ function tiltAbout(out: Pose, centre: THREE.Vector3, tilt: THREE.Quaternion) {
 /**
  * What a formation says about a fragment's light, beyond its pose (F3's leads
  * grow in and dwindle away, flash as they pass the core, stay lit if
- * qualified). Read by the Director right after fragTarget. Leads come and go by
- * SCALE, never by alpha: a half-faded shard reads as white ghost glass.
+ * qualified; F7's walls light as the corridor opens). Read by the Director
+ * right after fragTarget. Leads come and go by SCALE, never by alpha: a
+ * half-faded shard reads as white ghost glass.
  */
-export const fx = { fade: 0, glow: 1, flash: 0, lit: 0 };
+export const fx = { fade: 0, glow: 1, flash: 0, lit: 0, open: 0 };
 
 const smooth = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 
@@ -232,10 +274,7 @@ const RING_V = (RING_R * Math.PI) / (U_DECIDE - U_RING);
 /** F3 — one lead's place in the flow at the flow clock `t`. */
 function flowTarget(p: Prep, ctx: FormationCtx, out: Pose) {
   const u = (((ctx.flowT / FLOW_PERIOD + p.flowPhase) % 1) + 1) % 1;
-  fx.fade = 0;
   fx.glow = 0.22;
-  fx.flash = 0;
-  fx.lit = 0;
   // Every lead the same size, whatever its shard: the leads read as units, the column as filed.
   const size = FLOW_SCALE * p.unit;
   out.scale.setScalar(size);
@@ -303,6 +342,49 @@ function flowTarget(p: Prep, ctx: FormationCtx, out: Pose) {
   out.scale.setScalar(size * Math.max(0.002, 1 - smooth(d / 0.3)));
 }
 
+/**
+ * F7 — one shard of the colossus. Open, every joint parts a little from the
+ * heart; the glass between the heart and the camera stands aside (radially
+ * from that line, only up to just behind the camera), and a hollow opens
+ * round the heart — wherever the camera goes, it has room, and the heart is
+ * always in view.
+ */
+function colossusTarget(f: FragInfo, p: Prep, ctx: FormationCtx, out: Pose) {
+  const K = ctx.K;
+  _v.copy(f.centroid).multiplyScalar(K).applyQuaternion(ctx.stoneQuat).add(ctx.home);
+  out.quat.copy(ctx.stoneQuat);
+  out.scale.setScalar(K);
+  if (ctx.open > 1e-4) {
+    _c.copy(stoneMid).multiplyScalar(K).applyQuaternion(ctx.stoneQuat).add(ctx.home);
+    _d.copy(_v).sub(_c);
+    _cd.copy(ctx.camPos).sub(_c);
+    const camDist = Math.max(1e-3, _cd.length());
+    _cd.divideScalar(camDist);
+    const along = _d.dot(_cd);
+    _perp.copy(_d).addScaledVector(_cd, -along);
+    let pr = _perp.length();
+    if (pr < 1e-3) {
+      _perp.set(0, 1, 0).addScaledVector(_cd, -_cd.y);
+      pr = Math.max(1e-3, _perp.length());
+    }
+    // The tunnel: between the heart and a little behind the camera.
+    const wT = smooth((along + 0.1 * K) / (0.25 * K)) * (1 - smooth((along - camDist - 0.25 * K) / (0.4 * K)));
+    const pushT = (Math.max(0, TUNNEL_R * K - pr) + 0.06 * K) * wT;
+    _off.copy(_perp).multiplyScalar(pushT / pr);
+    // The hollow round the heart, and every joint opened a little.
+    const dl = Math.max(1e-3, _d.length());
+    const pushH = Math.max(0, HOLLOW_R * K - dl) + EXPAND * dl;
+    _off.addScaledVector(_d, pushH / dl);
+    _v.addScaledVector(_off, ctx.open);
+    // Each piece turns on itself as it flies out — the burst has spin.
+    const g = ctx.open * Math.min(1, (pushT + pushH) / (0.35 * K));
+    _q2.setFromAxisAngle(p.tumble, 0.55 * ctx.open * (0.5 + p.rand));
+    out.quat.multiply(_q2);
+    fx.open = g;
+  }
+  out.pos.copy(_v);
+}
+
 /** The core's pose in each form. */
 function coreTarget(F: Formation, ctx: FormationCtx, out: Pose) {
   switch (F) {
@@ -318,21 +400,34 @@ function coreTarget(F: Formation, ctx: FormationCtx, out: Pose) {
       out.scale.setScalar(CORE_IN_FLOW);
       tiltAbout(out, FLOW_C, ctx.tilt);
       return;
-    case "F5":
-    case "F6": {
-      _v.copy(stoneMid).applyQuaternion(ctx.buildQuat);
-      out.pos.copy(LAKE_HOME).add(_v);
-      out.quat.copy(ctx.buildQuat);
-      out.scale.setScalar(CORE_SCALE);
+    case "F8":
+      out.pos.copy(FLOW_C);
+      out.quat.setFromAxisAngle(Y, ctx.coreSpin * 2.4);
+      out.scale.setScalar(CORE_GATHERED);
+      return;
+    case "F4":
+      _v.copy(stoneMid).applyQuaternion(ctx.stoneQuat);
+      out.pos.copy(ctx.home).add(_v);
+      out.quat.setFromAxisAngle(Y, ctx.coreSpin).premultiply(ctx.stoneQuat);
+      out.scale.setScalar(CORE_SCALE * 1.3);
+      return;
+    case "F7": {
+      // The heart of the colossus: it draws in a little as the stone opens, so
+      // the camera can turn round it, and burns.
+      _v.copy(stoneMid).multiplyScalar(ctx.K).applyQuaternion(ctx.stoneQuat);
+      out.pos.copy(ctx.home).add(_v);
+      out.quat.setFromAxisAngle(Y, ctx.coreSpin).premultiply(ctx.stoneQuat);
+      out.scale.setScalar(CORE_SCALE * ctx.K * (1 - 0.25 * ctx.open));
+      fx.open = ctx.open;
       return;
     }
     default: {
       // Inside the stone, turning with it; laid bare by the burst.
-      _v.copy(stoneMid).applyQuaternion(ctx.stoneQuat);
-      out.pos.copy(homeA).add(_v);
+      _v.copy(stoneMid).multiplyScalar(ctx.K).applyQuaternion(ctx.stoneQuat);
+      out.pos.copy(ctx.home).add(_v);
       out.pos.y += ctx.lift;
       out.quat.copy(ctx.stoneQuat);
-      out.scale.setScalar(F === "F1" ? 0.62 : CORE_SCALE);
+      out.scale.setScalar((F === "F1" ? 0.62 : CORE_SCALE) * ctx.K);
     }
   }
 }
@@ -344,6 +439,7 @@ export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Po
   fx.glow = 1;
   fx.lit = 0;
   fx.flash = 0;
+  fx.open = 0;
   if (f.index === CORE) {
     coreTarget(F, ctx, out);
     return;
@@ -351,17 +447,27 @@ export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Po
   const p = prep[f.index];
   switch (F) {
     case "F0": {
-      _v.copy(f.centroid).addScaledVector(f.out, ctx.gap).applyQuaternion(ctx.stoneQuat);
-      out.pos.copy(homeA).add(_v);
+      _v.copy(f.centroid).addScaledVector(f.out, ctx.gap).multiplyScalar(ctx.K).applyQuaternion(ctx.stoneQuat);
+      out.pos.copy(ctx.home).add(_v);
       out.pos.y += ctx.lift;
       out.quat.copy(ctx.stoneQuat);
+      out.scale.setScalar(ctx.K);
       return;
     }
     case "F1": {
       _v.copy(f.centroid).add(p.burst).applyQuaternion(ctx.stoneQuat);
-      out.pos.copy(homeA).add(_v);
+      out.pos.copy(ctx.home).add(_v);
       out.pos.y += ctx.lift;
       out.quat.copy(ctx.stoneQuat).multiply(p.spin);
+      return;
+    }
+    case "F4": {
+      _v.copy(f.centroid).addScaledVector(p.explodeOff, ctx.explode).applyQuaternion(ctx.stoneQuat);
+      out.pos.copy(ctx.home).add(_v);
+      out.quat.copy(ctx.stoneQuat);
+      // The girdle band is a thin plate: held apart it would read as a line. It
+      // steps out of the exploded view and back in as the stone assembles.
+      if (f.piece === "band") out.scale.setScalar(0.002);
       return;
     }
     case "F2": {
@@ -376,38 +482,21 @@ export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Po
     case "F3":
       flowTarget(p, ctx, out);
       return;
-    case "F5": {
-      // Hanging in the column until its group seats: raised, pushed out, turned a little.
-      _v.copy(f.centroid);
-      let turn = 0;
-      if (f.group >= 0) {
-        const up = 1 - ctx.seat[f.group];
-        if (up > 0) {
-          _v.y += COLUMN_Y[f.group] * up;
-          _v2.set(f.centroid.x, 0, f.centroid.z);
-          if (_v2.lengthSq() > 1e-6) _v.addScaledVector(_v2.normalize(), 0.16 * up);
-          turn = 0.55 * up * (f.group % 2 ? -1 : 1);
-        }
-      }
-      _q.setFromAxisAngle(Y, turn);
-      _v.applyQuaternion(_q).applyQuaternion(ctx.buildQuat);
-      out.pos.copy(LAKE_HOME).add(_v);
-      out.quat.copy(ctx.buildQuat).multiply(_q);
+    case "F8": {
+      // Drawn into the heart: a last tight turn round it, then gone into the light.
+      _v.copy(p.tumble).multiplyScalar(0.12);
+      out.pos.copy(FLOW_C).add(_v);
+      _q.setFromAxisAngle(p.tumble, ctx.flowT * 2 + p.rand * 6.28);
+      out.quat.copy(_q);
+      out.scale.setScalar(0.002);
+      fx.lit = 1;
       return;
     }
-    case "F6": {
-      _v.copy(f.centroid);
-      if (f.piece === "crown") _v.y += 0.1 * ctx.crownLift;
-      if (f.piece === "band") _v.y += MARK.lift * ctx.bandLift;
-      if (f.piece === "bladeL") _v.x -= MARK.split * ctx.split;
-      if (f.piece === "bladeR") _v.x += MARK.split * ctx.split;
-      _v.applyQuaternion(ctx.buildQuat);
-      out.pos.copy(LAKE_HOME).add(_v);
-      out.quat.copy(ctx.buildQuat);
+    case "F7":
+      colossusTarget(f, p, ctx, out);
       return;
-    }
     default:
-      out.pos.copy(homeA);
+      out.pos.copy(ctx.home);
       out.quat.identity();
   }
 }

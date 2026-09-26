@@ -54,23 +54,22 @@ export function Director() {
   const quat = useMemo(() => new THREE.Quaternion(), []);
   const euler = useMemo(() => new THREE.Euler(0, 0, 0, "YXZ"), []);
   const tilt = useMemo(() => new THREE.Quaternion(), []);
-  const buildQuat = useMemo(() => new THREE.Quaternion(), []);
   const ctx = useMemo<FormationCtx>(
     () => ({
       stoneQuat: quat,
+      home: new THREE.Vector3(),
+      K: 1,
       gap: 0,
       lift: 0,
       monumentYaw: 0,
       coreSpin: 0,
       tilt,
       flowT: 0,
-      seat: [0, 0, 0, 0],
-      buildQuat,
-      crownLift: 0,
-      bandLift: 0,
-      split: 0,
+      explode: 1,
+      camPos: new THREE.Vector3(),
+      open: 0,
     }),
-    [quat, tilt, buildQuat]
+    [quat, tilt]
   );
   const tiltEuler = useMemo(() => new THREE.Euler(), []);
   const swirlQ = useMemo(() => new THREE.Quaternion(), []);
@@ -97,8 +96,8 @@ export function Director() {
     pulseT0: -1,
     pulseKind: 0,
     lastS: 0,
-    seatFlash: [0, 0, 0, 0],
-    seatDone: [false, false, false, false],
+    /** The hero's quiet invitation: a thread of light down a ridge every few seconds. */
+    lastIdleThread: 0,
     /** The 3D's own scroll clock: follows scroll.S with weight (−1 = not started). */
     S: -1,
     /** 1 while the stone is whole (fragments locked rigid), easing to 0 when it breaks. */
@@ -207,7 +206,9 @@ export function Director() {
     sceneState.stone.pitch = s.pitchSpring.x;
     sceneState.stone.bob = bob;
     const sm = sceneState.stone.matrix;
+    const K = sceneState.stone.scale;
     sm.makeRotationFromQuaternion(quat);
+    sm.scale(v.set(K, K, K));
     sm.elements[12] = sceneState.stone.home.x;
     sm.elements[13] = sceneState.stone.home.y + bob;
     sm.elements[14] = sceneState.stone.home.z;
@@ -221,6 +222,11 @@ export function Director() {
     if (ui.hoverStone && time - s.lastHoverThread > 3 && !s.thread.live && !reduced) {
       s.lastHoverThread = time;
       s.thread = { ridge: frontLeftRidge(yaw), t0: time, dur: THREAD_MS, live: true };
+    }
+    // At rest in the hero the stone keeps inviting: a thread of light every few seconds.
+    if (S < 0.15 && !inStory && intro.state === "done" && time - s.lastIdleThread > 7.5 && !s.thread.live && !reduced) {
+      s.lastIdleThread = time;
+      s.thread = { ridge: frontLeftRidge(yaw), t0: time, dur: THREAD_MS * 1.25, live: true };
     }
     s.hoverLight = lerp(s.hoverLight, ui.hoverStone ? 1 : 0, 1 - Math.exp(-dt / 0.13));
     u.cursorLight *= 1 + 0.5 * s.hoverLight;
@@ -258,12 +264,7 @@ export function Director() {
       s.pulseT0 = time;
       s.pulseKind = 0;
     }
-    if (s.lastS < M0 + 0.52 && S >= M0 + 0.52) {
-      s.pulseT0 = time;
-      s.pulseKind = 1;
-      bus.emit("mark:lock");
-    }
-    if (S < 1.6 || (S > 3 && S < M0 - 0.1)) s.pulseT0 = s.pulseT0 > 0 && time - s.pulseT0 < PULSE_MS / 1000 ? s.pulseT0 : -1;
+    if (S < 1.6 || S > 2.4) s.pulseT0 = s.pulseT0 > 0 && time - s.pulseT0 < PULSE_MS / 1000 ? s.pulseT0 : -1;
     if (s.pulseT0 >= 0 && !reduced) {
       const p = (time - s.pulseT0) / (PULSE_MS / 1000);
       if (p > 1) {
@@ -284,31 +285,21 @@ export function Director() {
       }
     } else u.pulseAmp = 0;
 
-    /* ---- seat flashes (ch05) ------------------------------------------- */
-    for (let g = 0; g < 4; g++) {
-      const done = plan.seat[g] >= 0.999 && S < M0;
-      if (done && !s.seatDone[g]) {
-        s.seatFlash[g] = 1;
-        bus.emit("seat", { group: g });
-      }
-      s.seatDone[g] = done;
-      s.seatFlash[g] *= Math.exp(-dt / 0.4);
-    }
     s.lastS = S;
 
     /* ---- the forms' own life -------------------------------------------- */
     ctx.gap = plan.gap;
     ctx.lift = plan.lift;
+    ctx.home.copy(plan.home);
+    ctx.K = plan.K;
+    ctx.explode = plan.explode + (still ? 0 : 0.025 * Math.sin(time * 0.9));
+    ctx.open = plan.open;
+    ctx.camPos.copy(cam.pos);
     ctx.monumentYaw = plan.monumentYaw + (still ? 0 : 0.035 * time);
-    buildQuat.setFromAxisAngle(Y_AXIS, plan.buildYaw);
-    for (let g = 0; g < 4; g++) ctx.seat[g] = plan.seat[g];
-    ctx.crownLift = plan.crownLift;
-    ctx.bandLift = plan.bandLift;
-    ctx.split = plan.split;
 
     // The flow runs on its own clock; a quick sweep of the cursor hurries it
     // (and spins the core); the whole sculpture leans toward the pointer.
-    const inSculpt = S > 1.3 && S < 3.9;
+    const inSculpt = !inStory && S > 2.85 && S < 5.98;
     if (pointer.has) {
       const speed = Math.hypot(pointer.x - s.px, pointer.y - s.py) / Math.max(dt, 1e-3);
       s.px = pointer.x;
@@ -337,7 +328,7 @@ export function Director() {
     const aspect = size.width / Math.max(1, size.height);
 
     // The light inside the glass follows the cursor (level here; where, per piece, below).
-    const wantCursor = pointer.has && !still && S < 4.2 && performance.now() - pointer.lastMove < 6000 ? 1 : 0;
+    const wantCursor = pointer.has && !still && S < 6 && performance.now() - pointer.lastMove < 6000 ? 1 : 0;
     springTo(s.cursorAmt, wantCursor * (inSculpt ? 1 : 0.6), 3, dt);
     u.cursorAmt = s.cursorAmt.x;
     if (pointer.has) {
@@ -347,14 +338,15 @@ export function Director() {
 
     // Rigid while the stone is whole: it must never wobble apart. Released
     // quickly when it breaks, re-locked gently.
-    const seatedAll = plan.seat.every((x) => x >= 0.999);
-    const whole = plan.a === plan.b && (plan.a === "F0" || plan.a === "F6" || (plan.a === "F5" && seatedAll));
+    // The colossus is rigid too: its opening is exact, driven by the camera.
+    const whole = plan.a === plan.b && (plan.a === "F0" || plan.a === "F7");
     s.rigid += ((whole ? 1 : 0) - s.rigid) * (1 - Math.exp(-dt * (whole ? 2.2 : 9)));
-    const snap = !s.springsLive || still;
+    if (plan.cut) s.rigid = whole ? 1 : 0;
+    const snap = !s.springsLive || still || plan.cut;
     const loose = 1 - s.rigid;
 
-    // The cursor lifts shards out of the monument and the flow.
-    const holdForm = plan.a === plan.b && (plan.a === "F2" || plan.a === "F3");
+    // The cursor lifts shards out of the exploded view, the monument and the flow.
+    const holdForm = plan.a === plan.b && (plan.a === "F2" || plan.a === "F3" || plan.a === "F4");
 
     const frags = stone.frags;
     for (let i = 0; i < frags.length; i++) {
@@ -367,6 +359,7 @@ export function Director() {
       let fxGlow = fx.glow;
       let fxFlash = fx.flash;
       let fxLit = fx.lit;
+      const fxOpen = fx.open;
       let m = plan.mix;
       if (plan.a !== plan.b) {
         // Per-fragment stagger inside the window.
@@ -389,6 +382,11 @@ export function Director() {
             // Re-forming: the far pieces arrive first, the crack closes last.
             d = 0.3 * (1 - pr.crackK);
             span = 0.7;
+            break;
+          case 7:
+            // Assembly: from the heart out, each piece on its own beat.
+            d = 0.46 * pr.radK + 0.06 * pr.rand;
+            span = 0.48;
             break;
         }
         if (plan.stagger !== 2) m = clamp01((m - d) / span);
@@ -414,7 +412,7 @@ export function Director() {
           P.quat.premultiply(swirlQ);
         }
         // Lock-in: a shard flashes as it lands in its new form.
-        if (!isCore && plan.stagger === 2 && sp.lastM < 0.985 && m >= 0.985 && !still) sp.flash = 1;
+        if (!isCore && (plan.stagger === 2 || plan.stagger === 7) && sp.lastM < 0.985 && m >= 0.985 && !still) sp.flash = 1;
         sp.lastM = m;
       } else {
         P.pos.copy(A.pos);
@@ -447,7 +445,7 @@ export function Director() {
       }
       springTo(sp.lift, near, near > sp.lift.x ? 7 : 3, dt);
       if (sp.lift.x > 0.001) {
-        liftDir.copy(P.pos).sub(plan.a === "F3" ? FLOW_C : MONUMENT_C);
+        liftDir.copy(P.pos).sub(plan.a === "F3" ? FLOW_C : plan.a === "F4" ? v.set(0, -0.464, 0) : MONUMENT_C);
         if (liftDir.lengthSq() < 1e-6) liftDir.set(0, 1, 0);
         liftDir.normalize();
         P.pos.addScaledVector(liftDir, 0.42 * sp.lift.x);
@@ -518,23 +516,36 @@ export function Director() {
         flash = Math.max(flash, fxFlash);
         fade = fxFade;
         boost = 2.4 * fxLit;
-      } else if (plan.glowMode === 4) {
-        // Unseated pieces carry the light; seating heals the cut.
-        const g = Math.max(0, f.group);
-        glow = 1 - 0.8 * plan.seat[g];
-        flash = Math.max(flash, s.seatFlash[g]);
-      } else if (plan.glowMode === 5) {
-        glow = f.piece === "crown" ? 0 : 1;
-        if (f.piece === "crown") fade = easeInOutSine(range(S - M0, 0.22, 0.36));
-      }
-      if (plan.glowMode === 4 && plan.a === "F3") {
-        fade = fxFade * (1 - m);
-        boost = 2.4 * fxLit;
+      } else if (plan.glowMode === 3) {
+        // The exploded view: every cut face a window onto the light inside;
+        // seating heals the cut.
+        glow = plan.a === "F4" && plan.b === "F0" ? 1 - 0.75 * easeInOutCubic(m) : 1;
+      } else if (plan.glowMode === 6) {
+        // The colossus: the walls light a little as they stand aside.
+        glow = 0.3 + 0.4 * fxOpen;
+      } else if (plan.glowMode === 7) {
+        // Into the light: the leads burn as they are drawn in.
+        glow = 1;
+        boost = 2.4 * Math.max(fxLit, m);
+        flash = Math.max(flash, m * m);
       }
       if (isCore) {
-        // The core: hidden inside the whole stone; laid bare by the burst; the light of the monument; the AI.
-        const shown = (plan.a === "F0" && plan.b === "F0") || (plan.a === "F1" && plan.b === "F0" && m > 0.95) || plan.a === "F5" || plan.a === "F6" ? 0 : 1;
-        boost = shown * (plan.glowMode === 2 ? 5 + 1.2 * Math.sin(time * 1.6) : plan.glowMode === 1 ? 3.6 : 2.6);
+        // The core: hidden inside the whole stone; laid bare by the burst; the
+        // heart of the exploded view, the monument and the flow; swelling with
+        // light as the leads are drawn in; burning inside the open colossus.
+        const hidden =
+          (plan.a === "F0" && plan.b === "F0") ||
+          (plan.b === "F0" && m > 0.95) ||
+          (plan.a === "F0" && plan.b !== "F0" && m < 0.04) ||
+          (plan.a === "F7" && plan.open < 0.01);
+        let lvl = 2.6;
+        if (plan.glowMode === 1) lvl = 3.6;
+        else if (plan.glowMode === 2) lvl = 5 + 1.2 * Math.sin(time * 1.6);
+        else if (plan.glowMode === 3) lvl = 2.8;
+        // (The flood carries the white; the core stays glass, burning indigo.)
+        else if (plan.glowMode === 7) lvl = 4.2 + 1.6 * m;
+        else if (plan.glowMode === 6) lvl = 1.1 + 1.5 * plan.open + 0.3 * plan.open * Math.sin(time * 1.3);
+        boost = hidden ? 0 : lvl;
         glow = 1;
         flash = 0;
       }

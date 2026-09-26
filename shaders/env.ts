@@ -5,10 +5,11 @@ import * as THREE from "three";
  *
  *   sea      THE SKY — an endless sea of cloud below, billowing, lit low from
  *            the side, melting into the page with distance
- *   puff     a billow of cloud (billboard) — volume near the camera, and what
- *            the camera sinks through on the way down
- *   haze     inside the cloud: the whole frame a soft, moving white
- *   terrain  THE LAKE's far hills (and their reflection in the still water)
+ *   puff     a billow of cloud (billboard) — volume round the sculptures
+ *   haze     inside a cloud bank: the whole frame a soft, moving white
+ *   flat     THE SALT FLAT — a pale crust that goes glassy toward a far,
+ *            hazy horizon; a ring can run out across it
+ *   flood    light pouring out of a point over the whole frame
  *
  * Everything is premultiplied alpha over the paper DOM (the canvas is
  * transparent): fog is alpha, so a place melts into the page, never into grey.
@@ -51,121 +52,7 @@ void main() {
 `;
 
 /* ------------------------------------------------------------------------ */
-/* The lake's hills                                                          */
-/* ------------------------------------------------------------------------ */
-
-const TERRAIN_VERT = /* glsl */ `
-${NOISE}
-uniform float uFloorY;
-varying vec3 vWorld;
-varying vec3 vN;
-varying float vDist;
-
-// A far range of low mountains beyond a wide ring of open water.
-float height(vec2 p) {
-  float r = length(p);
-  float ridge = 1.0 - abs(envFbm(p * 0.018 + 11.7) * 2.0 - 1.0);
-  float body = envFbm(p * 0.009 + 4.2);
-  float range = (pow(ridge, 2.4) * 0.75 + body * 0.35) * 22.0;
-  return range * smoothstep(70.0, 120.0, r) - 3.0 * (1.0 - smoothstep(60.0, 90.0, r));
-}
-
-void main() {
-  vec2 p = position.xz;
-  float h = height(p);
-  float e = 1.2;
-  vec3 n = normalize(vec3(height(p - vec2(e, 0.0)) - height(p + vec2(e, 0.0)), 2.0 * e, height(p - vec2(0.0, e)) - height(p + vec2(0.0, e))));
-  vec4 w = modelMatrix * vec4(p.x, uFloorY + h, p.y, 1.0);
-  vWorld = w.xyz;
-  vN = n;
-  vec4 mv = viewMatrix * w;
-  vDist = -mv.z;
-  gl_Position = projectionMatrix * mv;
-}
-`;
-
-const TERRAIN_FRAG = /* glsl */ `
-${NOISE}
-uniform float uFade;
-uniform float uFogNear;
-uniform float uFogFar;
-uniform vec3 uSun;
-uniform float uMirror;
-uniform float uFloorY;
-varying vec3 vWorld;
-varying vec3 vN;
-varying float vDist;
-void main() {
-  // Above the water line, or (the reflection copy) below it.
-  if (uMirror > 0.5 ? vWorld.y > uFloorY : vWorld.y < uFloorY - 0.02) discard;
-  float lit = clamp(dot(normalize(vN), normalize(uSun)), 0.0, 1.0);
-  // Cool greys under an overcast sky; the lit slopes pale, the lee blue-grey.
-  vec3 lee = vec3(0.64, 0.67, 0.72);
-  vec3 face = vec3(0.90, 0.905, 0.915);
-  vec3 col = mix(lee, face, 0.2 + 0.8 * lit);
-  // Aerial perspective: distance washes the range toward the sky, then away.
-  float t = clamp((vDist - uFogNear) / max(uFogFar - uFogNear, 1e-3), 0.0, 1.0);
-  float fog = t * t * (3.0 - 2.0 * t);
-  col = mix(col, vec3(0.93, 0.935, 0.94), 0.55 * t);
-  float a = uFade * (1.0 - fog) * (uMirror > 0.5 ? 0.3 * (1.0 - smoothstep(0.0, 14.0, uFloorY - vWorld.y)) : 1.0);
-  if (a < 0.003) discard;
-  gl_FragColor = vec4(col * a, a);
-}
-`;
-
-export function createTerrainMaterial(mirror = false): THREE.ShaderMaterial {
-  return new THREE.ShaderMaterial({
-    uniforms: {
-      uFloorY: { value: -1.975 },
-      uFade: { value: 0 },
-      uFogNear: { value: 60 },
-      uFogFar: { value: 230 },
-      uSun: { value: new THREE.Vector3(-0.6, 0.45, 0.3) },
-      uMirror: { value: mirror ? 1 : 0 },
-    },
-    vertexShader: TERRAIN_VERT,
-    fragmentShader: TERRAIN_FRAG,
-    transparent: true,
-    premultipliedAlpha: true,
-    depthWrite: !mirror,
-    toneMapped: false,
-  });
-}
-
-/* The water: still, faintly cooler than the sky, darker toward the horizon,
-   with slow wind streaks — so the lake reads as water, not as more paper. */
-const WATER_FRAG = /* glsl */ `
-${NOISE}
-uniform float uFade;
-uniform float uTime;
-varying vec3 vWorld;
-varying float vDist;
-void main() {
-  float far = smoothstep(8.0, 120.0, vDist);
-  float streak = envNoise(vec2(vWorld.x * 0.02 + uTime * 0.01, vWorld.z * 0.35));
-  float band = 0.5 + 0.5 * streak;
-  vec3 col = mix(vec3(0.925, 0.93, 0.935), vec3(0.86, 0.87, 0.885), far * 0.8);
-  col -= 0.012 * band * (1.0 - far);
-  float a = uFade * (0.25 + 0.55 * far) * (1.0 - smoothstep(170.0, 260.0, vDist));
-  if (a < 0.003) discard;
-  gl_FragColor = vec4(col * a, a);
-}
-`;
-
-export function createWaterMaterial(): THREE.ShaderMaterial {
-  return new THREE.ShaderMaterial({
-    uniforms: { uFade: { value: 0 }, uTime: { value: 0 } },
-    vertexShader: SEA_VERT_SRC,
-    fragmentShader: WATER_FRAG,
-    transparent: true,
-    premultipliedAlpha: true,
-    depthWrite: false,
-    toneMapped: false,
-  });
-}
-
-/* ------------------------------------------------------------------------ */
-/* Billboards                                                                */
+/* Billboards and full-screen quads                                          */
 /* ------------------------------------------------------------------------ */
 
 const CARD_VERT = /* glsl */ `
@@ -176,10 +63,6 @@ void main() {
 }
 `;
 
-/* ------------------------------------------------------------------------ */
-/* Full-screen quads                                                         */
-/* ------------------------------------------------------------------------ */
-
 const FLOOD_VERT = /* glsl */ `
 varying vec2 vUv;
 void main() {
@@ -188,11 +71,20 @@ void main() {
 }
 `;
 
+const premul = (fragmentShader: string, uniforms: Record<string, THREE.IUniform>, vertexShader = SEA_VERT_SRC) =>
+  new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader,
+    fragmentShader,
+    transparent: true,
+    premultipliedAlpha: true,
+    depthWrite: false,
+    toneMapped: false,
+  });
+
 /* ------------------------------------------------------------------------ */
 /* THE SKY — a sea of cloud below                                            */
 /* ------------------------------------------------------------------------ */
-
-const SEA_VERT = SEA_VERT_SRC;
 
 const SEA_FRAG = /* glsl */ `
 ${NOISE}
@@ -231,15 +123,7 @@ void main() {
 `;
 
 export function createCloudSeaMaterial(): THREE.ShaderMaterial {
-  return new THREE.ShaderMaterial({
-    uniforms: { uFade: { value: 0 }, uTime: { value: 0 }, uSun: { value: new THREE.Vector3(0.75, 0.42, -0.35) } },
-    vertexShader: SEA_VERT,
-    fragmentShader: SEA_FRAG,
-    transparent: true,
-    premultipliedAlpha: true,
-    depthWrite: false,
-    toneMapped: false,
-  });
+  return premul(SEA_FRAG, { uFade: { value: 0 }, uTime: { value: 0 }, uSun: { value: new THREE.Vector3(0.75, 0.42, -0.35) } });
 }
 
 /* A billow of cloud (billboard) — lit on top, cool grey beneath, soft all round. */
@@ -268,18 +152,10 @@ void main() {
 `;
 
 export function createPuffMaterial(seed: number): THREE.ShaderMaterial {
-  return new THREE.ShaderMaterial({
-    uniforms: { uAlpha: { value: 0 }, uTime: { value: 0 }, uSeed: { value: seed }, uNear: { value: 1 } },
-    vertexShader: CARD_VERT,
-    fragmentShader: PUFF_FRAG,
-    transparent: true,
-    premultipliedAlpha: true,
-    depthWrite: false,
-    toneMapped: false,
-  });
+  return premul(PUFF_FRAG, { uAlpha: { value: 0 }, uTime: { value: 0 }, uSeed: { value: seed }, uNear: { value: 1 } }, CARD_VERT);
 }
 
-/* Inside the cloud: the whole frame a soft, moving white. */
+/* Inside a cloud bank: the whole frame a soft, moving white. */
 const HAZE_FRAG = /* glsl */ `
 ${NOISE}
 uniform float uAmount;
@@ -297,14 +173,71 @@ void main() {
 `;
 
 export function createHazeMaterial(): THREE.ShaderMaterial {
-  return new THREE.ShaderMaterial({
-    uniforms: { uAmount: { value: 0 }, uTime: { value: 0 }, uAspect: { value: 1 } },
-    vertexShader: FLOOD_VERT,
-    fragmentShader: HAZE_FRAG,
-    transparent: true,
-    premultipliedAlpha: true,
-    depthWrite: false,
-    depthTest: false,
-    toneMapped: false,
-  });
+  const m = premul(HAZE_FRAG, { uAmount: { value: 0 }, uTime: { value: 0 }, uAspect: { value: 1 } }, FLOOD_VERT);
+  m.depthTest = false;
+  return m;
+}
+
+/* ------------------------------------------------------------------------ */
+/* THE SALT FLAT                                                             */
+/* ------------------------------------------------------------------------ */
+
+const FLAT_FRAG = /* glsl */ `
+${NOISE}
+uniform float uFade;
+uniform float uRipple;
+uniform vec2 uRippleC;
+varying vec3 vWorld;
+varying float vDist;
+void main() {
+  // The crust: large soft patches and a finer grain, barely there.
+  float n = envFbm(vWorld.xz * 0.018) * 0.65 + envFbm(vWorld.xz * 0.11 + 7.3) * 0.35;
+  vec3 crust = mix(vec3(0.905, 0.903, 0.897), vec3(0.972, 0.97, 0.964), n);
+  // Toward the horizon the flat goes glassy and cool, then melts into the sky.
+  float far = smoothstep(30.0, 520.0, vDist);
+  vec3 col = mix(crust, vec3(0.872, 0.88, 0.895), far);
+  float a = uFade * (0.07 + 0.12 * (1.0 - n) * (1.0 - far) + 0.34 * far) * (1.0 - smoothstep(0.84, 1.0, far));
+  // A ring running out across the flat from the colossus.
+  if (uRipple > 0.0 && uRipple < 1.0) {
+    float r = length(vWorld.xz - uRippleC);
+    float R = 14.0 + uRipple * 240.0;
+    float w = 3.0 + 14.0 * uRipple;
+    float ring = exp(-pow((r - R) / w, 2.0)) * (1.0 - uRipple) * (1.0 - uRipple);
+    col = mix(col, vec3(0.8, 0.81, 0.83), ring * 0.8);
+    a = max(a, uFade * ring * 0.35);
+  }
+  if (a < 0.003) discard;
+  gl_FragColor = vec4(col * a, a);
+}
+`;
+
+export function createFlatMaterial(): THREE.ShaderMaterial {
+  return premul(FLAT_FRAG, { uFade: { value: 0 }, uRipple: { value: 0 }, uRippleC: { value: new THREE.Vector2() } });
+}
+
+/* ------------------------------------------------------------------------ */
+/* THE FLOOD — light pouring out of a point                                  */
+/* ------------------------------------------------------------------------ */
+
+const FLOOD_FRAG = /* glsl */ `
+uniform float uFlood;
+uniform vec2 uC;
+uniform float uAspect;
+varying vec2 vUv;
+void main() {
+  vec2 p = (vUv - uC) * vec2(uAspect, 1.0);
+  float r = length(p);
+  float R = 2.1 * uFlood;
+  float a = 1.0 - smoothstep(R * 0.45, R, r);
+  a = max(a * smoothstep(0.0, 0.25, uFlood), smoothstep(0.82, 1.0, uFlood));
+  if (a < 0.003) discard;
+  vec3 col = vec3(0.994, 0.992, 0.988);
+  gl_FragColor = vec4(col * a, a);
+}
+`;
+
+export function createFloodMaterial(): THREE.ShaderMaterial {
+  const m = premul(FLOOD_FRAG, { uFlood: { value: 0 }, uC: { value: new THREE.Vector2(0.5, 0.5) }, uAspect: { value: 1 } }, FLOOD_VERT);
+  m.depthTest = false;
+  return m;
 }

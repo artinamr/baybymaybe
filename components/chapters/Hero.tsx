@@ -10,6 +10,48 @@ import { openStory } from "@/lib/story";
 const d = (ms: number, extra?: Record<string, string>) => ({ "--d": `${ms}ms`, ...extra }) as CSSProperties;
 
 /**
+ * Over the stone (hero only), the pointer carries a small lens of frosted
+ * glass that reads "The story": the stone itself is the door. It follows the
+ * pointer on a soft spring and scales in; it never shows anywhere else.
+ */
+function StoneCursor() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    let tx = x;
+    let ty = y;
+    let raf = 0;
+    const move = (e: PointerEvent) => {
+      tx = e.clientX;
+      ty = e.clientY;
+    };
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
+      x += (tx - x) * 0.22;
+      y += (ty - y) * 0.22;
+      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    raf = requestAnimationFrame(tick);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  return (
+    <div className="stone-cursor" ref={ref} aria-hidden>
+      <span className="stone-cursor-lens">
+        <span className="stone-cursor-dot" />
+        <span className="stone-cursor-label">The story</span>
+      </span>
+    </div>
+  );
+}
+
+/**
  * 00 · POTENTIAL. One display voice (Bodoni Moda) for the whole line. The
  * masthead-scale POTENTIAL crosses the frame BEHIND the canvas, so the stone
  * stands in the word and cuts it. It arrives as a hairline outline; the intro's
@@ -79,8 +121,8 @@ export function Hero() {
         </span>
       </p>
       <p className="hero-desc intro intro-rise" style={d(1100)}>
-        We engineer the digital infrastructure and AI automation that wins serious buyers — then handles them for you.
-        Built fast. Owned outright.
+        We design and engineer websites, platforms and AI automation — one system, built by one team, owned entirely by
+        you.
       </p>
       <div className="hero-ctas">
         <span className="intro intro-rise" style={d(1180)}>
@@ -92,17 +134,7 @@ export function Hero() {
           <GhostPill onClick={() => scrollToChapter("audit")}>Request an audit</GhostPill>
         </span>
       </div>
-      <button type="button" className="story-cue intro" style={d(1600)} onClick={openStory} aria-label="Enter the story">
-        <svg viewBox="0 0 120 120" aria-hidden>
-          <defs>
-            <path id="story-ring" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0" />
-          </defs>
-          <text>
-            <textPath href="#story-ring">WHY NERODYN EXISTS · ENTER THE STORY · </textPath>
-          </text>
-        </svg>
-        <span className="story-cue-dot" aria-hidden />
-      </button>
+      <StoneCursor />
     </Section>
   );
 }

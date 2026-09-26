@@ -13,10 +13,10 @@ const EMAIL = "hello@nerodyn.com";
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 /**
- * 03 · FREE AUDIT. The last cut takes the crown away and, from one angle only,
- * the stone IS the Nerodyn mark, its seams drawn in indigo light. The display
- * line sits behind the canvas so the blades pass over it. The footer lives
- * inside the sticky layer and rises as the stage folds back into a card.
+ * 04 · LET'S TALK. The stone at rest on the salt flat, its seams drawn in
+ * indigo light, standing in front of the display line (set behind the canvas,
+ * so the stone genuinely hides part of it). The footer lives inside the sticky
+ * layer and rises at the very end.
  */
 export function Audit() {
   const [copied, setCopied] = useState(false);
@@ -41,15 +41,15 @@ export function Audit() {
       }
     >
       <div className="mark-front">
-        <Marker n="03">Start with a free audit</Marker>
+        <Marker n="04">Start with a free audit</Marker>
         <div className="mark-foot">
           <p
             className="mark-body rv-fade"
             style={{ "--i": 2 } as CSSProperties}
           >
-            Send us your current site. Within 48 hours we return an honest read
-            on what is winning you clients and what is quietly turning them
-            away. No pitch, no cost.
+            Send us your website. Within two days you get a straight answer:
+            what is working, what is costing you enquiries, and what we would
+            build instead. Free, and no pitch.
           </p>
           <div
             className="mark-ctas rv-fade"

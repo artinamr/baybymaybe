@@ -158,6 +158,18 @@ a {
       color-mix(in oklab, #eaeef2 calc(var(--sky, 0) * 100%), transparent) 42%,
       color-mix(in oklab, #f6f5f2 0%, transparent) 78%
     ),
+    /* The salt flat's sky: cool overhead, a band of light on the horizon, the
+       flat a shade deeper just below it. Behind everything, so the type set
+       behind the canvas is never veiled. */
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, #d9dde3 calc(var(--flat, 0) * 100%), transparent) 0px,
+      color-mix(in oklab, #e9ebee calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) - 22vh),
+      color-mix(in oklab, #fcfbf8 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) - 0.5vh),
+      color-mix(in oklab, #e8e8e6 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) + 1.2vh),
+      color-mix(in oklab, #f1f0ec calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) + 16vh),
+      color-mix(in oklab, #f6f5f2 0%, transparent) 100%
+    ),
     radial-gradient(
       circle at var(--stone-x, 62vw) var(--stone-y, 50vh),
       var(--night) calc(var(--dusk) * 165vmax - 24vmax),
@@ -615,94 +627,226 @@ html[data-intro-skip] .intro-mask > span {
 .discs {
   display: grid;
   grid-template: 1fr / 1fr;
-  min-height: 11em;
+  min-height: calc(var(--vh) * 34);
 }
 .disc {
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  transition: opacity 700ms var(--ease-expo), transform 900ms var(--ease-expo), filter 700ms ease;
+  gap: calc(var(--vh) * 2.2);
 }
 .disc-title {
   font-family: var(--display);
-  font-weight: 500;
-  font-size: 30px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  font-size: min(3.6vw, calc(var(--vh) * 6));
+  line-height: 1.04;
+  letter-spacing: -0.026em;
+  max-width: 11.5em;
   margin: 0;
 }
 .disc-body {
   font-size: 17px;
   line-height: 1.6;
-  max-width: 38ch;
+  max-width: 40ch;
   color: color-mix(in oklab, var(--ink) 72%, transparent);
+  transition:
+    opacity 900ms var(--ease-expo) 240ms,
+    transform 1100ms var(--ease-expo) 240ms,
+    filter 900ms ease 240ms;
 }
 [data-disc="0"] .disc:not([data-i="0"]),
 [data-disc="1"] .disc:not([data-i="1"]),
 [data-disc="2"] .disc:not([data-i="2"]) {
-  opacity: 0;
-  filter: blur(6px);
-  transform: translateY(26px);
   pointer-events: none;
 }
 
-/* The numbers land with the stone's seats over the lake. */
-.numbers {
-  display: flex;
-  flex-direction: column;
-  margin-top: calc(var(--vh) * 1.5);
+/* ==========================================================================
+   01 · THE STUDIO — the statement, read through the stone
+   ========================================================================== */
+
+.statement-sec {
+  position: absolute;
+  inset: 0;
 }
-.number {
-  display: grid;
-  grid-template-columns: minmax(9.5ch, auto) 1fr;
-  column-gap: 20px;
-  align-items: baseline;
-  padding: calc(var(--vh) * 1.3) 0;
-  border-top: 1px solid var(--hair-soft);
+.statement-sec .marker {
+  position: absolute;
+  left: var(--g);
+  top: calc(var(--vh) * 16);
 }
-.number-big {
+.statement-wrap {
+  position: absolute;
+  left: var(--g);
+  top: calc(var(--vh) * 26);
+  width: calc(86vw - var(--g));
+}
+.statement {
   font-family: var(--display);
-  font-weight: 500;
-  font-size: 40px;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  font-variant-numeric: lining-nums;
-  /* A small optical size: sturdier hairlines, so the 4 of 14 never vanishes. */
-  font-variation-settings: "opsz" 11;
-  color: color-mix(in oklab, var(--ink) 28%, transparent);
-  transition: color 600ms ease;
-}
-.number-unit {
-  margin-left: 6px;
-  font-family: var(--font-isans), system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-.number-line {
-  font-size: 15px;
-  line-height: 1.45;
-  color: color-mix(in oklab, var(--ink) 45%, transparent);
-  transition: color 600ms ease;
-}
-.numbers[data-step="0"] .number[data-i="0"] .number-big,
-.numbers[data-step="1"] .number:is([data-i="0"], [data-i="1"]) .number-big,
-.numbers[data-step="2"] .number:is([data-i="0"], [data-i="1"], [data-i="2"]) .number-big,
-.numbers[data-step="3"] .number .number-big {
+  font-weight: 400;
+  font-size: min(4.4vw, calc(var(--vh) * 7.2));
+  line-height: 1.06;
+  letter-spacing: -0.028em;
   color: var(--ink);
+  max-width: 17em;
 }
-.numbers[data-step="0"] .number[data-i="0"] .number-line,
-.numbers[data-step="1"] .number:is([data-i="0"], [data-i="1"]) .number-line,
-.numbers[data-step="2"] .number:is([data-i="0"], [data-i="1"], [data-i="2"]) .number-line,
-.numbers[data-step="3"] .number .number-line {
+.inversion {
+  position: absolute;
+  inset: 0;
+  user-select: none;
+  pointer-events: none;
+  clip-path: polygon(0 0, 0 0, 0 0);
+}
+.statement.is-inverted,
+.statement.is-inverted .accent {
+  color: var(--paper);
+}
+.statement-body {
+  position: absolute;
+  left: var(--g);
+  top: calc(var(--vh) * 78);
+  max-width: 44ch;
+  font-size: 16px;
+  line-height: 1.6;
   color: color-mix(in oklab, var(--ink) 72%, transparent);
 }
-.numbers[data-step="0"] .number[data-i="0"] .number-unit,
-.numbers[data-step="1"] .number[data-i="1"] .number-unit,
-.numbers[data-step="2"] .number[data-i="2"] .number-unit,
-.numbers[data-step="3"] .number[data-i="3"] .number-unit {
+
+/* ==========================================================================
+   03 · WHY NERODYN — the headline at the top, one claim at a time below
+   ========================================================================== */
+
+.why-sec {
+  position: absolute;
+  inset: 0;
+}
+.why-top {
+  position: absolute;
+  left: var(--g);
+  top: calc(var(--vh) * 14);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--vh) * 2.4);
+}
+.why-h2 {
+  max-width: 12em;
+}
+.why-top {
+  transition:
+    opacity 700ms var(--ease-expo),
+    transform 900ms var(--ease-expo),
+    filter 700ms ease;
+}
+[data-inside="1"] .why-top {
+  opacity: 0;
+  transform: translateY(-24px);
+  filter: blur(6px);
+}
+.why-claims {
+  position: absolute;
+  left: calc(var(--g) - 30px);
+  bottom: calc(var(--vh) * 8);
+  width: min(46vw, 660px);
+  padding: 26px 30px 30px;
+  border-radius: 22px;
+  border: 1px solid transparent;
+  transition:
+    background-color 700ms var(--ease-expo),
+    border-color 700ms var(--ease-expo),
+    box-shadow 700ms var(--ease-expo),
+    backdrop-filter 700ms var(--ease-expo);
+}
+/* Inside the colossus the claim rides on a pane of frosted glass — ink never
+   lands on black glass. Over the flat the pane is invisible. */
+[data-inside="1"] .why-claims {
+  background-color: color-mix(in oklab, var(--paper) 64%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  backdrop-filter: blur(22px) saturate(1.25);
+  border-color: color-mix(in oklab, var(--ink) 7%, transparent);
+  box-shadow: 0 30px 80px -40px color-mix(in oklab, var(--ink) 45%, transparent);
+}
+.claim-index {
+  position: relative;
+  display: flex;
+  gap: 22px;
+  padding-bottom: 12px;
+  margin-bottom: calc(var(--vh) * 2.6);
+}
+.claim-tick {
+  font-size: 10.5px;
+  color: color-mix(in oklab, var(--ink) 34%, transparent);
+  transition: color 500ms ease;
+}
+[data-claim="0"] .claim-tick[data-i="0"],
+[data-claim="1"] .claim-tick[data-i="1"],
+[data-claim="2"] .claim-tick[data-i="2"] {
   color: var(--indigo);
+}
+.claim-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--hair);
+}
+.claim-bar > span {
+  position: absolute;
+  inset: 0;
+  background: var(--indigo);
+  transform: scaleX(var(--claim-p, 0));
+  transform-origin: left;
+}
+.claims {
+  display: grid;
+  grid-template: 1fr / 1fr;
+}
+.claim {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--vh) * 2);
+}
+.claim-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(5vw, calc(var(--vh) * 8.4));
+  line-height: 1;
+  letter-spacing: -0.032em;
+  margin: 0;
+}
+.claim-body {
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 40ch;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+  transition:
+    opacity 900ms var(--ease-expo) 260ms,
+    transform 1100ms var(--ease-expo) 260ms,
+    filter 900ms ease 260ms;
+}
+/* Word by word: the title rises out of a soft blur, a word at a time. */
+.claim-w,
+.disc-w {
+  display: inline-block;
+  transition:
+    opacity 900ms var(--ease-expo) calc(var(--k, 0) * 55ms),
+    transform 1200ms var(--ease-expo) calc(var(--k, 0) * 55ms),
+    filter 1000ms ease calc(var(--k, 0) * 55ms);
+}
+[data-claim="0"] .claim:not([data-i="0"]) :is(.claim-w, .claim-body),
+[data-claim="1"] .claim:not([data-i="1"]) :is(.claim-w, .claim-body),
+[data-claim="2"] .claim:not([data-i="2"]) :is(.claim-w, .claim-body),
+[data-disc="0"] .disc:not([data-i="0"]) :is(.disc-w, .disc-body),
+[data-disc="1"] .disc:not([data-i="1"]) :is(.disc-w, .disc-body),
+[data-disc="2"] .disc:not([data-i="2"]) :is(.disc-w, .disc-body) {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(0.5em);
+  transition-duration: 450ms;
+  transition-delay: 0ms;
+}
+[data-claim="0"] .claim:not([data-i="0"]),
+[data-claim="1"] .claim:not([data-i="1"]),
+[data-claim="2"] .claim:not([data-i="2"]) {
+  pointer-events: none;
 }
 
 /* ==========================================================================
@@ -1344,7 +1488,7 @@ main,
 .nav,
 .index,
 .index-counter,
-.story-cue {
+.stone-cursor {
   transition: opacity 700ms var(--ease-expo) 300ms;
 }
 html[data-story] main,
@@ -1352,7 +1496,7 @@ html[data-story] .nav,
 html[data-story] .index,
 html[data-story] .index-counter,
 html[data-story] .specimen,
-html[data-story] .story-cue {
+html[data-story] .stone-cursor {
   opacity: 0;
   pointer-events: none;
   transition: opacity 450ms ease;
@@ -1631,62 +1775,66 @@ html[data-story] .story-cue {
   pointer-events: none;
 }
 
-/* The door to the story in the hero: a slowly turning ring of words by the stone. */
-.story-cue {
+/* The door to the story is the stone itself: over it (hero only) the pointer
+   carries a small lens of frosted glass that reads "The story". */
+.stone-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+.stone-cursor-lens {
   position: absolute;
-  left: calc(var(--hero-axis, 62%) + 7.5vw);
-  top: calc(var(--vh) * 22);
-  width: 112px;
-  height: 112px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
+  left: 16px;
+  top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px 9px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--ink);
-  pointer-events: auto;
+  background: color-mix(in oklab, var(--paper) 58%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  backdrop-filter: blur(12px) saturate(1.3);
+  border: 1px solid color-mix(in oklab, var(--ink) 9%, transparent);
+  box-shadow: 0 12px 30px -16px color-mix(in oklab, var(--ink) 38%, transparent);
+  opacity: 0;
+  transform: scale(0.55) translateY(8px);
+  transform-origin: 0 0;
+  transition:
+    opacity 240ms ease,
+    transform 520ms var(--ease-expo);
 }
-.story-cue svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  animation: cueTurn 26s linear infinite;
+html[data-stone-hover]:not([data-scrolled]):not([data-story]) .stone-cursor-lens {
+  opacity: 1;
+  transform: none;
 }
-.story-cue text {
-  font-family: var(--font-gmono), ui-monospace, monospace;
-  font-size: 8.2px;
-  letter-spacing: 0.2em;
-  fill: currentColor;
-}
-.story-cue-dot {
-  width: 10px;
-  height: 10px;
+.stone-cursor-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--indigo);
-  box-shadow: 0 0 0 0 color-mix(in oklab, var(--indigo) 40%, transparent);
-  animation: cuePulse 2.4s var(--ease-expo) infinite;
-}
-.story-cue:hover .story-cue-dot {
-  transform: scale(1.5);
-  transition: transform 400ms var(--ease-expo);
-}
-html[data-scrolled] .story-cue {
-  opacity: 0;
-  pointer-events: none;
+  animation: lensPulse 1.8s var(--ease-expo) infinite;
 }
 html[data-stone-hover] {
   cursor: pointer;
 }
-@keyframes cueTurn {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes cuePulse {
+@keyframes lensPulse {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--indigo) 45%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--indigo) 55%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 16px color-mix(in oklab, var(--indigo) 0%, transparent);
+    box-shadow: 0 0 0 9px color-mix(in oklab, var(--indigo) 0%, transparent);
+  }
+}
+@media (hover: none) {
+  .stone-cursor {
+    display: none;
   }
 }
 
@@ -1717,13 +1865,6 @@ html[data-stone-hover] {
   }
   .story-hint {
     display: none;
-  }
-  .story-cue {
-    left: auto;
-    right: var(--g);
-    top: calc(var(--vh) * 58);
-    width: 88px;
-    height: 88px;
   }
 }
 
@@ -2088,14 +2229,8 @@ html[data-nowebgl] .pot-fill {
   }
 }
 
-/* Short screens: tighter numbers. */
+/* Short screens: a little tighter. */
 @media (max-height: 820px) and (min-width: 768px) {
-  .number {
-    padding: calc(var(--vh) * 0.9) 0;
-  }
-  .number-big {
-    font-size: 32px;
-  }
   .col-left,
   .col-right {
     gap: calc(var(--vh) * 2.4);
@@ -2182,23 +2317,10 @@ html[data-nowebgl] .pot-fill {
   .disc-body {
     font-size: 15px;
   }
-  .number {
-    padding: 7px 0;
-  }
-  .number-big {
-    font-size: 26px;
-  }
-  .number-line {
-    font-size: 13px;
-  }
   .mark-display > .rv {
     left: var(--g);
     font-size: 21vw;
     top: calc(var(--vh) * 20);
-  }
-  /* The stone and POTENTIAL fill the phone's hero; the pill is the way in. */
-  .story-cue {
-    display: none;
   }
   .mark-foot {
     right: var(--g);
@@ -2232,6 +2354,60 @@ html[data-nowebgl] .pot-fill {
   }
   .specimen {
     display: none;
+  }
+}
+
+/* ==========================================================================
+   Phone: the 3D lives in the top band; the words take the lower half.
+   ========================================================================== */
+
+@media (max-width: 767px) and (max-aspect-ratio: 5/6) {
+  .statement-sec .marker {
+    top: calc(var(--vh) * 11);
+  }
+  .statement-wrap {
+    top: calc(var(--vh) * 53);
+    width: calc(100vw - 2 * var(--g));
+  }
+  .statement {
+    font-size: 7.4vw;
+  }
+  .statement-body {
+    top: auto;
+    bottom: calc(var(--vh) * 7);
+    right: var(--g);
+    font-size: 14px;
+  }
+  .why-top {
+    top: calc(var(--vh) * 46);
+    right: var(--g);
+    gap: 10px;
+  }
+  .why-h2 {
+    font-size: 7.6vw;
+  }
+  .why-claims {
+    left: calc(var(--g) - 14px);
+    right: calc(var(--g) - 14px);
+    width: auto;
+    bottom: calc(var(--vh) * 4);
+    padding: 14px 14px 16px;
+    border-radius: 16px;
+  }
+  .claim-index {
+    margin-bottom: 10px;
+  }
+  .claim-title {
+    font-size: 8.4vw;
+  }
+  .claim-body {
+    font-size: 14px;
+  }
+  .disc-title {
+    font-size: 6.4vw;
+  }
+  .disc-body {
+    font-size: 14px;
   }
 }
 

@@ -25,25 +25,24 @@ The client asked for a FULL-SITE rebuild: white theme, a sharp obsidian stone in
 The full art-direction spec is **`docs/SPEC.md`**; module boundaries and
 interfaces are **`docs/CONTRACTS.md`**. Read both before changing the 3D.
 
-**SITE SHAPE (round 9, 2026-09-26 — "the page is too long … like UXBERT
-Labs, a story mode … four sections … go above and beyond").**
-- **Home = four sections** (`lib/chapters.ts`, page 920vh, S_MAX 8.2):
-  potential (hero) · build ("What we build": Design / Infrastructure / AI
-  automation) · why ("Why Nerodyn": 14 days · 100% · 0 retainers · 48 hours)
-  · audit ("Let's talk." + footer). Everything else lives on other pages.
+**SITE SHAPE (round 10, 2026-09-26 — "flip the table, step up the game").**
+- **Home = five sections** (`lib/chapters.ts`, page 1180vh, S_MAX 10.8):
+  potential (hero) · statement ("The studio" — the long statement, restored:
+  the client asked for it back verbatim) · build ("What we build": Websites /
+  Platforms / AI automation) · why ("Why Nerodyn": No hand-offs / Nothing off
+  the shelf / Nothing rented) · audit ("Let's talk." + footer).
+- **Copy is ours, not nerodyn.com's** (the client: "nerodyn.com isn't a good
+  website to copy"). Plain, specific, no invented numbers. Awaiting sign-off.
+- **The hero's door to the story** is the stone itself: over it the pointer
+  carries a frosted "The story" lens (`StoneCursor` in Hero.tsx), and at rest
+  a thread of light runs down a ridge every ~7.5 s. The rotating ring of words
+  was rejected ("should be removed … a nicer more elegant premium thing").
 - **Story mode** (`lib/story.ts`, `lib/storyFilm.ts`,
-  `components/story/StoryMode.tsx`): clicking the hero stone (or "Enter the
-  story", the nav's "The story", `/#story`) opens a UXBERT-style story of why
-  Nerodyn exists — six chapters (Potential · The first meeting · Seconds · The
-  cut · The light inside · Yours) on its own clock P with its own camera
-  spline over the same stone; decoding titles, typed copy, a chapter rail,
-  click-and-hold / wheel / arrows / Escape. Lenis stops while it's open;
-  closing rewinds the film to the hero. Story copy sits on a soft paper veil
-  (never ink on black glass).
-- **Methodology** is its own page (`app/methodology/`): editorial timeline
-  (Day 01 → 14), typical agency vs Nerodyn, principles, audit CTA.
+  `components/story/StoryMode.tsx`) — the client called it "bad for now; worry
+  about that later". Untouched in round 10; it still works (click the stone).
+- **Methodology** is its own page (`app/methodology/`).
 
-**THE HOME FILM (round 9).** One polished obsidian stone, shaped from the
+**THE HOME FILM (round 10).** One polished obsidian stone, shaped from the
 Nerodyn mark, fractured into 40 SHARDS (the mark's cuts + an anisotropic
 Voronoi — `lib/geo/crystal.ts`) plus the CORE: a small whole copy of the
 stone that lives inside it, full of light (fragment 40, code `CORE`). What
@@ -52,16 +51,18 @@ different PLACE. So:
 
 | S | place (`Places.tsx`, `sceneState.env`) | formation (lib/formations.ts) |
 |---|-------|------------------------------|
-| 0–0.7 | the studio (paper, mirror floor) | F0 the stone; look up, the pass, seams light |
-| 0.7–1.3 | → the SKY (a cloud sea below, puffs) | F1 it SHATTERS; the camera dives through the burst — no type yet |
-| 1.3–2.05 | the sky | F1→F0 the shards re-form the stone (DESIGN; type reveals at 1.46) |
-| 2.05–3.0 | the sky | F2 the MONUMENT: the stone rebuilt at 2.25×, course by course, open joints, core glowing (INFRASTRUCTURE) |
-| 3.0–3.64 | the sky | F3 the FLOW (AI AUTOMATION): leads sweep in from the distance, circle the core on a tilted ring, are decided at its front — the qualified LIGHT (full of light, like the core) and file into a rising column on the right; the noise goes dark and drops into the clouds |
-| 3.64–4.4 | down THROUGH the cloud (haze) to the LAKE | the shards rain down |
-| 4.4–6.8 | the LAKE (still water, a far range + its reflection, camera low over the water) | F5 the BUILD column, one group seated per number of "Why" |
-| 6.8– | the lake | F6 the mark ("Let's talk.") |
+| 0–1 | the studio (paper, mirror floor) | F0 the stone; look up, the pass |
+| 1–2.25 | the studio | F0 behind the statement (letters invert where it passes — lib/project.ts clip) |
+| 2.25–2.85 | → the SKY (cloud sea rolls in from below) | F1 THE SHATTER, the camera pulling back so the burst stays framed |
+| 2.85–3.95 | the sky | WEBSITES: F4 the EXPLODED VIEW (every shard turned back to its place, held apart; crown up, blades apart; the girdle plate steps out), then assembly from the heart out, each shard flashing as it seats |
+| 4.1–4.9 | the sky | PLATFORMS: F2 the MONUMENT course by course; a band of light rises through it when complete (`u.riseY/riseAmp`) |
+| 4.92–5.62 | the sky | AI AUTOMATION: F3 the FLOW (leads circle the core; the qualified light up and file into the column; the noise drops) |
+| 5.62–5.98 | the sky | F8 every lead drawn into the core; the camera follows it in |
+| 5.8–6.42 | the FLOOD of light (`env.flood`) — THE CUT at 6.05 (`cam.cut`: rig + shards snap) | — |
+| 6.05–8.6 | the SALT FLAT (`FLAT_Y`; its sky is the page, #field keyed to --flat/--horizon) | F7 the COLOSSUS (×7): far off, approached; it BURSTS in slow motion (every piece to ~2× its distance, a hollow round the core, the glass between core and camera standing aside); the camera flies in, orbits the core, pulls out as it closes; a ring runs across the flat |
+| 8.6– | the flat | F7 closed — LET'S TALK |
 
-Rest frames (auto-framing): 0 · 1.85 · 2.95 · 3.5 · 5.35 · 7.55 · the end.
+Rest frames (auto-framing): 0 · 1.62 · 3.45 · 4.02 · 4.86 · 5.42 · 6.55 · 7.45 · 7.95 · 8.72 · 9.95 · the end.
 
 **Client verdicts:** 2026-09-25 "bg and animations perfect for now" (round 5)
 → round 6 (armillary, light streams, standing-stone field) REJECTED: ch02–03
@@ -75,7 +76,13 @@ reshape, stacks" — "not just going to black or three pieces and back to one".
 "Crazy doesn't mean a ton of particles — the few you have must be very
 polished." → round 9: page too long; wanted a story mode (UXBERT Labs), four
 home sections, methodology on its own page, and transitions / environments
-that are creative and never sloppy. Typography is still owed a pass.
+that are creative and never sloppy. → round 9 verdict: hero "good" (lose the
+ring); build "not too bad" but wants more detail and a fuller frame; why
+"absolute shit" (texts, placement, background, the lake column) — rebuild it
+"super crazy"; audit "not bad" but framing; the lake backgrounds disliked
+("less viewable but not plain white"); transitions "terrible … out of frame …
+not smooth"; bring back the long statement; "it's just a black shard with
+repetitive shit — flip the table". Typography is still owed a pass.
 `preview-card.mp4` is MOTION ONLY.
 
 ## The stone's surface (2026-09-25: "shape great, texture really bad at some angles")
@@ -124,7 +131,12 @@ way relative to each other.
   CameraRig damps with ω 3.2 (heavy).
 - **Keep the 3D off the type.** Nothing crosses a chapter's text column: the
   burst plays before the build type reveals; the flow lives right of it; no
-  lead ever travels screen-left through the headline.
+  lead ever travels screen-left through the headline. Where the glass must
+  pass behind words (inside the colossus) the words ride a frosted pane.
+- **Never lose the subject.** Every transition keeps its subject framed (the
+  camera pulls back WITH a burst; the colossus opens toward the camera so
+  the camera always looks at its core). Place changes happen under the flood
+  (one hard cut, `CUT_S`), never as a camera flight across empty space.
 - **Weight.** The Director runs its own damped scroll clock (ω 4.5 on top of
   Lenis), and every shard follows its target on its own critically damped
   spring (ω 3.6–6), with a gentle float + rotational drift while suspended.
@@ -136,7 +148,10 @@ way relative to each other.
   ("crap"); the standing-stone field ("coffins"); flakes; flat emissive cut
   faces; the round-7 eight-piece rig and the dark night chapter ("plain",
   "just going to black"); the round-8 plain / void / floods / halo /
-  specimens (removed in round 9). Tiling shards onto a giant surface read as
+  specimens (removed in round 9); the round-9 lake, its mountains and the
+  build column ("absolute shit"); the rotating ring of words by the hero
+  stone; distant obsidian "peaks" in the sky (tried in round 10 — they read
+  as grey slabs, i.e. coffins). Tiling shards onto a giant surface read as
   a lumpy clump — the monument is the stone at scale with open joints instead.
 - **Billboards** (cloud puffs) fade to zero well inside their card — a card
   edge in the sky reads as a straight line.
@@ -162,12 +177,20 @@ way relative to each other.
   sculpture leans toward the pointer; a fast sweep STIRS the halo's orbits;
   the beat's orbit runs faster.
 - **Places** (`components/stage/Places.tsx`, `shaders/env.ts`,
-  `sceneState.env`): the sky (cloud-sea plane + puff billboards + a `--sky`
-  DOM tint), inside the cloud (haze), the lake (hills + mirrored copy + water
-  plane). Everything is premultiplied alpha over the paper DOM (fog as
-  alpha), so the page stays white where nothing is drawn. The `--dusk` CSS
-  machinery (colours derived from `--paper`/`--ink`) is dormant (dusk 0) —
-  never hard-code rgba ink/paper in globals.css.
+  `sceneState.env`): the sky (cloud-sea plane that rolls in from below, puff
+  billboards incl. great cumulus banks on the horizon, a `--sky` DOM tint),
+  the salt flat (a faint crust plane + the page's own sky gradient in #field,
+  horizon from lib/project.ts), the flood (full-screen, depth-test off).
+  Everything is premultiplied alpha over the paper DOM (fog as alpha), so the
+  page stays white where nothing is drawn. **Never draw a full-screen or
+  sky-dome layer in the canvas over a place:** it veils the `.back` type (the
+  "Let's talk." display went lavender) — put backgrounds in #field instead.
+  The `--dusk` CSS machinery is dormant (dusk 0) — never hard-code rgba
+  ink/paper in globals.css.
+- **What the glass sees** (`PlaceEnv.tsx`): the studio keeps StudioEnv; the
+  sky and the flat swap in their own PMREM-baked rooms — MOSTLY DARK with a
+  narrow bright horizon band (+ a sun in the sky). Evenly bright rooms turned
+  the obsidian into flat grey plastic; black glass needs contrast to reflect.
 - Vein lines FADE when a pixel spans too much of their period (fwidth) —
   edge-on faces otherwise alias into zebra stripes.
 

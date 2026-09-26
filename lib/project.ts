@@ -19,6 +19,7 @@ import { STONE } from "./geo/types";
  */
 
 const v = new THREE.Vector3();
+const hz = new THREE.Vector3();
 const pts: { x: number; y: number }[] = Array.from({ length: 10 }, () => ({ x: 0, y: 0 }));
 const hull: { x: number; y: number }[] = [];
 const last = new Map<string, string>();
@@ -74,6 +75,8 @@ function query(now: number) {
 export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number): void {
   const now = performance.now();
   query(now);
+  // Look-dev handle (development builds only): the film's state and the camera.
+  if (process.env.NODE_ENV !== "production") (window as unknown as { __nd?: object }).__nd = { sceneState, camera };
   const root = document.documentElement;
   const S = scroll.S;
   const stone = getStone();
@@ -92,6 +95,17 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
 
   /* ---- the sky: the page's paper cools toward the top over the cloud sea -- */
   write("sky", sceneState.env.sky.toFixed(3), (val) => root.style.setProperty("--sky", val));
+
+  /* ---- the salt flat's sky, and where its horizon lands on the page ------- */
+  write("flat", sceneState.env.flat.toFixed(3), (val) => root.style.setProperty("--flat", val));
+  if (sceneState.env.flat > 0.001) {
+    camera.getWorldDirection(hz);
+    hz.y = 0;
+    if (hz.lengthSq() < 1e-6) hz.set(0, 0, -1);
+    hz.normalize().multiplyScalar(5000).add(camera.position);
+    const hy = project(hz, camera, W, H).y;
+    write("horizon", Math.max(-H, Math.min(2 * H, hy)).toFixed(0), (val) => root.style.setProperty("--horizon", `${val}px`));
+  }
 
   /* ---- dusk: the page follows the film into night and back (ch03) ------- */
   const dusk = sceneState.u.dusk;

@@ -33,13 +33,15 @@ export function GroundFx() {
     }
     // Grounded = the stone is whole-ish and near the floor.
     const floor = sceneState.u.floorY;
-    const near = 1 - THREE.MathUtils.smoothstep(lowest - floor, 0.8, 2.2);
-    // Only in the studio (the mirror floor): the plain and the void have no contact shadow.
-    const shadow = near * (sceneState.stone.visible ? 1 : 0) * Math.min(1, sceneState.env.mirror);
+    const K = sceneState.stone.scale;
+    const near = 1 - THREE.MathUtils.smoothstep((lowest - floor) / K, 0.8, 2.2);
+    // Only on a floor: the studio's mirror, the salt flat.
+    const shadow = near * (sceneState.stone.visible ? 1 : 0) * Math.min(1, Math.max(sceneState.env.mirror, sceneState.env.flat));
     mat.uniforms.uShadow.value = shadow;
     mat.uniforms.uSpill.value = sceneState.u.spill;
     m.visible = shadow > 0.01 || sceneState.u.spill > 0.01;
-    m.position.set(home.x, floor + 0.002, home.z);
+    m.position.set(home.x, floor + 0.002 * K, home.z);
+    m.scale.setScalar(K);
     m.rotation.set(0, sceneState.cam.az, 0);
     mat.uniforms.uCoreOff.value.set(0, 0);
   }, PRIORITY.scene);

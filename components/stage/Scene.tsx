@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { PRIORITY } from "@/lib/sceneState";
 import { runBridge } from "@/lib/project";
 import { StudioEnv } from "./StudioEnv";
+import { PlaceEnv } from "./PlaceEnv";
 import { CursorLight } from "./CursorLight";
 import { Director } from "./Director";
 import { CameraRig } from "./CameraRig";
@@ -26,6 +27,7 @@ export function Scene() {
       <Director />
       <CameraRig />
       <StudioEnv />
+      <PlaceEnv />
       <CursorLight />
       <Stone />
       <GroundFx />

@@ -179,12 +179,12 @@ export function initScroll(): () => void {
 /**
  * The film's composed frames, in S. When you stop scrolling between two of
  * them, the page glides on to one — the way igloo.inc finishes a move for you:
- * the hero · design (the stone re-formed above the clouds) · infrastructure
- * (the monument complete) · AI automation (the flow) · why (the build on the
- * lake, all four seats lit) · the mark · the page end.
+ * the hero · the statement over the stone · the exploded view · the assembled
+ * stone · the monument, lit · the flow · the colossus far off · inside it,
+ * round the core · the colossus closed · let's talk · the page end.
  * (Chapter jumpS values sit on these — keep them in sync.)
  */
-const REST_STATIC = [0, 1.85, 2.95, 3.5, 5.35, 7.55];
+const REST_STATIC = [0, 1.62, 3.45, 4.02, 4.86, 5.42, 6.55, 7.45, 7.95, 8.72, 9.95];
 const restPts: number[] = [];
 
 function anchors(): number[] {

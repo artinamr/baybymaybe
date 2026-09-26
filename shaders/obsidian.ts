@@ -98,6 +98,11 @@ export const obsidianUniforms: {
   uFloors: U<number>;
   /** 0..1 the light inside wakes and fills the whole stone (the story's "light inside"). */
   uWake: U<number>;
+  /** A band of light rising through the glass: its height (object space) and strength. */
+  uRiseY: U<number>;
+  uRiseAmp: U<number>;
+  /** The stone's scale: the reflection fades over a distance that grows with it. */
+  uReflK: U<number>;
   /** The stone's bounding planes (object, n·x ≤ w) and each piece's cut bounds (yMin, yMax, xSign). */
   uHull: U<THREE.Vector4[]>;
   uPieceBox: U<THREE.Vector3[]>;
@@ -127,6 +132,9 @@ export const obsidianUniforms: {
   uNight: { value: 0 },
   uFloors: { value: 0 },
   uWake: { value: 0 },
+  uRiseY: { value: -2 },
+  uRiseAmp: { value: 0 },
+  uReflK: { value: 1 },
   uHull: { value: HULL },
   uPieceBox: { value: pieceBounds() },
 };
@@ -178,6 +186,9 @@ export function syncObsidianUniforms(): void {
   U.uNight.value = u.dusk;
   U.uFloors.value = u.floors;
   U.uWake.value = u.wake;
+  U.uRiseY.value = u.riseY;
+  U.uRiseAmp.value = u.riseAmp;
+  U.uReflK.value = s.stone.scale;
   planeAbove.constant = -u.floorY;
   planeBelow.constant = u.floorY;
 }
@@ -314,6 +325,9 @@ uniform float uCursorAmt;
 uniform float uNight;
 uniform float uFloors;
 uniform float uWake;
+uniform float uRiseY;
+uniform float uRiseAmp;
+uniform float uReflK;
 uniform vec4 uHull[16];
 varying vec3 vObs;
 varying float vKind;
@@ -441,7 +455,9 @@ float obsGlowField(vec3 p) {
   // Awake: a broad light from the stone's middle, breathing, filling the glass.
   vec3 wc = p - vec3(0.0, -0.55, 0.0);
   float awake = uWake * exp(-dot(wc, wc) * 1.6) * (0.75 + 0.25 * sin(uTime * 1.3 + p.y * 2.0));
-  return heart * drift * 0.16 + floors * 1.1 + full + awake * 0.55;
+  // A band of light rising through the glass (the monument powering up).
+  float rise = uRiseAmp * exp(-(p.y - uRiseY) * (p.y - uRiseY) * 30.0) * (0.7 + 0.3 * drift);
+  return heart * drift * 0.16 + floors * 1.1 + full + awake * 0.55 + rise * 0.9;
 }
 
 vec3 obsInterior(vec3 ro, vec3 rd, bool full) {
@@ -679,7 +695,7 @@ const FRAG_TAIL = /* glsl */ `
   #ifdef OBS_REFLECT
     // A mirror floor reflects only what stands above it.
     if (vWorldY > uFloorY + 1e-3) discard;
-    obsA *= 0.16 * (1.0 - smoothstep(0.0, 1.1, uFloorY - vWorldY)) * uReflect;
+    obsA *= 0.16 * (1.0 - smoothstep(0.0, 1.1 * uReflK, uFloorY - vWorldY)) * uReflect;
     obsRgb *= 0.85;
   #endif
   if (obsA < 0.004) discard;

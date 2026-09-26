@@ -68,7 +68,8 @@ export function Stone() {
 
     // Hover only while the stone is whole enough for the proxy to be true.
     const S = sceneState.S;
-    const whole = S < 0.6 || (S > M0 - 0.9 && S < M0 + 0.2);
+    // (The hero only: the stone is the door to the story.)
+    const whole = S < 0.6 && M0 > 0;
     if (pointer.has && pointer.lastMove !== lastMove.current) {
       lastMove.current = pointer.lastMove;
       let on = false;

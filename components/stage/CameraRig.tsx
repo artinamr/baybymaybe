@@ -31,7 +31,8 @@ export function CameraRig() {
     const dt = Math.min(rawDt, 1 / 20);
     const c = sceneState.cam;
     const goal = [c.pos.x, c.pos.y, c.pos.z, c.target.x, c.target.y, c.target.z, c.fov, c.ppx, c.ppy];
-    const snap = !started.current || sceneState.frozen;
+    // A hard cut (under the flood) jumps; otherwise the camera glides.
+    const snap = !started.current || sceneState.frozen || c.cut;
     started.current = true;
     const out = sp.map((s: Spring, i) => (snap ? springSnap(s, goal[i]) : springTo(s, goal[i], OMEGA, dt)));
 
@@ -43,7 +44,14 @@ export function CameraRig() {
     const fov = out[6];
     const ppx = out[7];
     const ppy = out[8];
+    // Near/far follow the framing: close inside the colossus, the flat's horizon far off.
+    const near = THREE.MathUtils.clamp(cam.position.distanceTo(target) * 0.012, 0.05, 1.2);
     const L = last.current;
+    if (Math.abs(near - cam.near) > 0.02 * near) {
+      cam.near = near;
+      cam.far = 2400;
+      L.fov = -1;
+    }
     if (Math.abs(fov - L.fov) > 1e-4 || Math.abs(ppx - L.ppx) > 1e-5 || Math.abs(ppy - L.ppy) > 1e-5 || L.w !== size.width || L.h !== size.height) {
       L.fov = fov;
       L.ppx = ppx;

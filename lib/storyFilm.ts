@@ -63,7 +63,14 @@ export function evaluateStory(P: number, _time: number, L: Layout, out: SceneSta
   const env = out.env;
 
   out.stone.home.set(0, 0, 0);
+  out.stone.scale = 1;
   out.stone.visible = true;
+  out.cam.cut = false;
+  plan.home.set(0, 0, 0);
+  plan.K = 1;
+  plan.cut = false;
+  plan.open = 0;
+  plan.explode = 1;
   // The stone turns slowly the whole way through; faster through the cut.
   plan.yaw = (20 + 38 * (P - STORY_START) + 90 * smoother(range(P, 3.0, 3.6))) * DEG;
   plan.buildYaw = plan.yaw;
@@ -107,6 +114,8 @@ export function evaluateStory(P: number, _time: number, L: Layout, out: SceneSta
   env.mirror = 1;
   env.sky = 0;
   env.inCloud = 0;
+  env.flat = 0;
+  env.ripple = 0;
   env.lake = 0;
   env.plain = 0;
   env.void = 0;
@@ -122,6 +131,7 @@ export function evaluateStory(P: number, _time: number, L: Layout, out: SceneSta
   u.vein = 0.8 + 1.4 * wake;
   u.floors = 0;
   u.wake = wake;
+  u.riseAmp = 0;
   u.spill = 0.5 * wake + 0.4 * range(P, 2.05, 2.3) * (1 - range(P, 2.6, 3.0));
   u.dusk = 0;
   u.fogNear = 60;
