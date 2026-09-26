@@ -57,7 +57,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Infrastructure",
     vh: 260,
     sticky: true,
-    jumpS: 3.52,
+    jumpS: 3.47,
     specimen: { name: "Digital infrastructure", line: "Interface, platform, data and foundation." },
   },
   {

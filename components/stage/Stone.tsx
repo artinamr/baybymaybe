@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { getStone, stoneHullGeometry } from "@/lib/geo/crystal";
 import { createObsidian, syncObsidianUniforms } from "@/shaders/obsidian";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
-import { film, M0 } from "@/lib/choreo";
+import { M0 } from "@/lib/choreo";
 import { bus, pointer, ready, ui } from "@/lib/stores";
 
 /**
@@ -65,7 +65,7 @@ export function Stone() {
 
     // Hover only while the stone is whole enough for the proxy to be true.
     const S = sceneState.S;
-    const whole = film.whole > 0.5 && S < M0 + 0.2;
+    const whole = S < 1.6 || (S > M0 - 0.9 && S < M0 + 0.2);
     if (pointer.has && pointer.lastMove !== lastMove.current) {
       lastMove.current = pointer.lastMove;
       let on = false;

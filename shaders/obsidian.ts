@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { fragTex } from "@/lib/fragTex";
 import { sceneState } from "@/lib/sceneState";
-import { STONE } from "@/lib/geo/types";
+import { FRAG_COUNT, STONE } from "@/lib/geo/types";
 import { hullPlanes, pieceBounds } from "@/lib/geo/crystal";
 
 /**
@@ -120,7 +120,7 @@ export const obsidianUniforms: {
   uUndulate: { value: 0.06 },
   uInner: { value: 0.3 },
   uLevelSeam: { value: 0 },
-  uCursorP: { value: Array.from({ length: 8 }, () => new THREE.Vector4(0, -0.4, 0, 0)) },
+  uCursorP: { value: Array.from({ length: FRAG_COUNT }, () => new THREE.Vector4(0, -0.4, 0, 0)) },
   uCursorAmt: { value: 0 },
   uNight: { value: 0 },
   uFloors: { value: 0 },
@@ -170,7 +170,7 @@ export function syncObsidianUniforms(): void {
   U.uVein.value = u.vein;
   U.uInner.value = u.inner;
   U.uLevelSeam.value = u.levelSeam;
-  for (let i = 0; i < 8; i++) U.uCursorP.value[i].copy(u.cursorPiece[i]);
+  for (let i = 0; i < FRAG_COUNT; i++) U.uCursorP.value[i].copy(u.cursorPiece[i]);
   U.uCursorAmt.value = u.cursorAmt;
   U.uNight.value = u.dusk;
   U.uFloors.value = u.floors;
@@ -206,13 +206,13 @@ varying float vWorldY;  // final world y (after the mesh matrix) — the reflect
   varying float vFaceR;
   varying vec3 vRipD;    // aObj − aRipO (object) — its length drives the conchoidal ripple
   varying vec3 vRipV;    // the same vector in VIEW space — the ripple's radial direction
-  varying vec3 vFx;      // glow, flash, fade (fragTex texel 7)
+  varying vec4 vFx;      // glow, flash, fade, core (fragTex texel 7)
   varying vec3 vPulseP;  // world position before the floor mirror — the seam pulse is authored in world space
   varying vec3 vViewObj; // camera → surface in STONE object space (vein parallax)
   varying mat3 vObjToView; // stone object frame → view (facet undulation stays glued to the glass)
-  uniform vec3 uPieceBox[8];
+  uniform vec3 uPieceBox[${FRAG_COUNT}];
   varying vec3 vPieceBox;  // this piece's cut bounds (yMin, yMax, xSign) for the interior march
-  uniform vec4 uCursorP[8];
+  uniform vec4 uCursorP[${FRAG_COUNT}];
   varying vec4 vCursorP;   // the cursor's light inside this piece (object space) + nearness
 #endif
 #ifdef OBS_INSTANCED
@@ -238,7 +238,7 @@ const VERT_NORMAL = /* glsl */ `
     texelFetch(uFragTex, ivec2(4, obsRow), 0).xyz,
     texelFetch(uFragTex, ivec2(5, obsRow), 0).xyz,
     texelFetch(uFragTex, ivec2(6, obsRow), 0).xyz);
-  vFx = texelFetch(uFragTex, ivec2(7, obsRow), 0).xyz;
+  vFx = texelFetch(uFragTex, ivec2(7, obsRow), 0);
   objectNormal = obsNormalM * objectNormal;
 #endif
 `;
@@ -320,7 +320,7 @@ varying float vWorldY;
   varying float vFaceR;
   varying vec3 vRipD;
   varying vec3 vRipV;
-  varying vec3 vFx;
+  varying vec4 vFx;
   varying vec3 vPulseP;
   varying vec3 vViewObj;
   varying mat3 vObjToView;
@@ -421,12 +421,15 @@ float obsGlowField(vec3 p) {
   // A small core of light low in the pavilion, breathing slowly.
   vec3 h = p - vec3(0.0, -0.62, 0.0);
   float heart = exp(-(dot(h.xz, h.xz) * 7.0 + h.y * h.y * 2.4));
-  float drift = 0.6 + 0.4 * obsNoise(p * 2.3 + vec3(0.0, uTime * 0.12, 0.0));
+  float drift = 0.7 + 0.3 * sin(dot(p, vec3(2.1, 1.3, 1.7)) + uTime * 0.4);
   // Floors of light inside the glass at the level cuts: when the stack parts,
   // each section wells up with light from its centre.
   float fy = exp(-p.y * p.y * 55.0) + exp(-(p.y + 0.6) * (p.y + 0.6) * 55.0) + exp(-(p.y + 1.22) * (p.y + 1.22) * 55.0);
   float floors = uFloors * fy * exp(-dot(p.xz, p.xz) * 2.6) * (0.75 + 0.25 * drift);
-  return heart * drift * 0.16 + floors * 1.1;
+  // A fragment full of light (the core crystal): luminous through its whole body.
+  vec3 hc = p - vec3(0.0, -0.464, 0.0);
+  float full = vFx.w * 0.1 * exp(-dot(hc, hc) * 0.8) * (0.8 + 0.2 * drift);
+  return heart * drift * 0.16 + floors * 1.1 + full;
 }
 
 vec3 obsInterior(vec3 ro, vec3 rd, bool full) {
@@ -445,8 +448,8 @@ vec3 obsInterior(vec3 ro, vec3 rd, bool full) {
   // Veins at depth.
   float lines = 0.0;
   float heat = 0.0;
-  for (int k = 0; k < 5; k++) {
-    float d = 0.035 + 0.11 * float(k) + 0.02 * float(k * k);
+  for (int k = 0; k < 4; k++) {
+    float d = 0.04 + 0.14 * float(k) + 0.03 * float(k * k);
     float inside = 1.0 - smoothstep(tMax - 0.03, tMax, d);
     float T = exp(-2.4 * d);
     vec3 pk = ro + rd * d;
@@ -600,7 +603,8 @@ const FRAG_EMISSIVE = /* glsl */ `
   #ifdef OBS_FRAG
     // The light inside: strong through a polished cut (a window into the
     // glass), faint through the outer faces (dark glass, mostly reflection).
-    float obsWin = obsCut > 0.5 ? vFx.x * uCutGlow * 1.2 + vFx.y * 0.8 : uInner * (0.55 + 0.45 * vFx.x) * 0.2;
+    // vFx.w: a fragment full of light seen through its outer faces (the core).
+    float obsWin = obsCut > 0.5 ? vFx.x * uCutGlow * 1.2 + vFx.y * 0.8 : uInner * (0.55 + 0.45 * vFx.x) * 0.2 + vFx.w * 0.34;
     obsWin *= 1.0 - vFx.z;
     if (obsWin > 0.002) {
       vec3 obsRd = normalize(vViewObj);
@@ -727,7 +731,7 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
 
   const defines: Record<string, string> = { ...(m.defines as Record<string, string>) };
   if (frag) defines.OBS_FRAG = "";
-  defines.OBS_STEPS = String(o.steps ?? 14);
+  defines.OBS_STEPS = String(o.steps ?? 10);
   if (reflection) defines.OBS_REFLECT = "";
   if (instanced) defines.OBS_INSTANCED = "";
   if (fadePass) defines.OBS_FADEPASS = "";
@@ -759,7 +763,7 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
     (reflection ? "r" : "-") +
     (instanced ? "i" : "-") +
     (fadePass ? "x" : "-") +
-    (o.steps ?? 14) +
+    (o.steps ?? 10) +
     (o.clip ?? "");
   m.customProgramCacheKey = () => key;
   return m;

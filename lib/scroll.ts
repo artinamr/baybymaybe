@@ -189,7 +189,7 @@ export function initScroll(): () => void {
  * the gathered column · each seat of the build · the mark · the footer.
  * (Chapter jumpS values sit on these — keep them in sync.)
  */
-const REST_STATIC = [0, 1.62, 2.5, 3.52, 3.76, 3.99, 4.23, 4.56, 6.2, 6.88, 10.62, 11.1, 11.55, 12.0, 12.45, 13.72, 14.32];
+const REST_STATIC = [0, 1.62, 3.47, 3.8, 4.13, 4.52, 6.2, 6.88, 10.62, 11.1, 11.55, 12.0, 12.45, 13.72, 14.32];
 const restPts: number[] = [];
 
 function anchors(): number[] {

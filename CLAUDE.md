@@ -25,37 +25,39 @@ The client asked for a FULL-SITE rebuild: white theme, a sharp obsidian stone in
 The full art-direction spec is **`docs/SPEC.md`**; module boundaries and
 interfaces are **`docs/CONTRACTS.md`**. Read both before changing the 3D.
 
-**THE FILM (round 7, 2026-09-26) — "one stone, seven places".** One polished
-obsidian stone, shaped from the Nerodyn mark, with an ANATOMY of eight pieces
-(crown, band, and two blades each cut into three levels — `lib/geo/crystal.ts`,
-every cut deliberate, no random fracture). The same pieces, never a new prop;
-what changes from chapter to chapter is the PLACE and the camera (igloo.inc's
-lesson: environments change, the theme and shapes stay):
+**THE FILM (round 8, 2026-09-26) — "shatter · reshape · stack, through
+changing places".** One polished obsidian stone, shaped from the Nerodyn mark,
+fractured into 40 SHARDS (the mark's cuts + an anisotropic Voronoi —
+`lib/geo/crystal.ts`) plus the CORE: a small whole copy of the stone that
+lives inside it, full of light (fragment 40, code `CORE`). What igloo.inc does
+(studied frame by frame in the browser): objects ASSEMBLE from many pieces,
+SHATTER, RESHAPE; each section is a different PLACE; fog / light floods carry
+the camera between places. So:
 
-| ch | place | gesture (lib/formations.ts rig) |
-|----|-------|------------------------------|
-| 00 | the stone on its mirror (paper studio) | — |
-| 01 | look up, the pass, then the mark's cut OPENS (crown up, blades part) | `open` |
-| 02 | the STACK: four layers part and turn like dials; the camera cranes down them as the rows are read; the focused layer slides out | `layerY/Spin/Out` |
-| 03 | NIGHT: the page goes dark (a circle of night spreads out of the stone); the blades swing open on their spine like a BOOK — two pages of light, the mark's V; product page first, then workspace | `bookL/R` |
-| 04 | the long mirror: the layers lift off, wait above the frame, and each swoops in as its row comes up, travels with the camera while it is read, then flies on ahead | `station` |
-| 05 | they GATHER into a column over the mirror and BUILD the stone, one layer per step (0.45 S each, auto-framed), tips first, each seat a flash | `column/seat` |
-| 06 | from one angle it IS the logo | `crown/band/split` |
+| S | place | formation (lib/formations.ts) |
+|---|-------|------------------------------|
+| 0–2 | the studio (paper, mirror floor) | F0 the stone; look up, the pass, seams light |
+| 2–2.9 | — | F1 it SHATTERS; the camera dives through the burst, the core laid bare |
+| ~2.8 | fog flood | — |
+| 3–4.75 | the PLAIN (pale dunes + far hills in haze, `Places.tsx`) | F2 the MONUMENT: the shards spiral in and rebuild the stone at 2.25×, course by course from the culet up (the stack — rows light foundation → interface), open joints, the core glowing inside, each shard flashing as it locks in |
+| 4.75–7.4 | the plain | F3 the HALO: the monument bursts open into two tilted orbits (product, workspace) round the glowing core |
+| ~7.6 | flood of light | the camera flies INTO the core |
+| 8–10 | the VOID (grey cloud banks + backdrop) | F4 SPECIMENS: four crystal druses of ten shards rise one by one on a vertical conveyor, one per work row |
+| ~10.4 | fog flood | — |
+| 10.4–13.6 | the studio | F5 the BUILD: a column over the mirror, one group per step (0.45 S), from the culet up |
+| 13.6– | the studio | F6 the mark |
 
-The rig is ONE parametric pose function; the film (`lib/choreo.ts`) eases its
-degrees of freedom as smooth functions of S, so every transition is a single
-continuous gesture — never "formation A morphs into formation B".
-
-**Client verdicts:** 2026-09-25 "bg and animations perfect for now" (the
-round-5 film) → 2026-09-26 round 6 (armillary, light streams, standing-stone
-field) was REJECTED: ch02–03 "meaningless", the particle hover "crap", the
-field stones "literally coffins", ch05 "just shattered and comes to screen …
-so quick nobody will catch it", the flat purple cut faces "a 1990s game", and
-overall "a few stuff changing into each other" instead of igloo's flow.
+**Client verdicts:** 2026-09-25 "bg and animations perfect for now" (round 5)
+→ round 6 (armillary, light streams, standing-stone field) REJECTED: ch02–03
+"meaningless", the particle hover "crap", the field "literally coffins", ch05
+"just shattered … so quick nobody will catch it", flat purple cut faces "a
+1990s game", "a few stuff changing into each other". → round 7 (eight clean
+pieces, open-book night chapter) REJECTED as "terrible … so plain … just
+rotating around the stupid shape", and it had removed the SHATTER — "the only
+good animation". Wanted: igloo-like story with CHANGING ENVIRONMENTS, "shatter,
+reshape, stacks" — "not just going to black or three pieces and back to one".
 "Crazy doesn't mean a ton of particles — the few you have must be very
-polished; shapes, placing, position, animation all accounted for." Hence the
-film above. Typography is still owed a pass (the client: "we don't care about
-them now"). Their example video (`preview-card.mp4`) is kept for MOTION ONLY.
+polished." Typography is still owed a pass. `preview-card.mp4` is MOTION ONLY.
 
 ## The stone's surface (2026-09-25: "shape great, texture really bad at some angles")
 
@@ -73,14 +75,14 @@ them now"). Their example video (`preview-card.mp4`) is kept for MOTION ONLY.
   light inside the stone). Never speckle, never cells — both were rejected.
 - **The light inside** (round 7, "the inside looks like a 90s game"): every
   pixel looks INTO the glass — the view ray refracts at the surface and runs
-  to the piece's exact exit (the stone's hull planes + the piece's own cut
-  bounds, uniforms), gathering (a) veins at five depths, deeper = softer and
-  dimmer (defocus), carrying signal pulses that run faster at night, and (b) a
-  soft glow ray-marched through a small heart and the CURSOR's light (per-piece,
-  in the piece's own frame — `sceneState.u.cursorPiece`). Cut faces are sawn
-  and POLISHED sections (optically flat, half their env reflection — else a
-  flat grey card), windows onto that depth; outer faces show it faintly.
-  Flat emissive cut faces are banned.
+  to the piece's exact exit (the stone's hull planes + the piece's mark-cut
+  bounds, uniforms), gathering (a) veins at four depths, deeper = softer and
+  dimmer (defocus), carrying signal pulses, and (b) a soft glow ray-marched
+  through a small inner glow, the CORE's light (fragTex texel 7 `w`) and the
+  CURSOR's light (per fragment, in its own frame — `sceneState.u.cursorPiece`).
+  Cut faces are sawn and POLISHED sections (optically flat, half their env
+  reflection — else a flat grey card), windows onto that depth; outer faces
+  show it faintly. Flat emissive cut faces are banned.
 - Look-dev: `?freeze=1&yaw=<deg>` pins the stone's rotation; render a sweep of
   yaws and crop to the stone before judging the surface. The cursor needs a
   live (unfrozen) frame: `?at=6.2&mx=0.25&my=0.6` in shots.mjs.
@@ -89,8 +91,9 @@ them now"). Their example video (`preview-card.mp4`) is kept for MOTION ONLY.
 
 Hero → ch01 is LOOK UP (camera below the girdle, lens widening, stone rising
 off its reflection) → THE PASS (close, fov 44, the stone filling the frame,
-veins waking) → settle into ch01 → the cut opens (a hairline of light first).
-The stone and camera always turn the same way relative to each other.
+veins waking) → settle into ch01 → a hairline of light, then it SHATTERS and
+the camera dives through the burst. The stone and camera always turn the same
+way relative to each other.
 
 ## Motion system (2026-09-26: "not smooth, not premium … like a wireframe")
 
@@ -99,16 +102,17 @@ The stone and camera always turn the same way relative to each other.
   keys (`lib/choreo.ts`, C1, holds only where a channel repeats), the
   corridor is one continuous path, and CameraRig damps with ω 3.2 (heavy).
 - **Weight.** The Director runs its own damped scroll clock (ω 4.5 on top of
-  Lenis), and every piece follows its target on a critically damped spring,
-  with a gentle float + rotational drift while suspended. Springs, float and
-  drift are per MOVING UNIT — a layer (stack, specimens, build) or a whole
-  blade (cut, book) — and drift turns about that unit's centre, so a layer's
-  halves or a blade's levels never come apart. The intact stone is blended
-  back to RIGID (`film.whole`). `&freeze=1` snaps everything for screenshots.
+  Lenis), and every shard follows its target on its own critically damped
+  spring (ω 3.6–6), with a gentle float + rotational drift while suspended.
+  Transitions are staggered per shard (crack distance, course, random, spec),
+  ride Bézier arcs and SPIRAL about the form's centre (`plan.swirl`). The
+  intact stone is blended back to RIGID. `&freeze=1` snaps everything.
 - **Rejected, never revive:** grid lines, leader lines, floor plates, graph
-  hairlines ("wireframe"); the ring tower, the armillary, light-stream
-  particles and cursor-parting ("meaningless", "crap"); the standing-stone
-  field ("coffins"); flakes; the 24-shard explosion; flat emissive cut faces.
+  hairlines ("wireframe"); light-stream particles and cursor-parting
+  ("crap"); the standing-stone field ("coffins"); flakes; flat emissive cut
+  faces; the round-7 eight-piece rig and the dark night chapter ("plain",
+  "just going to black"). Tiling shards onto a giant surface read as a lumpy
+  clump — the monument is the stone at scale with open joints instead.
 - **Type moves with the stone:** reveals are 1.3–1.4 s expo-out with a
   blur-to-sharp focus pull and 110 ms stagger; exits are quicker and upward.
 - The chapter card is a hero-only beat; it bows out once you scroll.
@@ -122,15 +126,17 @@ The stone and camera always turn the same way relative to each other.
   → onward). Any input cancels a glide; nav jumps suppress it until they land;
   never before the intro is done or the user has touched the scroll. Chapter
   `jumpS` values sit ON anchors — keep them in sync when moving keys.
-- **Interactivity:** the light inside the glass follows the cursor (hero →
-  ch03, strongest at night; the veins near it wake); the stack, the book and
-  the build lean toward the pointer; hovering a ch02 layer row slides that
-  layer out; the stack's dials drift on bounded oscillations (they never
-  unwind).
-- **Night (ch03):** `u.dusk` → `--dusk` (the #field's circle of night spreads
-  from `--stone-x/y`), `--dusk-ui` (type + chrome, switched as the circle
-  passes them), `--dusk-aura`. Every colour in globals.css derives from
-  `--paper` / `--ink`, so the page follows; never hard-code rgba ink/paper.
+- **Interactivity:** the light inside the glass follows the cursor (hero → the
+  void; the veins near it wake); shards near the cursor LIFT OUT of the
+  monument / halo / specimens and glow (pull a stone from the wall); the
+  sculpture leans toward the pointer; a fast sweep STIRS the halo's orbits;
+  the beat's orbit runs faster.
+- **Places + floods** (`components/stage/Places.tsx`, `shaders/env.ts`,
+  `sceneState.env`): the plain's terrain and the void's cloud banks fade in
+  only under a flood; everything is premultiplied alpha over the paper DOM
+  (fog as alpha), so the page stays white where nothing is drawn. The
+  `--dusk` CSS machinery (colours derived from `--paper`/`--ink`) is dormant
+  (dusk 0) — never hard-code rgba ink/paper in globals.css.
 - Vein lines FADE when a pixel spans too much of their period (fwidth) —
   edge-on faces otherwise alias into zebra stripes.
 
@@ -155,8 +161,8 @@ The stone and camera always turn the same way relative to each other.
 - The canvas is TRANSPARENT and there is no post-processing (bloom greys a
   light page). Type set in a chapter's `.back` layer sits UNDER the canvas and
   is genuinely occluded by the stone; `.front` sits over it.
-- The page is white; ch03 is the ONE night chapter (the stone becomes the
-  light), entered and left by the circle of night, never a hard cut.
+- The page is white. Places change by fog, haze and ground — never by going
+  dark (rejected).
 - Liked micro-interactions: nav hover-swap to indigo, the indigo pill's shine
   sweep, the ghost pill fill.
 - Never revive: periwinkle backgrounds, speckle/worley/Voronoi vein textures on
@@ -170,7 +176,7 @@ The stone and camera always turn the same way relative to each other.
   **`advance` takes SECONDS** — R3F derives delta from `timestamp − elapsedTime`.
 - Scroll coordinate `S = scrollY / vh`; chapter table in `lib/chapters.ts`.
   `lib/choreo.ts` is a pure function of S; the Director adds time-based life.
-- The stone is ONE draw call: its 8 pieces merged, per-piece transforms in
+- The stone is ONE draw call: 40 shards + the core merged, per-fragment transforms in
   a float DataTexture (`lib/fragTex.ts`), read by `shaders/obsidian.ts`.
 - `lib/layout.ts` is the only place hero/chapter geometry is derived.
 - Intro is PURE CSS keyed on `html[data-intro=wait|run|done]` (JS timelines

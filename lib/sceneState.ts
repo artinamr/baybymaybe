@@ -11,6 +11,7 @@
  * top-left of the viewport.
  */
 import * as THREE from "three";
+import { FRAG_COUNT } from "./geo/types";
 
 /** useFrame priorities. Keep all ≤ 0 so R3F still auto-renders after them. */
 export const PRIORITY = {
@@ -23,6 +24,8 @@ export const PRIORITY = {
   /** lib/project.ts bridge: project to screen, write DOM (after camera, before render). */
   bridge: -10,
 } as const;
+
+export type Formation = "F0" | "F1" | "F2" | "F3" | "F4" | "F5" | "F6";
 
 export const sceneState = {
   /** Global scroll coordinate this frame. */
@@ -53,7 +56,7 @@ export const sceneState = {
     target: new THREE.Vector3(0, -0.464, 0),
   },
 
-  /** The intact stone's placement (the rig composes every piece on top of it). */
+  /** The intact stone's placement (stone-relative forms compose on top of it). */
   stone: {
     home: new THREE.Vector3(0, 0, 0),
     /** radians */
@@ -64,6 +67,19 @@ export const sceneState = {
     matrix: new THREE.Matrix4(),
     visible: true,
   },
+
+  /** Formation blend the Director is currently evaluating (informational). */
+  formation: { a: "F0" as Formation, b: "F0" as Formation, mix: 0 },
+
+  /**
+   * THE PLACES (lib/choreo.ts): how present each environment is, 0..1, and the
+   * fog floods that carry the film from one to the next.
+   *   mirror  the studio's mirror floor (hero, the build, the mark)
+   *   plain   the pale plain in haze (the monument, the halo)
+   *   void    drifting fog, no ground (the specimens)
+   *   flood   a full-screen fog flood; floodLight: the flood into the heart's light
+   */
+  env: { mirror: 1, plain: 0, void: 0, flood: 0, floodLight: 0 },
 
   /** Material uniforms the Director drives (shaders/obsidian.ts copies these each frame). */
   u: {
@@ -107,7 +123,7 @@ export const sceneState = {
      * closest to the piece's heart, in stone object space (xyz), and how near the
      * ray passes (w, 0..1). cursorAmt is the global level (pointer active, chapter).
      */
-    cursorPiece: Array.from({ length: 8 }, () => new THREE.Vector4(0, -0.4, 0, 0)),
+    cursorPiece: Array.from({ length: FRAG_COUNT }, () => new THREE.Vector4(0, -0.4, 0, 0)),
     cursorAmt: 0,
   },
 

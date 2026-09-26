@@ -34,7 +34,8 @@ export function GroundFx() {
     // Grounded = the stone is whole-ish and near the floor.
     const floor = sceneState.u.floorY;
     const near = 1 - THREE.MathUtils.smoothstep(lowest - floor, 0.8, 2.2);
-    const shadow = near * (sceneState.stone.visible ? 1 : 0);
+    // Only in the studio (the mirror floor): the plain and the void have no contact shadow.
+    const shadow = near * (sceneState.stone.visible ? 1 : 0) * Math.min(1, sceneState.env.mirror);
     mat.uniforms.uShadow.value = shadow;
     mat.uniforms.uSpill.value = sceneState.u.spill;
     m.visible = shadow > 0.01 || sceneState.u.spill > 0.01;

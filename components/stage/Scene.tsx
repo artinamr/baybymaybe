@@ -11,6 +11,7 @@ import { CameraRig } from "./CameraRig";
 import { Stone } from "./Stone";
 import { GroundFx } from "./GroundFx";
 import { Mist } from "./Mist";
+import { Places } from "./Places";
 
 function Bridge() {
   const { camera, size } = useThree();
@@ -29,6 +30,7 @@ export function Scene() {
       <Stone />
       <GroundFx />
       <Mist />
+      <Places />
       <Bridge />
     </>
   );

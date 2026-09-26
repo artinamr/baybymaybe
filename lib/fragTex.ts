@@ -1,7 +1,7 @@
 /**
  * PER-FRAGMENT TRANSFORM TEXTURE — contract (docs/SPEC.md §4.3).
  *
- * The whole stone is ONE draw call: its 8 pieces merged into one geometry,
+ * The whole stone is ONE draw call: 40 shards + the core merged into one geometry,
  * each vertex tagged with `aFrag`. Each fragment's transform lives in one row of
  * an RGBA32F DataTexture (8 texels × FRAG_COUNT rows) — a uniform array could
  * overflow the vertex-uniform limit on an iGPU.
@@ -9,10 +9,11 @@
  * Row i (fragment i):
  *   texel 0..3  model matrix columns  (fragment-local → WORLD)
  *   texel 4..6  normal matrix columns (inverse-transpose of the model 3×3; w unused)
- *   texel 7     (glow, flash, fade, spare)
+ *   texel 7     (glow, flash, fade, core)
  *                 glow  0..1  cut-face indigo level for this fragment
  *                 flash 0..1  transient flash (walker arrival, seating)
  *                 fade  0..1  1 = fully dissolved into the paper (alpha fog)
+ *                 core  0..   light inside, seen through the OUTER faces (the core crystal)
  *
  * WRITER: components/stage/Director.tsx (via writeFrag), once per frame.
  * READERS: shaders/obsidian.ts vertex shader (texelFetch(uFragTex, ivec2(k, aFrag), 0)),
@@ -43,7 +44,7 @@ const fragFx: Float32Array = new Float32Array(FRAG_COUNT * 3);
 const _n = new THREE.Matrix3();
 
 /** Write fragment i. Allocation-free. Call writeDone() once after the last write of the frame. */
-function writeFrag(i: number, model: THREE.Matrix4, glow: number, flash: number, fade: number) {
+function writeFrag(i: number, model: THREE.Matrix4, glow: number, flash: number, fade: number, core = 0) {
   const o = i * W * 4;
   const e = model.elements; // column-major
   for (let k = 0; k < 16; k++) data[o + k] = e[k];
@@ -64,7 +65,7 @@ function writeFrag(i: number, model: THREE.Matrix4, glow: number, flash: number,
   data[o + 28] = glow;
   data[o + 29] = flash;
   data[o + 30] = fade;
-  data[o + 31] = 0;
+  data[o + 31] = core;
   fragWorld[i].copy(model);
   fragPos[i].setFromMatrixPosition(model);
   fragFx[i * 3] = glow;
