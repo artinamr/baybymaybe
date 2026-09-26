@@ -150,25 +150,44 @@ a {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(38vw 48vh at var(--stone-x, 62vw) var(--stone-y, 50vh), var(--lift) 0%, color-mix(in oklab, var(--lift) 0%, transparent) 70%),
+    radial-gradient(
+      38vw 48vh at var(--stone-x, 62vw) var(--stone-y, 50vh),
+      color-mix(in oklab, var(--lift) calc(max(0, 1 - var(--sky, 0) - var(--flat, 0)) * 100%), transparent) 0%,
+      color-mix(in oklab, var(--lift) 0%, transparent) 70%
+    ),
     radial-gradient(140vw 120vh at 50% 45%, color-mix(in oklab, var(--paper) 0%, transparent) 60%, color-mix(in oklab, var(--ink) 2.5%, transparent) 100%),
+    /* THE SKY over the cloud sea: the low sun's glow, then a clean
+       high-altitude blue overhead whitening to a bright haze on the horizon
+       (keyed to where the horizon lands on the page), the far cloud a shade
+       below it. The cloud sea itself is the canvas. */
+    radial-gradient(
+      circle at var(--sun-x, 80vw) var(--sun-y, -60vh),
+      color-mix(in oklab, #fffdf7 calc(var(--sky, 0) * 92%), transparent) 0,
+      color-mix(in oklab, #fffaf0 calc(var(--sky, 0) * 42%), transparent) 8vmin,
+      color-mix(in oklab, #fff8ee 0%, transparent) 46vmin
+    ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, #dfe5ec calc(var(--sky, 0) * 100%), transparent) 0%,
-      color-mix(in oklab, #eaeef2 calc(var(--sky, 0) * 100%), transparent) 42%,
-      color-mix(in oklab, #f6f5f2 0%, transparent) 78%
+      color-mix(in oklab, #b9cadf calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) - 120vh),
+      color-mix(in oklab, #cddaea calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) - 55vh),
+      color-mix(in oklab, #e4ecf4 calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) - 14vh),
+      color-mix(in oklab, #f7f9fa calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) - 0.6vh),
+      color-mix(in oklab, #eef2f6 calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) + 2.5vh),
+      color-mix(in oklab, #e3e9f0 calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) + 40vh)
     ),
     /* The salt flat's sky: cool overhead, a band of light on the horizon, the
        flat a shade deeper just below it. Behind everything, so the type set
        behind the canvas is never veiled. */
+    /* The salt flat's sky, and below the horizon its mirror (the canvas draws
+       the mirror itself; this is what shows where it melts off far away). */
     linear-gradient(
       180deg,
-      color-mix(in oklab, #d9dde3 calc(var(--flat, 0) * 100%), transparent) 0px,
-      color-mix(in oklab, #e9ebee calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) - 22vh),
+      color-mix(in oklab, #d3d9e1 calc(var(--flat, 0) * 100%), transparent) 0px,
+      color-mix(in oklab, #e6eaef calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) - 22vh),
       color-mix(in oklab, #fcfbf8 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) - 0.5vh),
-      color-mix(in oklab, #e8e8e6 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) + 1.2vh),
-      color-mix(in oklab, #f1f0ec calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) + 16vh),
-      color-mix(in oklab, #f6f5f2 0%, transparent) 100%
+      color-mix(in oklab, #f8f8f6 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) + 1.5vh),
+      color-mix(in oklab, #e9ecf0 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) + 22vh),
+      color-mix(in oklab, #e0e5eb calc(var(--flat, 0) * 100%), transparent) 100%
     ),
     radial-gradient(
       circle at var(--stone-x, 62vw) var(--stone-y, 50vh),
@@ -734,10 +753,24 @@ html[data-intro-skip] .intro-mask > span {
     transform 900ms var(--ease-expo),
     filter 700ms ease;
 }
-[data-inside="1"] .why-top {
-  opacity: 0;
-  transform: translateY(-24px);
-  filter: blur(6px);
+/* The paper copy of the section's words, clipped each frame (lib/project.ts)
+   to the silhouettes of the glass behind them: the letters turn from ink to
+   paper exactly where a piece passes behind — never ink on black glass. */
+.why-inv {
+  pointer-events: none;
+  user-select: none;
+  clip-path: polygon(0 0, 0 0, 0 0);
+}
+.why-inv,
+.why-inv * {
+  color: var(--paper) !important;
+  pointer-events: none !important;
+}
+.why-inv .claim-bar {
+  background: color-mix(in oklab, var(--paper) 30%, transparent);
+}
+.why-inv .claim-bar > span {
+  background: var(--paper);
 }
 .why-claims {
   position: absolute;
@@ -753,15 +786,7 @@ html[data-intro-skip] .intro-mask > span {
     box-shadow 700ms var(--ease-expo),
     backdrop-filter 700ms var(--ease-expo);
 }
-/* Inside the colossus the claim rides on a pane of frosted glass — ink never
-   lands on black glass. Over the flat the pane is invisible. */
-[data-inside="1"] .why-claims {
-  background-color: color-mix(in oklab, var(--paper) 88%, transparent);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border-color: color-mix(in oklab, var(--ink) 7%, transparent);
-  box-shadow: 0 30px 80px -40px color-mix(in oklab, var(--ink) 45%, transparent);
-}
+
 .claim-index {
   position: relative;
   display: flex;
@@ -858,10 +883,12 @@ html[data-intro-skip] .intro-mask > span {
   inset: 0;
   font-weight: inherit;
 }
+/* The word stands ON the salt flat's horizon (its baseline on the line where
+   sky meets mirror, written live by lib/project.ts) — and the flat reflects it. */
 .mark-display > .rv {
   position: absolute;
   left: 7vw;
-  top: calc(var(--vh) * 49 - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA)) * min(15vw, calc(var(--vh) * 26)));
+  top: calc(var(--horizon, calc(var(--vh) * 49)) - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA)) * min(15vw, calc(var(--vh) * 26)));
   font-family: var(--display);
   font-weight: 400;
   font-size: min(15vw, calc(var(--vh) * 26));

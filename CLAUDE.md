@@ -26,7 +26,7 @@ The full art-direction spec is **`docs/SPEC.md`**; module boundaries and
 interfaces are **`docs/CONTRACTS.md`**. Read both before changing the 3D.
 
 **SITE SHAPE (round 10, 2026-09-26 — "flip the table, step up the game").**
-- **Home = five sections** (`lib/chapters.ts`, page 1180vh, S_MAX 10.8):
+- **Home = five sections** (`lib/chapters.ts`, page 1250vh, S_MAX 11.5):
   potential (hero) · statement ("The studio" — the long statement, restored:
   the client asked for it back verbatim) · build ("What we build": Websites /
   Platforms / AI automation) · why ("Why Nerodyn": No hand-offs / Nothing off
@@ -39,32 +39,66 @@ interfaces are **`docs/CONTRACTS.md`**. Read both before changing the 3D.
   was rejected ("should be removed … a nicer more elegant premium thing").
 - **Story mode** (`lib/story.ts`, `lib/storyFilm.ts`,
   `components/story/StoryMode.tsx`) — the client called it "bad for now; worry
-  about that later". Untouched in round 10; it still works (click the stone).
+  about that later", and in round 12 "forget about the story mode and other
+  pages". Untouched; it still works (click the stone) — it uses only F0/F1, so
+  keep those two formations' behaviour stable.
 - **Methodology** is its own page (`app/methodology/`).
 
-**THE HOME FILM (round 11).** One polished obsidian stone, shaped from the
+**THE HOME FILM (round 12, 2026-09-27 — "meaningless/repetitive … step up the
+game, above and beyond").** One polished obsidian stone, shaped from the
 Nerodyn mark, fractured into 40 SHARDS (the mark's cuts + an anisotropic
 Voronoi — `lib/geo/crystal.ts`) plus the CORE: a small whole copy of the
-stone that lives inside it, full of light (fragment 40, code `CORE`). One
-unbroken shot — no cuts, no white-outs:
+stone that lives inside it, full of light (fragment 40, code `CORE`) — the
+film's protagonist (the intelligence) in every chapter. **The stone is WHOLE
+only at the two ends**; in between it is always a new form, and it bursts
+exactly once (round 11 re-formed it six times and burst it three — that was the
+"repetitive"). One unbroken shot — no cuts, no white-outs:
 
 | S | place (`Places.tsx`, `sceneState.env`) | formation (lib/formations.ts) |
 |---|-------|------------------------------|
 | 0–1 | the studio (paper, mirror floor) | F0 the stone; look up, the pass |
 | 1–2.25 | the studio | F0 behind the statement (letters invert where it passes — lib/project.ts clip) |
-| 2.25–2.85 | → the SKY (cloud sea rolls in from below) | F1 THE SHATTER (a light jolt), the camera pulling back so the burst stays framed |
-| 2.85–3.95 | the sky | WEBSITES: F4 EXPLODED VIEW (a scan of light rises through it), assembly from the heart out, each shard flashing as it seats |
-| 4.1–4.9 | the sky | PLATFORMS: F2 MONUMENT course by course; a band of light rises through it (`u.riseY/riseAmp`) |
-| 4.95–5.95 | the sky | AI AUTOMATION: F3 THE SORT, SCROLL-DRIVEN (`plan.ai`): the monument taken apart from the top; each piece a slow turn round the core, decided at its front (the core flares as it judges) — lit and filed into a column that builds up, or let down into the cloud |
-| 5.95–6.3 | the sky | every piece home into the stone (F3→F0, from the heart out) |
-| 6.3–7.05 | down THROUGH the cloud deck (puffs, haze) to the SALT FLAT | THE FALL: F0 with home and scale K interpolated (`fallAt`), turning 170°, growing ×7, its shadow gathering on the flat |
-| 7.05 | the flat | TOUCH-DOWN: a ring across the flat, light up through the seams and the glass, a camera jolt |
-| 7.05–9.15 | the flat (its sky is the page: #field keyed to --flat/--horizon) | F7 the COLOSSUS: bursts (outer shell first), the camera flies in and round the core — waves of light run out through the pieces (inside the glass) — and out as it closes, each piece flashing as it seats (outer last) |
-| 9.3– | the flat, down at its own level | LET'S TALK: the colossus and its reflection (a true mirror now: depth pre-pass, `u.reflLen`), lifting off it and turning |
+| 2.25–2.85 | → the SKY (cloud sea rolls in from below) | F1 THE SHATTER, the camera pulling back so the burst stays framed |
+| 2.85–3.9 | the sky | WEBSITES: F4 EXPLODED VIEW — the burst finds its order LOOSE, then snaps EXACT (`plan.exact`, per piece from the heart out, each flashing as it locks; a scan of light rises through it). It is NOT reassembled. |
+| 3.9–4.95 | the sky | PLATFORMS: F2 THE TOWER — the 32 blade splinters stacked 8 courses × 4 round a shaft, each turned so its polished CUT face is a window, the crown as its roof; built course by course from the cloud sea up ("builds up into a bigger one"); a pulse of light runs up it as the roof is laid |
+| 4.97–5.92 | the sky | AI AUTOMATION: F2 at `plan.ai` — the core climbs OUTSIDE the tower in a spiral (always on the camera's side); each floor it passes turns a step (the tower TWISTS) and its windows light; the camera spirals up beside it |
+| 6.0–7.05 | THROUGH the cloud deck (the spiral tears a HOLE in it — `env.hole` — and the flat shows far below) to the SALT FLAT | THE FALL: F3 — the core drops and the tower unravels after it, roof first, into a HELIX ordered by where each piece will seat (point first), growing ×7 as it falls |
+| 7.05–9.3 | the flat | WHY: F7 — the helix lands point first into the OPEN colossus (a wide hollow round the core, the glass toward the camera standing aside); the camera flies in and round the core, and out as it closes, the crown seating last. Built once — not burst and re-formed. |
+| 9.3– | the flat, down at its own level | LET'S TALK: the colossus and its reflection; "Let's talk." STANDS ON THE HORIZON (its baseline is `--horizon`) and the flat mirrors it (`lib/typeMirror.ts` → the flat shader), full-strength indigo in ripple bands |
 
-Rest frames (auto-framing): 0 · 1.62 · 3.45 · 4.02 · 4.86 · 5.45 · 5.95 · 7.4 · 8.15 · 8.55 · 9.3 · 10.75 · the end.
+Rest frames (auto-framing, `lib/scroll.ts`): 0 · 1.62 · 3.72 · 4.9 · 5.45 · 5.94 · 7.62 · 8.2 · 9.3 · 10.75 · the end. The fall is never a rest.
 The lighting TURNS with the scroll past the statement (`scene.environmentRotation`,
-PlaceEnv.tsx), with quick sweeps after assembly, on touch-down and at the end.
+PlaceEnv.tsx). The camera BANKS into its turns (a `roll` channel on the keys).
+
+**Round-12 techniques worth keeping:**
+- **The sky** (`shaders/env.ts` sea): a relief-marched height field of cumulus
+  domes from ONE tileable noise texture (`lib/sky.ts` `cloudNoiseTexture`),
+  adaptive stride, secant refinement, soft lit rims on skimmed crests, flatter
+  relief far off (far silhouettes only alias), hazy (not saturated) shadow blue,
+  a low sun (`SUN_DIR`, shared with the glass's room and the page's sun glow),
+  the pieces' SHADOWS on the clouds (one soft disc per fragment along the sun),
+  billows banked round the tower's foot (`uMound`), and it writes the relief's
+  depth so the tower genuinely sinks into cloud. Drawn AFTER the glass.
+- **The glass's room in the sky** (`PlaceEnv`): bright below (the cloud sea),
+  deep above, with soft patches below so a facet turned down never reads as one
+  flat grey.
+- **The flat**: a mirror of water over irregular (Voronoi) salt cells — the real
+  Uyuni crust, NOT a perfect hex grid (that read as tiles). It is drawn opaque
+  below the horizon, so any `.back` type must sit ON or above the horizon.
+- **Moving-frame springs**: during the fall every piece's spring (and the
+  camera rig) rides the falling core's frame, translating AND turning with the
+  spiral (`sceneState.cam.frameDelta`, Director `anchor`). Without it a 50-unit
+  fall leaves the pieces tens of units behind their targets and the helix
+  collapses into a clump. Judge the fall IN MOTION (a real wheel scroll), never
+  only from frozen stills — the stills snap springs.
+- **The Why words invert** (ink → paper) wherever ANY piece passes behind them:
+  a paper copy (`[data-inv-why]`) clipped each frame to the union of every
+  piece's projected hull (`lib/project.ts`). This replaced the frosted card.
+- **Emissive soft knee** (`shaders/obsidian.ts`): above 0.72 light compresses
+  toward 0.9 instead of hard-clamping — lit faces keep their gradients.
+- Reflection passes skip the interior march; their depth pre-pass is
+  depth-only (`depthOnly`). The deck billboards are culled near the lens; the
+  sea hands over to the veil just before the lens reaches it.
 
 **Client verdicts:** 2026-09-25 "bg and animations perfect for now" (round 5)
 → round 6 (armillary, light streams, standing-stone field) REJECTED: ch02–03
@@ -90,6 +124,11 @@ builds up into a bigger one", but not smooth enough and the AI flow "too fast,
 not smooth"; the build→why white-flood cut "absolute crap"; why's fly-in/out
 liked but wants more; the finale needs better, crazier framing; everything
 more "Apple level, igloo.inc level". Typography is still owed a pass.
+→ round 11 verdict (2026-09-27): "on the correct path", but the animations
+and effects not good enough, transitions not world class (UXBERT Labs,
+igloo.inc), "a bit meaningless/repetitive"; the hero's stone and shape are
+liked — "for everything else step up the game … super meaningful and perfect".
+Round 12 answers it (above). Awaiting the verdict.
 `preview-card.mp4` is MOTION ONLY.
 
 ## The stone's surface (2026-09-25: "shape great, texture really bad at some angles")
@@ -139,7 +178,8 @@ way relative to each other.
 - **Keep the 3D off the type.** Nothing crosses a chapter's text column: the
   burst plays before the build type reveals; the flow lives right of it; no
   lead ever travels screen-left through the headline. Where the glass must
-  pass behind words (inside the colossus) the words ride a frosted pane.
+  pass behind words (the Why section) the words INVERT to paper over it
+  (never a frosted card — it read as UI).
 - **Never lose the subject.** Every transition keeps its subject framed (the
   camera pulls back WITH a burst; the colossus opens toward the camera so
   the camera always looks at its core). Places change around the subject
@@ -148,8 +188,8 @@ way relative to each other.
 - **Smoothness is frame time first.** Judge motion at a real DPR
   (`hitch.mjs`-style: 1.5× display, vsync, count frames > 20 ms). The canvas
   renders at ≤ 1.3× (type is DOM); the glass march is 7 steps with optional
-  terms skipped when off; the cloud sea's billow normal comes from
-  screen-space derivatives. The monument dropped to 30 fps before that.
+  terms skipped when off. The relief-marched cloud sea is the heaviest layer:
+  measure S 3.45 / 6.5 / 6.6 (the crossing) after touching it.
 - **No flat indigo washes.** Light "events" (waves, scans, lit leads) go
   INSIDE the glass via the per-piece core boost (texel 7 w, centred on each
   piece's centroid) — never through `flash` on cut faces over whole pieces.
@@ -169,7 +209,8 @@ way relative to each other.
   the time-driven lead flow ("too fast"); the rotating ring of words by the hero
   stone; distant obsidian "peaks" in the sky (tried in round 10 — they read
   as grey slabs, i.e. coffins). Tiling shards onto a giant surface read as
-  a lumpy clump — the monument is the stone at scale with open joints instead.
+  a lumpy clump. Round 11's monument / sort / re-forming stone and the
+  frosted claim card were replaced in round 12 (repetitive; UI-looking).
 - **Billboards** (cloud puffs) fade to zero well inside their card — a card
   edge in the sky reads as a straight line.
 - **A piece "full of light"** (texel 7 `w`) glows about its OWN rest centroid
@@ -190,14 +231,16 @@ way relative to each other.
   `jumpS` values sit ON anchors — keep them in sync when moving keys.
 - **Interactivity:** the light inside the glass follows the cursor (hero → the
   void; the veins near it wake); shards near the cursor LIFT OUT of the
-  monument / halo / specimens and glow (pull a stone from the wall); the
-  sculpture leans toward the pointer; a fast sweep STIRS the halo's orbits;
-  the beat's orbit runs faster.
+  exploded view and the tower and glow (pull a stone from the wall); the
+  sculpture leans toward the pointer (the tall tower only sways); a fast sweep
+  hurries the core's turn.
 - **Places** (`components/stage/Places.tsx`, `shaders/env.ts`,
-  `sceneState.env`): the sky (cloud-sea plane that rolls in from below, puff
-  billboards incl. great cumulus banks on the horizon, a `--sky` DOM tint),
-  the salt flat (a faint crust plane + the page's own sky gradient in #field,
-  horizon from lib/project.ts), the flood (full-screen, depth-test off).
+  `sceneState.env`): the sky (the relief-marched cumulus sea that rolls in
+  from below, cumulus banks on the horizon, the page's own sky gradient + sun
+  glow in #field keyed to --horizon/--sun-x/--sun-y), the deck (billboards +
+  a light veil, only while the fall passes through; the hole the spiral tears),
+  the salt flat (the canvas mirror below the horizon + the page's sky above it
+  in #field), the flood (unused).
   Everything is premultiplied alpha over the paper DOM (fog as alpha), so the
   page stays white where nothing is drawn. **Never draw a full-screen or
   sky-dome layer in the canvas over a place:** it veils the `.back` type (the

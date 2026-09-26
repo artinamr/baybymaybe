@@ -59,7 +59,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "What we build",
     vh: 430,
     sticky: true,
-    jumpS: 3.45,
+    jumpS: 3.72,
     // The type waits for the shatter to play out on its own.
     revealAt: 0.12,
     specimen: { name: "What we build", line: "Websites, platforms, AI automation." },
@@ -70,7 +70,7 @@ const RAW: Omit<ChapterDef, "S0" | "holdEnd">[] = [
     label: "Why Nerodyn",
     vh: 320,
     sticky: true,
-    jumpS: 7.4,
+    jumpS: 7.62,
     // The type waits for the stone to land.
     revealAt: -0.05,
     specimen: { name: "Why Nerodyn", line: "One team builds it. You own it." },

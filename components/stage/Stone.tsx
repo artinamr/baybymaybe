@@ -32,7 +32,7 @@ export function Stone() {
     // The reflection is drawn twice: depth first, then colour only where it is
     // the nearest surface — so it reads as a reflected stone, not an x-ray of
     // every inner face blended together.
-    const mirrorDepth = createObsidian({ frag: true, reflection: true });
+    const mirrorDepth = createObsidian({ frag: true, reflection: true, depthOnly: true });
     mirrorDepth.colorWrite = false;
     mirrorDepth.depthWrite = true;
     return {

@@ -23,27 +23,70 @@ const CLAIMS = [
   },
 ];
 
+/** The section's words. Rendered twice: in ink, and in paper where glass passes behind them. */
+function Words({ inverted = false }: { inverted?: boolean }) {
+  return (
+    <>
+      <div className="why-top">
+        <Marker n="03">Why Nerodyn</Marker>
+        <h2 id={inverted ? undefined : "why-title"} className="h2 why-h2">
+          <Line i={0}>One team builds it.</Line> <Line i={1}>You own all of it.</Line>
+        </h2>
+      </div>
+      <div className="why-claims rv-fade" style={{ "--i": 2 } as CSSProperties}>
+        <div className="claim-index" aria-hidden>
+          {CLAIMS.map((c, i) => (
+            <span key={c.n} className="claim-tick mono" data-i={i}>
+              {c.n}
+            </span>
+          ))}
+          <span className="claim-bar">
+            <span />
+          </span>
+        </div>
+        <div className="claims">
+          {CLAIMS.map((c, i) => (
+            <article key={c.n} className="claim" data-i={i}>
+              <h3 className="claim-title">
+                {c.title.split(" ").map((w, k) => (
+                  <Fragment key={k}>
+                    <span className="claim-w" style={{ "--k": k } as CSSProperties}>
+                      {w}
+                    </span>{" "}
+                  </Fragment>
+                ))}
+              </h3>
+              <p className="claim-body">{c.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
 /**
- * 03 · WHY NERODYN. Out of a flood of light onto a salt flat, where the stone
- * stands at colossal scale. It opens; the camera flies through it, past the
- * light at its heart, and turns as it closes behind. The headline holds at the
- * top; one claim at a time, large, at the bottom — each with its beat.
+ * 03 · WHY NERODYN. On the salt flat the falling spiral lands and builds ONE
+ * colossal stone round the core — open, the camera inside it, round the
+ * burning heart — and closes as the camera pulls out, the crown last. The
+ * headline holds at the top; one claim at a time below. Where glass passes
+ * behind the words they turn from ink to paper (the same inversion as the
+ * statement — lib/project.ts clips the paper copy to every piece's silhouette).
  */
 export function Why() {
   const ref = useRef<HTMLDivElement>(null);
+  const inv = useRef<HTMLDivElement>(null);
   useEffect(
     () =>
       onScrollFrame((S) => {
-        const el = ref.current;
-        if (!el) return;
         const k = S < WHY_S[1] ? 0 : S < WHY_S[2] ? 1 : 2;
         const v = String(k);
-        if (el.dataset.claim !== v) el.dataset.claim = v;
-        // Inside the colossus the headline steps back and the claim rides on glass.
-        const inside = S > 7.74 && S < 8.95 ? "1" : "0";
-        if (el.dataset.inside !== inside) el.dataset.inside = inside;
-        const p = Math.max(0, Math.min(1, (S - WHY_S[0]) / (WHY_S[3] - WHY_S[0])));
-        el.style.setProperty("--claim-p", p.toFixed(4));
+        const p = Math.max(0, Math.min(1, (S - WHY_S[0]) / (WHY_S[3] - WHY_S[0]))).toFixed(4);
+        for (const el of [ref.current, inv.current]) {
+          if (!el) continue;
+          if (el.dataset.claim !== v) el.dataset.claim = v;
+          el.style.setProperty("--claim-p", p);
+        }
       }),
     []
   );
@@ -51,40 +94,10 @@ export function Why() {
   return (
     <Section id="why" labelledBy="why-title">
       <div className="why-sec" ref={ref} data-claim="0">
-        <div className="why-top">
-          <Marker n="03">Why Nerodyn</Marker>
-          <h2 id="why-title" className="h2 why-h2">
-            <Line i={0}>One team builds it.</Line> <Line i={1}>You own all of it.</Line>
-          </h2>
-        </div>
-        <div className="why-claims rv-fade" style={{ "--i": 2 } as CSSProperties}>
-          <div className="claim-index" aria-hidden>
-            {CLAIMS.map((c, i) => (
-              <span key={c.n} className="claim-tick mono" data-i={i}>
-                {c.n}
-              </span>
-            ))}
-            <span className="claim-bar">
-              <span />
-            </span>
-          </div>
-          <div className="claims">
-            {CLAIMS.map((c, i) => (
-              <article key={c.n} className="claim" data-i={i}>
-                <h3 className="claim-title">
-                  {c.title.split(" ").map((w, k) => (
-                    <Fragment key={k}>
-                      <span className="claim-w" style={{ "--k": k } as CSSProperties}>
-                        {w}
-                      </span>{" "}
-                    </Fragment>
-                  ))}
-                </h3>
-                <p className="claim-body">{c.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
+        <Words />
+      </div>
+      <div className="why-sec why-inv" ref={inv} data-claim="0" data-inv-why aria-hidden>
+        <Words inverted />
       </div>
     </Section>
   );

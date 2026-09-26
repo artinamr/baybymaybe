@@ -47,6 +47,8 @@ export type ObsidianOpts = {
   fadePass?: boolean;
   /** Interior ray-march steps (frag only). */
   steps?: number;
+  /** The reflection's depth pre-pass: positions only, no shading. */
+  depthOnly?: boolean;
 };
 
 type U<T> = THREE.IUniform<T>;
@@ -532,6 +534,15 @@ const FRAG_CLIP = /* glsl */ `
     if (vFx.z > 0.002) discard;
   #endif
 #endif
+#ifdef OBS_REFLECT
+  // A mirror floor reflects only what stands above it.
+  if (vWorldY > uFloorY + 1e-3) discard;
+#endif
+#ifdef OBS_DEPTHONLY
+  // The reflection's depth pre-pass: nothing to shade.
+  gl_FragColor = vec4(0.0);
+  return;
+#endif
 `;
 
 const FRAG_COLOR = /* glsl */ `
@@ -623,11 +634,13 @@ const FRAG_EMISSIVE = /* glsl */ `
     // Veins: a crisp line at the surface and a softer copy sampled a little
     // way INTO the glass along the view ray — it slides against the first as
     // the stone turns, so the light reads as inside the stone, not painted on.
+    #ifndef OBS_REFLECT
     if (obsCut < 0.5 && uVein > 0.001) {
       vec3 obsVd = normalize(vViewObj);
       float obsV = obsVeinField(vObs, 0.0, 0.0) + 0.5 * obsVeinField(vObs + obsVd * 0.09, 1.0, 0.0);
       obsInd += uVein * obsV * (1.0 - vFx.z);
     }
+    #endif
   #endif
   #ifdef OBS_INSTANCED
     // Glint (station stones, hover): a slow run of light down the bevels —
@@ -645,6 +658,10 @@ const FRAG_EMISSIVE = /* glsl */ `
     // vFx.w: a fragment full of light seen through its outer faces (the core).
     float obsWin = obsCut > 0.5 ? vFx.x * uCutGlow * 1.2 + vFx.y * 0.8 : uInner * (0.55 + 0.45 * vFx.x) * 0.2 + vFx.w * 0.34 + uWake * 0.9;
     obsWin *= 1.0 - vFx.z;
+    // A reflection is faint and far: the light inside is not worth marching.
+    #ifdef OBS_REFLECT
+    obsWin = 0.0;
+    #endif
     if (obsWin > 0.002) {
       vec3 obsRd = normalize(vViewObj);
       vec3 obsNo = normalize(transpose(vObjToView) * normal);
@@ -665,7 +682,11 @@ const FRAG_EMISSIVE = /* glsl */ `
     }
   #endif
   float obsM = max(obsE.r, max(obsE.g, obsE.b));
-  totalEmissiveRadiance += obsE * min(1.0, 0.9 / max(obsM, 1e-5));
+  // A soft knee, not a hard clamp: bright light keeps its gradients (a hard
+  // clamp flattens every lit face into one flat indigo — "a 90s game") and
+  // still never passes 0.9 in any channel (above it indigo rolls to lavender).
+  float obsKnee = obsM > 0.72 ? (0.72 + 0.18 * (1.0 - exp(-(obsM - 0.72) / 0.18))) / obsM : 1.0;
+  totalEmissiveRadiance += obsE * obsKnee;
 }
 `;
 
@@ -772,6 +793,7 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
   if (frag) defines.OBS_FRAG = "";
   defines.OBS_STEPS = String(o.steps ?? 7);
   if (reflection) defines.OBS_REFLECT = "";
+  if (o.depthOnly) defines.OBS_DEPTHONLY = "";
   if (instanced) defines.OBS_INSTANCED = "";
   if (fadePass) defines.OBS_FADEPASS = "";
   m.defines = defines;
@@ -802,6 +824,7 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
     (reflection ? "r" : "-") +
     (instanced ? "i" : "-") +
     (fadePass ? "x" : "-") +
+    (o.depthOnly ? "d" : "-") +
     (o.steps ?? 10) +
     (o.clip ?? "");
   m.customProgramCacheKey = () => key;

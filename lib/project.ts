@@ -3,6 +3,8 @@ import { getStone } from "./geo/crystal";
 import { sceneState } from "./sceneState";
 import { scroll } from "./stores";
 import { STONE } from "./geo/types";
+import { SUN_DIR } from "./sky";
+import { fragTex } from "./fragTex";
 
 /**
  * THE BRIDGE — once per frame, after the camera and before the render, it
@@ -59,7 +61,73 @@ function convexHull(p: { x: number; y: number }[]) {
   return hull;
 }
 
+/**
+ * Each piece's corners (fragment-local), deduplicated — the rounded bevels
+ * collapse back onto the corners they round — for projecting silhouettes.
+ */
+let fragCorners: Float32Array[] | null = null;
+function corners(): Float32Array[] {
+  if (fragCorners) return fragCorners;
+  const g = getStone().geometry;
+  const pos = g.getAttribute("position");
+  const fid = g.getAttribute("aFrag");
+  const sets = new Map<number, Map<string, [number, number, number]>>();
+  for (let i = 0; i < pos.count; i++) {
+    const f = Math.round(fid.getX(i));
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const z = pos.getZ(i);
+    const key = `${Math.round(x / 0.03)},${Math.round(y / 0.03)},${Math.round(z / 0.03)}`;
+    let s = sets.get(f);
+    if (!s) sets.set(f, (s = new Map()));
+    if (!s.has(key)) s.set(key, [x, y, z]);
+  }
+  const out: Float32Array[] = [];
+  for (let f = 0; f < fragTex.count; f++) {
+    const pts = [...(sets.get(f)?.values() ?? [])];
+    out.push(new Float32Array(pts.flat()));
+  }
+  fragCorners = out;
+  return out;
+}
+const scratch: { x: number; y: number }[] = Array.from({ length: 256 }, () => ({ x: 0, y: 0 }));
+const scratchHull: { x: number; y: number }[] = [];
+/** Monotone chain over scratch[0..n) — allocation-light (the sort is in place). */
+function hullOf(n: number) {
+  const s = scratch;
+  // Insertion sort (n is small).
+  for (let i = 1; i < n; i++) {
+    const a = s[i];
+    const ax = a.x;
+    const ay = a.y;
+    let j = i - 1;
+    while (j >= 0 && (s[j].x > ax || (s[j].x === ax && s[j].y > ay))) {
+      s[j + 1].x = s[j].x;
+      s[j + 1].y = s[j].y;
+      j--;
+    }
+    s[j + 1].x = ax;
+    s[j + 1].y = ay;
+  }
+  const h = scratchHull;
+  h.length = 0;
+  const cross = (o: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }) =>
+    (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  for (let i = 0; i < n; i++) {
+    while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], s[i]) <= 0) h.pop();
+    h.push(s[i]);
+  }
+  const lo = h.length + 1;
+  for (let i = n - 2; i >= 0; i--) {
+    while (h.length >= lo && cross(h[h.length - 2], h[h.length - 1], s[i]) <= 0) h.pop();
+    h.push(s[i]);
+  }
+  h.pop();
+  return h;
+}
+
 let inversionEls: HTMLElement[] | null = null;
+let whyInvEls: HTMLElement[] = [];
 let tierRows: HTMLElement[] = [];
 let readoutEls: HTMLElement[] = [];
 let lastQuery = 0;
@@ -68,6 +136,7 @@ function query(now: number) {
   if (inversionEls && now - lastQuery < 1000) return;
   lastQuery = now;
   inversionEls = Array.from(document.querySelectorAll<HTMLElement>("[data-inversion]"));
+  whyInvEls = Array.from(document.querySelectorAll<HTMLElement>("[data-inv-why]"));
   tierRows = [0, 1, 2, 3].map((i) => document.querySelector<HTMLElement>(`[data-tier-row="${i}"]`)).filter(Boolean) as HTMLElement[];
   readoutEls = Array.from(document.querySelectorAll<HTMLElement>("[data-readout]"));
 }
@@ -96,15 +165,31 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
   /* ---- the sky: the page's paper cools toward the top over the cloud sea -- */
   write("sky", sceneState.env.sky.toFixed(3), (val) => root.style.setProperty("--sky", val));
 
-  /* ---- the salt flat's sky, and where its horizon lands on the page ------- */
+  /* ---- the sky's and the salt flat's horizon, where it lands on the page;
+         the sun's glow over the cloud sea ------------------------------------ */
   write("flat", sceneState.env.flat.toFixed(3), (val) => root.style.setProperty("--flat", val));
-  if (sceneState.env.flat > 0.001) {
+  if (sceneState.env.flat > 0.001 || sceneState.env.sky > 0.001) {
     camera.getWorldDirection(hz);
+    const fwdY = hz.y;
     hz.y = 0;
     if (hz.lengthSq() < 1e-6) hz.set(0, 0, -1);
     hz.normalize().multiplyScalar(5000).add(camera.position);
-    const hy = project(hz, camera, W, H).y;
+    let hy = project(hz, camera, W, H).y;
+    // Looking straight down, the horizon is far above the frame.
+    if (fwdY < -0.97) hy = -H;
     write("horizon", Math.max(-H, Math.min(2 * H, hy)).toFixed(0), (val) => root.style.setProperty("--horizon", `${val}px`));
+  }
+  if (sceneState.env.sky > 0.001) {
+    camera.getWorldDirection(hz);
+    const facing = hz.dot(SUN_DIR);
+    hz.copy(SUN_DIR).multiplyScalar(5000).add(camera.position);
+    const sp = project(hz, camera, W, H);
+    const sx = facing > 0.05 ? Math.max(-W, Math.min(2 * W, sp.x)) : W * 0.5;
+    const sy = facing > 0.05 ? Math.max(-2 * H, Math.min(2 * H, sp.y)) : -3 * H;
+    write("sun", `${sx.toFixed(0)},${sy.toFixed(0)}`, () => {
+      root.style.setProperty("--sun-x", `${sx.toFixed(0)}px`);
+      root.style.setProperty("--sun-y", `${sy.toFixed(0)}px`);
+    });
   }
 
   /* ---- dusk: the page follows the film into night and back (ch03) ------- */
@@ -138,6 +223,42 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
       poly = "polygon(" + h.map((p) => `${(p.x - r.left).toFixed(1)}px ${(p.y - r.top).toFixed(1)}px`).join(",") + ")";
     }
     write("inv", poly, (val) => inversionEls!.forEach((el) => (el.style.clipPath = val)));
+  }
+
+  /* ---- WHY: the words turn to paper wherever a piece passes behind them --- */
+  if (whyInvEls.length) {
+    let clip = "polygon(0 0, 0 0, 0 0)";
+    if (S > 6.95 && S < 9.7) {
+      const box = whyInvEls[0].getBoundingClientRect();
+      const C = corners();
+      let d = "";
+      for (let i = 0; i < C.length; i++) {
+        const e = fragTex.fragWorld[i].elements;
+        // Pieces scaled away to nothing (the girdle plate) cast no silhouette.
+        if (e[0] * e[0] + e[1] * e[1] + e[2] * e[2] < 1e-4) continue;
+        const P = C[i];
+        let n = 0;
+        let behind = false;
+        for (let k = 0; k < P.length && n < scratch.length; k += 3) {
+          v.set(P[k], P[k + 1], P[k + 2]).applyMatrix4(fragTex.fragWorld[i]).project(camera);
+          if (v.z > 1 || v.z < -1) {
+            behind = true;
+            break;
+          }
+          scratch[n].x = (v.x * 0.5 + 0.5) * W - box.left;
+          scratch[n].y = (1 - (v.y * 0.5 + 0.5)) * H - box.top;
+          n++;
+        }
+        if (behind || n < 3) continue;
+        const h = hullOf(n);
+        if (h.length < 3) continue;
+        d += `M${h[0].x.toFixed(1)} ${h[0].y.toFixed(1)}`;
+        for (let k = 1; k < h.length; k++) d += `L${h[k].x.toFixed(1)} ${h[k].y.toFixed(1)}`;
+        d += "Z";
+      }
+      if (d) clip = `path('${d}')`;
+    }
+    write("invwhy", clip, (val) => whyInvEls.forEach((el) => (el.style.clipPath = val)));
   }
 
   /* ---- ch02: the focused ring's row reads ink, the others step back ---- */

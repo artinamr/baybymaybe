@@ -1,10 +1,11 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { story } from "@/lib/story";
+import { SUN_DIR } from "@/lib/sky";
 
 /**
  * WHAT THE GLASS SEES, PLACE BY PLACE. The studio's room (StudioEnv — a dark
@@ -26,7 +27,7 @@ import { story } from "@/lib/story";
  * sweep as the stone finishes assembling and as it lands.
  */
 
-type Stops = { nadir: number; below: number; horizon: number; above: number; zenith: number; tint: [number, number, number] };
+type Stops = { nadir: number; below: number; horizon: number; above: number; zenith: number; tint: [number, number, number]; patches?: number };
 
 function room(stops: Stops, sun: THREE.Vector3 | null, sunPower: number): THREE.Scene {
   const scene = new THREE.Scene();
@@ -44,6 +45,13 @@ function room(stops: Stops, sun: THREE.Vector3 | null, sunPower: number): THREE.
     } else {
       const band = Math.exp(y * 36);
       k = stops.nadir + (stops.below - stops.nadir) * Math.pow(1 + y, 2) + (stops.horizon - stops.below) * band * 0.7;
+      // Weather below: soft patches of brighter and shadowed cloud, so a facet
+      // turned down catches structure, never one flat grey.
+      if (stops.patches) {
+        const a = Math.atan2(pos.getZ(i), pos.getX(i));
+        const w = Math.sin(a * 3 + y * 7) * 0.5 + Math.sin(a * 7 - y * 11 + 1.3) * 0.3 + Math.sin(a * 13 + y * 5 + 2.1) * 0.2;
+        k *= 1 + stops.patches * w * Math.min(1, -y * 3);
+      }
     }
     colors[i * 3] = k * tr;
     colors[i * 3 + 1] = k * tg;
@@ -70,11 +78,13 @@ function sweep(S: number, a: number, b: number) {
 export function PlaceEnv() {
   const { gl, scene } = useThree();
   const tex = useRef<{ studio: THREE.Texture | null; sky: THREE.Texture | null; flat: THREE.Texture | null }>({ studio: null, sky: null, flat: null });
-  const sunDir = useMemo(() => new THREE.Vector3(0.75, 0.42, -0.35), []);
+  const sunDir = SUN_DIR;
 
   useEffect(() => {
     const pm = new THREE.PMREMGenerator(gl);
-    const sky = room({ nadir: 0.16, below: 0.34, horizon: 1.7, above: 0.32, zenith: 0.1, tint: [0.97, 0.98, 1.0] }, sunDir, 16);
+    // Over a sunlit cloud sea the world BELOW is bright and the zenith deep:
+    // facets turned down catch the clouds, facets turned up stay dark glass.
+    const sky = room({ nadir: 0.42, below: 0.82, horizon: 1.9, above: 0.34, zenith: 0.09, tint: [0.96, 0.975, 1.0], patches: 0.55 }, sunDir, 18);
     const flat = room({ nadir: 0.2, below: 0.42, horizon: 1.8, above: 0.28, zenith: 0.08, tint: [1.0, 0.995, 0.985] }, null, 0);
     const skyRT = pm.fromScene(sky, 0.02, 0.1, 100);
     const flatRT = pm.fromScene(flat, 0.02, 0.1, 100);

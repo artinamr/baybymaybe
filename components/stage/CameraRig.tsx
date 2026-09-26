@@ -22,7 +22,7 @@ const OMEGA = 3.2;
 export function CameraRig() {
   const { camera, size } = useThree();
   const cam = camera as THREE.PerspectiveCamera;
-  const sp = useMemo(() => Array.from({ length: 9 }, () => spring(0)), []);
+  const sp = useMemo(() => Array.from({ length: 10 }, () => spring(0)), []);
   const started = useRef(false);
   const target = useMemo(() => new THREE.Vector3(), []);
   const last = useRef({ fov: 0, ppx: -1, ppy: -1, w: 0, h: 0 });
@@ -30,9 +30,19 @@ export function CameraRig() {
   useFrame((_, rawDt) => {
     const dt = Math.min(rawDt, 1 / 20);
     const c = sceneState.cam;
-    const goal = [c.pos.x, c.pos.y, c.pos.z, c.target.x, c.target.y, c.target.z, c.fov, c.ppx, c.ppy];
+    const goal = [c.pos.x, c.pos.y, c.pos.z, c.target.x, c.target.y, c.target.z, c.fov, c.ppx, c.ppy, c.roll];
     // A hard cut (under the flood) jumps; otherwise the camera glides.
     const snap = !started.current || sceneState.frozen || c.cut;
+    // Ride the film's moving frame (the fall) exactly; springs smooth the rest.
+    const fd = c.frameDelta;
+    if (!snap && fd.lengthSq() > 0) {
+      sp[0].x += fd.x;
+      sp[1].x += fd.y;
+      sp[2].x += fd.z;
+      sp[3].x += fd.x;
+      sp[4].x += fd.y;
+      sp[5].x += fd.z;
+    }
     started.current = true;
     const out = sp.map((s: Spring, i) => (snap ? springSnap(s, goal[i]) : springTo(s, goal[i], OMEGA, dt)));
 
@@ -48,6 +58,8 @@ export function CameraRig() {
     }
     cam.up.set(0, 1, 0);
     cam.lookAt(target);
+    // The bank: the camera leans into its turns (a drone, not a dolly).
+    if (Math.abs(out[9]) > 1e-5) cam.rotateZ(out[9]);
 
     const fov = out[6];
     const ppx = out[7];

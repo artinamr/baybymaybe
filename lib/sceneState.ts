@@ -56,6 +56,12 @@ export const sceneState = {
     cut: false,
     /** 0..1 a short, decaying jolt (the landing), applied by the rig. */
     shake: 0,
+    /**
+     * How far the film's moving frame (the falling core) moved this frame. The
+     * rig adds it to its springs, so the camera rides the fall exactly and its
+     * weight only smooths motion relative to it.
+     */
+    frameDelta: new THREE.Vector3(),
     pos: new THREE.Vector3(0, 0, 7.25),
     target: new THREE.Vector3(0, -0.464, 0),
   },
@@ -98,6 +104,8 @@ export const sceneState = {
     floodX: 0.5,
     floodY: 0.5,
     ripple: 0,
+    /** 0..1 the falling spiral tears a hole through the cloud deck (the flat shows through it). */
+    hole: 0,
     lake: 0,
     plain: 0,
     void: 0,
