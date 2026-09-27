@@ -486,7 +486,10 @@ float obsGlowField(vec3 p) {
   float awake = 0.0;
   if (uWake > 0.001) {
     vec3 wc = p - vec3(0.0, -0.55, 0.0);
-    awake = uWake * exp(-dot(wc, wc) * 1.6) * (0.75 + 0.25 * sin(uTime * 1.3 + p.y * 2.0));
+    // Gathered at the heart, not poured evenly through the glass (an even fill
+    // read as flat violet): a faint breadth and a bright, deep middle.
+    float wr = dot(wc, wc);
+    awake = uWake * (0.35 * exp(-wr * 1.6) + exp(-wr * 5.0)) * (0.75 + 0.25 * sin(uTime * 1.3 + p.y * 2.0));
   }
   // A band of light rising through the glass (the monument powering up).
   float rise = 0.0;
