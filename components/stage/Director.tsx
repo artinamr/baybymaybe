@@ -145,6 +145,8 @@ export function Director() {
         /** The stair: how far the AI had turned this step last frame, and where the roof's glint was. */
         lastLit: 0,
         lastPulse: -1,
+        /** When the cursor last made this shard catch the light (s). */
+        glintT: -10,
         /** The exploded view: how exact this piece was last frame. */
         lastExact: 0,
       })),
@@ -386,6 +388,10 @@ export function Director() {
 
     // The cursor lifts shards out of the exploded view and the tower.
     const holdForm = plan.a === plan.b && (plan.a === "F2" || plan.a === "F4");
+    // The cursor catches the light on any glass it passes over, past the hero —
+    // but only while it is moving: a hand sweeping over polished stone.
+    const sweeping = pointer.has && !reduced && !still && !inStory && S > 2.4 && performance.now() - pointer.lastMove < 120;
+    const tanHalf = Math.tan(((camera as THREE.PerspectiveCamera).fov * DEG) / 2);
     // The colossus: a wave of light running out from the core through the open stone.
     const wavePeriod = 2.6;
     const waveR = ctx.K * (0.4 + 3.4 * (((time % wavePeriod) + wavePeriod) % wavePeriod) / wavePeriod);
@@ -540,6 +546,15 @@ export function Director() {
         near = near * near * (3 - 2 * near);
       }
       springTo(sp.lift, near, near > sp.lift.x ? 7 : 3, dt);
+      if (sweeping && !isCore && time - sp.glintT > 1.4 && P.scale.x > 0.05) {
+        ndc.copy(P.pos).project(camera);
+        const r = (f.radius * P.scale.x) / Math.max(0.1, camera.position.distanceTo(P.pos) * tanHalf);
+        const d = Math.hypot((ndc.x - pointer.nx) * aspect, ndc.y - pointer.ny);
+        if (ndc.z < 1 && d < r * 0.8) {
+          sp.glintT = time;
+          sp.flash = Math.max(sp.flash, 0.8);
+        }
+      }
       if (sp.lift.x > 0.001) {
         if (plan.a === "F2") liftDir.set(P.pos.x - TOWER_BASE.x, 0, P.pos.z - TOWER_BASE.z);
         else liftDir.copy(P.pos).sub(v.set(ctx.home.x, ctx.home.y - 0.464, ctx.home.z));

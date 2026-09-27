@@ -5,6 +5,7 @@ import { ui } from "./stores";
 import { DEG, easeInOutSine, lerp, range } from "./ease";
 import { STONE } from "./geo/types";
 import { chapter } from "./chapters";
+import { devNum } from "./dev";
 import { aiCore, COL_C, COL_HOME, COL_K, FLAT_Y, LIFT_Y, STEPS, TOWER_C, TOWER_K, TOWER_TOP_Y, stairStepY } from "./formations";
 
 /**
@@ -137,6 +138,10 @@ export const WHY_S = [7.05, 7.85, 8.45, 9.3];
 
 export const smoother = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
 
+/** Look-dev: `?rim=` overrides the white-room rim. */
+const DEV_RIM = devNum("rim");
+const DEV_CRISP = devNum("crisp");
+
 /** A soft bump: 0 → 1 over [a, b], 1 → 0 over [b, c]. */
 function bump(S: number, a: number, b: number, c: number): number {
   return smoother(range(S, a, b)) * (1 - smoother(range(S, b, c)));
@@ -218,8 +223,8 @@ function keys(L: Layout): Key[] {
     // THE GATHER — the core drops back down the well and the stair winds
     // itself round it into the colossus, from the foot up; the camera draws
     // back and down, circling…
-    { S: 6.25, pivot: [0, mob ? 12 : 16, 0], az: -424, el: 14, dist: mob ? 92 : 32, fov: 36, pp: pp(0.54, 0.5), roll: -2 },
-    { S: 6.6, pivot: [0, 11.5, 0], az: -446, el: 8, dist: mob ? 100 : 44, fov: 35, pp: pp(0.54, 0.5), roll: -1 },
+    { S: 6.18, pivot: [0, mob ? 11 : 11.5, 0], az: -420, el: 13, dist: mob ? 96 : 46, fov: 36, pp: pp(0.56, 0.5), roll: -2 },
+    { S: 6.6, pivot: [0, 10, 0], az: -448, el: 8, dist: mob ? 100 : 52, fov: 35, pp: pp(0.56, 0.5), roll: -1 },
     { S: LAND_S, pivot: CC, az: -486, el: 5, dist: floorD(58), fov: 34, pp: pp(0.56, 0.5) },
     { S: 7.32, pivot: CC, az: -494, el: 3, dist: D(46), fov: 33, pp: pp(0.57, 0.5) },
     // …flies into it…
@@ -505,7 +510,9 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   u.dusk = 0;
   u.inner = 0.32 + 0.3 * Math.sin(Math.PI * range(S, 0.3, 0.9)) + (landed ? 0.12 * plan.open + 0.25 * smoother(range(S, 9.6, M0 + 0.6)) : 0);
   u.floors = 0;
-  u.wake = landed ? 0.18 * smoother(range(S, 9.9, M0 + 0.8)) : 0.35 * bump(S, 1.9, 2.2, 2.45);
+  // (The glow that fills the stone before it breaks is gone by the time the
+  // pieces part — carried out on them it read as flat purple.)
+  u.wake = landed ? 0.18 * smoother(range(S, 9.9, M0 + 0.8)) : 0.35 * bump(S, 1.9, 2.2, 2.31);
   // A band of light rising through the glass: a scan through the exploded view
   // as it snaps exact, through the tower when its roof is laid, and through the
   // colossus as its crown seats.
@@ -524,7 +531,8 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
   u.reflLen = landed ? lerp(1.1, 3.0, smoother(range(S, 9.4, 10.0))) : 1.1;
   u.floorY = FLAT_Y;
   // The white room on the glass's grazing faces — from the break on.
-  u.rim = 0.62 * smoother(range(S, 2.15, 2.45));
+  u.rim = (DEV_RIM ?? 0.1) * smoother(range(S, 2.15, 2.45));
+  u.crisp = (DEV_CRISP ?? 1) * smoother(range(S, 2.2, 2.45));
   u.mistAlpha = 1 - range(S, 0.3, 0.8);
   u.mistClipY = L.hero.mistClipY;
   u.cursorLight = S > 2.3 && S < 6.3 ? 4 : 8;

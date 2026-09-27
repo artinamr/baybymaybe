@@ -4,10 +4,15 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
+import { pointer } from "@/lib/stores";
 import { spring, springSnap, springTo, type Spring } from "@/lib/springs";
 
 /** Low on purpose: a heavy, floating camera that glides into every framing. */
 const OMEGA = 3.2;
+/** The hand's parallax past the hero (rad): the camera drifts a breath round the subject. */
+const PAR_YAW = 0.024;
+const PAR_PITCH = 0.014;
+const Y_UP = new THREE.Vector3(0, 1, 0);
 
 /**
  * Applies sceneState.cam to the camera through critically damped springs
@@ -26,6 +31,7 @@ export function CameraRig() {
   const started = useRef(false);
   const target = useMemo(() => new THREE.Vector3(), []);
   const last = useRef({ fov: 0, ppx: -1, ppy: -1, w: 0, h: 0 });
+  const par = useMemo(() => ({ x: spring(0), y: spring(0), v: new THREE.Vector3(), r: new THREE.Vector3() }), []);
 
   useFrame((_, rawDt) => {
     const dt = Math.min(rawDt, 1 / 20);
@@ -48,6 +54,21 @@ export function CameraRig() {
 
     cam.position.set(out[0], out[1], out[2]);
     target.set(out[3], out[4], out[5]);
+    // PARALLAX: past the hero (liked exactly as it is) the camera answers the
+    // hand — it drifts a degree round the subject toward the pointer, slowly,
+    // so the glass shifts against the page and the room: depth you can feel.
+    const S = sceneState.S;
+    const parK = snap ? 0 : Math.min(1, Math.max(0, (S - 0.95) / 0.5));
+    const want = pointer.has && parK > 0;
+    springTo(par.x, want ? pointer.nx * parK : 0, 1.6, dt);
+    springTo(par.y, want ? pointer.ny * parK : 0, 1.6, dt);
+    if (Math.abs(par.x.x) + Math.abs(par.y.x) > 1e-4) {
+      par.v.subVectors(cam.position, target);
+      par.v.applyAxisAngle(Y_UP, par.x.x * PAR_YAW);
+      par.r.crossVectors(par.v, Y_UP);
+      if (par.r.lengthSq() > 1e-8) par.v.applyAxisAngle(par.r.normalize(), par.y.x * PAR_PITCH);
+      cam.position.copy(target).add(par.v);
+    }
     // The landing's jolt: a few frames of decaying shake, scaled to the framing.
     if (c.shake > 0.002) {
       const t = performance.now() / 1000;

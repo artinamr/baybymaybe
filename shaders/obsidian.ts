@@ -108,6 +108,8 @@ export const obsidianUniforms: {
   uReflLen: U<number>;
   /** The white room at grazing angles (0 in the hero — its black silhouette is liked). */
   uRim: U<number>;
+  /** 0..1 polished harder once broken: crisper reflections on facets and cuts (0 in the hero). */
+  uCrisp: U<number>;
   /** The stone's bounding planes (object, n·x ≤ w) and each piece's cut bounds (yMin, yMax, xSign). */
   uHull: U<THREE.Vector4[]>;
   uPieceBox: U<THREE.Vector3[]>;
@@ -142,6 +144,7 @@ export const obsidianUniforms: {
   uReflK: { value: 1 },
   uReflLen: { value: 1.1 },
   uRim: { value: 0 },
+  uCrisp: { value: 0 },
   uHull: { value: HULL },
   uPieceBox: { value: pieceBounds() },
 };
@@ -198,6 +201,7 @@ export function syncObsidianUniforms(): void {
   U.uReflK.value = s.stone.scale;
   U.uReflLen.value = u.reflLen;
   U.uRim.value = u.rim;
+  U.uCrisp.value = u.crisp;
   planeAbove.constant = -u.floorY;
   planeBelow.constant = u.floorY;
 }
@@ -339,6 +343,7 @@ uniform float uRiseAmp;
 uniform float uReflK;
 uniform float uReflLen;
 uniform float uRim;
+uniform float uCrisp;
 uniform vec4 uHull[16];
 varying vec3 vObs;
 varying float vKind;
@@ -408,7 +413,11 @@ float obsVeinField(vec3 p, float deep, float blur) {
   float along = dot(p, vec3(-0.3, 0.25, 0.92)) * 1.4 + warp * 0.8;
   float body = 0.45 + 0.55 * obsNoise(vec3(along * 2.0, s * 0.5, 3.7));
   float run = smoothstep(0.62, 1.0, 0.5 + 0.5 * sin(along * 2.4 - uTime * 0.85));
-  return mask * body * (core * 0.85 + halo * 0.3) * (0.6 + 0.9 * run);
+  // Now and then a pulse of light travels the vein — a sharp head, a fading
+  // tail, each vein on its own beat: the stone at work, never a blink.
+  float ph = fract(along * 0.35 - uTime * 0.2 + obsHash(vec3(floor(s), 2.2, 5.7)));
+  float pulse = exp(-(1.0 - ph) * 10.0) * smoothstep(0.0, 0.012, ph);
+  return mask * body * (core * 0.85 + halo * 0.3) * (0.55 + 0.75 * run + 1.5 * pulse);
 }
 
 /* The same veins, deeper in the glass: turned so they cross the sections on
@@ -464,8 +473,15 @@ float obsGlowField(vec3 p) {
   }
   // A fragment full of light (the core crystal, a chosen lead): luminous
   // through its whole body, centred on its own middle.
-  vec3 hc = p - vFragC;
-  float full = vFx.w * 0.1 * exp(-dot(hc, hc) * 0.8) * (0.8 + 0.2 * drift);
+  // …with a HEART: a tighter, hotter light at its middle, so what glows reads
+  // as light deep INSIDE the glass (brighter the deeper you look), not a
+  // tinted surface. (Most pieces carry none: skip the maths.)
+  float full = 0.0;
+  if (vFx.w > 0.001) {
+    vec3 hc = p - vFragC;
+    float hr = dot(hc, hc);
+    full = vFx.w * (0.1 * exp(-hr * 0.8) * (0.8 + 0.2 * drift) + 0.22 * exp(-hr * 5.5) * (0.85 + 0.15 * sin(uTime * 1.7)));
+  }
   // Awake: a broad light from the stone's middle, breathing, filling the glass.
   float awake = 0.0;
   if (uWake > 0.001) {
@@ -562,8 +578,11 @@ diffuseColor.rgb = mix(diffuseColor.rgb, uCutColor, obsCut);
    reflections — never a texture — so it stays at ±0.015 and off the cuts. */
 const FRAG_ROUGH = /* glsl */ `
 #include <roughnessmap_fragment>
+// Broken, the pieces are polished harder: a flat face mirrors the room's
+// lights as crisp shapes instead of a soft grey sheen (the "plastic").
+roughnessFactor *= 1.0 - 0.4 * uCrisp;
 roughnessFactor = mix(roughnessFactor, 0.035, obsBevel);
-roughnessFactor = mix(roughnessFactor, 0.07, obsCut);
+roughnessFactor = mix(roughnessFactor, mix(0.07, 0.028, uCrisp), obsCut);
 roughnessFactor += (obsNoise(vObs * vec3(0.8, 0.8, 6.0)) - 0.5) * 0.03 * uFlow * (1.0 - obsCut);
 `;
 

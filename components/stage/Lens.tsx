@@ -4,7 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { sceneState } from "@/lib/sceneState";
-import { perf } from "@/lib/stores";
+import { perf, ready } from "@/lib/stores";
 
 /**
  * THE LENS — depth of field, the one thing that makes a real-time render read
@@ -216,11 +216,34 @@ export function Lens() {
   }, []);
 
   // Compile both programs up front (in parallel where the driver can), never
-  // on the first frame that needs them.
+  // on the first frame that needs them — and the whole scene AGAIN for drawing
+  // into the lens's target: three keys every program on its output (linear, no
+  // tone mapping into a target), so without this every glass program
+  // recompiled the first time the lens opened — a 2.5 s freeze mid-shatter.
   useEffect(() => {
     gl.compileAsync(pass.tileScene, pass.cam).catch(() => undefined);
     gl.compileAsync(pass.scene, pass.cam).catch(() => undefined);
-  }, [gl, pass]);
+    let dead = false;
+    const tick = () => {
+      if (dead) return;
+      if (!ready.compiled) {
+        setTimeout(tick, 100);
+        return;
+      }
+      const prev = gl.getRenderTarget();
+      gl.setRenderTarget(rts.main);
+      gl.compileAsync(scene, camera).catch(() => undefined);
+      gl.setRenderTarget(prev);
+      const tilePrev = gl.getRenderTarget();
+      gl.setRenderTarget(rts.tile);
+      gl.compileAsync(pass.tileScene, pass.cam).catch(() => undefined);
+      gl.setRenderTarget(tilePrev);
+    };
+    tick();
+    return () => {
+      dead = true;
+    };
+  }, [gl, pass, scene, camera, rts]);
 
   useFrame(() => {
     const c = sceneState.cam;

@@ -140,6 +140,8 @@ export const sceneState = {
     reflLen: 1.1,
     /** 0..1 the white room seen at grazing angles on the glass (after the hero). */
     rim: 0,
+    /** 0..1 the pieces polished harder once the stone is broken (crisper reflections). */
+    crisp: 0,
     /** Floor height for reflections / ground effects this frame (world y). */
     floorY: -1.975,
     /** Ground mist: screen-space cutoff (0..1 from top; canvas pixels below this y are not drawn by mist) + alpha. */
