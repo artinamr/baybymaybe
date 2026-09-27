@@ -145,8 +145,9 @@ export function Director() {
         /** The stair: how far the AI had turned this step last frame, and where the roof's glint was. */
         lastLit: 0,
         lastPulse: -1,
-        /** When the cursor last made this shard catch the light (s). */
+        /** When the cursor last made this shard catch the light (s), and the colossus's wave. */
         glintT: -10,
+        waveT: -10,
         /** The exploded view: how exact this piece was last frame. */
         lastExact: 0,
       })),
@@ -632,7 +633,14 @@ export function Director() {
         glow = 0.25 + 0.25 * fxOpen;
         if (fxOpen > 0.001 && !isCore) {
           const dW = (P.pos.distanceTo(COL_C) - waveR) / (0.5 * ctx.K);
-          boost = 1.5 * fxOpen * Math.exp(-dW * dW);
+          const w = Math.exp(-dW * dW);
+          // A breath of light inside as it passes — and each piece CATCHES it,
+          // a white glint running across the glass as the wave front goes by.
+          boost = 0.3 * fxOpen * w;
+          if (w > 0.6 && time - sp.waveT > wavePeriod * 0.8 && !still) {
+            sp.waveT = time;
+            sp.flash = Math.max(sp.flash, 0.75 * fxOpen);
+          }
         }
 
       }

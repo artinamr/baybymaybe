@@ -202,15 +202,15 @@ function keys(L: Layout): Key[] {
     { S: 3.45, pivot: [0, lY, 0], az: -214, el: 6, dist: D(8.9), fov: 30, pp: pp(0.64, 0.5) },
     { S: 3.8, pivot: [0, lY - 0.1, 0], az: -224, el: 5, dist: D(9.6), fov: 30, pp: pp(0.64, 0.5) },
     // PLATFORMS — the stone lifts off its heart and climbs, laying a step as
-    // it passes each one's height; the camera rises with it, then stands
-    // right back as the crown settles on top: the whole stair on its mirror.
+    // it passes each one's height; the camera rises with it, then
+    // cranes up over the top as the last is laid, and looks down the spiral.
     { S: 4.02, pivot: [0, lY - 0.2, 0], az: -232, el: 8, dist: D(12), fov: 34, pp: pp(0.64, 0.5) },
     { S: 4.15, pivot: riser(4.15, -1.2), az: -244, el: 10, dist: upD(14), fov: 36, pp: pp(0.64, 0.5) },
     { S: 4.35, pivot: riser(4.35, -1.4), az: -262, el: 10, dist: upD(15), fov: 36, pp: pp(0.64, 0.5), roll: -1 },
     { S: 4.55, pivot: riser(4.55, -1.5), az: -280, el: 11, dist: upD(15), fov: 36, pp: pp(0.64, 0.5), roll: -1 },
     { S: 4.72, pivot: riser(4.72, -1.5), az: -292, el: 12, dist: upD(16), fov: 36, pp: pp(0.64, 0.5) },
-    // …the whole stair, from a little above: every tread catching the light.
-    { S: 4.9, pivot: [TC[0], TC[1] - 1, TC[2]], az: -304, el: 16, dist: upD(44), fov: 36, pp: pp(0.64, 0.5) },
+    // …the whole stair from above: a spiral of glass down to the light at its foot.
+    { S: 4.9, pivot: [TC[0], TC[1] - 3, TC[2]], az: -306, el: 56, dist: upD(36), fov: 40, pp: pp(0.64, 0.5) },
     // AI AUTOMATION — the camera climbs over the stair and looks DOWN it at
     // the light at its foot; the light rises toward the lens through the
     // spiral, every step turning into a blade as it passes, the camera turning
@@ -236,6 +236,7 @@ function keys(L: Layout): Key[] {
     { S: 8.62, pivot: CC, az: -656, el: 4, dist: 10, fov: 46, pp: [0.5, 0.5] },
     // …and out, the glass closing in front of it, the crown seating last.
     { S: 8.9, pivot: CC, az: -668, el: 2, dist: 24, fov: 38, pp: [0.52, 0.5] },
+    { S: 9.08, pivot: [CC[0], CC[1] + 1.2, CC[2]], az: -671, el: 2, dist: D(35), fov: 34, pp: pp(0.57, 0.5) },
     { S: 9.3, pivot: CC, az: -674, el: 2, dist: D(46), fov: 32, pp: pp(0.6, 0.5) },
     // LET'S TALK — down to the floor's own level: the colossus and its reflection.
     { S: 9.9, pivot: [COL_C.x, FLAT_Y + 1.2, COL_C.z], az: -680, el: 0.6, dist: floorD(108), fov: 30, pp: mob ? [0.5, 0.3] : [0.66, 0.47] },

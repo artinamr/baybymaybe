@@ -442,9 +442,15 @@ function colossusTarget(f: FragInfo, p: Prep, ctx: FormationCtx, out: Pose) {
     _off.addScaledVector(_d, pushH / dl);
     const e = glide(open);
     _v.addScaledVector(_off, e);
-    // Each piece turns a little on itself as it stands open.
-    _q2.setFromAxisAngle(p.tumble, 0.22 * e * (0.5 + p.rand));
+    // Standing open, each piece hangs as if weightless: turned a little on
+    // itself, drifting and turning slowly on its own beat.
+    const t = ctx.flowT;
+    const dr = e * (0.5 + p.rand);
+    _q2.setFromAxisAngle(p.tumble, 0.22 * e * (0.5 + p.rand) + 0.07 * dr * Math.sin(t * 0.37 + p.rand * 6.3));
     out.quat.multiply(_q2);
+    _v.x += 0.03 * K * dr * Math.sin(t * 0.29 + p.rand * 11);
+    _v.y += 0.04 * K * dr * Math.sin(t * 0.23 + p.rand * 7);
+    _v.z += 0.03 * K * dr * Math.cos(t * 0.31 + p.rand * 5);
   }
   out.pos.copy(_v);
 }
