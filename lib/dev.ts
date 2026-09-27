@@ -11,7 +11,7 @@
  * no URL, so everything is off — which is also why every dev overlay is mounted
  * after hydration, never during the first render (no hydration mismatch).
  */
-import { CHAPTERS, S_MAX, type ChapterId } from "./chapters";
+import { CHAPTERS, S_MAX, jumpS, pageS, type ChapterId } from "./chapters";
 
 export type Dev = {
   /** Raw `at` value (`"order:0.6"` or `"3.4"`), null when absent. */
@@ -19,10 +19,12 @@ export type Dev = {
   freeze: boolean;
   overlay: string | null;
   debugSafe: boolean;
+  /** `?render=1`: only the 3D and the paper (for stills of the film itself). */
+  render: boolean;
 };
 
 function parse(): Dev {
-  if (typeof window === "undefined") return { at: null, freeze: false, overlay: null, debugSafe: false };
+  if (typeof window === "undefined") return { at: null, freeze: false, overlay: null, debugSafe: false, render: false };
   const q = new URLSearchParams(window.location.search);
   // `?debug=safe,foo` and `?debug=safe&debug=foo` both work.
   const debug = q.getAll("debug").flatMap((v) => v.split(","));
@@ -32,6 +34,7 @@ function parse(): Dev {
     freeze: freeze === "1" || freeze === "true",
     overlay: q.get("overlay"),
     debugSafe: debug.includes("safe"),
+    render: q.get("render") === "1",
   };
 }
 
@@ -53,7 +56,11 @@ export function devNum(name: string): number | null {
  */
 export const FROZEN_TIME_S = 6;
 
-/** `"order:0.6"` → S0(order) + 0.6; `"3.4"` → 3.4. Clamped to [0, S_MAX]; null if unparseable. */
+/**
+ * `"why:0.6"` → page S0(why) + 0.6; `"why"` → its jump; `"7.62"` → FILM time
+ * 7.62 (where the film shows that frame — every look-dev number is film time).
+ * Clamped to [0, S_MAX]; null if unparseable.
+ */
 export function atToS(at: string | null): number | null {
   if (!at) return null;
   const [head, tail] = at.split(":");
@@ -65,7 +72,8 @@ export function atToS(at: string | null): number | null {
     S = c.S0 + s;
   } else {
     const byId = CHAPTERS.find((d) => d.id === (head as ChapterId));
-    S = byId ? byId.jumpS : Number(head);
+    const F = Number(head);
+    S = byId ? jumpS(byId) : pageS(F);
     if (!Number.isFinite(S)) return null;
   }
   return Math.min(S_MAX, Math.max(0, S));

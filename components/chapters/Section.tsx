@@ -35,6 +35,48 @@ export function Section({
   );
 }
 
+/**
+ * A PAGE section: ordinary content that scrolls up over the film like a sheet
+ * of paper (above the canvas, opaque; the film holds under it — lib/chapters).
+ * It flows with its content (min-height from the chapter table); its items
+ * rise into view on their own ([data-rv], PageReveal).
+ */
+export function PageSection({
+  id,
+  className = "",
+  children,
+  labelledBy,
+}: {
+  id: ChapterId;
+  className?: string;
+  children: ReactNode;
+  labelledBy?: string;
+}) {
+  const c = chapter(id);
+  return (
+    <section
+      data-chapter={id}
+      id={id}
+      className={`page-sec ch-${id} ${className}`}
+      style={{ minHeight: `calc(var(--vh, 1vh) * ${c.vh})` }}
+      aria-labelledby={labelledBy}
+    >
+      <div className="page-in">{children}</div>
+    </section>
+  );
+}
+
+/** A page section's heading: its number, a hairline, its name (the chapter marker's voice). */
+export function PageMarker({ n, children }: { n: string; children: ReactNode }) {
+  return (
+    <p className="marker ps-marker" data-rv>
+      <span className="marker-n">{n}</span>
+      <span className="marker-rule" aria-hidden />
+      <span>{children}</span>
+    </p>
+  );
+}
+
 /** A masked line that rises on reveal (data-state driven). `i` staggers it. */
 export function Line({ children, i = 0, className = "" }: { children: ReactNode; i?: number; className?: string }) {
   return (

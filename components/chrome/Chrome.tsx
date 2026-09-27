@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { CHAPTERS, type ChapterId } from "@/lib/chapters";
+import { CHAPTERS, jumpS, type ChapterId } from "@/lib/chapters";
 import { onScrollFrame, scrollToChapter, scrollToS, useActiveChapter } from "@/lib/scroll";
 import { LogoMark } from "./LogoMark";
 import { GhostPill } from "./Pills";
@@ -9,12 +9,12 @@ import { openStory } from "@/lib/story";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-/** The nav: two chapters of this page, the story, and the methodology page. */
+/** The nav: the sections a buyer looks for, in page order (the story lives in the hero's stone). */
 const NAV: { id?: ChapterId; label: string; href?: string; story?: boolean }[] = [
   { id: "build", label: "What we build" },
+  { id: "work", label: "Work" },
   { id: "why", label: "Why Nerodyn" },
-  { label: "The story", story: true },
-  { label: "Methodology", href: `${BASE}/methodology/` },
+  { id: "process", label: "How we work" },
 ];
 
 function SwapLabel({ children }: { children: string }) {
@@ -85,7 +85,7 @@ function ChapterIndex() {
         if (!el) return;
         const i = CHAPTERS.findLastIndex((c) => S >= c.S0 - 0.5);
         const c = CHAPTERS[Math.max(0, i)];
-        const p = Math.max(0, Math.min(1, (S - c.S0) / Math.max(0.5, c.vh / 100 - 0.5)));
+        const p = Math.max(0, Math.min(1, (S - c.S0) / Math.max(0.5, c.S1 - c.S0 - 0.5)));
         el.style.setProperty("--p", p.toFixed(3));
       }),
     []
@@ -101,7 +101,7 @@ function ChapterIndex() {
     <ol className="index" ref={ref} aria-label="Chapters">
       {CHAPTERS.map((c, i) => (
         <li key={c.id} className="index-row intro-tick" data-on={i === active || undefined} style={{ "--d": `${1300 + i * 50}ms` } as CSSProperties}>
-          <button type="button" onClick={() => scrollToS(c.jumpS)} aria-label={`${c.num} ${c.label}`} aria-current={i === active ? "step" : undefined}>
+          <button type="button" onClick={() => scrollToS(jumpS(c))} aria-label={`${c.num} ${c.label}`} aria-current={i === active ? "step" : undefined}>
             <span className="index-label">{c.label}</span>
             <span className="index-num mono">{c.num}</span>
             <span className="index-tick" aria-hidden>
@@ -135,7 +135,7 @@ function SpecimenCard() {
         <p className="specimen-name">{c.specimen.name}</p>
         <p className="specimen-line">{c.specimen.line}</p>
         {next ? (
-          <button type="button" className="specimen-next" onClick={() => scrollToS(next.jumpS)}>
+          <button type="button" className="specimen-next" onClick={() => scrollToS(jumpS(next))}>
             <span>Next — {next.label}</span>
             <span className="cue-line" aria-hidden>
               <span />
@@ -163,7 +163,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
             onClick={(e) => {
               e.preventDefault();
               onClose();
-              scrollToS(c.jumpS);
+              scrollToS(jumpS(c));
             }}
           >
             <span className="mono">{c.num}</span> {c.label}

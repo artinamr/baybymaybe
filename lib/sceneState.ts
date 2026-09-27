@@ -35,6 +35,8 @@ export const sceneState = {
   dt: 0,
   /** Dev `&freeze=1`: time stands still for deterministic screenshots. */
   frozen: false,
+  /** A page section fully covers the viewport: the film is held and hidden (nothing to draw). */
+  covered: false,
 
   /**
    * Camera (orbit rig): pos = pivot + dist·(sin az·cos el, sin el, cos az·cos el), looking at pivot.

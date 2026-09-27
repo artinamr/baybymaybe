@@ -4,7 +4,6 @@ import type { Formation, SceneState } from "./sceneState";
 import { ui } from "./stores";
 import { DEG, easeInOutSine, lerp, range } from "./ease";
 import { STONE } from "./geo/types";
-import { chapter } from "./chapters";
 import { devNum } from "./dev";
 import { aiCore, COL_C, COL_HOME, COL_K, FLAT_Y, LIFT_Y, STEPS, TOWER_C, TOWER_K, TOWER_TOP_Y, stairStepY } from "./formations";
 
@@ -102,7 +101,8 @@ export const plan = {
 };
 
 /** Top of the last section. */
-export const M0 = chapter("audit").S0;
+/** Film time of "let's talk" (where its scene's type arrives). */
+export const M0 = 10.3;
 /* The film's beats, in S. */
 const SHATTER = [2.25, 2.85];
 /** The burst finds its order; then the snap from loose to exact. */

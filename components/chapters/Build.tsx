@@ -3,7 +3,9 @@
 import { Fragment, useEffect, useRef, type CSSProperties } from "react";
 import { Section, Marker } from "./Section";
 import { onScrollFrame } from "@/lib/scroll";
+import { filmS } from "@/lib/chapters";
 import { DISCIPLINE_S } from "@/lib/choreo";
+import { DELIVERABLES } from "@/lib/content";
 
 const DISCIPLINES = [
   {
@@ -11,18 +13,21 @@ const DISCIPLINES = [
     name: "Websites",
     title: "Designed and engineered from a blank page.",
     body: "No templates, no page builders. A site written for your business — instant on every device, and built to turn visitors into enquiries.",
+    list: DELIVERABLES.websites,
   },
   {
     n: "02",
     name: "Platforms",
     title: "The systems your business runs on.",
     body: "Client portals, booking, dashboards and internal tools — engineered to carry real load, and connected to the software you already use.",
+    list: DELIVERABLES.platforms,
   },
   {
     n: "03",
     name: "AI automation",
     title: "AI that does the work.",
     body: "Assistants that answer, qualify and book on your site. Agents that file, draft and follow up inside your team's tools.",
+    list: DELIVERABLES.ai,
   },
 ];
 
@@ -37,9 +42,11 @@ export function Build() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(
     () =>
-      onScrollFrame((S) => {
+      onScrollFrame((pageS) => {
         const el = ref.current;
         if (!el) return;
+        // The disciplines follow the film (its clock holds under page sections).
+        const S = filmS(pageS);
         const d = S < DISCIPLINE_S[1] ? 0 : S < DISCIPLINE_S[2] ? 1 : 2;
         const v = String(d);
         if (el.dataset.disc !== v) el.dataset.disc = v;
@@ -78,6 +85,13 @@ export function Build() {
                 ))}
               </h3>
               <p className="disc-body">{d.body}</p>
+              <ul className="disc-list">
+                {d.list.map((item, k) => (
+                  <li key={item} style={{ "--k": k } as CSSProperties}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </article>
           ))}
         </div>

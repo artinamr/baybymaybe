@@ -14,6 +14,7 @@ import { layout } from "@/lib/layout";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { bus, intro, pointer, scroll, ui } from "@/lib/stores";
 import { dev, devNum, FROZEN_TIME_S } from "@/lib/dev";
+import { covered, filmS } from "@/lib/chapters";
 import { DEG, clamp01, easeBurst, easeInOutCubic, easeInOutSine, easeIntro, easeLock, easeOutSine, lerp, range } from "@/lib/ease";
 import { spring, springTo } from "@/lib/springs";
 
@@ -173,8 +174,10 @@ export function Director() {
     // Lenis), so a flick of the wheel becomes a glide, never a jolt.
     if (s.S < 0 || dev.freeze || reduced || Math.abs(scroll.S - s.S) > 3) s.S = scroll.S;
     else s.S += (scroll.S - s.S) * (1 - Math.exp(-dt * 4.5));
-    const S = s.S;
+    // The film runs on its own clock: it holds while a page section is on screen.
+    const S = filmS(s.S);
     sceneState.S = S;
+    sceneState.covered = covered(scroll.S);
 
     // Story mode replaces the scroll's film with the story's (same stone, same camera rig).
     const inStory = story.phase !== "closed";

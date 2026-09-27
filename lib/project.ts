@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { getStone } from "./geo/crystal";
 import { sceneState } from "./sceneState";
+import { CHAPTERS, chapter, filmS, pageS } from "./chapters";
 import { scroll } from "./stores";
 import { STONE } from "./geo/types";
 
@@ -127,6 +128,10 @@ function hullOf(n: number) {
 }
 
 let inversionEls: HTMLElement[] | null = null;
+/** The per-frame positions go on the elements that use them, never on :root —
+    a custom property changed on :root restyles the whole document. */
+let fieldEl: HTMLElement | null = null;
+let markEl: HTMLElement | null = null;
 let whyInvEls: HTMLElement[] = [];
 let tierRows: HTMLElement[] = [];
 let readoutEls: HTMLElement[] = [];
@@ -136,18 +141,27 @@ function query(now: number) {
   if (inversionEls && now - lastQuery < 1000) return;
   lastQuery = now;
   inversionEls = Array.from(document.querySelectorAll<HTMLElement>("[data-inversion]"));
+  fieldEl = document.getElementById("field");
+  markEl = document.querySelector<HTMLElement>(".mark-display");
   whyInvEls = Array.from(document.querySelectorAll<HTMLElement>("[data-inv-why]"));
   tierRows = [0, 1, 2, 3].map((i) => document.querySelector<HTMLElement>(`[data-tier-row="${i}"]`)).filter(Boolean) as HTMLElement[];
   readoutEls = Array.from(document.querySelectorAll<HTMLElement>("[data-readout]"));
+}
+
+/** Whether a chapter's section is in the viewport (page S). */
+function onScreen(id: "statement" | "why"): boolean {
+  const c = chapter(id);
+  return scroll.S > c.S0 - 1 && scroll.S < c.S1;
 }
 
 export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number): void {
   const now = performance.now();
   query(now);
   // Look-dev handle (development builds only): the film's state and the camera.
-  if (process.env.NODE_ENV !== "production") (window as unknown as { __nd?: object }).__nd = { sceneState, camera, stone: getStone() };
+  if (process.env.NODE_ENV !== "production") (window as unknown as { __nd?: object }).__nd = { sceneState, camera, stone: getStone(), pageS, filmS, chapters: CHAPTERS };
   const root = document.documentElement;
-  const S = scroll.S;
+  // Film time (the film holds while a page section is on screen).
+  const S = sceneState.S;
   const stone = getStone();
 
   /* ---- stone centre → paper lift ------------------------------------- */
@@ -157,16 +171,19 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
     W,
     H
   );
-  write("stone", `${c.x.toFixed(0)},${c.y.toFixed(0)}`, () => {
-    root.style.setProperty("--stone-x", `${c.x.toFixed(0)}px`);
-    root.style.setProperty("--stone-y", `${c.y.toFixed(0)}px`);
-  });
+  // Under a page sheet the field is hidden: nothing to move.
+  const hidden = sceneState.covered;
+  if (!hidden)
+    write("stone", `${c.x.toFixed(0)},${c.y.toFixed(0)}`, () => {
+      fieldEl?.style.setProperty("--stone-x", `${c.x.toFixed(0)}px`);
+      fieldEl?.style.setProperty("--stone-y", `${c.y.toFixed(0)}px`);
+    });
 
   /* ---- the studio the film plays in: a faint cove (floor meeting backdrop,
          keyed to where the floor's horizon lands on the page) and a soft pool
          of light behind the subject — barely there, never a picture ---------- */
-  write("cove", sceneState.env.cove.toFixed(3), (val) => root.style.setProperty("--cove", val));
-  if (sceneState.env.cove > 0.001) {
+  write("cove", sceneState.env.cove.toFixed(3), (val) => fieldEl?.style.setProperty("--cove", val));
+  if (sceneState.env.cove > 0.001 && !hidden) {
     camera.getWorldDirection(hz);
     const fwdY = hz.y;
     hz.y = 0;
@@ -175,11 +192,14 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
     let hy = project(hz, camera, W, H).y;
     // Looking steeply down, the horizon is above the frame.
     if (fwdY < -0.97) hy = -H;
-    write("horizon", Math.max(-H, Math.min(2 * H, hy)).toFixed(0), (val) => root.style.setProperty("--horizon", `${val}px`));
+    write("horizon", Math.max(-H, Math.min(2 * H, hy)).toFixed(0), (val) => {
+      fieldEl?.style.setProperty("--horizon", `${val}px`);
+      markEl?.style.setProperty("--horizon", `${val}px`);
+    });
     const pv = project(sceneState.cam.pivot, camera, W, H);
     write("subject", `${pv.x.toFixed(0)},${pv.y.toFixed(0)}`, () => {
-      root.style.setProperty("--subject-x", `${pv.x.toFixed(0)}px`);
-      root.style.setProperty("--subject-y", `${pv.y.toFixed(0)}px`);
+      fieldEl?.style.setProperty("--subject-x", `${pv.x.toFixed(0)}px`);
+      fieldEl?.style.setProperty("--subject-y", `${pv.y.toFixed(0)}px`);
     });
   }
 
@@ -197,8 +217,10 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
   });
 
   /* ---- ch01 inversion ----------------------------------------------------- */
+  // (Only while its chapter is on screen: the film holds under page sections,
+  // and an offscreen clip rebuilt every frame still forces a layout.)
   if (inversionEls && inversionEls.length) {
-    const on = S > 0.45 && S < 2.3;
+    const on = S > 0.45 && S < 2.3 && onScreen("statement");
     let poly = "polygon(0 0, 0 0, 0 0)";
     if (on) {
       const m = sceneState.stone.matrix;
@@ -219,7 +241,7 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
   /* ---- WHY: the words turn to paper wherever a piece passes behind them --- */
   if (whyInvEls.length) {
     let clip = "polygon(0 0, 0 0, 0 0)";
-    if (S > 6.95 && S < 9.7) {
+    if (S > 6.95 && S < 9.7 && onScreen("why")) {
       const box = whyInvEls[0].getBoundingClientRect();
       const C = corners();
       let d = "";

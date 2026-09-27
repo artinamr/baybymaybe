@@ -916,27 +916,36 @@ html[data-intro-skip] .intro-mask > span {
   position: absolute;
   inset: 0;
 }
-.mark-front .marker {
+/* The marker and the promise at the top; "Let's talk." on the horizon; the
+   form below it, on the floor — three tiers that never touch. */
+.mark-head {
   position: absolute;
   left: var(--g);
   top: calc(var(--vh) * 9.5);
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+.mark-head .marker {
+  margin: 0;
 }
 /* The copy and the actions flow as one block, set on the footer's line (its
    final top edge), so they never collide with each other or with it. */
 .mark-foot {
   position: absolute;
   left: var(--g);
-  bottom: calc(var(--vh) * 31);
+  bottom: calc(var(--vh) * 27);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 24px;
 }
 .mark-body {
-  max-width: 46ch;
+  max-width: 50ch;
   font-size: 17px;
   line-height: 1.5;
   color: color-mix(in oklab, var(--ink) 75%, transparent);
+  margin: 0;
 }
 .mark-ctas {
   display: flex;
@@ -988,57 +997,95 @@ html[data-intro-skip] .intro-mask > span {
   font-weight: 500;
 }
 
-.footer {
+/* ---- THE FOOTER: the page's last sheet, rising over the film's final frame ---- */
+.site-foot {
+  position: relative;
+  z-index: 5;
+  background: var(--paper);
+  overflow: hidden;
+}
+.site-foot::before {
+  content: "";
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: calc(var(--vh) * 28);
-  background: var(--paper);
-  border-top: 1px solid var(--hair);
-  transform: translateY(calc(100% * (1 - clamp(0, (var(--s, 0) - 0.95) * 4, 1))));
-  pointer-events: auto;
+  top: 0;
+  height: 1px;
+  background: var(--hair);
 }
-.footer-grid {
-  height: 100%;
-  padding: calc(var(--vh) * 4) var(--g);
+.sf-in {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: calc(var(--vh) * 13) var(--g) 0;
+}
+.sf-top {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  column-gap: 6vw;
+  row-gap: 32px;
+  align-items: end;
+  padding-bottom: calc(var(--vh) * 8);
+  border-bottom: 1px solid var(--hair);
 }
-.f-brand {
-  grid-column: span 5;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.f-mark {
-  width: 26px;
-  height: auto;
-}
-.f-word {
+.sf-line {
   font-family: var(--display);
-  font-size: 34px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  font-size: min(4.2vw, calc(var(--vh) * 7));
+  line-height: 1.03;
+  letter-spacing: -0.028em;
+  max-width: 15em;
+  margin: 0;
 }
-.f-sub {
-  font-size: 13px;
-  color: var(--muted);
+.sf-contact {
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+}
+.sf-email .email-text {
+  font-size: min(2.5vw, 34px);
+}
+.sf-cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  padding: calc(var(--vh) * 6) 0 calc(var(--vh) * 3);
+}
+/* The name, signed across the foot of the page. */
+.sf-mark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.4vw;
+  margin: 0;
+  padding-bottom: 4.6vw;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 18.5vw;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  /* A text optical size: at display sizes the Didone's hairlines thin to
+     nothing and the N reads as a slash. */
+  font-variation-settings: "opsz" 30;
+  color: var(--ink);
+  user-select: none;
+}
+.mark-body-m {
+  display: none;
+}
+.sf-logo {
+  width: 8.4vw;
+  height: auto;
+  flex: none;
+  margin-bottom: 3.2vw;
 }
 .f-col {
-  grid-column: span 2;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
   font-size: 15px;
 }
 .f-col a:hover {
   color: var(--indigo);
-}
-.f-end {
-  grid-column: span 3;
-  align-items: flex-start;
 }
 .f-h {
   font-size: 12px;
@@ -2358,40 +2405,64 @@ html[data-nowebgl] .pot-fill {
   .disc-body {
     font-size: 15px;
   }
+  /* The finale on a phone: the promise at the top, "Let's talk." across the
+     stone, the form on the floor below. */
+  .mark-head {
+    right: var(--g);
+    top: calc(var(--vh) * 10.5);
+    gap: 12px;
+  }
   .mark-display > .rv {
     left: var(--g);
     font-size: 21vw;
-    top: calc(var(--vh) * 20);
+    top: calc(var(--vh) * 30);
   }
   .mark-foot {
+    left: var(--g);
     right: var(--g);
-    bottom: calc(var(--vh) * 37);
-    gap: 16px;
+    bottom: calc(var(--vh) * 4.5);
+  }
+  .mark-head .mark-body {
+    display: none;
+  }
+  .mark-body-m {
+    display: block;
+    margin: 0 0 16px;
+  }
+  .chip {
+    height: 30px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+  .af-need {
+    gap: 6px;
   }
   .mark-body {
     font-size: 15px;
   }
-  .mark-ctas {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
   .email-text {
     font-size: 7vw;
   }
-  .footer {
-    height: calc(var(--vh) * 34);
+  .sf-in {
+    padding-top: calc(var(--vh) * 9);
   }
-  .footer-grid {
+  .sf-top {
+    grid-template-columns: 1fr;
+    padding-bottom: calc(var(--vh) * 5);
+  }
+  .sf-line {
+    font-size: 8.6vw;
+  }
+  .sf-email .email-text {
+    font-size: 6.6vw;
+  }
+  .sf-cols {
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    row-gap: 30px;
   }
-  .f-brand,
-  .f-end {
-    grid-column: span 2;
-  }
-  .f-col {
-    grid-column: span 1;
+  .sf-mark {
+    font-size: 17.5vw;
+    padding-bottom: 5vw;
   }
   .specimen {
     display: none;
@@ -2470,4 +2541,642 @@ html[data-nowebgl] .pot-fill {
     clip-path: none;
     opacity: 1;
   }
+}
+
+/* ==========================================================================
+   WHAT WE BUILD — what each discipline actually delivers
+   ========================================================================== */
+
+.disc-list {
+  display: grid;
+  gap: 10px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.disc-list li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--ink) 80%, transparent);
+  transition:
+    opacity 900ms var(--ease-expo) calc(320ms + var(--k, 0) * 70ms),
+    transform 1100ms var(--ease-expo) calc(320ms + var(--k, 0) * 70ms),
+    filter 900ms ease calc(320ms + var(--k, 0) * 70ms);
+}
+/* A tiny cut of glass for a bullet: the stone's facet, in indigo. */
+.disc-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.42em;
+  width: 9px;
+  height: 9px;
+  background: linear-gradient(135deg, var(--indigo-hi, #6b4bff), var(--indigo) 55%, #2a1a8f);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+[data-disc="0"] .disc:not([data-i="0"]) .disc-list li,
+[data-disc="1"] .disc:not([data-i="1"]) .disc-list li,
+[data-disc="2"] .disc:not([data-i="2"]) .disc-list li,
+.chapter[data-state="before"] .disc-list li {
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(10px);
+  transition-delay: 0ms;
+  transition-duration: 450ms;
+}
+
+/* ==========================================================================
+   PAGE SECTIONS — plain content on a sheet of paper that scrolls up OVER the
+   film (the film holds under it: lib/chapters.ts). Soft edges above and below,
+   so the 3D dissolves into the page and back, never a hard seam.
+   ========================================================================== */
+
+.page-sec {
+  position: relative;
+  z-index: 5;
+  background: var(--paper);
+}
+.page-sec::before,
+.page-sec::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(var(--vh) * 22);
+  pointer-events: none;
+}
+.page-sec::before {
+  bottom: 100%;
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--paper) 0%, transparent), color-mix(in oklab, var(--paper) 55%, transparent) 55%, var(--paper));
+}
+.page-sec::after {
+  top: 100%;
+  background: linear-gradient(to top, color-mix(in oklab, var(--paper) 0%, transparent), color-mix(in oklab, var(--paper) 55%, transparent) 55%, var(--paper));
+}
+/* Two sheets in a row are one sheet. */
+.page-sec + .page-sec::before,
+.page-sec:has(+ .page-sec)::after {
+  display: none;
+}
+.page-in {
+  padding: calc(var(--vh) * 16) var(--g) calc(var(--vh) * 14);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.page-sec + .page-sec .page-in {
+  padding-top: calc(var(--vh) * 6);
+}
+.ps-head {
+  display: grid;
+  gap: calc(var(--vh) * 3);
+  justify-items: start;
+  margin-bottom: calc(var(--vh) * 10);
+  max-width: 1100px;
+}
+.ps-marker {
+  margin: 0;
+}
+.ps-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(6.6vw, calc(var(--vh) * 10.5));
+  line-height: 0.98;
+  letter-spacing: -0.032em;
+  margin: 0;
+}
+.ps-lede {
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 52ch;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+  margin: 0;
+}
+.ps-foot {
+  margin-top: calc(var(--vh) * 9);
+}
+
+/* ---- 03 · Selected work: an editorial stagger ------------------------------ */
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 28px;
+  row-gap: calc(var(--vh) * 11);
+  align-items: start;
+}
+.work-card {
+  display: grid;
+  gap: 0;
+}
+.work-card-1 {
+  grid-column: 1 / span 7;
+}
+.work-card-2 {
+  grid-column: 9 / span 4;
+  margin-top: calc(var(--vh) * 18);
+}
+.work-card-3 {
+  grid-column: 3 / span 6;
+}
+.work-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border-radius: 6px;
+  background: #0b0b0f;
+  isolation: isolate;
+}
+.work-card-2 .work-media {
+  aspect-ratio: 4 / 5;
+}
+.work-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 1600ms var(--ease-expo);
+}
+.work-card:hover .work-media img {
+  transform: scale(1.065);
+}
+/* The glass's own light: one white glint across the cover on hover. */
+.work-shine {
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.22) 49%, rgba(255, 255, 255, 0.05) 53%, transparent 60%);
+  transform: translateX(-70%);
+  pointer-events: none;
+}
+.work-card:hover .work-shine {
+  transform: translateX(70%);
+  transition: transform 1300ms var(--ease-expo);
+}
+.work-ph {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f6f5f2;
+  background: rgba(10, 11, 16, 0.5);
+  backdrop-filter: blur(8px);
+}
+.work-body {
+  display: grid;
+  gap: 8px;
+  padding-top: 24px;
+  justify-items: start;
+}
+.work-kind {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--indigo);
+  margin: 0;
+}
+.work-kind span {
+  color: color-mix(in oklab, var(--ink) 40%, transparent);
+  margin-right: 6px;
+}
+.work-name {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(2.8vw, 40px);
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+  margin: 4px 0 0;
+}
+.work-client {
+  font-size: 14px;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  margin: 0;
+}
+.work-line {
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 46ch;
+  color: color-mix(in oklab, var(--ink) 74%, transparent);
+  margin: 6px 0 0;
+}
+.work-card[data-placeholder] .work-name,
+.work-card[data-placeholder] .work-client {
+  color: color-mix(in oklab, var(--ink) 38%, transparent);
+}
+
+/* ---- 05 · How we work: four days on one line -------------------------------- */
+
+.steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 36px;
+  margin: 0;
+  padding: 46px 0 0;
+  list-style: none;
+}
+.steps-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 7px;
+  height: 1px;
+  background: var(--hair);
+}
+.steps-line > span {
+  position: absolute;
+  inset: 0;
+  background: var(--indigo);
+  transform: scaleX(var(--line, 0));
+  transform-origin: left;
+}
+.step {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+.step-dot {
+  position: absolute;
+  top: -46px;
+  left: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
+  transition:
+    background 500ms ease,
+    border-color 500ms ease,
+    box-shadow 700ms var(--ease-expo);
+}
+.steps[data-lit="1"] .step[data-i="0"] .step-dot,
+.steps[data-lit="2"] .step:is([data-i="0"], [data-i="1"]) .step-dot,
+.steps[data-lit="3"] .step:is([data-i="0"], [data-i="1"], [data-i="2"]) .step-dot,
+.steps[data-lit="4"] .step .step-dot {
+  background: var(--indigo);
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 6px color-mix(in oklab, var(--indigo) 13%, transparent);
+}
+.step-day {
+  font-size: 12px;
+  color: var(--indigo);
+  margin: 0;
+}
+.step-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(3.3vw, 48px);
+  line-height: 1;
+  letter-spacing: -0.024em;
+  margin: 0;
+}
+.step-body {
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 30ch;
+  color: color-mix(in oklab, var(--ink) 74%, transparent);
+  margin: 0;
+}
+.step-note {
+  font-size: 11px;
+  color: color-mix(in oklab, var(--ink) 45%, transparent);
+  margin: 4px 0 0;
+}
+
+/* ---- 06 · Questions: the answers open in place ------------------------------ */
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: 6vw;
+  align-items: start;
+}
+.faq-head {
+  position: sticky;
+  top: calc(var(--vh) * 14);
+  margin-bottom: 0;
+}
+.faq .ps-title {
+  font-size: min(5.2vw, calc(var(--vh) * 8.6));
+}
+.faq-ask {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 0;
+}
+.qa-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hair);
+}
+.qa {
+  border-bottom: 1px solid var(--hair);
+}
+.qa h3 {
+  margin: 0;
+  font: inherit;
+}
+.qa-q {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 0;
+  text-align: left;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.qa-n {
+  font-size: 11px;
+  color: color-mix(in oklab, var(--ink) 40%, transparent);
+}
+.qa-text {
+  transition: color 300ms ease;
+}
+.qa-q:hover .qa-text,
+.qa[data-open] .qa-text {
+  color: var(--indigo);
+}
+.qa-icon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  justify-self: end;
+}
+.qa-icon::before,
+.qa-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  margin-top: -0.75px;
+  background: currentColor;
+  transition: transform 500ms var(--ease-expo);
+}
+.qa-icon::after {
+  transform: rotate(90deg);
+}
+.qa[data-open] .qa-icon::after {
+  transform: rotate(0deg);
+}
+.qa[data-open] .qa-icon::before {
+  transform: rotate(180deg);
+}
+.qa-a {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 650ms var(--ease-expo);
+}
+.qa[data-open] .qa-a {
+  grid-template-rows: 1fr;
+}
+.qa-a > div {
+  overflow: hidden;
+}
+.qa-a p {
+  margin: 0;
+  padding: 0 36px 30px 58px;
+  max-width: 60ch;
+  font-size: 17px;
+  line-height: 1.62;
+  color: color-mix(in oklab, var(--ink) 74%, transparent);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 400ms ease,
+    transform 700ms var(--ease-expo);
+}
+.qa[data-open] .qa-a p {
+  opacity: 1;
+  transform: none;
+  transition-delay: 120ms;
+}
+
+/* ---- 07 · The audit form --------------------------------------------------- */
+
+.audit-form {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.af-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.field {
+  position: relative;
+  display: block;
+}
+.field-label {
+  position: absolute;
+  /* Above the field's frosted fill (its backdrop filter paints over a plain label). */
+  z-index: 1;
+  left: 20px;
+  top: 7px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  pointer-events: none;
+}
+.field input {
+  width: min(250px, 24vw);
+  height: 56px;
+  padding: 18px 20px 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent);
+  background: color-mix(in oklab, var(--paper) 84%, transparent);
+  backdrop-filter: blur(10px);
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  transition:
+    border-color 250ms ease,
+    box-shadow 300ms ease,
+    background 250ms ease;
+}
+.field input::placeholder {
+  color: color-mix(in oklab, var(--ink) 32%, transparent);
+}
+.field input:hover {
+  border-color: color-mix(in oklab, var(--ink) 30%, transparent);
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--indigo);
+  background: var(--paper);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--indigo) 14%, transparent);
+}
+.af-send[disabled] {
+  opacity: 0.7;
+}
+.af-need {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+  border: 1px solid color-mix(in oklab, var(--ink) 14%, transparent);
+  background: color-mix(in oklab, var(--paper) 80%, transparent);
+  backdrop-filter: blur(8px);
+  transition:
+    background 250ms ease,
+    color 250ms ease,
+    border-color 250ms ease;
+}
+.chip:hover {
+  border-color: color-mix(in oklab, var(--ink) 34%, transparent);
+  color: var(--ink);
+}
+.chip[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.af-note {
+  font-size: 13px;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  margin: 2px 0 0 4px;
+}
+.audit-form[data-state="sent"] .af-note,
+.audit-form[data-state="mailed"] .af-note {
+  color: var(--indigo);
+}
+
+.f-col button {
+  text-align: left;
+  font-size: 15px;
+}
+.f-col button:hover {
+  color: var(--indigo);
+}
+
+@media (max-width: 1099px) {
+  .work-card-1,
+  .work-card-3 {
+    grid-column: 1 / -1;
+  }
+  .work-card-2 {
+    grid-column: 1 / span 8;
+    margin-top: 0;
+  }
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: calc(var(--vh) * 6);
+  }
+  .steps-line {
+    display: none;
+  }
+  .step-dot {
+    top: -28px;
+  }
+  .faq-grid {
+    grid-template-columns: 1fr;
+    row-gap: calc(var(--vh) * 6);
+  }
+  .faq-head {
+    position: static;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-in {
+    padding: calc(var(--vh) * 12) var(--g) calc(var(--vh) * 10);
+  }
+  .ps-title {
+    font-size: 13vw;
+  }
+  .ps-lede {
+    font-size: 16px;
+  }
+  .work-grid {
+    row-gap: calc(var(--vh) * 7);
+  }
+  .work-card-2 {
+    grid-column: 1 / -1;
+  }
+  .work-card-2 .work-media {
+    aspect-ratio: 16 / 10;
+  }
+  .work-name {
+    font-size: 30px;
+  }
+  .steps {
+    grid-template-columns: 1fr;
+  }
+  .step-title {
+    font-size: 36px;
+  }
+  .qa-q {
+    font-size: 17px;
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+    padding: 22px 0;
+  }
+  .qa-a p {
+    padding: 0 0 24px 48px;
+    font-size: 16px;
+  }
+  .af-row {
+    flex-direction: column;
+    align-items: stretch;
+    width: calc(100vw - 2 * var(--g));
+  }
+  .field input {
+    width: 100%;
+  }
+  .disc-list {
+    display: none;
+  }
+}
+
+/* Reading a page section: the chapter rail steps back (it would sit on the text). */
+.index,
+.index-counter {
+  transition: opacity 500ms ease;
+}
+html[data-reading] .index,
+html[data-reading] .index-counter {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Look-dev `?render=1`: the film alone (stills for covers). */
+html[data-render] main,
+html[data-render] .nav,
+html[data-render] .index,
+html[data-render] .index-counter,
+html[data-render] .specimen,
+html[data-render] .grain,
+html[data-render] .stone-cursor {
+  visibility: hidden !important;
+}
+
+/* The big work cards rise without the focus pull: a blur transition over a
+   large image layer costs frames while the film is still running. */
+.work-card[data-rv] {
+  filter: none;
+  transition:
+    opacity 1100ms var(--ease-expo),
+    transform 1300ms var(--ease-expo);
 }

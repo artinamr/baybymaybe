@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import Lenis from "lenis";
-import { CHAPTERS, chapter, type ChapterId } from "./chapters";
+import { CHAPTERS, chapter, holds, inPage, jumpS, measureChapters, pageS, type ChapterId } from "./chapters";
 import { bus, intro, pointer, scroll, type ChapterState } from "./stores";
 import { computeLayout, invalidateTextMetrics, layout, type Layout } from "./layout";
 import { easeInOutCubic, easeInOutQuart } from "./ease";
@@ -108,6 +108,26 @@ function relayout(force = false) {
     writeLayoutVars(layout.current);
   }
   sections = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
+  measure();
+}
+
+/**
+ * Page sections flow with their content: measure where every chapter really
+ * sits, so the film's holds (and every page S0 after them) follow the page.
+ */
+function measure() {
+  if (sections.length !== CHAPTERS.length) return;
+  const y = window.scrollY;
+  const vh = Math.max(1, vhPx * 100);
+  const tops: number[] = [];
+  const ends: number[] = [];
+  for (const el of sections) {
+    const r = el.getBoundingClientRect();
+    tops.push((r.top + y) / vh);
+    ends.push((r.bottom + y) / vh);
+  }
+  measureChapters(tops, ends);
+  for (let i = 0; i < CHAPTERS.length; i++) scroll.chapters[i].S0 = CHAPTERS[i].S0;
 }
 
 /**
@@ -177,21 +197,24 @@ export function initScroll(): () => void {
 /* ------------------------------------------------------------------------ */
 
 /**
- * The film's composed frames, in S. When you stop scrolling between two of
- * them, the page glides on to one — the way igloo.inc finishes a move for you:
- * the hero · the statement over the stone · the exploded view, exact · the
- * tower, whole over the clouds · the AI half way up it · the tower lit, the
- * core on its roof · the colossus standing open · inside it, round the core ·
- * the colossus closed · let's talk · the page end. (The fall is never a rest:
- * you pass through it.) Chapter jumpS values sit on these — keep them in sync.
+ * The film's composed frames, in FILM time. When you stop scrolling between
+ * two of them, the page glides on to one — the way igloo.inc finishes a move
+ * for you: the hero · the statement over the stone · the exploded view, exact
+ * · the stair from above · the AI half way up it · the core at the top · the
+ * colossus standing open · inside it, round the core · the colossus closed ·
+ * let's talk · the page end. The top of every page section is a rest too, but
+ * never while you are reading one. Chapter jumpF values sit on these — keep
+ * them in sync.
  */
-const REST_STATIC = [0, 1.62, 3.72, 4.9, 5.45, 5.94, 7.62, 8.2, 9.3, 10.75];
+const REST_FILM = [0, 1.62, 3.72, 4.9, 5.45, 5.94, 7.62, 8.2, 9.3, 10.75, 11.5];
 const restPts: number[] = [];
 
 function anchors(): number[] {
   restPts.length = 0;
-  for (const s of REST_STATIC) restPts.push(s);
-
+  for (const f of REST_FILM) restPts.push(pageS(f));
+  for (const c of CHAPTERS) if (c.kind === "page") restPts.push(c.S0);
+  // Where a run of page sections has gone and its scene is back.
+  for (const h of holds) restPts.push(h.S1);
   restPts.push(Math.max(0, (document.documentElement.scrollHeight - window.innerHeight) / Math.max(1, scroll.vh)));
   restPts.sort((a, b) => a - b);
   return restPts;
@@ -234,6 +257,8 @@ function autoFrame(now: number) {
   }
   if (!lenis || frame.gliding || intro.state !== "done") return;
   if (now - frame.lastInput < 900 || now - frame.lastMove < 200 || frame.lastInput === 0) return;
+  // Reading a page section: leave the page exactly where the reader put it.
+  if (inPage(scroll.S)) return;
   const a = pickAnchor(scroll.S, frame.dir);
   const d = Math.abs(a - scroll.S);
   if (d < 0.012) return;
@@ -252,7 +277,7 @@ function autoFrame(now: number) {
 /** Reveal state of a chapter from its local s. */
 function stateFor(i: number, s: number): ChapterState {
   const c = CHAPTERS[i];
-  const end = c.sticky ? c.holdEnd + 0.45 : c.vh / 100 - 0.4;
+  const end = c.sticky ? c.holdEnd + 0.45 : c.S1 - c.S0 - 0.4;
   if (s < (c.revealAt ?? -0.35)) return "before";
   if (s > end) return "after";
   return "active";
@@ -272,16 +297,24 @@ export function updateScroll(time: number): void {
     c.s = scroll.S - c.S0;
     const st = stateFor(i, c.s);
     const el = sections[i];
-    if (el) {
-      el.style.setProperty("--s", c.s.toFixed(4));
-      if (st !== c.state || el.dataset.state !== st) el.dataset.state = st;
-    }
+    // (No per-frame custom properties on sections: a changed custom property
+    // restyles the whole subtree, every frame — the page sections are big.)
+    if (el && (st !== c.state || el.dataset.state !== st)) el.dataset.state = st;
     c.state = st;
     if (scroll.S >= c.S0 - 0.5) active = i;
   }
   const scrolled = scroll.S > 0.15;
   if (scrolled !== document.documentElement.hasAttribute("data-scrolled")) {
     document.documentElement.toggleAttribute("data-scrolled", scrolled);
+  }
+  // Reading a page section (its sheet across the middle of the screen): the
+  // film's chrome — the chapter rail — steps back.
+  let reading = false;
+  for (const h of holds) if (scroll.S > h.S0 + 0.5 && scroll.S < h.S1 - 0.5) reading = true;
+  // …and over the footer, the page's last sheet.
+  if (scroll.S > CHAPTERS[CHAPTERS.length - 1].S1 - 0.5) reading = true;
+  if (reading !== document.documentElement.hasAttribute("data-reading")) {
+    document.documentElement.toggleAttribute("data-reading", reading);
   }
   if (active !== scroll.active) {
     scroll.active = active;
@@ -312,7 +345,7 @@ export function scrollToS(S: number, durationSec?: number, easing?: (t: number) 
 }
 
 export function scrollToChapter(id: ChapterId): void {
-  scrollToS(chapter(id).jumpS);
+  scrollToS(jumpS(chapter(id)));
 }
 
 

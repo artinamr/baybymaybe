@@ -25,12 +25,39 @@ The client asked for a FULL-SITE rebuild: white theme, a sharp obsidian stone in
 The full art-direction spec is **`docs/SPEC.md`**; module boundaries and
 interfaces are **`docs/CONTRACTS.md`**. Read both before changing the 3D.
 
-**SITE SHAPE (round 10, 2026-09-26 — "flip the table, step up the game").**
-- **Home = five sections** (`lib/chapters.ts`, page 1250vh, S_MAX 11.5):
-  potential (hero) · statement ("The studio" — the long statement, restored:
-  the client asked for it back verbatim) · build ("What we build": Websites /
-  Platforms / AI automation) · why ("Why Nerodyn": No hand-offs / Nothing off
-  the shelf / Nothing rented) · audit ("Let's talk." + footer).
+**SITE SHAPE (round 15, 2026-09-27 — "compared to UXBERT and igloo it isn't
+that special … also be a SENSIBLE website … not just a stupid animation";
+The Web Guys NZ as the "classic, well established and clean" reference; and
+"don't lose this 3D world … don't skip the animations we built").**
+- **Home = the film's five scenes with the page's plain sections between
+  them** (`lib/chapters.ts`): potential (hero) · statement · build ("What we
+  build" — now with what each discipline delivers) · **work** (page: selected
+  work, three placeholder projects) · why · **process** (page: how we work,
+  the four days) · **faq** (page: straight answers) · audit ("Let's talk." +
+  the audit FORM) · then the **site footer** (the page's last sheet: a closing
+  line, the address, every link, the name signed across the bottom).
+- **TWO CLOCKS.** Page S = scrollY / vh; FILM TIME F runs the 3D (every key in
+  lib/choreo.ts is film time and did not move). Film chapters run F 1:1 with
+  the scroll; a PAGE section is a sheet of paper (z 5, opaque, soft gradient
+  edges) that scrolls up OVER the film, and the film HOLDS from the last
+  screen of the scene before it to the end of the run of sheets (`holds`,
+  `filmS(S)` with softened corners; `pageS(F)` is its exact inverse by
+  bisection). Page sections flow with their content, so their size and every
+  page S0 after them are MEASURED from the DOM (`measureChapters`, on resize).
+  While sheets cover the whole viewport the canvas is not drawn at all
+  (`sceneState.covered`). Everything that reads the film uses film time
+  (`sceneState.S`, `filmS`); the chrome and reveals use page S.
+- Auto-framing rests are in film time (`REST_FILM`, + every page section's
+  top, + each hold's end, + the page end) and never pull a reader who stopped
+  inside a page section. The chapter rail steps back while you read a sheet
+  (`html[data-reading]`).
+- **Content lives in `lib/content.ts`**: deliverables, WORK (placeholders —
+  covers are stills of our own film, rendered with `?render=1`), PROCESS,
+  FAQ, contact. The audit form posts JSON to `NEXT_PUBLIC_FORM_ENDPOINT` if
+  set; on the static site it writes the email for you (mailto).
+- The hero's primary action is the free audit; "Enter the story" is the
+  ghost button. Nav: What we build · Work · Why Nerodyn · How we work · Free
+  audit.
 - **Copy is ours, not nerodyn.com's** (the client: "nerodyn.com isn't a good
   website to copy"). Plain, specific, no invented numbers. Awaiting sign-off.
 - **The hero's door to the story** is the stone itself: over it the pointer
@@ -71,7 +98,7 @@ nothing too visible". No cuts, no white-outs:
 | 7.05–9.3 | WHY: F7 — the open colossus (a wide hollow round the core, the glass toward the camera standing aside); the camera flies in and round the core, and out as it closes, the crown seating last |
 | 9.3– | LET'S TALK: down at the floor's own level, the colossus and its reflection; "Let's talk." stands on the horizon |
 
-Rest frames (auto-framing, `lib/scroll.ts`): 0 · 1.62 · 3.72 · 4.9 · 5.45 · 5.94 · 7.62 · 8.2 · 9.3 · 10.75 · the end.
+Rest frames (auto-framing, `lib/scroll.ts`, FILM time): 0 · 1.62 · 3.72 · 4.9 · 5.45 · 5.94 · 7.62 · 8.2 · 9.3 · 10.75 · 11.5 — the film holds at 5.94 under Work and at 9.3 under How we work + Questions.
 The lighting TURNS with the scroll past the statement (`scene.environmentRotation`,
 PlaceEnv.tsx). The camera BANKS into its turns (a `roll` channel on the keys).
 
@@ -342,11 +369,14 @@ way relative to each other.
 - **The in-app browser pane renders on the real GPU** (ANGLE/D3D11, AMD Radeon).
 - **Headless Chrome ALSO uses the real GPU** with
   `--use-angle=d3d11 --ignore-gpu-blocklist --enable-gpu` — exact-size,
-  real-material screenshots at any viewport. Use `?at=<S>&freeze=1`
-  (lib/dev.ts) to land on a point of the film with time frozen (drop
-  `freeze` to see time-based life, e.g. the flow), and `?story=<P>&freeze=1`
-  for a point of the story film. SwiftShader is no longer the only headless
-  option — don't fall back to it for material judgements.
+  real-material screenshots at any viewport. Use `?at=<F>&freeze=1`
+  (lib/dev.ts) to land on a point of the film with time frozen — F is FILM
+  time: it lands where the film shows that frame (`?at=why:0.5` is page
+  S0(why) + 0.5 instead); drop `freeze` to see time-based life, e.g. the flow.
+  `?story=<P>&freeze=1` lands on a point of the story film; `?render=1` hides
+  the DOM for stills of the film alone (the work covers). SwiftShader is no
+  longer the only headless option — don't fall back to it for material
+  judgements.
 
 ## Gotchas (each cost real time)
 
@@ -375,6 +405,10 @@ way relative to each other.
 
 ## Still owed by the client
 
-Real case studies (ch04 rows are labelled placeholders), the real contact email
-(`hello@nerodyn.com` is a placeholder) and social links, final copy sign-off,
-the brand font if different.
+Three real projects for Selected work (the cards are labelled placeholders —
+name, client, one line on what changed, a cover; `lib/content.ts` WORK), a
+testimonial or two if they have them, the form's destination (a Formspree-like
+endpoint → `NEXT_PUBLIC_FORM_ENDPOINT`; without it the form writes an email),
+the real contact email (`hello@nerodyn.com` is a placeholder) and social
+links, sign-off on the copy (including the FAQ answers and the "about
+fourteen days" promise), the brand font if different.

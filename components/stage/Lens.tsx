@@ -246,6 +246,9 @@ export function Lens() {
   }, [gl, pass, scene, camera, rts]);
 
   useFrame(() => {
+    // Page sections cover the whole viewport: the film is held and unseen —
+    // draw nothing (the canvas keeps its last frame under the paper).
+    if (sceneState.covered) return;
     const c = sceneState.cam;
     // The lowest performance tier gives the lens up first.
     const A = perf.tier >= 3 ? 0 : c.aperture;

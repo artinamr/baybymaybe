@@ -126,12 +126,10 @@ export function Hero() {
       </p>
       <div className="hero-ctas">
         <span className="intro intro-rise" style={d(1180)}>
-          <Pill onClick={openStory} live>
-            Enter the story
-          </Pill>
+          <Pill onClick={() => scrollToChapter("audit")}>Get a free audit</Pill>
         </span>
         <span className="intro intro-rise" style={d(1260)}>
-          <GhostPill onClick={() => scrollToChapter("audit")}>Request an audit</GhostPill>
+          <GhostPill onClick={openStory}>Enter the story</GhostPill>
         </span>
       </div>
       <StoneCursor />

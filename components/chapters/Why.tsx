@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, type CSSProperties } from "react";
 import { Section, Marker, Line } from "./Section";
 import { onScrollFrame } from "@/lib/scroll";
+import { filmS } from "@/lib/chapters";
 import { WHY_S } from "@/lib/choreo";
 
 const CLAIMS = [
@@ -78,7 +79,9 @@ export function Why() {
   const inv = useRef<HTMLDivElement>(null);
   useEffect(
     () =>
-      onScrollFrame((S) => {
+      onScrollFrame((pageS) => {
+        // The claims follow the film (its clock holds under page sections).
+        const S = filmS(pageS);
         const k = S < WHY_S[1] ? 0 : S < WHY_S[2] ? 1 : 2;
         const v = String(k);
         const p = Math.max(0, Math.min(1, (S - WHY_S[0]) / (WHY_S[3] - WHY_S[0]))).toFixed(4);

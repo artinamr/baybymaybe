@@ -43,6 +43,7 @@ export function Experience({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     const webgl = gl;
     if (!webgl) root.setAttribute("data-nowebgl", "");
+    if (dev.render) root.setAttribute("data-render", "");
     root.dataset.intro = "wait";
     const cleanup = initScroll();
     const reduced = root.hasAttribute("data-reduced");
