@@ -106,6 +106,8 @@ export const obsidianUniforms: {
   /** The stone's scale: the reflection fades over a distance that grows with it. */
   uReflK: U<number>;
   uReflLen: U<number>;
+  /** The white room at grazing angles (0 in the hero — its black silhouette is liked). */
+  uRim: U<number>;
   /** The stone's bounding planes (object, n·x ≤ w) and each piece's cut bounds (yMin, yMax, xSign). */
   uHull: U<THREE.Vector4[]>;
   uPieceBox: U<THREE.Vector3[]>;
@@ -139,6 +141,7 @@ export const obsidianUniforms: {
   uRiseAmp: { value: 0 },
   uReflK: { value: 1 },
   uReflLen: { value: 1.1 },
+  uRim: { value: 0 },
   uHull: { value: HULL },
   uPieceBox: { value: pieceBounds() },
 };
@@ -194,6 +197,7 @@ export function syncObsidianUniforms(): void {
   U.uRiseAmp.value = u.riseAmp;
   U.uReflK.value = s.stone.scale;
   U.uReflLen.value = u.reflLen;
+  U.uRim.value = u.rim;
   planeAbove.constant = -u.floorY;
   planeBelow.constant = u.floorY;
 }
@@ -334,6 +338,7 @@ uniform float uRiseY;
 uniform float uRiseAmp;
 uniform float uReflK;
 uniform float uReflLen;
+uniform float uRim;
 uniform vec4 uHull[16];
 varying vec3 vObs;
 varying float vKind;
@@ -602,9 +607,10 @@ const FRAG_EMISSIVE = /* glsl */ `
     float obsGlow = vFx.x * uCutGlow;
     float obsFlash = vFx.y;
 
-    // Cut faces: a whisper of light right at the rim (the seam), and a flash on a seat.
+    // Cut faces: a whisper of light right at the rim (the seam). A seat is
+    // marked by the white GLINT below — never by washing the face in indigo.
     float obsRim = smoothstep(0.82, 1.0, length(vFaceD) / max(vFaceR, 1e-4));
-    obsInd += obsCut * (obsGlow * 0.12 * obsRim + obsFlash * 0.35);
+    obsInd += obsCut * obsGlow * 0.12 * obsRim;
 
     // Mark seams: ONLY primary-cut edges (aCrack == 2), only on the outer skin.
     // Distance to the edge in pixels from the barycentric gradient, so the line
@@ -618,8 +624,8 @@ const FRAG_EMISSIVE = /* glsl */ `
     float obsLevel = max(obsLevelE.x, max(obsLevelE.y, obsLevelE.z)) * (1.0 - obsCut);
     vec3 obsDp = vPulseP - uPulsePos;
     float obsPulse = uPulseAmp * exp(-dot(obsDp, obsDp) / 0.0036);
-    obsInd += obsVein * (uSeam * (0.35 + obsPulse) + obsFlash * 0.9);
-    obsInd += obsLevel * (uLevelSeam * 0.8 + obsFlash * 0.9);
+    obsInd += obsVein * (uSeam * (0.35 + obsPulse) + obsFlash * 0.25);
+    obsInd += obsLevel * (uLevelSeam * 0.8 + obsFlash * 0.25);
 
     // The thread: a head of light running down one meridian's bevel strip.
     // uThreadRidge = −1 is "off"; aRidge = −1 marks non-ridge geometry.
@@ -652,11 +658,22 @@ const FRAG_EMISSIVE = /* glsl */ `
     }
   #endif
   vec3 obsE = uIndigoLin * obsInd;
+  vec3 obsGlint = vec3(0.0);
   #ifdef OBS_FRAG
+    // THE GLINT: as a piece seats (vFx.y set to 1, decaying) a narrow band of
+    // white light sweeps once across it — fast, then slowing — brightest on
+    // its polished round-overs: a studio light catching machined glass.
+    if (vFx.y > 0.02) {
+      vec3 obsGd = normalize(vec3(0.5, 0.82, 0.28));
+      float obsPh = dot(vObs - vFragC, obsGd);
+      float obsHead = mix(-0.75, 0.75, 1.0 - vFx.y);
+      float obsBand = exp(-pow((obsPh - obsHead) / 0.055, 2.0));
+      obsGlint = vec3(0.86, 0.87, 0.92) * obsBand * (0.22 + 0.78 * obsBevel + 0.3 * (1.0 - obsCut)) * smoothstep(0.02, 0.25, vFx.y);
+    }
     // The light inside: strong through a polished cut (a window into the
     // glass), faint through the outer faces (dark glass, mostly reflection).
     // vFx.w: a fragment full of light seen through its outer faces (the core).
-    float obsWin = obsCut > 0.5 ? vFx.x * uCutGlow * 1.2 + vFx.y * 0.8 : uInner * (0.55 + 0.45 * vFx.x) * 0.2 + vFx.w * 0.34 + uWake * 0.9;
+    float obsWin = obsCut > 0.5 ? vFx.x * uCutGlow * 1.2 : uInner * (0.55 + 0.45 * vFx.x) * 0.2 + vFx.w * 0.34 + uWake * 0.9;
     obsWin *= 1.0 - vFx.z;
     // A reflection is faint and far: the light inside is not worth marching.
     #ifdef OBS_REFLECT
@@ -686,7 +703,17 @@ const FRAG_EMISSIVE = /* glsl */ `
   // clamp flattens every lit face into one flat indigo — "a 90s game") and
   // still never passes 0.9 in any channel (above it indigo rolls to lavender).
   float obsKnee = obsM > 0.72 ? (0.72 + 0.18 * (1.0 - exp(-(obsM - 0.72) / 0.18))) / obsM : 1.0;
-  totalEmissiveRadiance += obsE * obsKnee;
+  // THE WHITE ROOM: the page is a white studio, and black glass in a white
+  // room picks the white up at grazing angles (Fresnel) — its edges and the
+  // faces turned away from the lens go pale while the faces toward it stay
+  // black. Without it, small pieces read as flat black cut-outs.
+  vec3 obsRoom = vec3(0.0);
+  if (uRim > 0.001) {
+    float obsNV = clamp(dot(normalize(vViewPosition), normal), 0.0, 1.0);
+    float obsFres = pow(1.0 - obsNV, 4.0);
+    obsRoom = vec3(0.93, 0.93, 0.945) * obsFres * uRim * (0.75 + 0.25 * obsBevel);
+  }
+  totalEmissiveRadiance += obsE * obsKnee + obsGlint + obsRoom;
 }
 `;
 

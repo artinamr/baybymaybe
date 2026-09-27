@@ -3,7 +3,7 @@ import { getStone } from "./geo/crystal";
 import { sceneState } from "./sceneState";
 import { scroll } from "./stores";
 import { STONE } from "./geo/types";
-import { SUN_DIR } from "./sky";
+
 import { fragTex } from "./fragTex";
 
 /**
@@ -145,7 +145,7 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
   const now = performance.now();
   query(now);
   // Look-dev handle (development builds only): the film's state and the camera.
-  if (process.env.NODE_ENV !== "production") (window as unknown as { __nd?: object }).__nd = { sceneState, camera };
+  if (process.env.NODE_ENV !== "production") (window as unknown as { __nd?: object }).__nd = { sceneState, camera, stone: getStone() };
   const root = document.documentElement;
   const S = scroll.S;
   const stone = getStone();
@@ -162,33 +162,24 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
     root.style.setProperty("--stone-y", `${c.y.toFixed(0)}px`);
   });
 
-  /* ---- the sky: the page's paper cools toward the top over the cloud sea -- */
-  write("sky", sceneState.env.sky.toFixed(3), (val) => root.style.setProperty("--sky", val));
-
-  /* ---- the sky's and the salt flat's horizon, where it lands on the page;
-         the sun's glow over the cloud sea ------------------------------------ */
-  write("flat", sceneState.env.flat.toFixed(3), (val) => root.style.setProperty("--flat", val));
-  if (sceneState.env.flat > 0.001 || sceneState.env.sky > 0.001) {
+  /* ---- the studio the film plays in: a faint cove (floor meeting backdrop,
+         keyed to where the floor's horizon lands on the page) and a soft pool
+         of light behind the subject — barely there, never a picture ---------- */
+  write("cove", sceneState.env.cove.toFixed(3), (val) => root.style.setProperty("--cove", val));
+  if (sceneState.env.cove > 0.001) {
     camera.getWorldDirection(hz);
     const fwdY = hz.y;
     hz.y = 0;
     if (hz.lengthSq() < 1e-6) hz.set(0, 0, -1);
     hz.normalize().multiplyScalar(5000).add(camera.position);
     let hy = project(hz, camera, W, H).y;
-    // Looking straight down, the horizon is far above the frame.
+    // Looking steeply down, the horizon is above the frame.
     if (fwdY < -0.97) hy = -H;
     write("horizon", Math.max(-H, Math.min(2 * H, hy)).toFixed(0), (val) => root.style.setProperty("--horizon", `${val}px`));
-  }
-  if (sceneState.env.sky > 0.001) {
-    camera.getWorldDirection(hz);
-    const facing = hz.dot(SUN_DIR);
-    hz.copy(SUN_DIR).multiplyScalar(5000).add(camera.position);
-    const sp = project(hz, camera, W, H);
-    const sx = facing > 0.05 ? Math.max(-W, Math.min(2 * W, sp.x)) : W * 0.5;
-    const sy = facing > 0.05 ? Math.max(-2 * H, Math.min(2 * H, sp.y)) : -3 * H;
-    write("sun", `${sx.toFixed(0)},${sy.toFixed(0)}`, () => {
-      root.style.setProperty("--sun-x", `${sx.toFixed(0)}px`);
-      root.style.setProperty("--sun-y", `${sy.toFixed(0)}px`);
+    const pv = project(sceneState.cam.pivot, camera, W, H);
+    write("subject", `${pv.x.toFixed(0)},${pv.y.toFixed(0)}`, () => {
+      root.style.setProperty("--subject-x", `${pv.x.toFixed(0)}px`);
+      root.style.setProperty("--subject-y", `${pv.y.toFixed(0)}px`);
     });
   }
 

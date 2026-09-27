@@ -149,51 +149,65 @@ a {
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  overflow: hidden;
   background:
+    /* The hero: the paper lifts to white behind the stone. */
     radial-gradient(
       38vw 48vh at var(--stone-x, 62vw) var(--stone-y, 50vh),
-      color-mix(in oklab, var(--lift) calc(max(0, 1 - var(--sky, 0) - var(--flat, 0)) * 100%), transparent) 0%,
+      color-mix(in oklab, var(--lift) calc(max(0, 1 - var(--cove, 0)) * 100%), transparent) 0%,
       color-mix(in oklab, var(--lift) 0%, transparent) 70%
     ),
     radial-gradient(140vw 120vh at 50% 45%, color-mix(in oklab, var(--paper) 0%, transparent) 60%, color-mix(in oklab, var(--ink) 2.5%, transparent) 100%),
-    /* THE SKY over the cloud sea: the low sun's glow, then a clean
-       high-altitude blue overhead whitening to a bright haze on the horizon
-       (keyed to where the horizon lands on the page), the far cloud a shade
-       below it. The cloud sea itself is the canvas. */
+    /* THE STUDIO, after the hero — barely there, never a picture: a soft pool
+       of light behind the subject (wherever the camera holds it)… */
     radial-gradient(
-      circle at var(--sun-x, 80vw) var(--sun-y, -60vh),
-      color-mix(in oklab, #fffdf7 calc(var(--sky, 0) * 92%), transparent) 0,
-      color-mix(in oklab, #fffaf0 calc(var(--sky, 0) * 42%), transparent) 8vmin,
-      color-mix(in oklab, #fff8ee 0%, transparent) 46vmin
+      46vw 58vh at var(--subject-x, 60vw) var(--subject-y, 50vh),
+      color-mix(in oklab, #fdfcfa calc(var(--cove, 0) * 100%), transparent) 0%,
+      color-mix(in oklab, #fbfaf7 calc(var(--cove, 0) * 55%), transparent) 45%,
+      color-mix(in oklab, #fbfaf7 0%, transparent) 75%
     ),
+    /* …and the cove: the backdrop a shade deeper overhead, a band of light
+       where it meets the floor (keyed to where the floor's horizon lands on
+       the page), the floor a shade deeper toward the lens. */
     linear-gradient(
       180deg,
-      color-mix(in oklab, #b9cadf calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) - 120vh),
-      color-mix(in oklab, #cddaea calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) - 55vh),
-      color-mix(in oklab, #e4ecf4 calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) - 14vh),
-      color-mix(in oklab, #f7f9fa calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) - 0.6vh),
-      color-mix(in oklab, #eef2f6 calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) + 2.5vh),
-      color-mix(in oklab, #e3e9f0 calc(var(--sky, 0) * 100%), transparent) calc(var(--horizon, 40vh) + 40vh)
-    ),
-    /* The salt flat's sky: cool overhead, a band of light on the horizon, the
-       flat a shade deeper just below it. Behind everything, so the type set
-       behind the canvas is never veiled. */
-    /* The salt flat's sky, and below the horizon its mirror (the canvas draws
-       the mirror itself; this is what shows where it melts off far away). */
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, #d3d9e1 calc(var(--flat, 0) * 100%), transparent) 0px,
-      color-mix(in oklab, #e6eaef calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) - 22vh),
-      color-mix(in oklab, #fcfbf8 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) - 0.5vh),
-      color-mix(in oklab, #f8f8f6 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) + 1.5vh),
-      color-mix(in oklab, #e9ecf0 calc(var(--flat, 0) * 100%), transparent) calc(var(--horizon, 60vh) + 22vh),
-      color-mix(in oklab, #e0e5eb calc(var(--flat, 0) * 100%), transparent) 100%
+      color-mix(in oklab, #eeede9 calc(var(--cove, 0) * 100%), transparent) calc(var(--horizon, 50vh) - 90vh),
+      color-mix(in oklab, #f3f2ee calc(var(--cove, 0) * 100%), transparent) calc(var(--horizon, 50vh) - 26vh),
+      color-mix(in oklab, #f9f8f5 calc(var(--cove, 0) * 100%), transparent) calc(var(--horizon, 50vh) - 0.8vh),
+      color-mix(in oklab, #f2f1ed calc(var(--cove, 0) * 100%), transparent) calc(var(--horizon, 50vh) + 3vh),
+      color-mix(in oklab, #ebeae5 calc(var(--cove, 0) * 100%), transparent) calc(var(--horizon, 50vh) + 60vh)
     ),
     radial-gradient(
       circle at var(--stone-x, 62vw) var(--stone-y, 50vh),
       var(--night) calc(var(--dusk) * 165vmax - 24vmax),
       var(--paper-day) calc(var(--dusk) * 165vmax)
     );
+}
+/* A slow, cool haze drifting across the studio — the only thing that moves
+   in the backdrop, and so faint it is felt more than seen. */
+#field::after {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  opacity: calc(var(--cove, 0) * 0.9);
+  background:
+    radial-gradient(34% 30% at 28% 36%, color-mix(in oklab, #e4e3ec 70%, transparent), transparent 70%),
+    radial-gradient(30% 34% at 74% 68%, color-mix(in oklab, #e7e6ee 60%, transparent), transparent 70%);
+  animation: studio-haze 70s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes studio-haze {
+  0% {
+    transform: translate3d(-4%, -2%, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    transform: translate3d(5%, 3%, 0) rotate(8deg) scale(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #field::after {
+    animation: none;
+  }
 }
 #field-card {
   position: fixed;

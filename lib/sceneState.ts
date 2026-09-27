@@ -56,6 +56,8 @@ export const sceneState = {
     cut: false,
     /** 0..1 a short, decaying jolt (the landing), applied by the rig. */
     shake: 0,
+    /** Depth of field: px of blur for what lies far behind the focus (0 = no lens pass). */
+    aperture: 0,
     /**
      * How far the film's moving frame (the falling core) moved this frame. The
      * rig adds it to its springs, so the camera rides the fall exactly and its
@@ -104,8 +106,10 @@ export const sceneState = {
     floodX: 0.5,
     floodY: 0.5,
     ripple: 0,
-    /** 0..1 the falling spiral tears a hole through the cloud deck (the flat shows through it). */
+    /** 0..1 the falling spiral tears a hole through the cloud deck (retired). */
     hole: 0,
+    /** 0..1 the studio's faint cove + light pool on the page (#field) — after the hero. */
+    cove: 0,
     lake: 0,
     plain: 0,
     void: 0,
@@ -134,6 +138,8 @@ export const sceneState = {
     reflect: 1,
     /** How far below the floor the reflection reaches, in stone heights × scale. */
     reflLen: 1.1,
+    /** 0..1 the white room seen at grazing angles on the glass (after the hero). */
+    rim: 0,
     /** Floor height for reflections / ground effects this frame (world y). */
     floorY: -1.975,
     /** Ground mist: screen-space cutoff (0..1 from top; canvas pixels below this y are not drawn by mist) + alpha. */

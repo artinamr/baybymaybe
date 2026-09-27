@@ -114,3 +114,25 @@ export function mulberry32(seed: number): () => number {
 }
 
 export const DEG = Math.PI / 180;
+
+/**
+ * An explosion: leaves fast and slows for a long time (exponential drag) —
+ * never an ease-in (a burst that starts slowly reads as a tween).
+ */
+export function easeBurst(t: number): number {
+  const x = clamp01(t);
+  return (1 - Math.exp(-5.2 * x)) / (1 - Math.exp(-5.2));
+}
+
+/**
+ * A precision seat: a hair of anticipation, the move, then a small overshoot
+ * (~1.7%) and settle — the click of a machined part landing. Ends exactly at 1.
+ */
+export function easeLock(t: number): number {
+  const x = clamp01(t);
+  const c1 = 0.62;
+  const c2 = c1 * 1.525;
+  return x < 0.5
+    ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
+    : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
+}

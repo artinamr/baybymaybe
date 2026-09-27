@@ -69,7 +69,7 @@ export function CameraRig() {
     const L = last.current;
     if (Math.abs(near - cam.near) > 0.02 * near) {
       cam.near = near;
-      cam.far = 2400;
+      cam.far = 700;
       L.fov = -1;
     }
     if (Math.abs(fov - L.fov) > 1e-4 || Math.abs(ppx - L.ppx) > 1e-5 || Math.abs(ppy - L.ppy) > 1e-5 || L.w !== size.width || L.h !== size.height) {

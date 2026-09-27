@@ -3,10 +3,10 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { evaluate, LAND_S, M0, plan } from "@/lib/choreo";
+import { evaluate, M0, plan } from "@/lib/choreo";
 import { evaluateStory } from "@/lib/storyFilm";
 import { story } from "@/lib/story";
-import { blendPose, COL_C, fallCore, fragTarget, fx, pose, poseMatrix, prepareFormations, prepared, TOWER_BASE, vortexSpin, type FormationCtx } from "@/lib/formations";
+import { blendPose, COL_C, fragTarget, fx, pose, poseMatrix, prepareFormations, prepared, STEPS, TOWER_BASE, type FormationCtx } from "@/lib/formations";
 import { CORE } from "@/lib/geo/types";
 import { getStone } from "@/lib/geo/crystal";
 import { fragTex } from "@/lib/fragTex";
@@ -14,7 +14,7 @@ import { layout } from "@/lib/layout";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { bus, intro, pointer, scroll, ui } from "@/lib/stores";
 import { dev, devNum, FROZEN_TIME_S } from "@/lib/dev";
-import { DEG, clamp01, easeInOutCubic, easeInOutSine, easeIntro, easeOutSine, lerp, range } from "@/lib/ease";
+import { DEG, clamp01, easeBurst, easeInOutCubic, easeInOutSine, easeIntro, easeLock, easeOutSine, lerp, range } from "@/lib/ease";
 import { spring, springTo } from "@/lib/springs";
 
 /**
@@ -65,9 +65,9 @@ export function Director() {
       tilt,
       flowT: 0,
       ai: 0,
+      burstT: 0,
       exact: 1,
       explode: 1,
-      fall: 0,
       camPos: new THREE.Vector3(),
       open: 0,
     }),
@@ -100,11 +100,12 @@ export function Director() {
     lastS: 0,
     /** The hero's quiet invitation: a thread of light down a ridge every few seconds. */
     lastIdleThread: 0,
-    /** When the core last touched down on the flat, and the stone last shattered (−1: not yet). */
-    landT0: -1,
+    /** When the stone last shattered (−1: not yet). */
     breakT0: -1,
-    /** When the tower's roof was laid (a pulse of light runs up it). */
+    /** When the stair's roof was laid (a glint runs up it, step after step). */
     roofT0: -1,
+    /** The turbine: how far the stair has run on its own once the AI has worked it (rad). */
+    turbine: 0,
     /** The 3D's own scroll clock: follows scroll.S with weight (−1 = not started). */
     S: -1,
     /** 1 while the stone is whole (fragments locked rigid), easing to 0 when it breaks. */
@@ -131,7 +132,8 @@ export function Director() {
         vel: new THREE.Vector3(),
         quat: new THREE.Quaternion(),
         scale: new THREE.Vector3(1, 1, 1),
-        omega: 3.6 + 2.4 * ((i * 0.618034) % 1),
+        // Tight enough that the choreography reads crisp, loose enough for weight.
+        omega: 6.5 + 2.5 * ((i * 0.618034) % 1),
         phase: i * 1.713,
         /** Blend progress last frame (for the lock-in flash) and the flash itself. */
         lastM: 0,
@@ -140,16 +142,16 @@ export function Director() {
         lift: spring(0),
         /** The colossus: how open this piece was last frame (it flashes as it seats). */
         lastOpen: 0,
-        /** The tower: how far the AI had turned this piece's floor last frame. */
+        /** The stair: how far the AI had turned this step last frame, and where the roof's glint was. */
         lastLit: 0,
+        lastPulse: -1,
         /** The exploded view: how exact this piece was last frame. */
         lastExact: 0,
       })),
     [stone]
   );
-  // The film's moving frame: the falling core. Springs live in it, so a piece
-  // (or the camera) riding a 50-unit fall keeps its place in the spiral.
-  const anchor = useMemo(() => ({ now: new THREE.Vector3(), last: new THREE.Vector3(), live: false, spin: 0, lastSpin: 0, dq: new THREE.Quaternion() }), []);
+  const flightAxis = useMemo(() => new THREE.Vector3(), []);
+  const flightQ = useMemo(() => new THREE.Quaternion(), []);
   const drift = useMemo(() => new THREE.Quaternion(), []);
   const driftAxis = useMemo(() => new THREE.Vector3(), []);
 
@@ -212,6 +214,9 @@ export function Director() {
     const finaleK = S > M0 - 1.0 ? range(S, M0 - 1.0, M0 - 0.6) * (1 - range(S, M0, M0 + 0.1)) : 0;
     springTo(s.pitchSpring, (pitchIdle + pPitch) * heroK + (pPitch * 0.3 + pitchIdle) * finaleK, 4.5, dt);
     yaw += s.yawSpring.x;
+    // Held, the exploded view turns slowly on its own — a turntable, never a still.
+    const holdK = inStory ? 0 : range(S, 2.95, 3.3) * (1 - range(S, 3.85, 3.95));
+    if (!still) yaw += holdK * 14 * DEG * Math.sin((2 * Math.PI * time) / 26);
     if (devYaw !== null) yaw = devYaw * DEG;
     // At the end, pointer tilt ≤ ±1.5° so the stone breathes but never swings.
     if (S >= M0) yaw += (pointer.has ? 1.5 * DEG * pointer.nx : 0) * (1 - range(S - M0, 0.3, 0.5));
@@ -301,17 +306,12 @@ export function Director() {
       }
     } else u.pulseAmp = 0;
 
-    // TOUCH-DOWN: a jolt through the camera, the seams flaring. (The shatter
-    // hits too, more lightly.) The roof being laid sends light up the tower.
-    if (!inStory && s.lastS < LAND_S && S >= LAND_S && !still) s.landT0 = time;
-    if (S < LAND_S - 0.05) s.landT0 = -1;
+    // The shatter hits the camera, lightly. The roof being laid sends a glint
+    // up the stair.
     if (!inStory && s.lastS < 2.3 && S >= 2.3 && !still) s.breakT0 = time;
-    if (!inStory && s.lastS < 4.86 && S >= 4.86 && !still) s.roofT0 = time;
-    if (S < 4.7) s.roofT0 = -1;
-    const landK = s.landT0 >= 0 ? Math.exp(-(time - s.landT0) / 0.28) : 0;
-    const breakK = s.breakT0 >= 0 ? 0.45 * Math.exp(-(time - s.breakT0) / 0.22) : 0;
-    sceneState.cam.shake = Math.max(landK, breakK);
-    u.seam += 0.8 * landK;
+    if (!inStory && s.lastS < 4.84 && S >= 4.84 && !still) s.roofT0 = time;
+    if (S < 4.6) s.roofT0 = -1;
+    sceneState.cam.shake = s.breakT0 >= 0 ? 0.45 * Math.exp(-(time - s.breakT0) / 0.22) : 0;
     s.lastS = S;
 
     /* ---- the forms' own life -------------------------------------------- */
@@ -321,11 +321,14 @@ export function Director() {
     ctx.K = plan.K;
     ctx.explode = plan.explode + (still ? 0 : 0.02 * Math.sin(time * 0.9));
     ctx.exact = plan.exact;
+    ctx.burstT = inStory ? 0 : plan.burstT;
     ctx.ai = plan.ai;
-    ctx.fall = plan.fall;
     ctx.open = plan.open;
     ctx.camPos.copy(cam.pos);
-    ctx.towerYaw = plan.towerYaw + (still ? 0 : 0.012 * time);
+    // The stair sways a breath; once the AI has worked it, it runs — a turbine.
+    const aiK = plan.ai * plan.ai * (3 - 2 * plan.ai);
+    if (!still && (plan.a === "F2" || plan.b === "F2")) s.turbine += dt * 0.07 * aiK;
+    ctx.towerYaw = plan.towerYaw + (still ? 0 : 0.05 * Math.sin(time * 0.16)) + s.turbine;
 
     // The core turns on its own clock; a quick sweep of the cursor hurries it;
     // the whole sculpture leans toward the pointer.
@@ -361,7 +364,9 @@ export function Director() {
 
     // The light inside the glass follows the cursor (level here; where, per piece, below).
     const wantCursor = pointer.has && !still && S < 6 && performance.now() - pointer.lastMove < 6000 ? 1 : 0;
-    springTo(s.cursorAmt, wantCursor * (inSculpt ? 1 : 0.6), 3, dt);
+    // (Past the hero the light answers the hand only faintly: a shard filled
+    // with it reads as flat indigo.)
+    springTo(s.cursorAmt, wantCursor * (S > 2.3 ? 0.28 : 0.6), 3, dt);
     u.cursorAmt = s.cursorAmt.x;
     if (pointer.has) {
       ndc2.set(pointer.nx, pointer.ny);
@@ -377,31 +382,16 @@ export function Director() {
     if (plan.cut) s.rigid = whole ? 1 : 0;
     const snap = !s.springsLive || still || plan.cut;
     const loose = 1 - s.rigid;
-    // The moving frame (constant outside the fall, so it only moves there).
-    fallCore(inStory ? 0 : plan.fall, anchor.now);
-    const frameDelta = sceneState.cam.frameDelta;
-    anchor.spin = inStory ? 0 : vortexSpin(plan.fall);
-    let dSpin = 0;
-    if (anchor.live && !snap) {
-      frameDelta.subVectors(anchor.now, anchor.last);
-      dSpin = anchor.spin - anchor.lastSpin;
-    } else frameDelta.set(0, 0, 0);
-    anchor.last.copy(anchor.now);
-    anchor.lastSpin = anchor.spin;
-    anchor.live = true;
-    const cS = Math.cos(dSpin);
-    const sS = Math.sin(dSpin);
-    // The spiral's angle turns x toward z — a rotation about Y by −dSpin.
-    if (dSpin !== 0) anchor.dq.setFromAxisAngle(Y_AXIS, -dSpin);
+    sceneState.cam.frameDelta.set(0, 0, 0);
 
     // The cursor lifts shards out of the exploded view and the tower.
     const holdForm = plan.a === plan.b && (plan.a === "F2" || plan.a === "F4");
     // The colossus: a wave of light running out from the core through the open stone.
     const wavePeriod = 2.6;
     const waveR = ctx.K * (0.4 + 3.4 * (((time % wavePeriod) + wavePeriod) % wavePeriod) / wavePeriod);
-    // The tower: a pulse of light running up it when the roof is laid.
-    const roofP = s.roofT0 >= 0 ? (time - s.roofT0) / 1.6 : -1;
-    // How near the core is to passing a floor right now (the core flares as it works).
+    // The stair: a glint running up it when the roof is laid.
+    const roofP = s.roofT0 >= 0 ? (time - s.roofT0) / 1.4 : -1;
+    // How near the core is to passing a step right now (the core flares as it works).
     let passSum = 0;
 
     const frags = stone.frags;
@@ -428,9 +418,10 @@ export function Director() {
             span = 0.7;
             break;
           case 2: {
-            // Course by course: each lands in its own window, with a little scatter.
-            const c = isCore ? 0 : Math.max(0, pr.course);
-            m = clamp01((plan.course[c] - 0.1 * pr.rand) / 0.9);
+            // The stair: each step leaves the climbing stone as it passes its
+            // height; the roof last; the heart first — down to the foot.
+            const k = isCore ? -1.6 : pr.step >= 0 ? pr.step : STEPS + 0.5;
+            m = clamp01((plan.front - k) / 2.5);
             break;
           }
           case 3:
@@ -447,11 +438,6 @@ export function Director() {
             d = 0.46 * pr.radK + 0.06 * pr.rand;
             span = 0.48;
             break;
-          case 8:
-            // The tower unravels: the core first, then the roof, then floor by floor down.
-            d = isCore ? 0 : 0.12 + 0.5 * pr.trail + 0.04 * pr.rand;
-            span = 0.34;
-            break;
           case 9:
             // The colossus: the point seats first, the crown last.
             d = isCore ? 0 : 0.55 * pr.hK + 0.05 * pr.rand;
@@ -460,12 +446,31 @@ export function Director() {
         }
         if (plan.stagger !== 2) m = clamp01((m - d) / span);
         fragTarget(plan.b, f, ctx, Bp);
-        const e = easeInOutCubic(m);
-        fxGlow = lerp(fxGlow, fx.glow, e);
-        fxFlash = lerp(fxFlash, fx.flash, e);
-        fxLit = lerp(fxLit, fx.lit, e);
-        fxPass = lerp(fxPass, fx.pass, e);
+        // The curve of the move: a burst leaves fast and slows for a long
+        // time; a piece that SEATS anticipates a hair and lands with a small
+        // overshoot-and-settle (the click of a precision part); the rest glide.
+        const st = plan.stagger;
+        const e = st === 1 ? easeBurst(m) : st === 2 || st === 6 || st === 7 || st === 9 ? easeLock(m) : easeInOutCubic(m);
+        const eL = clamp01(e);
+        fxGlow = lerp(fxGlow, fx.glow, eL);
+        fxFlash = lerp(fxFlash, fx.flash, eL);
+        fxLit = lerp(fxLit, fx.lit, eL);
+        fxPass = lerp(fxPass, fx.pass, eL);
         blendPose(A, Bp, e, f.out, plan.arc, P);
+        // Thrown, not slid: in flight a piece tumbles a little about the axis
+        // across its path — most at mid-flight — and arrives square.
+        if (st !== 1 && !isCore) {
+          flightAxis.subVectors(Bp.pos, A.pos);
+          const dist = flightAxis.length();
+          if (dist > 1e-3) {
+            flightAxis.cross(Y_AXIS);
+            if (flightAxis.lengthSq() < 1e-6) flightAxis.set(1, 0, 0);
+            flightAxis.normalize();
+            const spin = Math.min(1.1, (dist / Math.max(1, P.scale.x)) * 0.3) * (0.55 + 0.45 * pr.rand) * Math.sin(Math.PI * eL);
+            flightQ.setFromAxisAngle(flightAxis, spin);
+            P.quat.premultiply(flightQ);
+          }
+        }
         // The spiral: swept round the vertical axis mid-flight, straight at both ends.
         if (plan.swirl !== 0) {
           const ang = plan.swirl * Math.sin(Math.PI * e);
@@ -494,11 +499,17 @@ export function Director() {
         if (sp.lastOpen > 0.02 && fxOpen <= 0.0005 && !still) sp.flash = 1;
         sp.lastOpen = fxOpen;
       } else sp.lastOpen = 0;
-      // The tower: a floor flashes as the AI turns it home.
+      // The stair: a step glints as the AI turns it home…
       if (plan.a === "F2" && plan.b === "F2" && !isCore) {
         if (sp.lastLit < 0.97 && fxLit >= 0.97 && !still) sp.flash = Math.max(sp.flash, 0.8);
         sp.lastLit = fxLit;
       } else sp.lastLit = fxLit;
+      // …and when the roof is laid a glint runs up it, step after step.
+      if (roofP >= 0 && plan.glowMode === 1 && !isCore && !still) {
+        const at = roofP * 1.15;
+        if (sp.lastPulse < pr.stepK && at >= pr.stepK) sp.flash = Math.max(sp.flash, 0.9);
+        sp.lastPulse = at;
+      } else sp.lastPulse = -1;
       // The exploded view: each piece flashes as it snaps exact.
       if (plan.a === "F4" && plan.b === "F4" && !isCore) {
         if (sp.lastExact < 0.97 && fxSnap >= 0.97 && !still) sp.flash = Math.max(sp.flash, 0.75);
@@ -510,11 +521,11 @@ export function Director() {
       // Suspended pieces breathe: a slow float and a drift of rotation.
       if (loose > 0.001 && !reduced) {
         const ph = sp.phase;
-        P.pos.x += 0.03 * loose * Math.sin(time * 0.61 + ph);
-        P.pos.y += 0.045 * loose * Math.sin(time * 0.47 + ph * 1.3);
-        P.pos.z += 0.03 * loose * Math.cos(time * 0.53 + ph * 0.7);
+        P.pos.x += 0.012 * loose * Math.sin(time * 0.61 + ph);
+        P.pos.y += 0.016 * loose * Math.sin(time * 0.47 + ph * 1.3);
+        P.pos.z += 0.012 * loose * Math.cos(time * 0.53 + ph * 0.7);
         driftAxis.set(Math.sin(ph), Math.cos(ph * 1.7), Math.sin(ph * 0.9)).normalize();
-        drift.setFromAxisAngle(driftAxis, 0.06 * loose * Math.sin(time * 0.33 + ph));
+        drift.setFromAxisAngle(driftAxis, 0.025 * loose * Math.sin(time * 0.33 + ph));
         P.quat.multiply(drift);
       }
 
@@ -544,18 +555,6 @@ export function Director() {
         sp.quat.copy(P.quat);
         sp.scale.copy(P.scale);
       } else {
-        sp.pos.add(frameDelta);
-        // …and turns with the spiral, about the falling core.
-        if (dSpin !== 0) {
-          const dx = sp.pos.x - anchor.now.x;
-          const dz = sp.pos.z - anchor.now.z;
-          sp.pos.x = anchor.now.x + dx * cS - dz * sS;
-          sp.pos.z = anchor.now.z + dx * sS + dz * cS;
-          const vx = sp.vel.x;
-          sp.vel.x = vx * cS - sp.vel.z * sS;
-          sp.vel.z = vx * sS + sp.vel.z * cS;
-          sp.quat.premultiply(anchor.dq);
-        }
         const w = sp.omega;
         const ax = w * w * (P.pos.x - sp.pos.x) - 2 * w * sp.vel.x;
         const ay = w * w * (P.pos.y - sp.pos.y) - 2 * w * sp.vel.y;
@@ -600,26 +599,17 @@ export function Director() {
 
       // Glow / flash / fade / core light.
       let glow = 1;
-      let flash = Math.max(sp.flash, 0.7 * sp.lift.x);
+      let flash = sp.flash;
       const fade = 0;
       let boost = 0;
       if (plan.glowMode === 1) {
-        // The tower: its windows glow softly while it is built; the pulse of
-        // the roof being laid runs up it; the floors the AI has passed are
-        // full of light, and the one it is passing flares.
-        // Windows stay dark glass until the AI has been past them.
-        const floorK = Math.max(0, pr.course) / 8;
-        const pulse = roofP >= 0 && roofP < 1.4 ? Math.exp(-Math.pow((roofP * 1.25 - floorK) / 0.12, 2)) : 0;
-        glow = lerp(0.12, 0.95, fxLit) + 0.5 * pulse;
-        flash = Math.max(flash, 0.45 * fxPass, 0.5 * pulse);
-        boost = 0.3 * fxLit + 0.8 * pulse + 0.45 * fxPass;
+        // The stair: dark glass. Only the core's light, INSIDE the steps it is
+        // passing (never a wash); the glints do the rest.
+        glow = 0.14 + 0.1 * fxLit;
+        boost = 0.22 * fxPass;
       } else if (plan.glowMode === 3) {
         // The exploded view: every cut face a window onto the light inside.
         glow = 1;
-      } else if (plan.glowMode === 4) {
-        // The fall: the pieces keep the light the AI gave them, dimming as they go.
-        glow = 0.85;
-        boost = 1.3 * (1 - 0.5 * ctx.fall) * fxLit + 0.2;
       } else if (plan.glowMode === 6) {
         // The colossus: the walls light a little as they stand aside, and a
         // wave of light runs out from the core through every piece — INSIDE
@@ -629,8 +619,7 @@ export function Director() {
           const dW = (P.pos.distanceTo(COL_C) - waveR) / (0.5 * ctx.K);
           boost = 1.5 * fxOpen * Math.exp(-dW * dW);
         }
-        // Still arriving from the fall: carrying a little light.
-        if (plan.a === "F3" && !isCore) boost = Math.max(boost, 0.5 * (1 - easeInOutCubic(m)));
+
       }
       if (isCore) {
         // The core: hidden inside the whole stone; laid bare by the burst; the
@@ -641,20 +630,24 @@ export function Director() {
           (plan.b === "F0" && m > 0.95) ||
           (plan.a === "F0" && plan.b !== "F0" && m < 0.04) ||
           (plan.a === "F7" && plan.open < 0.01);
-        let lvl = 2.6;
-        if (plan.glowMode === 1) lvl = 3.0 + 1.6 * Math.min(1, passSum * 0.5) + (still ? 0 : 0.3 * Math.sin(time * 2.1));
-        else if (plan.glowMode === 3) lvl = 2.8;
-        else if (plan.glowMode === 4) lvl = 3.6;
+        // Dark glass with a light burning INSIDE it — its facets still catch
+        // the room — never a violet fill (the lens brings it close now).
+        let lvl = 1.35;
+        if (plan.glowMode === 1) lvl = 1.45 + 0.5 * Math.min(1, passSum * 0.3) + (still ? 0 : 0.12 * Math.sin(time * 2.1));
+        else if (plan.glowMode === 3) lvl = 1.4;
         else if (plan.glowMode === 6) {
           // It beats with the waves it sends out.
           const beat = Math.exp(-Math.pow(((time % wavePeriod) + wavePeriod) % wavePeriod, 2) / 0.02);
-          lvl = 1.1 + 1.5 * plan.open + 1.6 * plan.open * beat;
-          if (plan.a === "F3") lvl = Math.max(lvl, 3.6 * (1 - easeInOutCubic(m)));
+          lvl = 0.8 + 0.8 * plan.open + 0.9 * plan.open * beat;
+          // Dropping down the well into the heart of the gathering stone.
+          if (plan.a === "F2") lvl = Math.max(lvl, 1.7 * (1 - easeInOutCubic(m)));
         }
         boost = hidden ? 0 : lvl;
         glow = 1;
         flash = 0;
       }
+      // Lifted by the cursor: a little light wakes inside it.
+      if (!isCore) boost += 0.12 * sp.lift.x;
       fragTex.writeFrag(i, M, glow, flash, fade, boost);
     }
     fragTex.writeDone();

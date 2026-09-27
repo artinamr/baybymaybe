@@ -5,67 +5,69 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { story } from "@/lib/story";
-import { SUN_DIR } from "@/lib/sky";
 
 /**
- * WHAT THE GLASS SEES, PLACE BY PLACE. The studio's room (StudioEnv — a dark
- * studio and softboxes, tuned for black glass on white paper) is right for the
- * hero; out in the sky and on the salt flat the obsidian must reflect the
- * world it is in, or every shard reads as a flat black cut-out. Two small
- * rooms are baked once with PMREM and swapped in as the places change:
+ * WHAT THE GLASS SEES.
  *
- *   sky   a bright horizon over a grey sea of cloud, a cool zenith, a low sun
- *   flat  a white horizon all round, a pale glaring flat below, an overcast
- *         zenith — a black monolith on a salt pan
+ * The hero and the statement keep StudioEnv — a dark room of narrow strips and
+ * broad dim softboxes, which gives the single stone its black silhouette (liked
+ * exactly as it is). From the break on, the page is a WHITE studio full of
+ * glass, and glass must reflect that room or every piece reads as a flat black
+ * cut-out. So the pieces get the product photographer's answer for glossy
+ * black on white: a pale room lit from above and below, with bold BLACK FLAGS
+ * standing round it — every face then carries a crisp dark reflection or a
+ * pale sheen, never one flat tone (an evenly bright room is grey plastic; the
+ * flags are what keep it glass). Baked once (PMREM), swapped in mid-burst,
+ * where the motion hides the change.
  *
- * Facets facing the camera stay dark (glass reflects ~8% head-on); the ones
- * turned away catch the horizon as bright bands — which is what makes black
- * glass read as glass.
- *
- * Past the statement the room also TURNS with the scroll, so the highlights
- * sweep across the glass the way a product film's lights do — with a quicker
- * sweep as the stone finishes assembling and as it lands.
+ * Past the statement the room TURNS with the scroll, so highlights and flag
+ * edges sweep across the glass the way a product film's lights do.
  */
 
-type Stops = { nadir: number; below: number; horizon: number; above: number; zenith: number; tint: [number, number, number]; patches?: number };
-
-function room(stops: Stops, sun: THREE.Vector3 | null, sunPower: number): THREE.Scene {
+function whiteStudio(): THREE.Scene {
   const scene = new THREE.Scene();
-  const geo = new THREE.SphereGeometry(40, 64, 32);
+  const R = 40;
+  const geo = new THREE.SphereGeometry(R, 64, 32);
   const pos = geo.attributes.position;
   const colors = new Float32Array(pos.count * 3);
-  const [tr, tg, tb] = stops.tint;
   for (let i = 0; i < pos.count; i++) {
-    const y = pos.getY(i) / 40;
-    let k: number;
-    if (y >= 0) {
-      // A narrow band of light at the horizon, a darker sky above it.
-      const band = Math.exp(-y * 30);
-      k = stops.above + (stops.zenith - stops.above) * Math.pow(y, 0.6) + (stops.horizon - stops.above) * band;
-    } else {
-      const band = Math.exp(y * 36);
-      k = stops.nadir + (stops.below - stops.nadir) * Math.pow(1 + y, 2) + (stops.horizon - stops.below) * band * 0.7;
-      // Weather below: soft patches of brighter and shadowed cloud, so a facet
-      // turned down catches structure, never one flat grey.
-      if (stops.patches) {
-        const a = Math.atan2(pos.getZ(i), pos.getX(i));
-        const w = Math.sin(a * 3 + y * 7) * 0.5 + Math.sin(a * 7 - y * 11 + 1.3) * 0.3 + Math.sin(a * 13 + y * 5 + 2.1) * 0.2;
-        k *= 1 + stops.patches * w * Math.min(1, -y * 3);
-      }
-    }
-    colors[i * 3] = k * tr;
-    colors[i * 3 + 1] = k * tg;
-    colors[i * 3 + 2] = k * tb;
+    const y = pos.getY(i) / R;
+    // A pale cove: a bright top light, a white floor bounce, a softer wall.
+    let k = 0.62 + 0.22 * Math.max(0, y) ** 0.7 + 0.2 * Math.max(0, -y) ** 0.8;
+    k += 0.35 * Math.exp(-((y - 0.95) ** 2) / 0.004); // the top softbox, a disc of light
+    colors[i * 3] = k;
+    colors[i * 3 + 1] = k * 0.997;
+    colors[i * 3 + 2] = k * 0.99;
   }
   geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  const mat = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, toneMapped: false });
-  scene.add(new THREE.Mesh(geo, mat));
-  if (sun) {
-    const s = new THREE.Mesh(new THREE.SphereGeometry(1.6, 16, 8), new THREE.MeshBasicMaterial({ toneMapped: false }));
-    s.material.color.setRGB(sunPower, sunPower * 0.97, sunPower * 0.92);
-    s.position.copy(sun).normalize().multiplyScalar(34);
-    scene.add(s);
-  }
+  scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, toneMapped: false })));
+
+  const black = new THREE.MeshBasicMaterial({ color: 0x050507, side: THREE.DoubleSide, toneMapped: false });
+  const panel = (w: number, h: number, az: number, r: number, y: number, mat: THREE.Material) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    m.position.set(Math.sin(az) * r, y, Math.cos(az) * r);
+    m.lookAt(0, y, 0);
+    scene.add(m);
+  };
+  // Black flags standing round the glass (tall, of different widths, so the
+  // reflections they make are never a regular pattern).
+  const flags: [number, number, number][] = [
+    [9, 0.35, 22],
+    [5, 1.55, 20],
+    [11, 2.6, 24],
+    [6, 3.7, 21],
+    [4, 4.7, 19],
+    [8, 5.6, 23],
+  ];
+  for (const [w, az, r] of flags) panel(w, 34, az, r, 2, black);
+  // A low black card in front, for a dark line along the lower facets.
+  panel(40, 3, 0.9, 16, -9, black);
+  // Two narrow strip lights between the flags: the crisp edge highlights.
+  const strip = new THREE.MeshBasicMaterial({ color: new THREE.Color(3.2, 3.15, 3.05), side: THREE.DoubleSide, toneMapped: false });
+  panel(0.7, 26, 1.05, 17, 3, strip);
+  panel(0.5, 26, 4.2, 17, 3, strip);
+  // (No coloured light in this room: a flat face that caught it went solid
+  // indigo — the rejected "flat purple" — the indigo lives inside the glass.)
   return scene;
 }
 
@@ -77,43 +79,28 @@ function sweep(S: number, a: number, b: number) {
 
 export function PlaceEnv() {
   const { gl, scene } = useThree();
-  const tex = useRef<{ studio: THREE.Texture | null; sky: THREE.Texture | null; flat: THREE.Texture | null }>({ studio: null, sky: null, flat: null });
-  const sunDir = SUN_DIR;
+  const tex = useRef<{ studio: THREE.Texture | null; white: THREE.Texture | null }>({ studio: null, white: null });
 
   useEffect(() => {
     const pm = new THREE.PMREMGenerator(gl);
-    // Over a sunlit cloud sea the world BELOW is bright and the zenith deep:
-    // facets turned down catch the clouds, facets turned up stay dark glass.
-    const sky = room({ nadir: 0.42, below: 0.82, horizon: 1.9, above: 0.34, zenith: 0.09, tint: [0.96, 0.975, 1.0], patches: 0.55 }, sunDir, 18);
-    const flat = room({ nadir: 0.2, below: 0.42, horizon: 1.8, above: 0.28, zenith: 0.08, tint: [1.0, 0.995, 0.985] }, null, 0);
-    const skyRT = pm.fromScene(sky, 0.02, 0.1, 100);
-    const flatRT = pm.fromScene(flat, 0.02, 0.1, 100);
-    tex.current.sky = skyRT.texture;
-    tex.current.flat = flatRT.texture;
+    const rt = pm.fromScene(whiteStudio(), 0.02, 0.1, 100);
+    tex.current.white = rt.texture;
     pm.dispose();
-    return () => {
-      skyRT.dispose();
-      flatRT.dispose();
-    };
-  }, [gl, sunDir]);
+    return () => rt.dispose();
+  }, [gl]);
 
   useFrame(() => {
     const t = tex.current;
     // The studio's baked room is whatever drei's <Environment> left on the scene first.
-    if (!t.studio && scene.environment && scene.environment !== t.sky && scene.environment !== t.flat) t.studio = scene.environment;
+    if (!t.studio && scene.environment && scene.environment !== t.white) t.studio = scene.environment;
     if (!t.studio) return;
-    const env = sceneState.env;
-    let want: THREE.Texture | null = t.studio;
-    if (story.phase === "closed") {
-      if (env.flat > 0.5 && t.flat) want = t.flat;
-      else if (env.sky > 0.5 && t.sky) want = t.sky;
-    }
-    if (want && scene.environment !== want) scene.environment = want;
     const S = sceneState.S;
-    const turn =
-      story.phase === "closed"
-        ? 0.32 * Math.max(0, S - 2.2) + 1.1 * sweep(S, 3.9, 4.15) + 1.3 * sweep(S, 7.0, 7.4) + 0.9 * sweep(S, 9.7, 10.6)
-        : 0;
+    const inFilm = story.phase === "closed";
+    const want = inFilm && S > 2.36 && t.white ? t.white : t.studio;
+    if (scene.environment !== want) scene.environment = want;
+    const turn = inFilm
+      ? 0.32 * Math.max(0, S - 2.2) + 1.1 * sweep(S, 4.7, 5.0) + 1.3 * sweep(S, 8.9, 9.4) + 0.9 * sweep(S, 9.7, 10.6)
+      : 0;
     scene.environmentRotation.set(0, turn, 0);
   }, PRIORITY.scene);
 
