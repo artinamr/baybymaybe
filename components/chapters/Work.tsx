@@ -40,7 +40,7 @@ export function Work() {
               onClick={w.href ? undefined : (e) => e.preventDefault()}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- static export, pre-sized covers */}
-              <img src={w.cover} alt="" loading="lazy" decoding="async" />
+              <img src={w.cover} alt="" loading="eager" fetchPriority="low" decoding="async" />
               <span className="work-shine" aria-hidden />
               {w.placeholder ? <span className="work-ph mono">Placeholder</span> : null}
             </a>

@@ -2676,7 +2676,8 @@ html[data-nowebgl] .pot-fill {
   overflow: hidden;
   aspect-ratio: 16 / 10;
   border-radius: 6px;
-  background: #0b0b0f;
+  /* The tone of the covers' own paper, so a cover still loading is a quiet light card, never a black box. */
+  background: #eeede9;
   isolation: isolate;
 }
 .work-card-2 .work-media {
