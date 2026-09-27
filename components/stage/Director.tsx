@@ -252,6 +252,12 @@ export function Director() {
       s.lastIdleThread = time;
       s.thread = { ridge: frontLeftRidge(yaw), t0: time, dur: THREAD_MS * 1.25, live: true };
     }
+    // …and at the end the colossus answers it: the same thread of light down
+    // its ridge, where the film began — slower, as befits its size.
+    if (S > M0 + 0.3 && !inStory && time - s.lastIdleThread > 7.5 && !s.thread.live && !reduced) {
+      s.lastIdleThread = time;
+      s.thread = { ridge: frontLeftRidge(yaw - cam.az), t0: time, dur: THREAD_MS * 1.8, live: true };
+    }
     s.hoverLight = lerp(s.hoverLight, ui.hoverStone ? 1 : 0, 1 - Math.exp(-dt / 0.13));
     u.cursorLight *= 1 + 0.5 * s.hoverLight;
     if (s.thread.live) {

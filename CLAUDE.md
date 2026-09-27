@@ -65,9 +65,9 @@ nothing too visible". No cuts, no white-outs:
 | 2.25–2.85 | F1 THE SHATTER — explosive (`easeBurst`) and never frozen (every piece keeps drifting and tumbling, `plan.burstT`); the camera DIVES INTO it (the Lens softening the pieces that slide past), the core sharp at the centre |
 | 2.85–3.9 | WEBSITES: F4 EXPLODED VIEW — loose, then snapping EXACT per piece from the heart out, a white glint as each locks; held, it sways on its own (a turntable, never a still) |
 | 3.9–4.84 | PLATFORMS: F2 THE STAIR — the exploded stone lifts off its heart (the core drops to the floor) and CLIMBS, turning like a drill, laying a splinter as each step as it passes that step's height (`plan.front`): 39 treads (every shard but the girdle plate), all the same length, rise and turn, round an open well, ordered by where each will seat in the colossus; the camera rises with it; each tread glints as it seats, and a glint runs up the stair when the last is laid ("builds up into a bigger one") |
-| 4.84–5.0 | the whole stair from a little above, on its mirror |
+| 4.84–5.0 | the camera cranes up over the top and looks DOWN the whole spiral to the light at its foot (a far side view read as a line of chips) |
 | 4.97–5.92 | AI AUTOMATION: F2 at `plan.ai` — the core climbs the well; every step it passes turns a quarter on its own length (tread → blade, `easeLock`, a glint) and swings 30° on — the stair becomes a turbine and keeps running (the Director's time-integrated `turbine`). The camera climbs OVER it and looks DOWN (el 44–66°): a vortex of blades, the light rising through it |
-| 5.98–7.34 | THE GATHER: F2 → F7 — the core drops back down the well and the stair winds itself (`plan.swirl` 1.5) into the OPEN colossus, point first, growing ×3; the camera draws back and down, circling |
+| 5.98–7.34 | THE GATHER: F2 → F7 — the core drops back down the well and the stair winds itself (`plan.swirl` 1.5) into the OPEN colossus, point first, growing ×3; the camera draws right back at once so the whole stair is seen winding in, then circles down |
 | 7.05–9.3 | WHY: F7 — the open colossus (a wide hollow round the core, the glass toward the camera standing aside); the camera flies in and round the core, and out as it closes, the crown seating last |
 | 9.3– | LET'S TALK: down at the floor's own level, the colossus and its reflection; "Let's talk." stands on the horizon |
 
@@ -85,21 +85,45 @@ PlaceEnv.tsx). The camera BANKS into its turns (a `roll` channel on the keys).
   loop is `textureLod`: ANGLE's HLSL compiler unrolls loops that need
   derivatives, and the first version stalled ~5.7 s on first use. Both
   programs are precompiled (`compileAsync`). Measured at 60 fps, 1.3× DPR.
-- **The white studio the glass sees** (`PlaceEnv.tsx`): from the break on, a
-  PMREM-baked pale cove with bold BLACK FLAGS and two strip lights — glossy
-  black on white needs dark reflections to stay glass. NO coloured light in it:
-  an indigo strip filled whole flat faces with solid indigo.
-- **The white-room rim** (`uRim`, obsidian.ts): Fresnel white at grazing
-  angles after the break (0 in the hero) — without it small pieces read as
-  black cut-outs on the white page.
+- **The room the glass sees after the break** (`PlaceEnv.tsx`, round 14): a
+  DARK studio (the hero's kind) opened up for pieces — a luminous HORIZON ring
+  all round (grazing faces reflect it, so every shard gets a bright edge while
+  faces toward the lens stay black), the hero's crisp strips, softboxes with a
+  real light's falloff (a uniform panel caught whole reads as a grey card),
+  the bright paper floor and one deep indigo trace far back. The round-13
+  PALE room turned every face mid-grey — "plasticky". Broken pieces are
+  polished harder (`uCrisp`: crisper reflections, glossier cuts). At the end
+  (S ≥ 9.62) the whole stone takes the hero's own room back, held round with
+  the camera — the film ends on the look it began with.
+- **Never let the glass programs recompile mid-film.** three keys every
+  program on its output target and on the env's PMREM size: the first time
+  the Lens drew into its target, every obsidian program recompiled — a 2.5 s
+  FREEZE at the shatter (live in round 13). The Lens precompiles the scene for
+  its target at load, and every baked room uses the hero room's PMREM size
+  (512). After touching either, record a real wheel scroll through 2.2–2.5
+  and check the longest frame gap.
+- **The white-room rim** (`uRim`, obsidian.ts) is down to a hint (0.1): the
+  horizon ring does it physically.
 - **Motion curves** (`lib/ease.ts`): `easeBurst` (explosive, long tail) for the
   shatter; `easeLock` (a hair of anticipation, ~1.7 % overshoot, settle) for
   every seat and flip; in flight a piece tumbles about the axis across its
   path, most at mid-flight, and arrives square.
-- **Glints, not washes**: an event (a seat, a flip, a lock) is a narrow band of
-  WHITE light sweeping once across the piece (`vFx.y` → `obsGlint`). Past the
-  hero the cursor's light inside the glass is faint (0.28) and a lifted shard
-  barely lights — full strength filled nearby shards with flat indigo.
+- **Glints, not washes**: an event (a seat, a flip, a lock, the colossus's
+  wave, the cursor sweeping over glass) is a narrow band of WHITE light
+  sweeping once across the piece (`vFx.y` → `obsGlint`). Past the hero the
+  cursor's light inside the glass is faint (0.28) and a lifted shard barely
+  lights — full strength filled nearby shards with flat indigo. The glow that
+  fills the stone before the shatter is gone before the pieces part.
+- **The core** has a HEART: a tight, hot light deep inside (obsGlowField
+  `full`), so it reads as light within the glass, not tinted glass.
+- **Veins** carry an occasional travelling pulse (a sharp head, a fading
+  tail, each vein on its own beat — a cheap per-vein hash, never extra noise
+  per pixel: that cost the colossus close-ups 10 fps).
+- **Interactivity past the hero:** the camera drifts a degree toward the
+  pointer (CameraRig parallax, from S 0.95; the hero is untouched); glass
+  catches a glint as the cursor sweeps over it; the open colossus drifts and
+  turns on each piece's own beat, as if weightless; at "Let's talk." the
+  hero's ridge thread runs down the colossus.
 - **The Why words invert** (ink → paper) wherever ANY piece passes behind them:
   a paper copy (`[data-inv-why]`) clipped each frame to the union of every
   piece's projected hull (`lib/project.ts`). This replaced the frosted card.
@@ -141,10 +165,16 @@ liked — "for everything else step up the game … super meaningful and perfect
 Round 12 answered it with the sky / tower / fall / salt-flat film. → round 12
 verdict (2026-09-27): "I don't like the water and the cloud thingy. You can
 add vague abstract background but nothing too visible, and the animations are
-still cheap and unimpressive and non premium." Round 13 answers it (above):
-the clouds, the deck, the salt flat and the fall are gone — the studio is the
-only place; the tower became the stair; the lens, the white room, the glints
-and the new motion curves. Awaiting the verdict.
+still cheap and unimpressive and non premium." Round 13 answered it: the
+studio is the only place; the tower became the stair; the lens, the glints
+and the new motion curves. → round 13 verdict (2026-09-27): "we are in the
+right direction … the overall shape and stuff are good", but some animations
+"too plasticky … too generic rather than polished Apple level" — work on the
+transitions, textures, interactivity, colour, veins; "don't worsen it …
+more premium, more polished, more majestic". Round 14 is that polish pass
+(the dark studio room, the freeze fix, the core's heart, vein pulses,
+parallax and glints, the reveal from above, the gather framed whole, the
+weightless colossus, the hero's room at the end). Awaiting the verdict.
 `preview-card.mp4` is MOTION ONLY.
 
 ## The stone's surface (2026-09-25: "shape great, texture really bad at some angles")

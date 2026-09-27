@@ -142,6 +142,9 @@ function openStudio(): THREE.Scene {
 const Q = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
 const HORIZON = Q?.get("hz") ? Number(Q.get("hz")) : 2.0;
 const INDIGO = Q?.get("indigo") ? Number(Q.get("indigo")) : 1.2;
+/** Where the ending takes the hero's room back (the camera sinking to the floor). */
+const FINALE_S = 9.62;
+const FIN_SIGN = Q?.get("fin") ? Number(Q.get("fin")) : 1;
 
 /** 0 → 1 across [a, b], eased both ends. */
 function sweep(S: number, a: number, b: number) {
@@ -171,11 +174,17 @@ export function PlaceEnv() {
     if (!t.studio) return;
     const S = sceneState.S;
     const inFilm = story.phase === "closed";
-    const want = inFilm && S > 2.36 && t.open ? t.open : t.studio;
+    // At the end the stone is whole again, and sees the hero's own room again
+    // (swapped while the camera sinks to the floor): the film ends on the
+    // look it began with.
+    const hero = !inFilm || S <= 2.36 || S >= FINALE_S;
+    const want = !hero && t.open ? t.open : t.studio;
     if (scene.environment !== want) scene.environment = want;
-    const turn = inFilm
+    let turn = inFilm
       ? 0.32 * Math.max(0, S - 2.2) + 1.1 * sweep(S, 4.7, 5.0) + 1.3 * sweep(S, 8.9, 9.4) + 0.9 * sweep(S, 9.7, 10.6)
       : 0;
+    // …held round with the camera, so its strips fall on the glass as they do in the hero.
+    if (inFilm && S >= FINALE_S) turn = FIN_SIGN * sceneState.cam.az;
     scene.environmentRotation.set(0, turn, 0);
   }, PRIORITY.scene);
 
