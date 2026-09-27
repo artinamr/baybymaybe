@@ -421,6 +421,7 @@ export function Director() {
       let fxFlash = fx.flash;
       let fxLit = fx.lit;
       let fxPass = fx.pass;
+      let fxTrail = fx.trail;
       const fxOpen = fx.open;
       const fxSnap = fx.snap;
       let m = plan.mix;
@@ -472,6 +473,7 @@ export function Director() {
         fxFlash = lerp(fxFlash, fx.flash, eL);
         fxLit = lerp(fxLit, fx.lit, eL);
         fxPass = lerp(fxPass, fx.pass, eL);
+        fxTrail = lerp(fxTrail, fx.trail, eL);
         blendPose(A, Bp, e, f.out, plan.arc, P);
         // Thrown, not slid: in flight a piece tumbles a little about the axis
         // across its path — most at mid-flight — and arrives square.
@@ -628,10 +630,12 @@ export function Director() {
       const fade = 0;
       let boost = 0;
       if (plan.glowMode === 1) {
-        // The stair: dark glass. Only the core's light, INSIDE the steps it is
-        // passing (never a wash); the glints do the rest.
-        glow = 0.14 + 0.1 * fxLit;
-        boost = 0.22 * fxPass;
+        // The stair: dark glass until the AI has worked through it — then the
+        // core's light stays INSIDE every step it passed, brightest just
+        // behind it: a trail of light up the system (never a wash; the cut
+        // faces stay dark windows onto it).
+        glow = 0.14 + 0.1 * fxLit + 0.16 * fxTrail;
+        boost = 0.22 * fxPass + 0.62 * fxTrail;
       } else if (plan.glowMode === 3) {
         // The exploded view: every cut face a window onto the light inside.
         glow = 1;

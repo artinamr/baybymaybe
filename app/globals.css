@@ -1003,15 +1003,8 @@ html[data-intro-skip] .intro-mask > span {
   z-index: 5;
   background: var(--paper);
   overflow: hidden;
-}
-.site-foot::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: var(--hair);
+  border-radius: 34px 34px 0 0;
+  box-shadow: 0 -1px 0 color-mix(in oklab, var(--ink) 9%, transparent), 0 -34px 70px -44px color-mix(in oklab, var(--ink) 30%, transparent);
 }
 .sf-in {
   max-width: 1600px;
@@ -2593,32 +2586,29 @@ html[data-nowebgl] .pot-fill {
    so the 3D dissolves into the page and back, never a hard seam.
    ========================================================================== */
 
+/* A sheet of paper with a real edge — rounded corners, a hairline and a soft
+   shadow on the scene below — never a fade to white (a white-out was the
+   round-10 "absolute crap"): the page slides over the film, visibly. */
 .page-sec {
+  --sheet-r: 34px;
+  --sheet-top: 0 -1px 0 color-mix(in oklab, var(--ink) 9%, transparent), 0 -34px 70px -44px color-mix(in oklab, var(--ink) 30%, transparent);
+  --sheet-bot: 0 1px 0 color-mix(in oklab, var(--ink) 9%, transparent), 0 34px 70px -44px color-mix(in oklab, var(--ink) 30%, transparent);
   position: relative;
   z-index: 5;
   background: var(--paper);
+  border-radius: var(--sheet-r);
+  box-shadow: var(--sheet-top), var(--sheet-bot);
 }
-.page-sec::before,
-.page-sec::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: calc(var(--vh) * 22);
-  pointer-events: none;
+/* A run of sheets is one card: square where two meet. */
+.page-sec:has(+ .page-sec) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: var(--sheet-top);
 }
-.page-sec::before {
-  bottom: 100%;
-  background: linear-gradient(to bottom, color-mix(in oklab, var(--paper) 0%, transparent), color-mix(in oklab, var(--paper) 55%, transparent) 55%, var(--paper));
-}
-.page-sec::after {
-  top: 100%;
-  background: linear-gradient(to top, color-mix(in oklab, var(--paper) 0%, transparent), color-mix(in oklab, var(--paper) 55%, transparent) 55%, var(--paper));
-}
-/* Two sheets in a row are one sheet. */
-.page-sec + .page-sec::before,
-.page-sec:has(+ .page-sec)::after {
-  display: none;
+.page-sec + .page-sec {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  box-shadow: var(--sheet-bot);
 }
 .page-in {
   padding: calc(var(--vh) * 16) var(--g) calc(var(--vh) * 14);
@@ -3101,6 +3091,12 @@ html[data-nowebgl] .pot-fill {
 }
 
 @media (max-width: 767px) {
+  .page-sec {
+    --sheet-r: 24px;
+  }
+  .site-foot {
+    border-radius: 24px 24px 0 0;
+  }
   .page-in {
     padding: calc(var(--vh) * 12) var(--g) calc(var(--vh) * 10);
   }

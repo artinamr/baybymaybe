@@ -342,7 +342,7 @@ function tiltAbout(out: Pose, centre: THREE.Vector3, tilt: THREE.Quaternion) {
  *   open  0..1 how open this piece of the colossus is
  *   snap  0..1 how exact this piece of the exploded view is
  */
-export const fx = { fade: 0, glow: 1, flash: 0, lit: 0, open: 0, pass: 0, snap: 0 };
+export const fx = { fade: 0, glow: 1, flash: 0, lit: 0, open: 0, pass: 0, snap: 0, trail: 0 };
 
 const smooth = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 /** Ease in and out, with a gentle middle: every leg starts and lands softly. */
@@ -370,11 +370,16 @@ export function aiCore(ai: number, out: THREE.Vector3): THREE.Vector3 {
  * step has turned behind it (it turns like a lock's tumbler: a hair back,
  * round, a click past, home).
  */
-function stepState(y: number, ai: number): { pass: number; done: number } {
+function stepState(y: number, ai: number): { pass: number; done: number; trail: number } {
   const dy = (coreClimb(ai) - y) / STEP_RISE; // steps the core is past this one
   const pass = Math.exp(-dy * dy * 0.18) * (ai > 0.001 && ai < 0.999 ? 1 : 0);
   const done = easeLock((dy + 0.5) / 2);
-  return { pass, done };
+  // THE TRAIL: every step the light has worked through keeps some of it —
+  // brightest just behind the core, fading down the stair; once the work is
+  // done the whole system stays softly alight (it is running).
+  const behind = dy > 0 ? Math.min(1, dy / 1.5) * Math.exp(-dy / 9) : 0;
+  const trail = ai > 0.001 ? Math.max(behind, 0.32 * done * Math.min(1, ai * 1.6)) : 0;
+  return { pass, done, trail };
 }
 
 /** A piece of the stair (or its roof) at AI progress ctx.ai. */
@@ -398,6 +403,7 @@ function stairTarget(p: Prep, ctx: FormationCtx, out: Pose) {
   tiltAbout(out, TOWER_C, ctx.tilt);
   fx.pass = st.pass;
   fx.lit = st.done;
+  fx.trail = st.trail;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -507,6 +513,7 @@ export function fragTarget(F: Formation, f: FragInfo, ctx: FormationCtx, out: Po
   fx.open = 0;
   fx.pass = 0;
   fx.snap = 0;
+  fx.trail = 0;
   if (f.index === CORE) {
     coreTarget(F, ctx, out);
     return;

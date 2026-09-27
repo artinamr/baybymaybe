@@ -38,8 +38,10 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
   line, the address, every link, the name signed across the bottom).
 - **TWO CLOCKS.** Page S = scrollY / vh; FILM TIME F runs the 3D (every key in
   lib/choreo.ts is film time and did not move). Film chapters run F 1:1 with
-  the scroll; a PAGE section is a sheet of paper (z 5, opaque, soft gradient
-  edges) that scrolls up OVER the film, and the film HOLDS from the last
+  the scroll; a PAGE section is a sheet of paper (z 5, opaque; a real card
+  edge — rounded corners, hairline, soft shadow on the scene — never a fade
+  to white, which reads as the rejected white-out) that scrolls up OVER the
+  film, and the film HOLDS from the last
   screen of the scene before it to the end of the run of sheets (`holds`,
   `filmS(S)` with softened corners; `pageS(F)` is its exact inverse by
   bisection). Page sections flow with their content, so their size and every
