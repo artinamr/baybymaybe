@@ -170,9 +170,12 @@ export function Director() {
     const L = layout.current;
     const reduced = typeof window !== "undefined" && document.documentElement.hasAttribute("data-reduced");
     const still = reduced || dev.freeze;
+    // Events (glints, the crack) never fire on a cut: a jump lands, it does not flash.
+    const quiet = still || scroll.cut;
     // The film follows the scroll with a little weight of its own (on top of
     // Lenis), so a flick of the wheel becomes a glide, never a jolt.
-    if (s.S < 0 || dev.freeze || reduced || Math.abs(scroll.S - s.S) > 3) s.S = scroll.S;
+    // (A jump cuts: the film lands on the new frame at once.)
+    if (s.S < 0 || dev.freeze || reduced || scroll.cut || Math.abs(scroll.S - s.S) > 3) s.S = scroll.S;
     else s.S += (scroll.S - s.S) * (1 - Math.exp(-dt * 4.5));
     // The film runs on its own clock: it holds while a page section is on screen.
     const S = filmS(s.S);
@@ -320,8 +323,8 @@ export function Director() {
 
     // The shatter hits the camera, lightly. The roof being laid sends a glint
     // up the stair.
-    if (!inStory && s.lastS < 2.3 && S >= 2.3 && !still) s.breakT0 = time;
-    if (!inStory && s.lastS < 4.84 && S >= 4.84 && !still) s.roofT0 = time;
+    if (!inStory && s.lastS < 2.3 && S >= 2.3 && !quiet) s.breakT0 = time;
+    if (!inStory && s.lastS < 4.84 && S >= 4.84 && !quiet) s.roofT0 = time;
     if (S < 4.6) s.roofT0 = -1;
     sceneState.cam.shake = s.breakT0 >= 0 ? 0.45 * Math.exp(-(time - s.breakT0) / 0.22) : 0;
     s.lastS = S;
@@ -391,8 +394,8 @@ export function Director() {
     // So is the tower: a building does not float.
     const whole = plan.a === plan.b && (plan.a === "F0" || plan.a === "F7" || plan.a === "F2");
     s.rigid += ((whole ? 1 : 0) - s.rigid) * (1 - Math.exp(-dt * (whole ? 2.2 : 9)));
-    if (plan.cut) s.rigid = whole ? 1 : 0;
-    const snap = !s.springsLive || still || plan.cut;
+    if (plan.cut || scroll.cut) s.rigid = whole ? 1 : 0;
+    const snap = !s.springsLive || still || plan.cut || scroll.cut;
     const loose = 1 - s.rigid;
     sceneState.cam.frameDelta.set(0, 0, 0);
 
@@ -504,7 +507,7 @@ export function Director() {
           P.quat.premultiply(swirlQ);
         }
         // Lock-in: a shard flashes as it lands in its new form.
-        if (!isCore && (plan.stagger === 2 || plan.stagger === 7 || plan.stagger === 9) && sp.lastM < 0.985 && m >= 0.985 && !still) sp.flash = 1;
+        if (!isCore && (plan.stagger === 2 || plan.stagger === 7 || plan.stagger === 9) && sp.lastM < 0.985 && m >= 0.985 && !quiet) sp.flash = 1;
         sp.lastM = m;
       } else {
         P.pos.copy(A.pos);
@@ -514,12 +517,12 @@ export function Director() {
       }
       // The colossus closing: each piece flashes as it seats back into place.
       if (plan.a === "F7" && !isCore) {
-        if (sp.lastOpen > 0.02 && fxOpen <= 0.0005 && !still) sp.flash = 1;
+        if (sp.lastOpen > 0.02 && fxOpen <= 0.0005 && !quiet) sp.flash = 1;
         sp.lastOpen = fxOpen;
       } else sp.lastOpen = 0;
       // The stair: a step glints as the AI turns it home…
       if (plan.a === "F2" && plan.b === "F2" && !isCore) {
-        if (sp.lastLit < 0.97 && fxLit >= 0.97 && !still) sp.flash = Math.max(sp.flash, 0.8);
+        if (sp.lastLit < 0.97 && fxLit >= 0.97 && !quiet) sp.flash = Math.max(sp.flash, 0.8);
         sp.lastLit = fxLit;
       } else sp.lastLit = fxLit;
       // …and when the roof is laid a glint runs up it, step after step.
@@ -530,7 +533,7 @@ export function Director() {
       } else sp.lastPulse = -1;
       // The exploded view: each piece flashes as it snaps exact.
       if (plan.a === "F4" && plan.b === "F4" && !isCore) {
-        if (sp.lastExact < 0.97 && fxSnap >= 0.97 && !still) sp.flash = Math.max(sp.flash, 0.75);
+        if (sp.lastExact < 0.97 && fxSnap >= 0.97 && !quiet) sp.flash = Math.max(sp.flash, 0.75);
         sp.lastExact = fxSnap;
       } else sp.lastExact = plan.a === "F4" ? fxSnap : plan.exact;
       sp.flash *= Math.exp(-dt / 0.5);

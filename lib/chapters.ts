@@ -144,7 +144,8 @@ const RAW: Raw[] = [
     vh: 320,
     sticky: true,
     jumpF: 10.75,
-    revealAt: 0.65,
+    // The words rise as the stone settles on the floor between them.
+    revealAt: 1.2,
     specimen: { name: "Let's talk", line: "A free, honest audit of what you have." },
   },
 ];

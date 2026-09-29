@@ -4,7 +4,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { Section } from "./Section";
 import { Pill, GhostPill } from "@/components/chrome/Pills";
 import { bus, intro } from "@/lib/stores";
-import { scrollToChapter } from "@/lib/scroll";
+import { jumpToAudit } from "@/lib/scroll";
 import { openStory } from "@/lib/story";
 
 const d = (ms: number, extra?: Record<string, string>) => ({ "--d": `${ms}ms`, ...extra }) as CSSProperties;
@@ -126,7 +126,7 @@ export function Hero() {
       </p>
       <div className="hero-ctas">
         <span className="intro intro-rise" style={d(1180)}>
-          <Pill onClick={() => scrollToChapter("audit")}>Get a free audit</Pill>
+          <Pill onClick={jumpToAudit}>Get a free audit</Pill>
         </span>
         <span className="intro intro-rise" style={d(1260)}>
           <GhostPill onClick={openStory}>Enter the story</GhostPill>

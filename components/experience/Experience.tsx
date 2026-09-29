@@ -8,7 +8,9 @@ import { bus, intro, ready, scroll } from "@/lib/stores";
 import { atToS, dev } from "@/lib/dev";
 import { openStory, story, updateStory } from "@/lib/story";
 import { devNum } from "@/lib/dev";
-import { LogoMark } from "@/components/chrome/LogoMark";
+import { LogoMark, MARK_MASK } from "@/components/chrome/LogoMark";
+import { CHAPTERS, type ChapterId } from "@/lib/chapters";
+import { jumpToAudit, scrollToChapter } from "@/lib/scroll";
 
 const StageCanvas = dynamic(() => import("@/components/stage/StageCanvas"), { ssr: false });
 
@@ -81,12 +83,41 @@ export function Experience({ children }: { children: ReactNode }) {
     const t0 = performance.now();
     let skipAt = -1;
     const start = (t: number) => {
+      // THE HAND-OFF: the loader's mark flies up into the nav's own (whose
+      // rect is already final — before the intro it is only transparent) as
+      // the paper lifts, and the nav's mark takes over the moment it lands.
+      const fly = document.querySelector<HTMLElement>("#loader .ld-fly");
+      const to = document.querySelector<SVGElement>(".nav-brand .nav-mark");
+      if (fly && to && !reduced && !dev.freeze) {
+        const a = fly.getBoundingClientRect();
+        const b = to.getBoundingClientRect();
+        if (a.width > 0 && b.width > 0) {
+          const L = document.getElementById("loader");
+          L?.style.setProperty("--fx", `${(b.left + b.width / 2 - (a.left + a.width / 2)).toFixed(1)}px`);
+          L?.style.setProperty("--fy", `${(b.top + b.height / 2 - (a.top + a.height / 2)).toFixed(1)}px`);
+          L?.style.setProperty("--fs", (b.width / a.width).toFixed(4));
+          root.setAttribute("data-handoff", "");
+          window.setTimeout(() => root.removeAttribute("data-handoff"), 1000);
+        }
+      }
       intro.state = "run";
       intro.t0 = t;
       performance.mark("nd:start");
       root.dataset.intro = "run";
       bus.emit("intro:run");
     };
+
+    // A link from another page (/#build, /#contact…) lands on its section as
+    // soon as the page is up — measured, fonts in — the hero's intro skipped.
+    const hash = window.location.hash.slice(1);
+    if (hash === "contact" || CHAPTERS.some((c) => c.id === hash && c.id !== "potential")) {
+      const off = bus.on("intro:run", () => {
+        off();
+        intro.skipped = true;
+        root.setAttribute("data-intro-skip", "");
+        requestAnimationFrame(() => (hash === "contact" ? jumpToAudit() : scrollToChapter(hash as ChapterId)));
+      });
+    }
     const finish = () => {
       intro.state = "done";
       root.dataset.intro = "done";
@@ -145,10 +176,15 @@ export function Experience({ children }: { children: ReactNode }) {
           the stone, its room and its shaders get ready; it gives way to the
           intro. Server-rendered, so it is the very first paint. */}
       <div id="loader" aria-hidden>
+        <div className="ld-veil" />
         <div className="ld-in">
-          <LogoMark className="ld-mark" />
+          <div className="ld-fly">
+            <LogoMark className="ld-mark" />
+            <span className="ld-glint" style={{ WebkitMaskImage: MARK_MASK, maskImage: MARK_MASK }} />
+          </div>
           <div className="ld-bar">
             <span />
+            <i />
           </div>
           <p className="ld-n mono">000</p>
         </div>

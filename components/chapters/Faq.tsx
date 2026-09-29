@@ -2,8 +2,8 @@
 
 import { useState, type CSSProperties } from "react";
 import { PageSection, PageMarker } from "./Section";
-import { CONTACT, FAQ } from "@/lib/content";
-import { scrollToChapter } from "@/lib/scroll";
+import { CONTACT, FAQ, PAGES } from "@/lib/content";
+import { jumpToAudit } from "@/lib/scroll";
 
 /**
  * 06 · QUESTIONS — what a buyer asks before the first call, answered plainly.
@@ -27,9 +27,12 @@ export function Faq() {
             <a className="text-link" href={`mailto:${CONTACT.email}`}>
               {CONTACT.email}
             </a>
-            <button type="button" className="text-link" onClick={() => scrollToChapter("audit")}>
+            <button type="button" className="text-link" onClick={jumpToAudit}>
               Start a free audit <span aria-hidden>↓</span>
             </button>
+            <a className="text-link" href={PAGES.faq}>
+              All questions <span aria-hidden>→</span>
+            </a>
           </p>
         </header>
         <ul className="qa-list">

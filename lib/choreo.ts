@@ -238,10 +238,12 @@ function keys(L: Layout): Key[] {
     { S: 8.9, pivot: CC, az: -668, el: 2, dist: 24, fov: 38, pp: [0.52, 0.5] },
     { S: 9.08, pivot: [CC[0], CC[1] + 1.2, CC[2]], az: -671, el: 2, dist: D(35), fov: 34, pp: pp(0.57, 0.5) },
     { S: 9.3, pivot: CC, az: -674, el: 2, dist: D(46), fov: 32, pp: pp(0.6, 0.5) },
-    // LET'S TALK — down to the floor's own level: the colossus and its reflection.
-    { S: 9.9, pivot: [COL_C.x, FLAT_Y + 1.2, COL_C.z], az: -680, el: 0.6, dist: floorD(108), fov: 30, pp: mob ? [0.5, 0.3] : [0.66, 0.47] },
-    { S: M0 + 0.5, pivot: [COL_C.x, FLAT_Y + 1.6, COL_C.z], az: -674, el: 0.6, dist: mob ? floorD(92) : 118, fov: 30, pp: mob ? [0.5, 0.3] : [0.66, 0.47] },
-    { S: M0 + 1.25, pivot: [COL_C.x, FLAT_Y + 3.2, COL_C.z], az: -664, el: 1.2, dist: mob ? floorD(100) : 126, fov: 30, pp: mob ? [0.5, 0.28] : [0.68, 0.45] },
+    // LET'S TALK — down to the floor's own level: the stone whole on its
+    // reflection, in the middle of the frame — "Let's ◆ talk." stands on the
+    // horizon either side of it (Audit.tsx).
+    { S: 9.9, pivot: [COL_C.x, FLAT_Y + 1.2, COL_C.z], az: -680, el: 0.6, dist: floorD(108), fov: 30, pp: mob ? [0.5, 0.37] : [0.5, 0.47] },
+    { S: M0 + 0.5, pivot: [COL_C.x, FLAT_Y + 1.6, COL_C.z], az: -674, el: 0.6, dist: mob ? floorD(92) : 118, fov: 30, pp: mob ? [0.5, 0.37] : [0.5, 0.47] },
+    { S: M0 + 1.25, pivot: [COL_C.x, FLAT_Y + 3.2, COL_C.z], az: -664, el: 1.2, dist: mob ? floorD(100) : 126, fov: 30, pp: mob ? [0.5, 0.35] : [0.5, 0.45] },
   ];
 }
 

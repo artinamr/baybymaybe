@@ -1,3 +1,16 @@
+/** The mark's three pieces (viewBox 440 210 1170 1620): the rhombus plate and the two blades. */
+export const MARK_PATHS = {
+  plate:
+    "M1024.1 223.099C1072.41 249.214 1124.15 274.149 1173.05 299.761C1308.95 370.927 1447.09 439.725 1582.27 512.166C1567.47 521.965 1538.01 537.433 1521.83 546.624L1398.95 616.541L1024.55 830.086C1016.42 828.418 909.427 765.123 891.335 754.789L465.643 512.402C522.324 481.003 585.352 449.565 643.049 419.672L1024.1 223.099Z",
+  left: "M453.078 529.795C463.966 534.464 495.273 553.41 507.546 560.424L620.202 624.726L1013.4 848.933L1013.37 1505.9L1013.39 1702.25C1013.39 1738.89 1013.9 1776.85 1013.15 1813.41C1008.48 1805.57 998.714 1781.58 994.795 1772.55L958.748 1689.47L836.979 1408.55L453.078 529.795Z",
+  right: "M1593.57 530.024L1594.27 530.56C1593.53 536.483 1566.1 595.725 1561.63 605.867L1465.4 825.407L1035.78 1812.2L1034.6 1811.5L1034.66 848.827L1593.57 530.024Z",
+};
+
+/** The mark as a CSS mask (a data URL), for light that falls only on its shape. */
+export const MARK_MASK = `url("data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns='http://www.w3.org/2000/svg' viewBox='440 210 1170 1620'><path d='${MARK_PATHS.plate}'/><path d='${MARK_PATHS.left}'/><path d='${MARK_PATHS.right}'/></svg>`
+)}")`;
+
 /**
  * The Nerodyn mark, inlined as three separate pieces — a rhombus plate and two
  * blades — so the finale can echo the stone: when the mark locks in 3D, the
@@ -6,9 +19,9 @@
 export function LogoMark({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="440 210 1170 1620" className={`logo-mark ${className}`} fill="currentColor" aria-hidden focusable="false">
-      <path className="lm-plate" d="M1024.1 223.099C1072.41 249.214 1124.15 274.149 1173.05 299.761C1308.95 370.927 1447.09 439.725 1582.27 512.166C1567.47 521.965 1538.01 537.433 1521.83 546.624L1398.95 616.541L1024.55 830.086C1016.42 828.418 909.427 765.123 891.335 754.789L465.643 512.402C522.324 481.003 585.352 449.565 643.049 419.672L1024.1 223.099Z" />
-      <path className="lm-left" d="M453.078 529.795C463.966 534.464 495.273 553.41 507.546 560.424L620.202 624.726L1013.4 848.933L1013.37 1505.9L1013.39 1702.25C1013.39 1738.89 1013.9 1776.85 1013.15 1813.41C1008.48 1805.57 998.714 1781.58 994.795 1772.55L958.748 1689.47L836.979 1408.55L453.078 529.795Z" />
-      <path className="lm-right" d="M1593.57 530.024L1594.27 530.56C1593.53 536.483 1566.1 595.725 1561.63 605.867L1465.4 825.407L1035.78 1812.2L1034.6 1811.5L1034.66 848.827L1593.57 530.024Z" />
+      <path className="lm-plate" d={MARK_PATHS.plate} />
+      <path className="lm-left" d={MARK_PATHS.left} />
+      <path className="lm-right" d={MARK_PATHS.right} />
     </svg>
   );
 }

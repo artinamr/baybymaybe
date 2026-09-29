@@ -5,6 +5,7 @@ import { PerformanceMonitor } from "@react-three/drei";
 import { useEffect, useState } from "react";
 import * as THREE from "three";
 import { intro, perf, ready } from "@/lib/stores";
+import { devNum } from "@/lib/dev";
 import { Scene } from "./Scene";
 import { compileFor } from "./compile";
 
@@ -53,7 +54,8 @@ function Compile() {
  */
 export default function StageCanvas() {
   const [tier, setTier] = useState(0);
-  const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio : 1, DPR_TIERS[tier]);
+  // (Look-dev stills: `?dpr=2` lifts the cap for print-sharp frames of the film.)
+  const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio : 1, devNum("dpr") ?? DPR_TIERS[tier]);
   // Frame times mean nothing while shaders compile (the first seconds of a
   // first visit): judged then, the machine passed for a slow one and the hero
   // went soft. The monitor starts once every program is in (or after a while).

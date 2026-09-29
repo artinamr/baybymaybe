@@ -31,6 +31,13 @@ export const scroll = {
   active: 0,
   /** Per chapter: local s = S − S0 (negative while entering) and its reveal state. */
   chapters: CHAPTERS.map((c) => ({ id: c.id as ChapterId, S0: c.S0, s: 0, state: "before" as ChapterState })),
+  /**
+   * A jump (the nav, the index, a link): this frame the film CUTS to where the
+   * page is — its clock, every shard and the camera land at once instead of
+   * gliding there. `cutFrames` is set by lib/scroll.ts jumpToS.
+   */
+  cut: false,
+  cutFrames: 0,
 };
 
 export const pointer = {

@@ -196,6 +196,12 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
       fieldEl?.style.setProperty("--horizon", `${val}px`);
       markEl?.style.setProperty("--horizon", `${val}px`);
     });
+    // The finale's words stand on the floor right under the stone — the line
+    // its reflection starts from — not on the far horizon above it.
+    if (S > 9.25) {
+      const fl = project(v.set(sceneState.cam.pivot.x, sceneState.u.floorY, sceneState.cam.pivot.z), camera, W, H);
+      write("floorline", Math.max(-H, Math.min(2 * H, fl.y)).toFixed(0), (val) => markEl?.style.setProperty("--floorline", `${val}px`));
+    }
     const pv = project(sceneState.cam.pivot, camera, W, H);
     write("subject", `${pv.x.toFixed(0)},${pv.y.toFixed(0)}`, () => {
       fieldEl?.style.setProperty("--subject-x", `${pv.x.toFixed(0)}px`);

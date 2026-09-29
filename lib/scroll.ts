@@ -290,6 +290,8 @@ export function updateScroll(time: number): void {
   scroll.y = y;
   scroll.S = y / Math.max(1, scroll.vh);
   scroll.v = lenis ? lenis.velocity : 0;
+  scroll.cut = scroll.cutFrames > 0;
+  if (scroll.cutFrames > 0) scroll.cutFrames--;
 
   let active = 0;
   for (let i = 0; i < CHAPTERS.length; i++) {
@@ -344,8 +346,35 @@ export function scrollToS(S: number, durationSec?: number, easing?: (t: number) 
   else window.scrollTo({ top: target, behavior: document.documentElement.hasAttribute("data-reduced") ? "auto" : "smooth" });
 }
 
+/**
+ * JUMP to a global S at once: a chosen destination never makes the reader
+ * wait through a glide. The film cuts with it (scroll.cut): its clock, the
+ * shards and the camera land on the new frame in the same frame.
+ */
+export function jumpToS(S: number): void {
+  const target = Math.max(0, S * scroll.vh);
+  frame.gliding = false;
+  frame.lastInput = performance.now();
+  if (lenis) lenis.scrollTo(target, { immediate: true, force: true });
+  else window.scrollTo({ top: target, behavior: "auto" });
+  scroll.cutFrames = 2;
+}
+
 export function scrollToChapter(id: ChapterId): void {
-  scrollToS(jumpS(chapter(id)));
+  jumpToS(jumpS(chapter(id)));
+}
+
+/** Jump so an element's top sits just under the nav (e.g. the audit form in the footer). */
+export function jumpToEl(el: Element | null, gap = 0): void {
+  if (!el) return;
+  const nav = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 72;
+  const y = el.getBoundingClientRect().top + (lenis ? lenis.scroll : window.scrollY) - nav - gap;
+  jumpToS(y / Math.max(1, scroll.vh));
+}
+
+/** The audit form (top of the footer): every "free audit" action lands on it. */
+export function jumpToAudit(): void {
+  jumpToEl(document.getElementById("contact"));
 }
 
 

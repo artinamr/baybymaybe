@@ -892,56 +892,65 @@ html[data-intro-skip] .intro-mask > span {
    06 · THE MARK — contact + footer
    ========================================================================== */
 
+/* "Let's ◆ talk." — the two words stand ON the floor's horizon (their baseline
+   on the line written live by lib/project.ts), parted round the stone, which
+   stands whole in the middle of the frame. */
 .mark-display {
   position: absolute;
   inset: 0;
   font-weight: inherit;
+  --md-size: min(14.5vw, calc(var(--vh) * 25));
+  /* The stone's width on the horizon, with air either side of it. */
+  --md-gap: min(16vw, calc(var(--vh) * 27));
 }
-/* The word stands ON the salt flat's horizon (its baseline on the line where
-   sky meets mirror, written live by lib/project.ts) — and the flat reflects it. */
-.mark-display > .rv {
+.mark-display .md-w {
   position: absolute;
-  left: 7vw;
-  top: calc(var(--horizon, calc(var(--vh) * 49)) - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA)) * min(15vw, calc(var(--vh) * 26)));
+  top: calc(var(--floorline, var(--horizon, calc(var(--vh) * 49))) - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA)) * var(--md-size));
   font-family: var(--display);
   font-weight: 400;
-  font-size: min(15vw, calc(var(--vh) * 26));
+  font-size: var(--md-size);
   line-height: 1;
   letter-spacing: -0.035em;
   color: var(--indigo);
   white-space: nowrap;
+}
+.mark-display .rv {
   overflow-clip-margin: 0.3em;
+}
+.md-l {
+  right: calc(50% + var(--md-gap) / 2);
+}
+.md-r {
+  left: calc(50% + var(--md-gap) / 2);
 }
 .mark-front {
   position: absolute;
   inset: 0;
 }
-/* The marker and the promise at the top; "Let's talk." on the horizon; the
-   form below it, on the floor — three tiers that never touch. */
+/* The marker at the top, as every scene has it. */
 .mark-head {
   position: absolute;
   left: var(--g);
   top: calc(var(--vh) * 9.5);
-  display: grid;
-  gap: 16px;
-  justify-items: start;
 }
 .mark-head .marker {
   margin: 0;
 }
-/* The copy and the actions flow as one block, set on the footer's line (its
-   final top edge), so they never collide with each other or with it. */
+/* On the floor, under the reflection: one sentence and the way on, centred
+   under the stone. */
 .mark-foot {
   position: absolute;
   left: var(--g);
-  bottom: calc(var(--vh) * 27);
+  right: var(--g);
+  bottom: calc(var(--vh) * 7.5);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   gap: 24px;
 }
 .mark-body {
-  max-width: 50ch;
+  max-width: 48ch;
   font-size: 17px;
   line-height: 1.5;
   color: color-mix(in oklab, var(--ink) 75%, transparent);
@@ -950,7 +959,12 @@ html[data-intro-skip] .intro-mask > span {
 .mark-ctas {
   display: flex;
   align-items: center;
-  gap: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px 30px;
+}
+.mark-mail {
+  font-size: 15px;
 }
 @media (max-height: 780px) and (min-width: 768px) {
   .mark-body {
@@ -959,6 +973,7 @@ html[data-intro-skip] .intro-mask > span {
   }
   .mark-foot {
     gap: 16px;
+    bottom: calc(var(--vh) * 5.5);
   }
 }
 .email {
@@ -1011,31 +1026,73 @@ html[data-intro-skip] .intro-mask > span {
   margin: 0 auto;
   padding: calc(var(--vh) * 13) var(--g) 0;
 }
-.sf-top {
+/* THE AUDIT — the footer opens with the site's one ask: what you get on the
+   left, the form on the right. Every "free audit" on the site lands here. */
+.sf-audit {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
   column-gap: 6vw;
-  row-gap: 32px;
-  align-items: end;
-  padding-bottom: calc(var(--vh) * 8);
+  row-gap: 44px;
+  align-items: start;
+  padding-bottom: calc(var(--vh) * 10);
   border-bottom: 1px solid var(--hair);
 }
-.sf-line {
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: min(4.2vw, calc(var(--vh) * 7));
-  line-height: 1.03;
-  letter-spacing: -0.028em;
-  max-width: 15em;
-  margin: 0;
-}
-.sf-contact {
+.sfa-head {
   display: grid;
-  gap: 18px;
+  gap: 30px;
+  align-content: start;
   justify-items: start;
 }
+.sfa-head .marker {
+  margin: 0;
+}
+.sfa-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(3.9vw, calc(var(--vh) * 6.6));
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  margin: 0;
+  max-width: 13em;
+}
+.sfa-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 34em;
+  border-top: 1px solid var(--hair);
+}
+.sfa-points li {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: baseline;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.sfa-points span {
+  font-size: 12px;
+  color: var(--indigo);
+}
+.sfa-points p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--ink) 80%, transparent);
+}
+.sfa-direct {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 14px;
+  row-gap: 6px;
+}
+.sfa-or {
+  font-size: 14px;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+}
 .sf-email .email-text {
-  font-size: min(2.5vw, 34px);
+  font-size: min(2.1vw, 30px);
 }
 .sf-cols {
   display: grid;
@@ -1060,9 +1117,6 @@ html[data-intro-skip] .intro-mask > span {
   font-variation-settings: "opsz" 30;
   color: var(--ink);
   user-select: none;
-}
-.mark-body-m {
-  display: none;
 }
 .sf-logo {
   width: 8.4vw;
@@ -1954,13 +2008,16 @@ html[data-story] .specimen {
 }
 
 /* ==========================================================================
-   METHODOLOGY (app/methodology) — editorial, its own page
+   THE SITE'S OWN PAGES (methodology, questions, privacy, terms) — editorial,
+   on the same paper and in the same two voices as the home page; each ends
+   on the same footer (and its audit form).
    ========================================================================== */
 
-.mp {
-  --mpw: min(1180px, calc(100vw - 2 * var(--g)));
+.sp {
+  --spw: min(1240px, calc(100vw - 2 * var(--g)));
+  min-height: 100vh;
 }
-.mp-nav {
+.sp-nav {
   position: sticky;
   top: 0;
   z-index: 20;
@@ -1968,10 +2025,11 @@ html[data-story] .specimen {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 24px;
   padding: 0 var(--g);
-  background: linear-gradient(to bottom, var(--paper) 55%, color-mix(in oklab, var(--paper) 0%, transparent));
+  background: linear-gradient(to bottom, var(--paper) 58%, color-mix(in oklab, var(--paper) 0%, transparent));
 }
-.mp-brand {
+.sp-brand {
   display: inline-flex;
   gap: 10px;
   align-items: center;
@@ -1979,18 +2037,36 @@ html[data-story] .specimen {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
-.mp-mark {
+.sp-mark {
   width: 18px;
   height: 22px;
 }
-.mp-links {
+.sp-links {
   display: flex;
-  gap: 30px;
+  gap: 28px;
   align-items: center;
   font-size: 14px;
   font-weight: 500;
 }
-.mp-cta {
+.sp-link {
+  position: relative;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  transition: color 250ms ease;
+}
+.sp-link:hover,
+.sp-link[aria-current="page"] {
+  color: var(--ink);
+}
+.sp-link[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -7px;
+  height: 1px;
+  background: var(--indigo);
+}
+.sp-cta {
   display: inline-flex;
   gap: 8px;
   align-items: center;
@@ -1998,16 +2074,22 @@ html[data-story] .specimen {
   padding: 0 16px;
   border: 1px solid var(--hair);
   border-radius: 999px;
-  transition: background 300ms ease, color 300ms ease;
+  transition:
+    background 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease;
 }
-.mp-cta:hover {
+.sp-cta:hover {
   background: var(--ink);
+  border-color: var(--ink);
   color: var(--paper);
 }
-.mp main {
-  width: var(--mpw);
+.sp-main {
+  width: var(--spw);
   margin: 0 auto;
 }
+
+/* Rises into view once (SubReveal here; the home page's sheets use the same). */
 [data-rv] {
   opacity: 0;
   transform: translateY(30px);
@@ -2022,260 +2104,438 @@ html[data-story] .specimen {
   transform: none;
   filter: none;
 }
-.mp-hero {
-  padding: calc(var(--vh) * 16) 0 calc(var(--vh) * 12);
+
+.sp-hero {
+  padding: calc(var(--vh) * 13) 0 calc(var(--vh) * 8);
 }
-.mp-kicker {
+.sp-hero-s {
+  padding-bottom: calc(var(--vh) * 7);
+}
+.sp-kicker {
   display: flex;
   gap: 12px;
   align-items: center;
   font-size: 13px;
   font-weight: 500;
   color: color-mix(in oklab, var(--ink) 60%, transparent);
-  margin-bottom: 28px;
+  margin: 0 0 26px;
 }
-.mp-rule {
+.sp-rule {
+  display: inline-block;
   width: 32px;
   height: 1px;
   background: currentColor;
   opacity: 0.45;
 }
-.mp-h1 {
+.sp-h1 {
   font-family: var(--display);
   font-weight: 400;
-  font-size: min(8.2vw, 124px);
-  line-height: 0.96;
+  font-size: min(8vw, 120px);
+  line-height: 0.98;
   letter-spacing: -0.035em;
-  margin: 0 0 36px;
+  margin: 0 0 32px;
 }
-.mp-h1 em {
+.sp-h1 em {
   font-style: normal;
   color: var(--indigo);
 }
-.mp-lede {
-  font-size: 19px;
-  line-height: 1.6;
-  max-width: 46ch;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-}
-.mp-timeline {
-  position: relative;
-  padding: calc(var(--vh) * 4) 0 calc(var(--vh) * 10);
-}
-.mp-line {
-  position: absolute;
-  left: 172px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--hair);
-}
-.mp-line > span {
-  position: absolute;
-  inset: 0;
-  background: var(--indigo);
-  transform-origin: top;
-  transform: scaleY(var(--line, 0));
-}
-.mp-day {
-  display: grid;
-  grid-template-columns: 150px 1fr;
-  column-gap: 60px;
-  padding: calc(var(--vh) * 6) 0;
-}
-.mp-day-n {
-  font-family: var(--display);
-  font-size: 64px;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  text-align: right;
-}
-.mp-day-n .mono {
-  display: block;
-  font-size: 10px;
-  color: var(--indigo);
-  margin-bottom: 8px;
-}
-.mp-day-title {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: 40px;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  margin: 6px 0 16px;
-}
-.mp-day-body p {
-  font-size: 18px;
-  line-height: 1.6;
-  max-width: 44ch;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-}
-.mp-day-body .mp-note {
-  margin-top: 16px;
-  font-size: 10.5px;
-  color: color-mix(in oklab, var(--ink) 45%, transparent);
-}
-.mp-compare {
-  display: grid;
-  gap: 40px;
-  padding: calc(var(--vh) * 10) 0;
-  border-top: 1px solid var(--hair-soft);
-}
-.mp-row {
-  display: grid;
-  grid-template-columns: 170px 170px 1fr;
-  grid-template-areas: "who span bar" "who span how";
-  column-gap: 40px;
-  row-gap: 12px;
-  align-items: center;
-}
-.mp-who {
-  grid-area: who;
-  font-size: 14px;
-  font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
-}
-.mp-span {
-  grid-area: span;
-  font-family: var(--display);
-  font-size: 72px;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: color-mix(in oklab, var(--ink) 40%, transparent);
-}
-.mp-span span {
-  font-family: var(--font-isans), system-ui, sans-serif;
-  font-size: 16px;
-  letter-spacing: 0;
-}
-.mp-row-us .mp-who,
-.mp-row-us .mp-span {
-  color: var(--ink);
-}
-.mp-bar {
-  grid-area: bar;
-  height: 6px;
-  border-radius: 6px;
-  background: var(--hair-soft);
-  overflow: hidden;
-}
-.mp-bar span {
-  display: block;
-  height: 100%;
-  border-radius: 6px;
-  background: color-mix(in oklab, var(--ink) 30%, transparent);
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 1600ms var(--ease-expo) 300ms;
-}
-.mp-row-us .mp-bar span {
-  background: var(--indigo);
-}
-.mp-row[data-in] .mp-bar span {
-  transform: scaleX(1);
-}
-.mp-how {
-  grid-area: how;
-  font-size: 15px;
-  color: color-mix(in oklab, var(--ink) 62%, transparent);
-}
-.mp-principles {
-  padding: calc(var(--vh) * 12) 0;
-  border-top: 1px solid var(--hair-soft);
-}
-.mp-h2 {
+.sp-h2 {
   font-family: var(--display);
   font-weight: 400;
   font-size: min(4.6vw, 64px);
   line-height: 1.02;
   letter-spacing: -0.03em;
-  margin: 0 0 calc(var(--vh) * 7);
+  margin: 0;
 }
-.mp-principles ul {
+.sp-lede {
+  font-size: 19px;
+  line-height: 1.6;
+  max-width: 50ch;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+  margin: 0;
+}
+.sp-meta {
+  font-size: 13px;
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  margin: -14px 0 24px;
+}
+.sp-inline {
+  color: var(--indigo);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.sp-block {
+  padding: calc(var(--vh) * 12) 0;
+  border-top: 1px solid var(--hair-soft);
+}
+
+/* The banner: the stone up close, the width of the page. */
+.sp-banner {
+  border: 1px solid var(--hair-soft);
+  margin: 0;
+  border-radius: 28px;
+  overflow: hidden;
+  aspect-ratio: 24 / 11;
+  background: #eeede9;
+}
+.sp-banner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The four stages, each set against a frame of the film. */
+.ms {
+  padding: calc(var(--vh) * 14) 0 calc(var(--vh) * 6);
+}
+.ms-head {
+  margin-bottom: calc(var(--vh) * 6);
+}
+.ms-stage {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  column-gap: 7vw;
+  align-items: center;
+  padding: calc(var(--vh) * 6) 0;
+}
+.ms-stage[data-flip] .ms-img {
+  order: 2;
+}
+.ms-img {
+  border: 1px solid var(--hair-soft);
+  margin: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: #eeede9;
+}
+.ms-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.06);
+  transition: transform 1800ms var(--ease-expo);
+}
+.ms-img[data-in] img {
+  transform: none;
+}
+.ms-day {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  font-size: 14px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 60%, transparent);
+  margin: 0 0 18px;
+}
+.ms-day .mono {
+  font-size: 11px;
+  color: var(--indigo);
+}
+.ms-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(6vw, 88px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  margin: 0 0 24px;
+}
+.ms-lede {
+  font-size: 18px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+  margin: 0 0 30px;
+  max-width: 42ch;
+}
+.ms-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 36em;
+  border-top: 1px solid var(--hair);
+}
+.ms-points li {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: 15px;
+  color: color-mix(in oklab, var(--ink) 80%, transparent);
+}
+.ms-points li::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--indigo);
+  transform: translateY(-2px);
+}
+
+/* Principles. */
+.pr .sp-h2 {
+  margin-bottom: calc(var(--vh) * 7);
+}
+.pr-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 32px;
 }
-.mp-principles li {
+.pr-grid li {
   padding-top: 20px;
   border-top: 1px solid var(--hair);
 }
-.mp-p-n {
+.pr-n {
   font-size: 10px;
   color: var(--indigo);
-  margin-bottom: 14px;
+  margin: 0 0 14px;
 }
-.mp-p-name {
+.pr-name {
   font-family: var(--display);
   font-weight: 500;
   font-size: 28px;
   letter-spacing: -0.02em;
-  margin-bottom: 10px;
+  margin: 0 0 10px;
 }
-.mp-p-line {
+.pr-line {
   font-size: 15px;
   line-height: 1.55;
   color: color-mix(in oklab, var(--ink) 66%, transparent);
+  margin: 0;
 }
-.mp-close {
-  padding: calc(var(--vh) * 12) 0 calc(var(--vh) * 16);
-  border-top: 1px solid var(--hair-soft);
+
+/* What is yours at the end. */
+.own {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: 7vw;
+  row-gap: 40px;
+  align-items: start;
 }
-.mp-close-line {
-  font-family: var(--display);
-  font-size: min(6vw, 88px);
-  line-height: 1;
-  letter-spacing: -0.034em;
-  margin-bottom: 30px;
-  max-width: 14em;
+.own-head {
+  display: grid;
+  gap: 22px;
 }
-.mp-close-ctas {
+.own-head .sp-kicker {
+  margin: 0;
+}
+.own-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.own-list li {
   display: flex;
-  gap: 30px;
   align-items: center;
-  margin-top: 40px;
+  gap: 18px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--display);
+  font-size: min(2.6vw, 34px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
-.mp-foot {
+.own-tick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+.own-tick svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sp-more {
   display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
-  padding: 28px var(--g) 36px;
-  font-size: 13px;
-  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  gap: 20px 40px;
+  padding-bottom: calc(var(--vh) * 14);
+}
+.sp-more-line {
+  font-family: var(--display);
+  font-size: min(4.2vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.sp-more-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 36px;
+}
+
+/* Documents (the questions, the legal pages): the topics alongside, sticky. */
+.doc {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  column-gap: 7vw;
+  padding: calc(var(--vh) * 3) 0 calc(var(--vh) * 16);
   border-top: 1px solid var(--hair-soft);
 }
+.doc-toc {
+  position: sticky;
+  top: calc(var(--nav-h) + 24px);
+  align-self: start;
+  display: grid;
+  gap: 10px;
+  padding-top: 30px;
+  font-size: 14px;
+}
+.doc-toc-h {
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  margin: 0 0 6px;
+}
+.doc-toc a {
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+  transition: color 250ms ease;
+}
+.doc-toc a:hover {
+  color: var(--indigo);
+}
+.doc-body {
+  min-width: 0;
+}
+.fq-group {
+  padding-top: 30px;
+  scroll-margin-top: calc(var(--nav-h) + 12px);
+}
+.fq-group + .fq-group {
+  padding-top: calc(var(--vh) * 8);
+}
+.fq-h,
+.lg-h {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(3vw, 40px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin: 0 0 14px;
+}
+.fq-h .mono,
+.lg-h .mono {
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--indigo);
+}
+.lg-sec {
+  padding: 30px 0 12px;
+  scroll-margin-top: calc(var(--nav-h) + 12px);
+}
+.lg-sec + .lg-sec {
+  border-top: 1px solid var(--hair-soft);
+}
+.lg-body p,
+.lg-body li {
+  font-size: 17px;
+  line-height: 1.7;
+  color: color-mix(in oklab, var(--ink) 76%, transparent);
+  max-width: 64ch;
+}
+.lg-body p {
+  margin: 0 0 16px;
+}
+.lg-body ul {
+  margin: 0 0 16px;
+  padding-left: 20px;
+}
+.lg-body li {
+  margin: 0 0 6px;
+}
+.lg-body strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
 @media (max-width: 900px) {
-  .mp-links a:not(.mp-cta) {
+  .sp-links .sp-link {
     display: none;
   }
-  .mp-line {
-    left: 0;
-  }
-  .mp-day {
+  .ms-stage,
+  .own {
     grid-template-columns: 1fr;
-    padding-left: 22px;
-    row-gap: 10px;
+    row-gap: 28px;
   }
-  .mp-day-n {
-    text-align: left;
-    font-size: 44px;
+  .ms-stage[data-flip] .ms-img {
+    order: 0;
   }
-  .mp-day-title {
-    font-size: 30px;
-  }
-  .mp-row {
-    grid-template-columns: 1fr;
-    grid-template-areas: "who" "span" "bar" "how";
-  }
-  .mp-principles ul {
+  .pr-grid {
     grid-template-columns: 1fr 1fr;
   }
-  .mp-close-ctas {
-    flex-direction: column;
-    align-items: flex-start;
+  .doc {
+    grid-template-columns: 1fr;
+  }
+  .doc-toc {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 24px 0 8px;
+  }
+  .doc-toc-h {
+    width: 100%;
+    margin: 0;
+  }
+  .sp-h2 {
+    font-size: 9vw;
+  }
+  .ms-title {
+    font-size: 13vw;
+  }
+  .fq-h,
+  .lg-h {
+    font-size: 7.4vw;
+  }
+  .own-list li {
+    font-size: 24px;
+  }
+  .sp-banner {
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+  }
+  .ms-img {
+    border-radius: 20px;
+  }
+}
+@media (max-width: 560px) {
+  .pr-grid {
+    grid-template-columns: 1fr;
+  }
+  .sp-h1 {
+    font-size: 13.5vw;
+  }
+  .sp-lede {
+    font-size: 17px;
+  }
+  .sp-more-line {
+    font-size: 9vw;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-rv] {
+  [data-rv],
+  .ms-img img {
     opacity: 1;
     transform: none;
     filter: none;
@@ -2398,40 +2658,25 @@ html[data-nowebgl] .pot-fill {
   .disc-body {
     font-size: 15px;
   }
-  /* The finale on a phone: the promise at the top, "Let's talk." across the
-     stone, the form on the floor below. */
+  /* The finale on a phone: the marker at the top, "Let's ◆ talk." on the
+     horizon round the stone, the sentence and the way on at the foot. */
   .mark-head {
-    right: var(--g);
     top: calc(var(--vh) * 10.5);
-    gap: 12px;
   }
-  .mark-display > .rv {
-    left: var(--g);
-    font-size: 21vw;
-    top: calc(var(--vh) * 30);
+  .mark-display {
+    --md-size: 17.5vw;
+    --md-gap: 22vw;
   }
   .mark-foot {
-    left: var(--g);
-    right: var(--g);
-    bottom: calc(var(--vh) * 4.5);
-  }
-  .mark-head .mark-body {
-    display: none;
-  }
-  .mark-body-m {
-    display: block;
-    margin: 0 0 16px;
-  }
-  .chip {
-    height: 30px;
-    padding: 0 11px;
-    font-size: 12px;
-  }
-  .af-need {
-    gap: 6px;
+    bottom: calc(var(--vh) * 5);
+    gap: 18px;
   }
   .mark-body {
     font-size: 15px;
+  }
+  .mark-ctas {
+    flex-direction: column;
+    gap: 14px;
   }
   .email-text {
     font-size: 7vw;
@@ -2439,15 +2684,15 @@ html[data-nowebgl] .pot-fill {
   .sf-in {
     padding-top: calc(var(--vh) * 9);
   }
-  .sf-top {
+  .sf-audit {
     grid-template-columns: 1fr;
-    padding-bottom: calc(var(--vh) * 5);
+    padding-bottom: calc(var(--vh) * 6);
   }
-  .sf-line {
-    font-size: 8.6vw;
+  .sfa-title {
+    font-size: 8.4vw;
   }
   .sf-email .email-text {
-    font-size: 6.6vw;
+    font-size: 6.2vw;
   }
   .sf-cols {
     grid-template-columns: 1fr 1fr;
@@ -2960,77 +3205,48 @@ html[data-nowebgl] .pot-fill {
 
 .audit-form {
   display: grid;
-  gap: 12px;
-  justify-items: start;
+  gap: 26px;
+  min-width: 0;
 }
-.af-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+.af-card {
+  padding: clamp(24px, 3vw, 44px);
+  border-radius: 28px;
+  background: color-mix(in oklab, var(--ink) 2.5%, var(--paper));
+  border: 1px solid var(--hair);
+  box-shadow: 0 40px 80px -56px color-mix(in oklab, var(--ink) 34%, transparent);
 }
-.field {
-  position: relative;
-  display: block;
-}
-.field-label {
-  position: absolute;
-  /* Above the field's frosted fill (its backdrop filter paints over a plain label). */
-  z-index: 1;
-  left: 20px;
-  top: 7px;
-  font-size: 10px;
+.af-label {
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.02em;
-  color: color-mix(in oklab, var(--ink) 50%, transparent);
-  pointer-events: none;
+  color: color-mix(in oklab, var(--ink) 66%, transparent);
+  padding: 0;
 }
-.field input {
-  width: min(250px, 24vw);
-  height: 56px;
-  padding: 18px 20px 0;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent);
-  background: color-mix(in oklab, var(--paper) 84%, transparent);
-  backdrop-filter: blur(10px);
-  font: inherit;
-  font-size: 15px;
-  color: var(--ink);
-  transition:
-    border-color 250ms ease,
-    box-shadow 300ms ease,
-    background 250ms ease;
-}
-.field input::placeholder {
-  color: color-mix(in oklab, var(--ink) 32%, transparent);
-}
-.field input:hover {
-  border-color: color-mix(in oklab, var(--ink) 30%, transparent);
-}
-.field input:focus {
-  outline: none;
-  border-color: var(--indigo);
-  background: var(--paper);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--indigo) 14%, transparent);
-}
-.af-send[disabled] {
-  opacity: 0.7;
+.af-opt {
+  font-weight: 400;
+  color: color-mix(in oklab, var(--ink) 42%, transparent);
 }
 .af-need {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.af-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 .chip {
-  height: 34px;
-  padding: 0 14px;
+  height: 38px;
+  padding: 0 16px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
+  color: color-mix(in oklab, var(--ink) 74%, transparent);
   border: 1px solid color-mix(in oklab, var(--ink) 14%, transparent);
-  background: color-mix(in oklab, var(--paper) 80%, transparent);
-  backdrop-filter: blur(8px);
+  background: var(--paper);
   transition:
     background 250ms ease,
     color 250ms ease,
@@ -3045,14 +3261,142 @@ html[data-nowebgl] .pot-fill {
   border-color: var(--ink);
   color: var(--paper);
 }
+.chip:focus-visible,
+.af-send:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 3px;
+}
+.af-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 16px;
+}
+.af-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.af-wide {
+  grid-column: 1 / -1;
+}
+.af-field input,
+.af-field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid color-mix(in oklab, var(--ink) 14%, transparent);
+  border-radius: 14px;
+  padding: 13px 16px;
+  transition:
+    border-color 250ms ease,
+    box-shadow 300ms ease;
+}
+.af-field textarea {
+  resize: vertical;
+  min-height: 108px;
+}
+.af-field input::placeholder,
+.af-field textarea::placeholder {
+  color: color-mix(in oklab, var(--ink) 32%, transparent);
+}
+.af-field input:hover,
+.af-field textarea:hover {
+  border-color: color-mix(in oklab, var(--ink) 28%, transparent);
+}
+.af-field input:focus,
+.af-field textarea:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--indigo) 14%, transparent);
+}
+.af-field[data-bad] input {
+  border-color: #b3372f;
+}
+.af-err {
+  font-size: 13px;
+  color: #b3372f;
+}
+/* A field only bots fill: out of sight and out of reach. */
+.af-honey {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.af-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 24px;
+}
+.af-send[disabled] {
+  opacity: 0.72;
+  cursor: progress;
+}
 .af-note {
   font-size: 13px;
+  line-height: 1.5;
   color: color-mix(in oklab, var(--ink) 55%, transparent);
-  margin: 2px 0 0 4px;
+  margin: 0;
+  max-width: 36ch;
 }
-.audit-form[data-state="sent"] .af-note,
-.audit-form[data-state="mailed"] .af-note {
+.af-mail {
   color: var(--indigo);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* Sent: a tick drawn in indigo, and a plain thank you. */
+.af-done {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  align-content: center;
+  min-height: 380px;
+}
+.af-tick {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+.af-tick svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: af-draw 800ms var(--ease-expo) 200ms forwards;
+}
+@keyframes af-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.af-done-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 42px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 8px 0 0;
+}
+.af-done-line {
+  max-width: 40ch;
+  font-size: 16px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+  margin: 0 0 8px;
 }
 
 .f-col button {
@@ -3134,13 +3478,17 @@ html[data-nowebgl] .pot-fill {
     padding: 0 0 24px 48px;
     font-size: 16px;
   }
-  .af-row {
-    flex-direction: column;
-    align-items: stretch;
-    width: calc(100vw - 2 * var(--g));
+  .af-grid {
+    grid-template-columns: 1fr;
   }
-  .field input {
-    width: 100%;
+  .af-card {
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+  .chip {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
   }
   .disc-list {
     display: none;
@@ -3157,26 +3505,86 @@ html[data-nowebgl] .pot-fill {
   z-index: 95;
   display: grid;
   place-items: center;
+  transition: visibility 0s linear 1150ms;
+}
+/* The paper the page waits under — it lifts as the mark flies to the nav. */
+.ld-veil {
+  position: absolute;
+  inset: 0;
   background: var(--paper);
-  transition:
-    opacity 700ms var(--ease-expo),
-    visibility 0s linear 700ms;
+  transition: opacity 900ms var(--ease-expo) 120ms;
 }
 html:not([data-intro="wait"]) #loader {
-  opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
+html:not([data-intro="wait"]) .ld-veil {
+  opacity: 0;
+}
 .ld-in {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 26px;
+}
+/* THE HAND-OFF: the assembled mark flies to the nav's mark (--fx/--fy/--fs,
+   measured by Experience) and hands over as it lands. */
+.ld-fly {
+  position: relative;
+  line-height: 0;
+  transition:
+    transform 1000ms cubic-bezier(0.65, 0, 0.18, 1),
+    opacity 160ms ease 900ms;
+}
+html:not([data-intro="wait"]) .ld-fly {
+  transform: translate(var(--fx, 0px), var(--fy, 0px)) scale(var(--fs, 1));
+  opacity: 0;
+}
+html:not([data-intro="wait"]) .ld-bar,
+html:not([data-intro="wait"]) .ld-n {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 280ms ease,
+    transform 400ms var(--ease-expo);
+}
+html[data-handoff] .nav-brand .nav-mark {
+  opacity: 0;
+}
+.nav-brand .nav-mark {
+  transition: opacity 180ms ease;
 }
 .ld-mark {
   width: 46px;
   height: auto;
   color: var(--ink);
   overflow: visible;
+}
+/* A glint of white light sweeps the mark while the stone gets ready — the
+   film's own event, a narrow band across polished black. */
+.ld-glint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  background: linear-gradient(104deg, transparent 38%, color-mix(in oklab, white 92%, transparent) 50%, transparent 62%) no-repeat;
+  background-size: 280% 100%;
+  background-position: 135% 0;
+  animation: ld-glint 2800ms cubic-bezier(0.5, 0, 0.2, 1) 1250ms infinite;
+}
+@keyframes ld-glint {
+  0% {
+    background-position: 135% 0;
+  }
+  48%,
+  100% {
+    background-position: -35% 0;
+  }
 }
 .ld-mark path {
   transform-box: fill-box;
@@ -3215,7 +3623,6 @@ html:not([data-intro="wait"]) #loader {
   width: 132px;
   height: 1px;
   background: color-mix(in oklab, var(--ink) 12%, transparent);
-  overflow: hidden;
   animation: fade-in 500ms ease 200ms both;
 }
 .ld-bar > span {
@@ -3224,6 +3631,18 @@ html:not([data-intro="wait"]) #loader {
   background: var(--indigo);
   transform: scaleX(var(--ld, 0));
   transform-origin: left;
+}
+/* …led by a small bright head of light. */
+.ld-bar > i {
+  position: absolute;
+  top: -2px;
+  left: -2.5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--indigo);
+  box-shadow: 0 0 10px 2px color-mix(in oklab, var(--indigo) 55%, transparent);
+  transform: translateX(calc(var(--ld, 0) * 132px));
 }
 .ld-n {
   font-size: 10px;

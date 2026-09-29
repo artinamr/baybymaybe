@@ -7,7 +7,8 @@ import { Work } from "@/components/chapters/Work";
 import { Why } from "@/components/chapters/Why";
 import { Process } from "@/components/chapters/Process";
 import { Faq } from "@/components/chapters/Faq";
-import { Audit, SiteFooter } from "@/components/chapters/Audit";
+import { Audit } from "@/components/chapters/Audit";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { PageReveal } from "@/components/chapters/PageReveal";
 import { StoryMode } from "@/components/story/StoryMode";
 
@@ -30,7 +31,7 @@ export default function Home() {
         <Faq />
         <Audit />
       </main>
-      <SiteFooter />
+      <SiteFooter home />
       <PageReveal />
       <StoryMode />
     </Experience>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type CSSProperties } from "react";
 import { PageSection, PageMarker } from "./Section";
-import { METHODOLOGY_HREF, PROCESS } from "@/lib/content";
+import { PAGES, PROCESS } from "@/lib/content";
 import { onScrollFrame } from "@/lib/scroll";
 import { scroll } from "@/lib/stores";
 
@@ -74,7 +74,7 @@ export function Process() {
         ))}
       </ol>
       <p className="ps-foot" data-rv>
-        <a className="text-link" href={METHODOLOGY_HREF}>
+        <a className="text-link" href={PAGES.methodology}>
           Read the full methodology <span aria-hidden>→</span>
         </a>
       </p>

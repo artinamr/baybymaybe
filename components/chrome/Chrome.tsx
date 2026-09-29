@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { CHAPTERS, jumpS, type ChapterId } from "@/lib/chapters";
-import { onScrollFrame, scrollToChapter, scrollToS, useActiveChapter } from "@/lib/scroll";
+import { jumpToAudit, jumpToS, onScrollFrame, scrollToChapter, useActiveChapter } from "@/lib/scroll";
 import { LogoMark } from "./LogoMark";
 import { GhostPill } from "./Pills";
 import { openStory } from "@/lib/story";
@@ -37,7 +37,7 @@ function Nav({ onMenu }: { onMenu: () => void }) {
         style={{ "--d": "380ms" } as CSSProperties}
         onClick={(e) => {
           e.preventDefault();
-          scrollToS(0);
+          jumpToS(0);
         }}
         aria-label="Nerodyn — back to the top"
       >
@@ -62,7 +62,7 @@ function Nav({ onMenu }: { onMenu: () => void }) {
           </a>
         ))}
         <span className="intro intro-drop" style={{ "--d": "680ms" } as CSSProperties}>
-          <GhostPill small onClick={() => scrollToChapter("audit")}>
+          <GhostPill small onClick={jumpToAudit}>
             Free audit
           </GhostPill>
         </span>
@@ -101,7 +101,7 @@ function ChapterIndex() {
     <ol className="index" ref={ref} aria-label="Chapters">
       {CHAPTERS.map((c, i) => (
         <li key={c.id} className="index-row intro-tick" data-on={i === active || undefined} style={{ "--d": `${1300 + i * 50}ms` } as CSSProperties}>
-          <button type="button" onClick={() => scrollToS(jumpS(c))} aria-label={`${c.num} ${c.label}`} aria-current={i === active ? "step" : undefined}>
+          <button type="button" onClick={() => jumpToS(jumpS(c))} aria-label={`${c.num} ${c.label}`} aria-current={i === active ? "step" : undefined}>
             <span className="index-label">{c.label}</span>
             <span className="index-num mono">{c.num}</span>
             <span className="index-tick" aria-hidden>
@@ -135,7 +135,7 @@ function SpecimenCard() {
         <p className="specimen-name">{c.specimen.name}</p>
         <p className="specimen-line">{c.specimen.line}</p>
         {next ? (
-          <button type="button" className="specimen-next" onClick={() => scrollToS(jumpS(next))}>
+          <button type="button" className="specimen-next" onClick={() => jumpToS(jumpS(next))}>
             <span>Next — {next.label}</span>
             <span className="cue-line" aria-hidden>
               <span />
@@ -163,7 +163,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
             onClick={(e) => {
               e.preventDefault();
               onClose();
-              scrollToS(jumpS(c));
+              jumpToS(jumpS(c));
             }}
           >
             <span className="mono">{c.num}</span> {c.label}

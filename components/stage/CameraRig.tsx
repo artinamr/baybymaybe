@@ -4,7 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
-import { pointer } from "@/lib/stores";
+import { pointer, scroll } from "@/lib/stores";
 import { spring, springSnap, springTo, type Spring } from "@/lib/springs";
 
 /** Low on purpose: a heavy, floating camera that glides into every framing. */
@@ -37,8 +37,8 @@ export function CameraRig() {
     const dt = Math.min(rawDt, 1 / 20);
     const c = sceneState.cam;
     const goal = [c.pos.x, c.pos.y, c.pos.z, c.target.x, c.target.y, c.target.z, c.fov, c.ppx, c.ppy, c.roll];
-    // A hard cut (under the flood) jumps; otherwise the camera glides.
-    const snap = !started.current || sceneState.frozen || c.cut;
+    // A hard cut (a jump from the nav) lands at once; otherwise the camera glides.
+    const snap = !started.current || sceneState.frozen || c.cut || scroll.cut;
     // Ride the film's moving frame (the fall) exactly; springs smooth the rest.
     const fd = c.frameDelta;
     if (!snap && fd.lengthSq() > 0) {
