@@ -49,6 +49,15 @@ export type ObsidianOpts = {
   steps?: number;
   /** The reflection's depth pre-pass: positions only, no shading. */
   depthOnly?: boolean;
+  /**
+   * The first glass the stone wears: no veins, no light inside — the rest is
+   * the full glass. It compiles in a fraction of the time (on Windows the
+   * full program takes the D3D compiler several seconds on a first visit), so
+   * the page starts at once and the full glass is swapped in when it is ready,
+   * its light fading up (uFullIn). With `reflection` it is the mirror's colour
+   * pass in the same program (uMirror): a reflection needs no veins either.
+   */
+  lite?: boolean;
 };
 
 type U<T> = THREE.IUniform<T>;
@@ -106,6 +115,8 @@ export const obsidianUniforms: {
   /** The stone's scale: the reflection fades over a distance that grows with it. */
   uReflK: U<number>;
   uReflLen: U<number>;
+  /** 0..1 the full glass's veins and inner light, faded up once it is swapped in. */
+  uFullIn: U<number>;
   /** The white room at grazing angles (0 in the hero — its black silhouette is liked). */
   uRim: U<number>;
   /** 0..1 polished harder once broken: crisper reflections on facets and cuts (0 in the hero). */
@@ -144,6 +155,7 @@ export const obsidianUniforms: {
   uReflK: { value: 1 },
   uReflLen: { value: 1.1 },
   uRim: { value: 0 },
+  uFullIn: { value: 1 },
   uCrisp: { value: 0 },
   uHull: { value: HULL },
   uPieceBox: { value: pieceBounds() },
@@ -343,6 +355,10 @@ uniform float uRiseAmp;
 uniform float uReflK;
 uniform float uReflLen;
 uniform float uRim;
+uniform float uFullIn;
+// The lite glass is also the mirror's colour pass (one program for both — on
+// Windows each costs seconds to compile): 1 on the mirror's material.
+uniform float uMirror;
 uniform float uCrisp;
 uniform vec4 uHull[16];
 varying vec3 vObs;
@@ -374,16 +390,25 @@ float obsHash(vec3 p) {
   p *= 17.0;
   return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
 }
+/* obsHash at four lattice points at once: the same arithmetic per lane (the
+   same values, pixel for pixel), in a quarter of the instructions — the glass
+   evaluates the noise ~20 times a pixel. */
+vec4 obsHash4(vec4 x, vec4 y, vec4 z) {
+  x = fract(x * 0.3183099 + 0.1) * 17.0;
+  y = fract(y * 0.3183099 + 0.1) * 17.0;
+  z = fract(z * 0.3183099 + 0.1) * 17.0;
+  return fract(x * y * z * (x + y + z));
+}
 float obsNoise(vec3 x) {
   vec3 i = floor(x);
   vec3 f = fract(x);
   f = f * f * (3.0 - 2.0 * f);
-  return mix(
-    mix(mix(obsHash(i), obsHash(i + vec3(1, 0, 0)), f.x),
-        mix(obsHash(i + vec3(0, 1, 0)), obsHash(i + vec3(1, 1, 0)), f.x), f.y),
-    mix(mix(obsHash(i + vec3(0, 0, 1)), obsHash(i + vec3(1, 0, 1)), f.x),
-        mix(obsHash(i + vec3(0, 1, 1)), obsHash(i + vec3(1, 1, 1)), f.x), f.y),
-    f.z);
+  // The eight corners as two vec4s (x0y0 x1y0 x0y1 x1y1, at z0 and z1).
+  vec4 cx = i.x + vec4(0.0, 1.0, 0.0, 1.0);
+  vec4 cy = i.y + vec4(0.0, 0.0, 1.0, 1.0);
+  vec4 h = mix(obsHash4(cx, cy, vec4(i.z)), obsHash4(cx, cy, vec4(i.z + 1.0)), f.z);
+  vec2 hy = mix(h.xz, h.yw, f.x);
+  return mix(hy.x, hy.y, f.y);
 }
 
 /* Veins of light. A slanted plane coordinate bent by LOW-frequency noise gives
@@ -554,6 +579,8 @@ const FRAG_CLIP = /* glsl */ `
 #ifdef OBS_FRAG
   #ifdef OBS_FADEPASS
     if (vFx.z <= 0.002) discard;
+  #elif defined(OBS_LITE)
+    if (uMirror < 0.5 && vFx.z > 0.002) discard;
   #elif !defined(OBS_REFLECT)
     if (vFx.z > 0.002) discard;
   #endif
@@ -561,6 +588,8 @@ const FRAG_CLIP = /* glsl */ `
 #ifdef OBS_REFLECT
   // A mirror floor reflects only what stands above it.
   if (vWorldY > uFloorY + 1e-3) discard;
+#elif defined(OBS_LITE)
+  if (uMirror > 0.5 && vWorldY > uFloorY + 1e-3) discard;
 #endif
 #ifdef OBS_DEPTHONLY
   // The reflection's depth pre-pass: nothing to shade.
@@ -662,11 +691,11 @@ const FRAG_EMISSIVE = /* glsl */ `
     // Veins: a crisp line at the surface and a softer copy sampled a little
     // way INTO the glass along the view ray — it slides against the first as
     // the stone turns, so the light reads as inside the stone, not painted on.
-    #ifndef OBS_REFLECT
+    #if !defined(OBS_REFLECT) && !defined(OBS_LITE)
     if (obsCut < 0.5 && uVein > 0.001) {
       vec3 obsVd = normalize(vViewObj);
       float obsV = obsVeinField(vObs, 0.0, 0.0) + 0.5 * obsVeinField(vObs + obsVd * 0.09, 1.0, 0.0);
-      obsInd += uVein * obsV * (1.0 - vFx.z);
+      obsInd += uVein * obsV * (1.0 - vFx.z) * uFullIn;
     }
     #endif
   #endif
@@ -696,9 +725,10 @@ const FRAG_EMISSIVE = /* glsl */ `
     // glass), faint through the outer faces (dark glass, mostly reflection).
     // vFx.w: a fragment full of light seen through its outer faces (the core).
     float obsWin = obsCut > 0.5 ? vFx.x * uCutGlow * 1.2 : uInner * (0.55 + 0.45 * vFx.x) * 0.2 + vFx.w * 0.34 + uWake * 0.9;
-    obsWin *= 1.0 - vFx.z;
+    obsWin *= (1.0 - vFx.z) * uFullIn;
     // A reflection is faint and far: the light inside is not worth marching.
-    #ifdef OBS_REFLECT
+    // (The lite glass has none yet.)
+    #if defined(OBS_REFLECT) || defined(OBS_LITE)
     obsWin = 0.0;
     #endif
     if (obsWin > 0.002) {
@@ -778,6 +808,11 @@ const FRAG_TAIL = /* glsl */ `
     if (vWorldY > uFloorY + 1e-3) discard;
     obsA *= 0.16 * (1.0 - smoothstep(0.0, uReflLen * uReflK, uFloorY - vWorldY)) * uReflect;
     obsRgb *= 0.85;
+  #elif defined(OBS_LITE)
+    if (uMirror > 0.5) {
+      obsA *= 0.16 * (1.0 - smoothstep(0.0, uReflLen * uReflK, uFloorY - vWorldY)) * uReflect;
+      obsRgb *= 0.85;
+    }
   #endif
   if (obsA < 0.004) discard;
   gl_FragColor = vec4(obsRgb * obsA, obsA);
@@ -823,6 +858,10 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
   const reflection = !!o.reflection;
   const instanced = !!o.instanced;
   const fadePass = !!o.fadePass && frag && !reflection;
+  // The mirror's colour pass in the lite glass runs the lite glass's own
+  // program (uMirror = 1): no OBS_REFLECT, the same key, the same flags.
+  const mirrorLite = reflection && !!o.lite && !o.depthOnly;
+  const reflectDefine = reflection && !mirrorLite;
 
   const m = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color("#07080C"),
@@ -841,8 +880,9 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
   const defines: Record<string, string> = { ...(m.defines as Record<string, string>) };
   if (frag) defines.OBS_FRAG = "";
   defines.OBS_STEPS = String(o.steps ?? 7);
-  if (reflection) defines.OBS_REFLECT = "";
+  if (reflectDefine) defines.OBS_REFLECT = "";
   if (o.depthOnly) defines.OBS_DEPTHONLY = "";
+  if (o.lite) defines.OBS_LITE = "";
   if (instanced) defines.OBS_INSTANCED = "";
   if (fadePass) defines.OBS_FADEPASS = "";
   m.defines = defines;
@@ -854,6 +894,13 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
     m.premultipliedAlpha = true;
     // The fade pass keeps depth so a fading piece still hides its own far side.
     m.depthWrite = fadePass;
+  } else if (o.lite) {
+    // The solid in the lite glass keys like the mirror that shares its program
+    // (three keys on "opaque" and premultiplied alpha). The same GL state as
+    // before — an opaque material draws with no blending — and the same
+    // output: its alpha is 1 until the tail writes the fog's.
+    m.blending = THREE.NoBlending;
+    m.premultipliedAlpha = true;
   }
 
   if (o.clip) m.clippingPlanes = [o.clip === "above-floor" ? planeAbove : planeBelow];
@@ -863,6 +910,7 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
 
   m.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, obsidianUniforms);
+    shader.uniforms.uMirror = { value: mirrorLite ? 1 : 0 };
     shader.vertexShader = patchVertex(shader.vertexShader);
     shader.fragmentShader = patchFragment(shader.fragmentShader);
   };
@@ -870,10 +918,11 @@ export function createObsidian(o: ObsidianOpts = {}): THREE.MeshPhysicalMaterial
   const key =
     "obsidian:" +
     (frag ? "f" : "-") +
-    (reflection ? "r" : "-") +
+    (reflectDefine ? "r" : "-") +
     (instanced ? "i" : "-") +
     (fadePass ? "x" : "-") +
     (o.depthOnly ? "d" : "-") +
+    (o.lite ? "l" : "-") +
     (o.steps ?? 10) +
     (o.clip ?? "");
   m.customProgramCacheKey = () => key;

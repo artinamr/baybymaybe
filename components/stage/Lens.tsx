@@ -1,10 +1,12 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { dev } from "@/lib/dev";
 import { sceneState } from "@/lib/sceneState";
-import { perf, ready } from "@/lib/stores";
+import { intro, perf, ready } from "@/lib/stores";
+import { compileFor } from "./compile";
 
 /**
  * THE LENS — depth of field, the one thing that makes a real-time render read
@@ -179,13 +181,16 @@ export function Lens() {
     });
     return { main, tile };
   }, [size.width, size.height, dpr]);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    // Allocated now, not on first use: that is the shatter, and allocating a
+    // canvas-sized half-float MSAA target there was a visible hitch mid-scroll.
+    gl.initRenderTarget(rts.main);
+    gl.initRenderTarget(rts.tile);
+    return () => {
       rts.main.dispose();
       rts.tile.dispose();
-    },
-    [rts]
-  );
+    };
+  }, [gl, rts]);
 
   const pass = useMemo(() => {
     const tileMat = new THREE.ShaderMaterial({
@@ -215,43 +220,41 @@ export function Lens() {
     return { tileMat, mat, tileScene: fullScreen(tileMat), scene: fullScreen(mat), cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1) };
   }, []);
 
-  // Compile both programs up front (in parallel where the driver can), never
-  // on the first frame that needs them — and the whole scene AGAIN for drawing
-  // into the lens's target: three keys every program on its output (linear, no
-  // tone mapping into a target), so without this every glass program
-  // recompiled the first time the lens opened — a 2.5 s freeze mid-shatter.
+  // Its own two programs, compiled up front (the tile pass draws into a
+  // target, and is keyed so). The glass it draws into its target is compiled
+  // by Stone (`ready.lens`): three keys every program on its output (linear,
+  // no tone mapping into a target), and a draw into the target before those
+  // were ready recompiled every glass program — a 2.5 s freeze mid-shatter.
+  const passOK = useRef(false);
+  const openAt = useRef(-1);
   useEffect(() => {
-    gl.compileAsync(pass.tileScene, pass.cam).catch(() => undefined);
-    gl.compileAsync(pass.scene, pass.cam).catch(() => undefined);
     let dead = false;
-    const tick = () => {
-      if (dead) return;
-      if (!ready.compiled) {
-        setTimeout(tick, 100);
-        return;
-      }
-      const prev = gl.getRenderTarget();
-      gl.setRenderTarget(rts.main);
-      gl.compileAsync(scene, camera).catch(() => undefined);
-      gl.setRenderTarget(prev);
-      const tilePrev = gl.getRenderTarget();
-      gl.setRenderTarget(rts.tile);
-      gl.compileAsync(pass.tileScene, pass.cam).catch(() => undefined);
-      gl.setRenderTarget(tilePrev);
-    };
-    tick();
+    const key = new THREE.WebGLRenderTarget(1, 1);
+    Promise.all([compileFor(gl, pass.tileScene, pass.cam, pass.tileScene, key), compileFor(gl, pass.scene, pass.cam, pass.scene)]).then(() => {
+      if (!dead) passOK.current = true;
+    });
     return () => {
       dead = true;
+      key.dispose();
     };
-  }, [gl, pass, scene, camera, rts]);
+  }, [gl, pass]);
 
   useFrame(() => {
     // Page sections cover the whole viewport: the film is held and unseen —
     // draw nothing (the canvas keeps its last frame under the paper).
     if (sceneState.covered) return;
+    // Nothing is drawn while the glass's shaders compile (in parallel, off the
+    // main thread): a draw would wait for them and freeze the page — the
+    // loader stays up instead.
+    // …nor before the rooms are baked (the scene carries a key-only stand-in).
+    if (!ready.env || (!ready.compiled && intro.state === "wait")) return;
     const c = sceneState.cam;
+    // Shut until every program it draws is ready, then opening over ~0.9 s
+    // rather than snapping (only a very fast first scroll ever sees it).
+    if (openAt.current < 0 && passOK.current && ready.lens && ready.full) openAt.current = performance.now();
+    const o = dev.freeze ? 1 : openAt.current < 0 ? 0 : Math.min(1, (performance.now() - openAt.current) / 900);
     // The lowest performance tier gives the lens up first.
-    const A = perf.tier >= 3 ? 0 : c.aperture;
+    const A = perf.tier >= 3 || (!dev.freeze && o <= 0) ? 0 : c.aperture * o * o * (3 - 2 * o);
     if (A < 0.05) {
       gl.setRenderTarget(null);
       gl.render(scene, camera);

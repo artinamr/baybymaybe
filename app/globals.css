@@ -3147,6 +3147,98 @@ html[data-nowebgl] .pot-fill {
   }
 }
 
+/* ==========================================================================
+   THE LOADER (home page): the mark assembles while the 3D gets ready, then
+   gives way to the intro (html[data-intro] leaves "wait").
+   ========================================================================== */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  transition:
+    opacity 700ms var(--ease-expo),
+    visibility 0s linear 700ms;
+}
+html:not([data-intro="wait"]) #loader {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.ld-in {
+  display: grid;
+  justify-items: center;
+  gap: 26px;
+}
+.ld-mark {
+  width: 46px;
+  height: auto;
+  color: var(--ink);
+  overflow: visible;
+}
+.ld-mark path {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ld-mark .lm-plate {
+  animation: ld-plate 900ms var(--ease-expo) 120ms both;
+}
+.ld-mark .lm-left {
+  animation: ld-left 900ms var(--ease-expo) 300ms both;
+}
+.ld-mark .lm-right {
+  animation: ld-right 900ms var(--ease-expo) 380ms both;
+}
+@keyframes ld-plate {
+  from {
+    opacity: 0;
+    transform: translateY(-38%) scale(0.9);
+  }
+}
+@keyframes ld-left {
+  from {
+    opacity: 0;
+    transform: translate(-42%, 10%) rotate(-7deg);
+  }
+}
+@keyframes ld-right {
+  from {
+    opacity: 0;
+    transform: translate(42%, 10%) rotate(7deg);
+  }
+}
+/* The line: a hairline that fills with indigo as the stone gets ready. */
+.ld-bar {
+  position: relative;
+  width: 132px;
+  height: 1px;
+  background: color-mix(in oklab, var(--ink) 12%, transparent);
+  overflow: hidden;
+  animation: fade-in 500ms ease 200ms both;
+}
+.ld-bar > span {
+  position: absolute;
+  inset: 0;
+  background: var(--indigo);
+  transform: scaleX(var(--ld, 0));
+  transform-origin: left;
+}
+.ld-n {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: color-mix(in oklab, var(--ink) 45%, transparent);
+  margin: -14px 0 0;
+  font-variant-numeric: tabular-nums;
+  animation: fade-in 500ms ease 260ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  #loader {
+    display: none;
+  }
+}
+
 /* Reading a page section: the chapter rail steps back (it would sit on the text). */
 .index,
 .index-counter {

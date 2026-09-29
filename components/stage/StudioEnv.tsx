@@ -21,7 +21,7 @@ import { PRIORITY } from "@/lib/sceneState";
 export function StudioEnv() {
   const frames = useRef(0);
   useFrame(() => {
-    if (frames.current < 3 && ++frames.current === 2) ready.env = true;
+    if (frames.current < 3 && ++frames.current === 2) ready.cube = true;
   }, PRIORITY.scene);
 
   return (

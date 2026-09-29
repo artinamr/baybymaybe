@@ -4,7 +4,9 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
+import { ready } from "@/lib/stores";
 import { story } from "@/lib/story";
+import { compileFor } from "./compile";
 
 /**
  * WHAT THE GLASS SEES.
@@ -152,26 +154,122 @@ function sweep(S: number, a: number, b: number) {
   return t * t * (3 - 2 * t);
 }
 
+/** A PMREM of a 512 cube, as three keys programs on it: only its mapping and height. */
+const PMREM_SIZE = 512;
+function keyOnlyRoom(): THREE.Texture {
+  const t = new THREE.Texture();
+  t.mapping = THREE.CubeUVReflectionMapping;
+  t.image = { width: 3 * PMREM_SIZE, height: 4 * PMREM_SIZE };
+  return t;
+}
+
+/**
+ * The PMREM generator's heavy programs (its GGX convolution alone takes the
+ * D3D compiler over a second, and a bake that meets it uncompiled blocks the
+ * page while it compiles), compiled off the main thread before the first bake
+ * — the bakes are then only draws. Private three API, guarded: without it the
+ * bake compiles as it goes (a pause, not a failure).
+ */
+function warmPMREM(gl: THREE.WebGLRenderer, pm: THREE.PMREMGenerator, room: THREE.Scene): Promise<void> {
+  const p = pm as unknown as {
+    _setSize?: (n: number) => void;
+    _allocateTargets?: () => THREE.WebGLRenderTarget;
+    _ggxMaterial?: THREE.Material | null;
+    _blurMaterial?: THREE.Material | null;
+    _pingPongRenderTarget?: THREE.WebGLRenderTarget | null;
+  };
+  if (typeof p._setSize !== "function" || typeof p._allocateTargets !== "function") return Promise.resolve();
+  try {
+    p._setSize(PMREM_SIZE);
+    p._allocateTargets().dispose();
+    const target = p._pingPongRenderTarget ?? null;
+    const passes = new THREE.Scene();
+    for (const m of [p._ggxMaterial, p._blurMaterial]) {
+      if (!m) continue;
+      const q = new THREE.Mesh(new THREE.BufferGeometry(), m);
+      q.frustumCulled = false;
+      passes.add(q);
+    }
+    const cam = new THREE.PerspectiveCamera(90, 1, 0.1, 100);
+    // (The room's own lights draw into the same kind of target.)
+    return Promise.all([compileFor(gl, passes, cam, passes, target), compileFor(gl, room, cam, room, target)]).then(() => undefined);
+  } catch {
+    return Promise.resolve();
+  }
+}
+
 export function PlaceEnv() {
   const { gl, scene } = useThree();
-  const tex = useRef<{ studio: THREE.Texture | null; open: THREE.Texture | null }>({ studio: null, open: null });
+  const tex = useRef<{ cube: THREE.Texture | null; studio: THREE.Texture | null; open: THREE.Texture | null }>({ cube: null, studio: null, open: null });
+  const bake = useRef<{
+    pm: THREE.PMREMGenerator | null;
+    room: THREE.Scene | null;
+    warm: boolean;
+    key: THREE.Texture;
+    rts: THREE.WebGLRenderTarget[];
+    studioRT: THREE.WebGLRenderTarget | null;
+    cubeVersion: number;
+  }>({ pm: null, room: null, warm: false, key: keyOnlyRoom(), rts: [], studioRT: null, cubeVersion: -1 });
 
+  // Both rooms are baked by ONE generator (the same size as drei's hero room,
+  // 512: the glass's programs are keyed on it, so a different size would
+  // recompile every glass program at the swap — a multi-second freeze
+  // mid-shatter), its programs warmed first. Meanwhile the scene carries a
+  // stand-in with the rooms' key, so the glass's programs compile alongside;
+  // nothing draws until the real rooms are in (`ready.env`).
   useEffect(() => {
+    let dead = false;
+    const b = bake.current;
+    const t = tex.current;
     const pm = new THREE.PMREMGenerator(gl);
-    // The same PMREM size as the hero's baked room (drei, 512): the glass's
-    // shader is keyed on it, so a different size would recompile every glass
-    // program at the swap — a multi-second freeze mid-shatter.
-    const rt = pm.fromScene(openStudio(), 0.02, 0.1, 100, { size: 512 });
-    tex.current.open = rt.texture;
-    pm.dispose();
-    return () => rt.dispose();
+    const room = openStudio();
+    b.pm = pm;
+    b.room = room;
+    warmPMREM(gl, pm, room).then(() => {
+      if (!dead) b.warm = true;
+    });
+    return () => {
+      dead = true;
+      for (const rt of b.rts) rt.dispose();
+      b.rts = [];
+      b.studioRT = null;
+      pm.dispose();
+      b.pm = null;
+      b.warm = false;
+      t.studio = t.open = null;
+      ready.env = false;
+    };
   }, [gl]);
 
   useFrame(() => {
     const t = tex.current;
-    // The studio's baked room is whatever drei's <Environment> left on the scene first.
-    if (!t.studio && scene.environment && scene.environment !== t.open) t.studio = scene.environment;
-    if (!t.studio) return;
+    const b = bake.current;
+    if (!t.studio) {
+      // drei's <Environment> (StudioEnv) leaves the hero room on the scene as a
+      // cube map: kept for the bake; the stand-in takes its place meanwhile
+      // (a cube map on the scene would make three convert it on the spot,
+      // compiling the convolution on the main thread).
+      const e = scene.environment;
+      if (e && e !== b.key && e.mapping === THREE.CubeReflectionMapping) t.cube = e;
+      if (scene.environment !== b.key) scene.environment = b.key;
+      ready.envKey = true;
+      if (!b.warm || !b.pm || !b.room || !t.cube || !ready.cube) return;
+      const studio = b.pm.fromCubemap(t.cube as THREE.CubeTexture);
+      const open = b.pm.fromScene(b.room, 0.02, 0.1, 100, { size: PMREM_SIZE });
+      b.rts.push(studio, open);
+      b.studioRT = studio;
+      b.cubeVersion = t.cube.pmremVersion;
+      t.studio = studio.texture;
+      t.open = open.texture;
+      scene.environment = t.studio;
+      ready.env = true;
+      performance.mark("nd:env");
+    } else if (t.cube && b.pm && b.studioRT && t.cube.pmremVersion !== b.cubeVersion) {
+      // drei draws the hero room again whenever its <Environment> re-renders
+      // (three followed it the same way when it converted the room itself).
+      b.pm.fromCubemap(t.cube as THREE.CubeTexture, b.studioRT);
+      b.cubeVersion = t.cube.pmremVersion;
+    }
     const S = sceneState.S;
     const inFilm = story.phase === "closed";
     // At the end the stone is whole again, and sees the hero's own room again

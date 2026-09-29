@@ -118,13 +118,33 @@ export const bus = createBus<BusEvents>();
 /* ------------------------------------------------------------------------ */
 
 /**
- * The intro gate (Experience.tsx) waits for every flag. Owners set their own:
- *   fonts  — Experience (document.fonts.ready)
- *   stone  — components/stage/Stone.tsx (geometry built, materials created)
- *   env    — components/stage/StudioEnv.tsx (env cubemap rendered once)
- *   compiled — StageCanvas (renderer.compileAsync done, first frame presented)
+ * The intro gate (Experience.tsx) waits for fonts, stone, env and compiled.
+ * Owners set their own:
+ *   fonts     — Experience (document.fonts.ready)
+ *   stone     — components/stage/Stone.tsx (geometry built, materials created)
+ *   cube      — components/stage/StudioEnv.tsx (the hero room's cube map drawn)
+ *   envKey    — components/stage/PlaceEnv.tsx: the scene carries a stand-in
+ *               with the rooms' key — programs can compile
+ *   env       — PlaceEnv: both rooms baked and in place — the scene can draw
+ *   compiling — StageCanvas: the first programs are compiling
+ *   compiled  — StageCanvas: they are ready (the stone in its LITE glass) —
+ *               the page can start
+ *   full      — Stone: the full glass (veins, the light inside), compiled
+ *               alongside, is on the stone
+ *   lens      — Stone: every glass program the lens draws into its target is
+ *               ready (until then the lens stays shut)
  */
-export const ready = { fonts: false, stone: false, env: false, compiled: false };
+export const ready = {
+  fonts: false,
+  stone: false,
+  cube: false,
+  envKey: false,
+  env: false,
+  compiling: false,
+  compiled: false,
+  full: false,
+  lens: false,
+};
 
 
 /** GPU performance tier from StageCanvas's PerformanceMonitor: 0 best … 3 lowest (SPEC §11). */

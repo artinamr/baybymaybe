@@ -8,11 +8,16 @@ import { bus, intro, ready, scroll } from "@/lib/stores";
 import { atToS, dev } from "@/lib/dev";
 import { openStory, story, updateStory } from "@/lib/story";
 import { devNum } from "@/lib/dev";
+import { LogoMark } from "@/components/chrome/LogoMark";
 
 const StageCanvas = dynamic(() => import("@/components/stage/StageCanvas"), { ssr: false });
 
 const INTRO_DONE_MS = 3400;
-const GATE_FALLBACK_MS = 1500;
+/** The loader waits for the stone, its room and its compiled shaders — never
+    longer than this (a slow device still gets the page, a hitch or two). */
+const GATE_FALLBACK_MS = 7000;
+/** …and shows for at least this long, so the mark always finishes assembling. */
+const GATE_MIN_MS = 950;
 
 function hasWebGL2(): boolean {
   try {
@@ -78,6 +83,7 @@ export function Experience({ children }: { children: ReactNode }) {
     const start = (t: number) => {
       intro.state = "run";
       intro.t0 = t;
+      performance.mark("nd:start");
       root.dataset.intro = "run";
       bus.emit("intro:run");
     };
@@ -89,6 +95,9 @@ export function Experience({ children }: { children: ReactNode }) {
 
     let raf = 0;
     let lastT = -1;
+    let loadP = 0;
+    const loader = document.getElementById("loader");
+    const loaderN = loader?.querySelector<HTMLElement>(".ld-n") ?? null;
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
       if (document.hidden) return;
@@ -99,7 +108,19 @@ export function Experience({ children }: { children: ReactNode }) {
 
       if (intro.state === "wait") {
         const all = ready.fonts && ready.stone && ready.env && ready.compiled;
-        if (all || !webgl || reduced || dev.freeze || t - t0 > GATE_FALLBACK_MS) start(t);
+        // The loader's line: what is really ready, eased; creeping on while
+        // the shaders compile so it never sits still.
+        const got = (+ready.fonts + +ready.stone + +ready.env + +ready.compiled) / 4;
+        const creep = 0.55 * (1 - Math.exp(-(t - t0) / 1400));
+        loadP += (Math.max(got * 0.97, Math.min(0.9, creep)) - loadP) * (1 - Math.exp(-dt * 7));
+        if (loader) loader.style.setProperty("--ld", loadP.toFixed(4));
+        if (loaderN) loaderN.textContent = String(Math.round(loadP * 100)).padStart(3, "0");
+        const due = all && t - t0 > GATE_MIN_MS;
+        if (due || !webgl || reduced || dev.freeze || t - t0 > GATE_FALLBACK_MS) {
+          if (loader) loader.style.setProperty("--ld", "1");
+          if (loaderN) loaderN.textContent = "100";
+          start(t);
+        }
       }
       if (intro.state !== "wait") {
         intro.ms = t - intro.t0;
@@ -120,6 +141,18 @@ export function Experience({ children }: { children: ReactNode }) {
 
   return (
     <>
+      {/* THE LOADER — the mark assembles (plate, then the two blades) while
+          the stone, its room and its shaders get ready; it gives way to the
+          intro. Server-rendered, so it is the very first paint. */}
+      <div id="loader" aria-hidden>
+        <div className="ld-in">
+          <LogoMark className="ld-mark" />
+          <div className="ld-bar">
+            <span />
+          </div>
+          <p className="ld-n mono">000</p>
+        </div>
+      </div>
       <div id="field" aria-hidden />
       <div id="field-card" aria-hidden />
       <div id="stage" aria-hidden>
