@@ -127,10 +127,13 @@ PlaceEnv.tsx). The camera BANKS into its turns (a `roll` channel on the keys).
 - **Never let the glass programs recompile mid-film.** three keys every
   program on its output target and on the env's PMREM size: the first time
   the Lens drew into its target, every obsidian program recompiled — a 2.5 s
-  FREEZE at the shatter (live in round 13). The Lens precompiles the scene for
-  its target at load, and every baked room uses the hero room's PMREM size
-  (512). After touching either, record a real wheel scroll through 2.2–2.5
-  and check the longest frame gap.
+  FREEZE at the shatter (live in round 13). Stone compiles the whole scene for
+  the lens's target at load (`ready.lens`) and the Lens stays SHUT until it is
+  ready (then opens over 0.9 s); its targets are allocated up front
+  (`initRenderTarget` — allocating them at the shatter was a hitch); every
+  baked room uses the hero room's PMREM size (512). After touching any of it,
+  record a real wheel scroll through 2.2–2.5 and check the longest frame gap
+  (scratchpad `scrollhitch.mjs`-style: a fresh profile, fast AND warm).
 - **The white-room rim** (`uRim`, obsidian.ts) is down to a hint (0.1): the
   horizon ring does it physically.
 - **Motion curves** (`lib/ease.ts`): `easeBurst` (explosive, long tail) for the
@@ -365,6 +368,34 @@ way relative to each other.
 - `lib/layout.ts` is the only place hero/chapter geometry is derived.
 - Intro is PURE CSS keyed on `html[data-intro=wait|run|done]` (JS timelines
   are flaky under StrictMode).
+- **First visit (round 15, "absolute perfect").** On Windows the D3D compiler
+  (FXC, via ANGLE) takes ~2 s for the lite glass and ~5 s for the full glass
+  (PMREM's GGX convolution ~1.3 s); Chrome caches them for later visits. The
+  pipeline (flags in `lib/stores.ts` `ready`, marks `nd:*` in the Performance
+  panel):
+  1. `#loader` (the mark assembling, a hairline filling) is the first paint.
+  2. PlaceEnv warms ONE PMREM generator's programs off the main thread and
+     puts a key-only stand-in (`CubeUVReflectionMapping`, height 2048) on
+     `scene.environment` (`envKey`) — so the first programs compile
+     alongside; when warm it converts drei's hero cube + bakes the open
+     studio (only draws now) → `env`. Nothing draws before `env`.
+  3. StageCanvas compiles the scene as it first draws — the stone in its
+     LITE glass, whose program the mirror SHARES (`uMirror`) → `compiled`;
+     the loader gives way (~3.5 s here).
+  4. Stone compiles the FULL glass alongside (parallel: ANGLE compiles side
+     by side) and swaps it in, veins/inner light fading up (`uFullIn`) →
+     `full`; then the scene for the lens's target → `lens`.
+  5. PerformanceMonitor starts only after `lens` (judged during compile it
+     took the machine for a slow one and softened the hero).
+  6. `scripts/preload-stage.mjs` (runs after `next build`) preloads the
+     stage's chunk from the home page's <head>: as a client-only dynamic
+     import it was only requested after hydration (~0.7 s late on the live
+     site). It finds the chunk by the glass's GLSL (`obsNoise`) — keep the
+     marker in step if that name ever changes.
+  All compiles go through `components/stage/compile.ts` `compileFor` (waits
+  on exactly the programs made; three's compileAsync re-reads the current
+  program). Measure with a FRESH profile and interleaved A/B runs — other
+  projects' dev servers on this machine skew absolute times by 2×.
 
 ## Verification
 
@@ -378,7 +409,9 @@ way relative to each other.
   `?story=<P>&freeze=1` lands on a point of the story film; `?render=1` hides
   the DOM for stills of the film alone (the work covers). SwiftShader is no
   longer the only headless option — don't fall back to it for material
-  judgements.
+  judgements. For pixel diffs between builds let a frozen still SETTLE ~10 s
+  (at 3 s the hero was not settled, and a changed load order read as a
+  "difference" that was not there).
 
 ## Gotchas (each cost real time)
 
