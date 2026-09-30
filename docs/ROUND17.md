@@ -64,7 +64,17 @@ container — the same component is the desktop and the phone view):
   Approved, a log; the "chest tightness" email is never answered
   automatically (handed to a person, marked urgent). Sends nothing.
 
-Still to do in increment 2:
+**Status when the session ended:** everything below items 1–5 is WRITTEN and
+`npm run build` passes with no errors (all 3 case studies + /work/ generate);
+covers are captured in `public/work/*.webp` (+ `operations-portal-tall.webp`
+for the home page's tall card); NAV has Work; the home Work section now
+reads `content/work.ts`; the old placeholder `WORK` list was removed from
+lib/content.ts. NOT yet done: a visual review of /work/ and the case study
+pages (desktop + phone), lint, the Pages build, commit and push. The work is
+uncommitted in the working tree. `public/work/cover-1..3.jpg` are now unused
+(delete them once the review is done).
+
+Original list for increment 2:
 1. Frame CSS in globals.css (above).
 2. `content/work.ts` — records: slug (`practice-website`,
    `operations-portal`, `enquiry-desk` — already referenced by
