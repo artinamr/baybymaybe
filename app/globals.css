@@ -3485,6 +3485,9 @@ html[data-nowebgl] .pot-fill {
     font-size: 16px;
   }
   .work-grid {
+    /* One column: twelve with their 28 px gaps need 308 px on their own,
+       wider than a 320 px phone's text column. */
+    grid-template-columns: minmax(0, 1fr);
     row-gap: calc(var(--vh) * 7);
   }
   .work-card-2 {
@@ -3774,4 +3777,33 @@ html[data-story] .stone-cursor-dot {
   align-items: center;
   gap: 18px 30px;
   margin-top: 44px;
+}
+
+/* Narrow phones (under 390 px: older and "Display Zoom" iPhones, many
+   Androids at 360): the hero's two actions keep to one row inside the
+   gutters — past the edge they widened the whole layout and pushed the Menu
+   off-screen. From 390 px up nothing changes. */
+.cta-short {
+  display: none;
+}
+@media (max-width: 389px) and (max-aspect-ratio: 5/6) {
+  .hero-ctas {
+    gap: 8px;
+  }
+  .hero-ctas .pill,
+  .hero-ctas .ghost {
+    padding: 0 15px;
+    font-size: 14px;
+  }
+  .hero-ctas .pill {
+    gap: 8px;
+  }
+}
+@media (max-width: 349px) and (max-aspect-ratio: 5/6) {
+  .cta-long {
+    display: none;
+  }
+  .cta-short {
+    display: inline;
+  }
 }

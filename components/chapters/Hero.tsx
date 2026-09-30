@@ -131,7 +131,10 @@ export function Hero() {
           <Pill onClick={jumpToAudit}>Get a free audit</Pill>
         </span>
         <span className="intro intro-rise" style={d(1260)}>
-          <GhostPill onClick={openStory}>Enter the story</GhostPill>
+          <GhostPill onClick={openStory}>
+            <span className="cta-long">Enter the story</span>
+            <span className="cta-short">The story</span>
+          </GhostPill>
         </span>
       </div>
       <StoneCursor />
