@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Geist_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
-import { SITE_URL } from "@/lib/content";
+import { PAGES, SITE_URL } from "@/lib/content";
 
 // Variable names must never equal an @theme --font-* token (CLAUDE.md gotcha #2).
 const isans = Instrument_Sans({
@@ -60,6 +60,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <noscript>
           <style>{`#loader{display:none!important}[data-rv]{opacity:1!important;transform:none!important;filter:none!important}#stage,#field-card,#stage-frame,.intro,.intro-mask>*{clip-path:none!important;opacity:1!important;transform:none!important;animation:none!important}`}</style>
         </noscript>
+        {/* The .ico for Safari and crawlers (Next drops its own favicon link
+            under a basePath); sized 32x32 so browsers that read SVG keep
+            app/icon.svg. React hoists it into <head>. */}
+        <link rel="icon" href={`${PAGES.home}favicon.ico`} sizes="32x32" />
         <a className="skip-link" href="#main">
           Skip to content
         </a>
