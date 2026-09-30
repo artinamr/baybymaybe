@@ -50,7 +50,7 @@ export function Process() {
   return (
     <PageSection id="process" labelledBy="process-title">
       <header className="ps-head">
-        <PageMarker n="05">How we work</PageMarker>
+        <PageMarker of="process">How we work</PageMarker>
         <h2 id="process-title" className="ps-title" data-rv>
           From first call to live.
         </h2>

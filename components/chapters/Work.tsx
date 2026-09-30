@@ -15,7 +15,7 @@ export function Work() {
   return (
     <PageSection id="work" labelledBy="work-title">
       <header className="ps-head">
-        <PageMarker n="03">Selected work</PageMarker>
+        <PageMarker of="work">Selected work</PageMarker>
         <h2 id="work-title" className="ps-title" data-rv>
           Recent work.
         </h2>

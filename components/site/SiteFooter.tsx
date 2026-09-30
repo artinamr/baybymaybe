@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { LogoMark } from "@/components/chrome/LogoMark";
 import { AuditForm } from "@/components/contact/AuditForm";
 import { ui } from "@/lib/stores";
-import type { ChapterId } from "@/lib/chapters";
+import { chapter, type ChapterId } from "@/lib/chapters";
 import { jumpToAudit, jumpToS, scrollToChapter } from "@/lib/scroll";
 import { CONTACT, PAGES } from "@/lib/content";
 import { openStory } from "@/lib/story";
@@ -45,7 +45,7 @@ export function SiteFooter({ home = false }: { home?: boolean }) {
         <section id="contact" className="sf-audit" aria-labelledby="contact-title">
           <div className="sfa-head">
             <p className="marker">
-              {home ? <span className="marker-n">07</span> : null}
+              {home ? <span className="marker-n">{chapter("audit").num}</span> : null}
               {home ? <span className="marker-rule" aria-hidden /> : null}
               <span>Start with a free audit</span>
             </p>

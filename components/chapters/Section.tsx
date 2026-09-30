@@ -66,11 +66,14 @@ export function PageSection({
   );
 }
 
-/** A page section's heading: its number, a hairline, its name (the chapter marker's voice). */
-export function PageMarker({ n, children }: { n: string; children: ReactNode }) {
+/**
+ * A page section's heading: its number, a hairline, its name (the chapter
+ * marker's voice). The number is the chapter's own, as the rail shows it.
+ */
+export function PageMarker({ of, children }: { of: ChapterId; children: ReactNode }) {
   return (
     <p className="marker ps-marker" data-rv>
-      <span className="marker-n">{n}</span>
+      <span className="marker-n">{chapter(of).num}</span>
       <span className="marker-rule" aria-hidden />
       <span>{children}</span>
     </p>
@@ -88,11 +91,14 @@ export function Line({ children, i = 0, className = "" }: { children: ReactNode;
   );
 }
 
-/** Chapter marker: its number, a hairline, its name. Plain, small, sentence case. */
-export function Marker({ n, children, i = 0 }: { n: string; children: ReactNode; i?: number }) {
+/**
+ * Chapter marker: its number (the chapter's own, as the rail shows it), a
+ * hairline, its name. Plain, small, sentence case.
+ */
+export function Marker({ of, children, i = 0 }: { of: ChapterId; children: ReactNode; i?: number }) {
   return (
     <p className="marker rv-fade" style={{ "--i": i } as CSSProperties}>
-      <span className="marker-n">{n}</span>
+      <span className="marker-n">{chapter(of).num}</span>
       <span className="marker-rule" aria-hidden />
       <span>{children}</span>
     </p>

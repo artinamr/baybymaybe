@@ -16,7 +16,7 @@ export function Faq() {
     <PageSection id="faq" labelledBy="faq-title" className="faq">
       <div className="faq-grid">
         <header className="ps-head faq-head">
-          <PageMarker n="06">Questions</PageMarker>
+          <PageMarker of="faq">Questions</PageMarker>
           <h2 id="faq-title" className="ps-title" data-rv>
             Straight answers.
           </h2>

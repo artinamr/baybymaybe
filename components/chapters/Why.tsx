@@ -29,7 +29,7 @@ function Words({ inverted = false }: { inverted?: boolean }) {
   return (
     <>
       <div className="why-top">
-        <Marker n="03">Why Nerodyn</Marker>
+        <Marker of="why">Why Nerodyn</Marker>
         <h2 id={inverted ? undefined : "why-title"} className="h2 why-h2">
           <Line i={0}>One team builds it.</Line> <Line i={1}>You own all of it.</Line>
         </h2>

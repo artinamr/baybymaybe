@@ -20,7 +20,7 @@ export function Statement() {
   return (
     <Section id="statement" labelledBy="statement-title">
       <div className="statement-sec">
-        <Marker n="01">
+        <Marker of="statement">
           <span id="statement-title">The studio</span>
         </Marker>
         <div className="statement-wrap rv-wipe">
