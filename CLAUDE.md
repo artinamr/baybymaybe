@@ -50,13 +50,15 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
   (`sceneState.covered`). Everything that reads the film uses film time
   (`sceneState.S`, `filmS`); the chrome and reveals use page S.
 - Auto-framing rests are in film time (`REST_FILM`, + every page section's
-  top, + each hold's end, + the page end) and never pull a reader who stopped
-  inside a page section. The chapter rail steps back while you read a sheet
+  top, + each hold's end, + the footer's top — nothing past it) and never
+  pull a reader who stopped inside a page section or the footer. The chapter rail steps back while you read a sheet
   (`html[data-reading]`).
 - **Content lives in `lib/content.ts`**: deliverables, WORK (placeholders —
   covers are stills of our own film, rendered with `?render=1`), PROCESS,
-  FAQ, contact. The audit form posts JSON to `NEXT_PUBLIC_FORM_ENDPOINT` if
-  set; on the static site it writes the email for you (mailto).
+  FAQ, contact. The audit form (round 16) lives at the top of the footer
+  (`#contact`) and posts JSON to FormSubmit → `artin@nerodyn.com`
+  (`FORM_ENDPOINT`; `NEXT_PUBLIC_FORM_ENDPOINT` overrides); if the post fails
+  it offers the same message as a pre-written email (mailto).
 - The hero's primary action is the free audit; "Enter the story" is the
   ghost button. Nav: What we build · Work · Why Nerodyn · How we work · Free
   audit.
@@ -72,6 +74,58 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
   pages". Untouched; it still works (click the stone) — it uses only F0/F1, so
   keep those two formations' behaviour stable.
 - **Methodology** is its own page (`app/methodology/`).
+
+**ROUND 16 (2026-09-29/30 — "other pages … fix the let's talk … the form
+isn't functional … jump, don't animate … optimise with ZERO visual change …
+better loading … make the whole website perfect").**
+- **Pages:** `/methodology` (editorial: hero, film-still banner, four stages
+  with images from `public/method/*.webp`, principles, "what is yours on day
+  fourteen"), `/faq` (FAQ_ALL, grouped, topics alongside), `/privacy`,
+  `/terms` (NZ law assumed — needs the client's/lawyer's review), a branded
+  404. They share `SubHeader` (its `audit` prop points the Free-audit link
+  off-page on the 404), `SiteFooter`, `SubReveal`, `LegalPage`.
+- **The footer is the audit's home** (`SiteFooter`, also on every sub-page):
+  `#contact` (title, three points, "Rather write?" copy-email, the form) →
+  link columns → the signature (`.sf-mark`, `pointer-events: none` — its
+  line box sits over the last row of links). Every "free audit" action calls
+  `jumpToAudit()` (lands `#contact` right under the nav).
+- **The finale** ("Let's talk.", `Audit.tsx`): the two words stand ON the
+  floor line (`--floorline`, projected in lib/project.ts for S > 9.25), one
+  each side of the colossus; below, one line, the audit pill and the email.
+- **Jumps are instant:** nav, rail, menu, footer links call `jumpToS` →
+  `scroll.cutFrames = 2`; the Director and CameraRig SNAP on `scroll.cut`
+  (clock, springs, rigid, camera) and suppress glints/cracks, so the film
+  lands on the new frame in one frame. Only the reader's own scroll animates.
+- **Auto-framing and the footer:** the footer's top (`FOOT_S`, measured) is
+  the last rest; inside the footer nothing glides (it used to pull readers
+  up to 900 px to the page end, taking the form away mid-read). Past
+  `FOOT_S` the canvas is not drawn (`covered`).
+- **Keyboard / a11y:** skip link; the phone menu is a real dialog (inert when
+  closed, focus in, Tab kept inside, Escape, focus back) and carries Free
+  audit; the rail and hero card get `visibility: hidden` AFTER their fades
+  (no visual change, out of the tab order); Tab into a film chapter whose
+  words wait for their frame lands on that frame (`focusin`, keyboard only);
+  `html { scroll-padding-top }` keeps focus/anchors clear of the nav.
+  Section markers read their numbers from `chapter(id).num` (Why said 03
+  while the rail said 04).
+- **Head:** share card `public/og.jpg` (+ OG/Twitter tags, `SITE_URL` —
+  set `NEXT_PUBLIC_SITE_URL` when the domain moves), `sitemap.xml`,
+  `robots.txt`, the stone-mark icons (`app/icon.svg` flips to paper on dark
+  browser themes, `favicon.ico`, `apple-icon.png`; the template's triangle
+  was still there), JSON-LD (`components/site/JsonLd.tsx`: organisation +
+  offers on home, FAQPage on /faq).
+- **Loader:** the veil, the mark assembling with a glint sweep, a hairline
+  with a bright head; when the page is ready the mark FLIPs into the nav's
+  mark (`data-handoff`, `--fx/--fy/--fs`).
+- **Performance with identical pixels** (verified by pixel diffs, max 1–2/255):
+  a depth-only pre-pass for the glass (colour passes `depthWrite: false`,
+  `invariant gl_Position`), an early `discard` through the shared `obsAlpha()`
+  (the mirror at F 7.62: 5.5 → 0.3 ms), a dilated CoC tile map for the Lens,
+  no per-frame custom properties on containers (they restyle the whole
+  subtree — write transforms straight onto the element, only when changed),
+  invisible CSS animations paused. Style recalc per frame 91 → 2 elements;
+  scroll-hitch test 0 frames > 50 ms (was 14–19). Measure with `?perf=1`
+  (GPU timer queries per pass, `window.__perf` toggles) and `?dpr=`.
 
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
@@ -302,7 +356,8 @@ way relative to each other.
 ## Auto-framing + interactivity (2026-09-26: "auto framing like igloo", "AI one more impressive")
 
 - **Auto-framing** (`lib/scroll.ts`): composed frames are listed in
-  `REST_STATIC` (+ measured work rows + the page end). ~0.9 s after the last
+  `REST_FILM` (+ page-section tops, hold ends and the footer's top — see
+  round 16). ~0.9 s after the last
   wheel/touch/key input, with the scroll at rest, the page glides to the
   nearest frame, biased toward the direction of travel (past 20 % of the gap
   → onward). Any input cancels a glide; nav jumps suppress it until they land;
@@ -412,6 +467,13 @@ way relative to each other.
   judgements. For pixel diffs between builds let a frozen still SETTLE ~10 s
   (at 3 s the hero was not settled, and a changed load order read as a
   "difference" that was not there).
+- **Local tests run on the static export** (`npm run build`, serve `out/`).
+  A Pages build (`NEXT_PUBLIC_BASE_PATH=/baybymaybe`) left in `out/` 404s
+  every asset locally — rebuild plain before measuring anything.
+- **The browser pane pauses rAF when it is hidden** (`visibilityState`
+  hidden): the intro sits at `wait` there. Use headless Chrome for timings.
+- **Never submit the live form in tests** — mock `formsubmit.co` with
+  request interception (it emails the client).
 
 ## Gotchas (each cost real time)
 
@@ -442,8 +504,10 @@ way relative to each other.
 
 Three real projects for Selected work (the cards are labelled placeholders —
 name, client, one line on what changed, a cover; `lib/content.ts` WORK), a
-testimonial or two if they have them, the form's destination (a Formspree-like
-endpoint → `NEXT_PUBLIC_FORM_ENDPOINT`; without it the form writes an email),
-the real contact email (`hello@nerodyn.com` is a placeholder) and social
-links, sign-off on the copy (including the FAQ answers and the "about
-fourteen days" promise), the brand font if different.
+testimonial or two if they have them, ONE activation of the form (the first
+submission makes FormSubmit email an "Activate Form" link to
+artin@nerodyn.com — until it is clicked, submissions wait), the social links
+(`CONTACT.linkedin` / `instagram` — hidden until filled in), a legal review of
+/privacy and /terms (written for New Zealand), sign-off on the copy
+(including the FAQ answers and the "about fourteen days" promise), the brand
+font if different, and the real domain (`NEXT_PUBLIC_SITE_URL`).
