@@ -7,6 +7,14 @@
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
+/**
+ * Where the site lives, for absolute URLs (share cards, the sitemap). Set
+ * NEXT_PUBLIC_SITE_URL when it moves to its own domain (https://nerodyn.com).
+ */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || (BASE ? `https://artinamr.github.io${BASE}` : "http://localhost:3000")
+).replace(/\/$/, "");
+
 /** What each discipline actually delivers (the "What we build" panels). */
 export const DELIVERABLES: Record<"websites" | "platforms" | "ai", string[]> = {
   websites: ["Custom design, no templates", "Fast on every phone and screen", "Search foundations built in", "Content your team edits itself"],

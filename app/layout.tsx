@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Geist_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/content";
 
 // Variable names must never equal an @theme --font-* token (CLAUDE.md gotcha #2).
 const isans = Instrument_Sans({
@@ -27,10 +28,23 @@ const gmono = Geist_Mono({
   display: "swap",
 });
 
+const TITLE = "Nerodyn — Digital infrastructure & AI automation";
+const DESCRIPTION =
+  "Nerodyn designs, engineers and runs the websites and platforms companies run on — and the AI that works inside them.";
+
 export const metadata: Metadata = {
-  title: "Nerodyn — Digital infrastructure & AI automation",
-  description:
-    "Nerodyn designs, engineers and runs the websites and platforms companies run on — and the AI that works inside them.",
+  metadataBase: new URL(`${SITE_URL}/`),
+  title: TITLE,
+  description: DESCRIPTION,
+  // The card a shared link shows: the stone, the name, the one line.
+  openGraph: {
+    type: "website",
+    siteName: "Nerodyn",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: "og.jpg", width: 1200, height: 630, alt: "Nerodyn — a polished obsidian stone with light inside it, and the name." }],
+  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["og.jpg"] },
 };
 
 export const viewport: Viewport = {

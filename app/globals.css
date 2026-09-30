@@ -2460,6 +2460,10 @@ html[data-story] .specimen {
 .lg-body ul {
   margin: 0 0 16px;
   padding-left: 20px;
+  list-style: disc;
+}
+.lg-body li::marker {
+  color: var(--indigo);
 }
 .lg-body li {
   margin: 0 0 6px;
@@ -3709,4 +3713,29 @@ html[data-story] .stone-cursor-dot {
 }
 #field:not([data-haze])::after {
   animation-play-state: paused;
+}
+
+/* THE 404 — plainly lost, the ways back. */
+.nf-main {
+  min-height: calc(100vh - var(--nav-h));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6vh 0 12vh;
+}
+.nf-mark {
+  width: 34px;
+  height: auto;
+  margin-bottom: 36px;
+  color: var(--ink);
+}
+.nf-h1 {
+  font-size: min(7vw, 104px);
+}
+.nf-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 30px;
+  margin-top: 44px;
 }

@@ -56,12 +56,22 @@ export function Experience({ children }: { children: ReactNode }) {
     const reduced = root.hasAttribute("data-reduced");
     document.fonts?.ready.then(() => (ready.fonts = true));
 
-    const at = atToS(dev.at);
-    if (at !== null) {
+    const land = () => {
+      const at = atToS(dev.at);
+      if (at === null) return;
       const y = at * scroll.vh;
       const lenis = getLenis();
       if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
       else window.scrollTo(0, y);
+    };
+    land();
+    // (Look-dev: again once the page is measured — on a phone the sheets are
+    // far taller than their minimum, and the first landing falls short or long.)
+    if (dev.at) {
+      const off = bus.on("intro:run", () => {
+        off();
+        requestAnimationFrame(land);
+      });
     }
 
     // A link to `/#story` (the methodology page's nav) opens the story once the intro has played.

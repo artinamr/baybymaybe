@@ -8,7 +8,7 @@ type Here = "methodology" | "faq" | "privacy" | "terms";
  * pages): the name back home, the pages a buyer looks for, and the audit —
  * which lands on the form at the foot of this very page.
  */
-export function SubHeader({ here }: { here: Here }) {
+export function SubHeader({ here, audit = "#contact" }: { here?: Here; audit?: string }) {
   const link = (key: Here, href: string, label: string) => (
     <a href={href} className="sp-link" aria-current={here === key ? "page" : undefined}>
       {label}
@@ -29,8 +29,8 @@ export function SubHeader({ here }: { here: Here }) {
         </a>
         {link("methodology", PAGES.methodology, "Methodology")}
         {link("faq", PAGES.faq, "Questions")}
-        <a href="#contact" className="sp-cta">
-          Free audit <span aria-hidden>↓</span>
+        <a href={audit} className="sp-cta">
+          Free audit <span aria-hidden>{audit.startsWith("#") ? "↓" : "→"}</span>
         </a>
       </nav>
     </header>
