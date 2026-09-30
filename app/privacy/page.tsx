@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { LegalPage, type LegalSection } from "@/components/site/LegalPage";
 import { CONTACT } from "@/lib/content";
+import { pageMeta } from "@/lib/meta";
 
-export const metadata: Metadata = {
-  title: "Privacy — Nerodyn",
+export const metadata: Metadata = pageMeta({
+  title: "Privacy",
   description: "What personal information the Nerodyn website collects, why, who else sees it, and how to have it corrected or deleted.",
-};
+  path: "privacy/",
+});
 
 const mail = (
   <a className="sp-inline" href={`mailto:${CONTACT.email}`}>

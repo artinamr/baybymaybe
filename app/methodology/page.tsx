@@ -2,22 +2,17 @@ import type { Metadata } from "next";
 import { SubHeader } from "@/components/site/SubHeader";
 import { SubReveal } from "@/components/site/SubReveal";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { PAGES, STAGES } from "@/lib/content";
+import { PAGES, PRINCIPLES, STAGES } from "@/lib/content";
+import { pageMeta } from "@/lib/meta";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-export const metadata: Metadata = {
-  title: "Methodology — Nerodyn",
+export const metadata: Metadata = pageMeta({
+  title: "Methodology",
   description:
     "From first call to live in about fourteen days: how Nerodyn discovers, designs, builds and launches — one team, no hand-offs, and you own everything at the end.",
-};
-
-const PRINCIPLES = [
-  { name: "Ownership", line: "You own it all — code, domain, every asset. No platform holds you hostage." },
-  { name: "Craft", line: "Made to fit your business, not stamped from a theme ten others bought." },
-  { name: "Clarity", line: "Straight answers in plain language, tied to your bottom line. Never left guessing." },
-  { name: "Proof", line: "Useful first: we audit what you have before you spend anything — free." },
-];
+  path: "methodology/",
+});
 
 const YOURS = ["The code", "The domain", "The content, and every asset", "Every account, in your name", "Plain notes on how it all works"];
 

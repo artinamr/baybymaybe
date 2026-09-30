@@ -1,24 +1,29 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { LogoMark } from "@/components/chrome/LogoMark";
 import { AuditForm } from "@/components/contact/AuditForm";
 import { ui } from "@/lib/stores";
-import { chapter, type ChapterId } from "@/lib/chapters";
-import { jumpToAudit, jumpToS, scrollToChapter } from "@/lib/scroll";
+import { chapter } from "@/lib/chapters";
 import { CONTACT, PAGES } from "@/lib/content";
-import { openStory } from "@/lib/story";
+import { SERVICES } from "@/content/services";
 
 const EMAIL = CONTACT.email;
+
+// The home page's scroll and story code is already loaded there; these load it
+// on demand, so the other pages never download it for a footer they only link from.
+const jumpToAudit = () => import("@/lib/scroll").then((m) => m.jumpToAudit());
+const jumpToTop = () => import("@/lib/scroll").then((m) => m.jumpToS(0));
+const jumpToWork = () => import("@/lib/scroll").then((m) => m.scrollToChapter("work"));
+const openStory = () => import("@/lib/story").then((m) => m.openStory());
 
 /**
  * THE FOOTER — every page ends on it. It opens with the audit form (every
  * "free audit" on the site lands on #contact), then every way round the site,
  * and the name signed across the bottom. On the home page it is the last sheet,
- * rising over the film's final frame, and its links jump in place; on the other
- * pages they lead back to the home page's sections.
+ * rising over the film's final frame.
  */
-export function SiteFooter({ home = false }: { home?: boolean }) {
+export function SiteFooter({ home = false, form = true }: { home?: boolean; form?: boolean }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -29,19 +34,11 @@ export function SiteFooter({ home = false }: { home?: boolean }) {
       window.location.href = `mailto:${EMAIL}`;
     }
   };
-  /** A home section: a jump on the home page, a link from anywhere else. */
-  const to = (id: ChapterId, label: ReactNode) =>
-    home ? (
-      <button type="button" onClick={() => scrollToChapter(id)}>
-        {label}
-      </button>
-    ) : (
-      <a href={`${PAGES.home}#${id}`}>{label}</a>
-    );
 
   return (
-    <footer className="site-foot" aria-label="Site">
+    <footer className="site-foot" aria-label="Site" data-noform={form ? undefined : ""}>
       <div className="sf-in">
+        {form ? (
         <section id="contact" className="sf-audit" aria-labelledby="contact-title">
           <div className="sfa-head">
             <p className="marker">
@@ -89,19 +86,29 @@ export function SiteFooter({ home = false }: { home?: boolean }) {
             <AuditForm tone="card" />
           </div>
         </section>
+        ) : null}
 
         <nav className="sf-cols" aria-label="Footer">
           <div className="f-col">
-            <p className="f-h">What we build</p>
-            {to("build", "Websites")}
-            {to("build", "Platforms")}
-            {to("build", "AI automation")}
+            <p className="f-h">Services</p>
+            {SERVICES.map((s) => (
+              <a key={s.slug} href={PAGES.service(s.slug)}>
+                {s.name}
+              </a>
+            ))}
+            <a href={PAGES.pricing}>Investment</a>
           </div>
           <div className="f-col">
             <p className="f-h">Studio</p>
-            {to("work", "Work")}
-            {to("process", "How we work")}
+            {home ? (
+              <button type="button" onClick={jumpToWork}>
+                Work
+              </button>
+            ) : (
+              <a href={`${PAGES.home}#work`}>Work</a>
+            )}
             <a href={PAGES.methodology}>Methodology</a>
+            <a href={PAGES.studio}>Studio</a>
             {home ? (
               <button type="button" onClick={openStory}>
                 The story
@@ -113,6 +120,7 @@ export function SiteFooter({ home = false }: { home?: boolean }) {
           <div className="f-col">
             <p className="f-h">Help</p>
             <a href={PAGES.faq}>Questions</a>
+            <a href={PAGES.contact}>Contact</a>
             {home ? (
               <button type="button" onClick={jumpToAudit}>
                 Free audit
@@ -136,7 +144,7 @@ export function SiteFooter({ home = false }: { home?: boolean }) {
             <p className="f-h">© 2026 Nerodyn</p>
             <a href={PAGES.privacy}>Privacy</a>
             <a href={PAGES.terms}>Terms</a>
-            <button type="button" className="text-link" onClick={() => (home ? jumpToS(0) : window.scrollTo({ top: 0 }))}>
+            <button type="button" className="text-link" onClick={() => (home ? jumpToTop() : window.scrollTo({ top: 0 }))}>
               Back to the top <span aria-hidden>↑</span>
             </button>
           </div>

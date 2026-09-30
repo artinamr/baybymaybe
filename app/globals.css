@@ -3807,3 +3807,477 @@ html[data-story] .stone-cursor-dot {
     display: inline;
   }
 }
+
+/* ==========================================================================
+   THE SITE'S PAGES, CONTINUED (services, studio, investment, contact): the
+   same editorial voice. A split block (the heading holds the left column,
+   the content the right), items in two columns under hairlines, numbered
+   flows, image cards, and one closing ask per page.
+   ========================================================================== */
+
+/* The trail above a deep page's title. */
+.crumbs ol {
+  list-style: none;
+  margin: 0 0 26px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+}
+.crumbs li {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+}
+.crumbs li + li::before {
+  content: "/";
+  opacity: 0.45;
+}
+.crumbs a {
+  transition: color 250ms ease;
+}
+.crumbs a:hover {
+  color: var(--indigo);
+}
+.crumbs [aria-current] {
+  color: var(--ink);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: 7vw;
+  row-gap: 40px;
+  align-items: start;
+}
+.split-head {
+  position: sticky;
+  top: calc(var(--nav-h) + 32px);
+  display: grid;
+  gap: 22px;
+}
+.split-head .sp-kicker,
+.split-more {
+  margin: 0;
+}
+
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 44px 36px;
+}
+.items li {
+  padding-top: 22px;
+  border-top: 1px solid var(--hair);
+}
+.items-1 {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.items-1 li {
+  padding: 24px 0 28px;
+}
+.items-1 li:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+.item-n {
+  display: block;
+  font-size: 11px;
+  color: var(--indigo);
+  margin-bottom: 14px;
+}
+.item-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 0 0 10px;
+}
+.item-b {
+  font-size: 16px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  margin: 0;
+  max-width: 50ch;
+}
+
+.flow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.flow li {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  column-gap: 20px;
+  padding: 26px 0 30px;
+  border-top: 1px solid var(--hair);
+}
+.flow li:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+.flow-n {
+  grid-row: 1 / 3;
+  font-size: 11px;
+  color: var(--indigo);
+  padding-top: 8px;
+}
+.flow .item-t,
+.flow .item-b {
+  grid-column: 2;
+}
+
+.own-list-s li {
+  font-size: min(2.1vw, 27px);
+  padding: 17px 0;
+}
+.own-no .own-tick {
+  background: var(--ink);
+}
+
+/* The three disciplines, as cards. */
+.svc-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  padding: 0 0 calc(var(--vh) * 12);
+}
+.svc-card {
+  display: grid;
+  gap: 22px;
+  align-content: start;
+}
+.svc-img {
+  display: block;
+  overflow: hidden;
+  border-radius: 20px;
+  aspect-ratio: 4 / 5;
+  background: #eeede9;
+  border: 1px solid var(--hair-soft);
+}
+.svc-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1400ms var(--ease-expo);
+}
+.svc-card:hover .svc-img img {
+  transform: scale(1.04);
+}
+.svc-meta {
+  display: grid;
+  gap: 10px;
+}
+.svc-n {
+  font-size: 11px;
+  color: var(--indigo);
+}
+.svc-name {
+  font-family: var(--display);
+  font-size: min(3.4vw, 48px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.svc-line {
+  font-size: 16px;
+  line-height: 1.55;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  max-width: 36ch;
+}
+.svc-go {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--indigo);
+  margin-top: 4px;
+}
+.svc-go span,
+.svc-other .svc-go {
+  display: inline-block;
+  transition: transform 450ms var(--ease-expo);
+}
+.svc-card:hover .svc-go span,
+.svc-other:hover .svc-go {
+  transform: translateX(5px);
+}
+.svc-hero .sp-h1 {
+  font-size: min(6.6vw, 100px);
+}
+.svc-hero .closing-actions {
+  margin-top: 38px;
+}
+.svc-others .sp-kicker {
+  margin-bottom: 30px;
+}
+.svc-others-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.svc-other {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 30px 32px 34px;
+  border: 1px solid var(--hair);
+  border-radius: 22px;
+  transition:
+    border-color 300ms ease,
+    background 300ms ease;
+}
+.svc-other:hover {
+  border-color: color-mix(in oklab, var(--indigo) 38%, transparent);
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+.svc-other-name {
+  font-family: var(--display);
+  font-size: 38px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.svc-other .svc-go {
+  position: absolute;
+  top: 28px;
+  right: 30px;
+  font-size: 20px;
+  margin: 0;
+}
+
+/* One closing ask per page. */
+.closing {
+  display: grid;
+  gap: 26px;
+  justify-items: start;
+  padding-bottom: calc(var(--vh) * 14);
+}
+.closing .sp-h2 {
+  font-size: min(5.6vw, 80px);
+}
+.closing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 34px;
+}
+
+/* Contact: the asks and what happens next beside the form. */
+.ct {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  grid-template-areas:
+    "head form"
+    "more form";
+  grid-template-rows: auto 1fr;
+  column-gap: 6vw;
+  row-gap: 0;
+  align-items: start;
+  padding: calc(var(--vh) * 12) 0 calc(var(--vh) * 14);
+}
+.ct-head .sp-h1 {
+  font-size: min(5.6vw, 84px);
+}
+/* The contact page carries the form itself: its footer starts at the links. */
+.site-foot[data-noform] .sf-in {
+  padding-top: calc(var(--vh) * 8);
+}
+.site-foot[data-noform] .sf-cols {
+  padding-top: 0;
+}
+.ct-next {
+  list-style: none;
+  margin: 44px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.ct-next li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.ct-next .mono {
+  font-size: 11px;
+  color: var(--indigo);
+  padding-top: 7px;
+}
+.ct-next .item-t {
+  font-size: 21px;
+  margin-bottom: 6px;
+}
+.ct-next .item-b {
+  font-size: 15px;
+}
+.ct-direct {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: baseline;
+  margin: 34px 0 0;
+  font-size: 14px;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+}
+.ct-email {
+  font-family: var(--display);
+  font-size: 30px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  transition: color 250ms ease;
+}
+.ct-email:hover {
+  color: var(--indigo);
+}
+.ct-head {
+  grid-area: head;
+}
+.ct-more {
+  grid-area: more;
+}
+.ct-form {
+  grid-area: form;
+  position: sticky;
+  top: calc(var(--nav-h) + 24px);
+}
+/* A service banner holds its subject, right of centre, when a phone crops it. */
+.svc-banner img {
+  object-position: 64% 50%;
+}
+
+/* The form's two asks (contact page). */
+.af-kind {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 26px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ink) 6%, transparent);
+}
+.af-kind-opt {
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+  transition:
+    background 300ms ease,
+    color 300ms ease,
+    box-shadow 300ms ease;
+}
+.af-kind-opt[aria-pressed="true"] {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ink) 8%, transparent),
+    0 6px 16px -8px color-mix(in oklab, var(--ink) 22%, transparent);
+}
+.af-field[data-bad] textarea {
+  border-color: #b3372f;
+}
+
+/* The sub-pages' Menu (phones), and the home menu's "on this page". */
+.sp-menu {
+  display: none;
+  align-items: center;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.menu-here {
+  margin-top: 34px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hair);
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    transform 700ms var(--ease-expo) calc(var(--i) * 60ms),
+    opacity 500ms ease calc(var(--i) * 60ms);
+}
+.menu-sheet[data-open] .menu-here {
+  opacity: 1;
+  transform: none;
+}
+.menu-here-h {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  margin: 0 0 12px;
+}
+.menu-here-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+.menu-here-links a {
+  font-size: 15px;
+  font-weight: 500;
+}
+.menu-here-links .mono {
+  font-size: 10px;
+  color: var(--indigo);
+  margin-right: 4px;
+}
+
+@media (max-width: 900px) {
+  .sp-menu {
+    display: inline-flex;
+  }
+  .split,
+  .ct {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ct {
+    grid-template-areas: "head" "form" "more";
+    grid-template-rows: none;
+    row-gap: 40px;
+  }
+  .split-head,
+  .ct-form {
+    position: static;
+  }
+  .items,
+  .svc-cards,
+  .svc-others-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .svc-img {
+    aspect-ratio: 16 / 10;
+  }
+  .svc-name {
+    font-size: 11vw;
+  }
+  .svc-hero .sp-h1,
+  .ct-head .sp-h1 {
+    font-size: 12vw;
+  }
+  .closing .sp-h2 {
+    font-size: 11vw;
+  }
+  .own-list-s li {
+    font-size: 21px;
+  }
+  .svc-other-name {
+    font-size: 30px;
+  }
+}
+@media (max-width: 560px) {
+  .sp-cta {
+    display: none;
+  }
+  .af-kind-opt {
+    font-size: 13px;
+  }
+}

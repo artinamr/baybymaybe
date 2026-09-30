@@ -5,11 +5,13 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { QaList } from "@/components/site/QaList";
 import { CONTACT, FAQ_ALL } from "@/lib/content";
 import { FaqLd } from "@/components/site/JsonLd";
+import { pageMeta } from "@/lib/meta";
 
-export const metadata: Metadata = {
-  title: "Questions — Nerodyn",
+export const metadata: Metadata = pageMeta({
+  title: "Questions",
   description: "Straight answers to what people ask Nerodyn before the first call: price, time, ownership, working together and AI automation.",
-};
+  path: "faq/",
+});
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z]+/g, "-").replace(/(^-|-$)/g, "");
 

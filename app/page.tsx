@@ -13,6 +13,9 @@ import { PageReveal } from "@/components/chapters/PageReveal";
 import { StoryMode } from "@/components/story/StoryMode";
 import { OrgLd } from "@/components/site/JsonLd";
 
+// The home page's own canonical address (the layout's title and card are its).
+export const metadata = { alternates: { canonical: "./" } };
+
 /**
  * The home page: the film's scenes (hero, statement, what we build, why,
  * let's talk) with the page's plain sections (work, how we work, questions)

@@ -1,4 +1,4 @@
-import { CONTACT, FAQ_ALL, SITE_URL } from "@/lib/content";
+import { CONTACT, FAQ_ALL, SITE_URL, abs } from "@/lib/content";
 
 /**
  * Structured data for search engines and AI assistants: who Nerodyn is and
@@ -38,6 +38,48 @@ export function OrgLd() {
           },
           { "@type": "WebSite", "@id": `${SITE_URL}/#site`, name: "Nerodyn", url: `${SITE_URL}/`, publisher: { "@id": `${SITE_URL}/#org` } },
         ],
+      }}
+    />
+  );
+}
+
+/** The trail to a page (the visible Crumbs mirror it). */
+export function CrumbsLd({ crumbs }: { crumbs: { name: string; href: string }[] }) {
+  return (
+    <Ld
+      data={{
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: abs(c.href) })),
+      }}
+    />
+  );
+}
+
+/** One discipline, offered by the organisation on the home page. */
+export function ServiceLd({ name, description, href }: { name: string; description: string; href: string }) {
+  return (
+    <Ld
+      data={{
+        "@context": "https://schema.org",
+        "@type": "Service",
+        name,
+        description,
+        url: abs(href),
+        provider: { "@id": `${SITE_URL}/#org` },
+      }}
+    />
+  );
+}
+
+/** Questions and answers shown on a page (FAQPage matches what is visible). */
+export function QaLd({ items }: { items: { q: string; a: string }[] }) {
+  return (
+    <Ld
+      data={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: items.map((it) => ({ "@type": "Question", name: it.q, acceptedAnswer: { "@type": "Answer", text: it.a } })),
       }}
     />
   );

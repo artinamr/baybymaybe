@@ -227,6 +227,14 @@ export const STAGES = [
   },
 ];
 
+/** How we work, in four words (methodology, studio). */
+export const PRINCIPLES = [
+  { name: "Ownership", line: "You own it all — code, domain, every asset. No platform holds you hostage." },
+  { name: "Craft", line: "Made to fit your business, not stamped from a theme ten others bought." },
+  { name: "Clarity", line: "Straight answers in plain language, tied to your bottom line. Never left guessing." },
+  { name: "Proof", line: "Useful first: we audit what you have before you spend anything — free." },
+];
+
 /** Contact. The social profiles show only once they are filled in (the client supplies them). */
 export const CONTACT = {
   email: "artin@nerodyn.com",
@@ -244,10 +252,29 @@ export const FORM_ENDPOINT = process.env.NEXT_PUBLIC_FORM_ENDPOINT || `https://f
 
 /** The site's own pages. */
 export const PAGES = {
+  home: `${BASE}/`,
+  services: `${BASE}/services/`,
+  service: (slug: string) => `${BASE}/services/${slug}/`,
+  work: `${BASE}/work/`,
+  project: (slug: string) => `${BASE}/work/${slug}/`,
   methodology: `${BASE}/methodology/`,
+  studio: `${BASE}/studio/`,
+  pricing: `${BASE}/pricing/`,
+  blog: `${BASE}/blog/`,
+  article: (slug: string) => `${BASE}/blog/${slug}/`,
+  contact: `${BASE}/contact/`,
   faq: `${BASE}/faq/`,
   privacy: `${BASE}/privacy/`,
   terms: `${BASE}/terms/`,
-  home: `${BASE}/`,
 };
+
+/**
+ * Search engines index the site only on its real domain (NEXT_PUBLIC_SITE_URL
+ * set). The GitHub Pages preview says noindex, so it never competes with
+ * nerodyn.com; links shared from it still show their cards.
+ */
+export const INDEXABLE = Boolean(process.env.NEXT_PUBLIC_SITE_URL);
+
+/** A page's absolute URL (for structured data) from its href (which carries the base path). */
+export const abs = (href: string) => `${SITE_URL}${href.slice(BASE.length)}`;
 

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Geist_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
-import { PAGES, SITE_URL } from "@/lib/content";
+import { INDEXABLE, PAGES, SITE_URL } from "@/lib/content";
 
 // Variable names must never equal an @theme --font-* token (CLAUDE.md gotcha #2).
 const isans = Instrument_Sans({
@@ -34,6 +34,8 @@ const DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL(`${SITE_URL}/`),
+  // The GitHub Pages preview stays out of search; the real domain is indexed.
+  ...(INDEXABLE ? {} : { robots: { index: false, follow: true } }),
   title: TITLE,
   description: DESCRIPTION,
   // The card a shared link shows: the stone, the name, the one line.

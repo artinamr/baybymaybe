@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { LegalPage, type LegalSection } from "@/components/site/LegalPage";
 import { CONTACT } from "@/lib/content";
+import { pageMeta } from "@/lib/meta";
 
-export const metadata: Metadata = {
-  title: "Terms — Nerodyn",
+export const metadata: Metadata = pageMeta({
+  title: "Terms",
   description: "The terms of using the Nerodyn website: its content, the free audit, links, liability and the law that applies.",
-};
+  path: "terms/",
+});
 
 const SECTIONS: LegalSection[] = [
   {

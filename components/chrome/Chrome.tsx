@@ -1,21 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
-import { CHAPTERS, jumpS, type ChapterId } from "@/lib/chapters";
-import { jumpToAudit, jumpToS, onScrollFrame, scrollToChapter, useActiveChapter } from "@/lib/scroll";
+import { CHAPTERS, jumpS } from "@/lib/chapters";
+import { jumpToAudit, jumpToS, onScrollFrame, useActiveChapter } from "@/lib/scroll";
+import { NAV } from "@/lib/nav";
+import { PAGES } from "@/lib/content";
 import { LogoMark } from "./LogoMark";
 import { GhostPill } from "./Pills";
-import { openStory } from "@/lib/story";
-
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-
-/** The nav: the sections a buyer looks for, in page order (the story lives in the hero's stone). */
-const NAV: { id?: ChapterId; label: string; href?: string; story?: boolean }[] = [
-  { id: "build", label: "What we build" },
-  { id: "work", label: "Work" },
-  { id: "why", label: "Why Nerodyn" },
-  { id: "process", label: "How we work" },
-];
+import { MenuSheet } from "./MenuSheet";
 
 function SwapLabel({ children }: { children: string }) {
   return (
@@ -44,20 +36,9 @@ function Nav({ onMenu }: { onMenu: () => void }) {
         <LogoMark className="nav-mark" />
         <span className="nav-word">Nerodyn</span>
       </a>
-      <nav className="nav-links" aria-label="Chapters">
+      <nav className="nav-links" aria-label="Site">
         {NAV.map((l, i) => (
-          <a
-            key={l.label}
-            href={l.href ?? (l.id ? `#${l.id}` : "#story")}
-            className="nav-link intro intro-drop"
-            style={{ "--d": `${440 + i * 50}ms` } as CSSProperties}
-            onClick={(e) => {
-              if (l.href) return;
-              e.preventDefault();
-              if (l.story) openStory();
-              else if (l.id) scrollToChapter(l.id);
-            }}
-          >
+          <a key={l.key} href={l.href} className="nav-link intro intro-drop" style={{ "--d": `${440 + i * 50}ms` } as CSSProperties}>
             <SwapLabel>{l.label}</SwapLabel>
           </a>
         ))}
@@ -158,82 +139,40 @@ function SpecimenCard() {
 }
 
 /**
- * The phone's menu: a sheet over the page. Closed it is inert (out of the tab
- * order and the accessibility tree); open it takes focus, Escape closes it,
- * and focus goes back to the Menu button.
+ * The phone's menu on the home page: the site's pages and the free audit, and
+ * underneath, this page's own chapters — each a jump.
  */
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const sheet = useRef<HTMLDivElement>(null);
-  const close = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const back = document.activeElement as HTMLElement | null;
-    close.current?.focus({ preventScroll: true });
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key !== "Tab" || !sheet.current) return;
-      // Keep Tab inside the sheet: from the last link round to Close, and back.
-      const f = sheet.current.querySelectorAll<HTMLElement>("button, a[href]");
-      const first = f[0];
-      const last = f[f.length - 1];
-      if (e.shiftKey ? document.activeElement === first : document.activeElement === last) {
-        e.preventDefault();
-        (e.shiftKey ? last : first).focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      if (back?.isConnected) back.focus({ preventScroll: true });
-    };
-  }, [open, onClose]);
+  const links = [
+    ...NAV.map((l, i) => ({ label: l.label, mark: String(i + 1).padStart(2, "0"), href: l.href })),
+    { label: "Free audit", mark: "↓", href: "#contact", onClick: jumpToAudit },
+  ];
   return (
-    <div className="menu-sheet" ref={sheet} data-open={open || undefined} inert={!open} role="dialog" aria-modal="true" aria-label="Menu">
-      <button type="button" className="menu-close mono" onClick={onClose} ref={close}>
-        Close
-      </button>
-      <nav>
-        {CHAPTERS.slice(1).map((c, i) => (
-          <a
-            key={c.id}
-            href={`#${c.id}`}
-            style={{ "--i": i } as CSSProperties}
-            onClick={(e) => {
-              e.preventDefault();
-              onClose();
-              jumpToS(jumpS(c));
-            }}
-          >
-            <span className="mono">{c.num}</span> {c.label}
-          </a>
-        ))}
-        <a
-          href="#story"
-          style={{ "--i": CHAPTERS.length - 1 } as CSSProperties}
-          onClick={(e) => {
-            e.preventDefault();
-            onClose();
-            openStory();
-          }}
-        >
-          <span className="mono">↗</span> The story
-        </a>
-        <a href={`${BASE}/methodology/`} style={{ "--i": CHAPTERS.length } as CSSProperties}>
-          <span className="mono">↗</span> Methodology
-        </a>
-        <a
-          href="#contact"
-          style={{ "--i": CHAPTERS.length + 1 } as CSSProperties}
-          onClick={(e) => {
-            e.preventDefault();
-            onClose();
-            jumpToAudit();
-          }}
-        >
-          <span className="mono">↓</span> Free audit
-        </a>
-      </nav>
-    </div>
+    <MenuSheet
+      open={open}
+      onClose={onClose}
+      links={links}
+      extra={
+        <div className="menu-here" style={{ "--i": links.length } as CSSProperties}>
+          <p className="menu-here-h mono">On this page</p>
+          <div className="menu-here-links">
+            {CHAPTERS.slice(1).map((c) => (
+              <a
+                key={c.id}
+                href={`${PAGES.home}#${c.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onClose();
+                  jumpToS(jumpS(c));
+                }}
+              >
+                <span className="mono">{c.num}</span> {c.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      }
+    />
   );
 }
 
