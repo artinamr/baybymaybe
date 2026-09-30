@@ -11,6 +11,7 @@ import { Audit } from "@/components/chapters/Audit";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PageReveal } from "@/components/chapters/PageReveal";
 import { StoryMode } from "@/components/story/StoryMode";
+import { OrgLd } from "@/components/site/JsonLd";
 
 /**
  * The home page: the film's scenes (hero, statement, what we build, why,
@@ -34,6 +35,7 @@ export default function Home() {
       <SiteFooter home />
       <PageReveal />
       <StoryMode />
+      <OrgLd />
     </Experience>
   );
 }

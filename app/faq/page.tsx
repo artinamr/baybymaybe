@@ -4,6 +4,7 @@ import { SubReveal } from "@/components/site/SubReveal";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { QaList } from "@/components/site/QaList";
 import { CONTACT, FAQ_ALL } from "@/lib/content";
+import { FaqLd } from "@/components/site/JsonLd";
 
 export const metadata: Metadata = {
   title: "Questions — Nerodyn",
@@ -17,6 +18,7 @@ export default function Questions() {
   return (
     <div className="sp">
       <SubReveal />
+      <FaqLd />
       <SubHeader here="faq" />
       <main id="main" className="sp-main">
         <section className="sp-hero sp-hero-s">
