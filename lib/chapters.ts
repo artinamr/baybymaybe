@@ -184,6 +184,9 @@ export const F_MAX = (() => {
   return last.F0 + last.vh / 100 - 1;
 })();
 
+/** Page S of the footer's top edge (measured): past it the footer's paper covers the whole screen. */
+export let FOOT_S = Infinity;
+
 /** Page S of the last reachable frame (re-measured with the page). */
 export let S_MAX = CHAPTERS[CHAPTERS.length - 1].S1 - 1;
 
@@ -222,7 +225,8 @@ computeHolds();
  * Update the page geometry from the DOM (page sections flow with their
  * content). `tops[i]` / `ends[i]` in page S. Called by lib/scroll.ts.
  */
-export function measureChapters(tops: number[], ends: number[]): void {
+export function measureChapters(tops: number[], ends: number[], footTop = Infinity): void {
+  FOOT_S = footTop;
   for (let i = 0; i < CHAPTERS.length; i++) {
     if (!Number.isFinite(tops[i]) || !Number.isFinite(ends[i])) continue;
     CHAPTERS[i].S0 = tops[i];
@@ -283,5 +287,6 @@ export function jumpS(c: ChapterDef): number {
 /** Whether page sections cover the whole viewport at page S (the film is hidden: skip drawing it). */
 export function covered(S: number): boolean {
   for (const h of holds) if (S >= h.S0 + 1 + 0.01 && S <= h.S1 - 1 - 0.01) return true;
-  return false;
+  // The footer, once its top edge is above the screen's (it runs to the page end).
+  return S >= FOOT_S + 0.01;
 }

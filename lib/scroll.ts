@@ -126,7 +126,8 @@ function measure() {
     tops.push((r.top + y) / vh);
     ends.push((r.bottom + y) / vh);
   }
-  measureChapters(tops, ends);
+  const foot = document.querySelector(".site-foot");
+  measureChapters(tops, ends, foot ? (foot.getBoundingClientRect().top + y) / vh : Infinity);
   for (let i = 0; i < CHAPTERS.length; i++) scroll.chapters[i].S0 = CHAPTERS[i].S0;
 }
 

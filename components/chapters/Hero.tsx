@@ -28,11 +28,13 @@ function StoneCursor() {
       tx = e.clientX;
       ty = e.clientY;
     };
+    let last = "";
     const tick = () => {
       raf = requestAnimationFrame(tick);
       x += (tx - x) * 0.22;
       y += (ty - y) * 0.22;
-      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+      const t = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+      if (t !== last) el.style.transform = last = t;
     };
     window.addEventListener("pointermove", move, { passive: true });
     raf = requestAnimationFrame(tick);

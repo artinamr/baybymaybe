@@ -223,6 +223,10 @@ export function syncObsidianUniforms(): void {
 /* ------------------------------------------------------------------------ */
 
 const VERT_PARS = /* glsl */ `
+// Every glass program lands a vertex on exactly the same position, so a depth
+// pre-pass and its colour pass always agree (a hair of disagreement would
+// flicker).
+invariant gl_Position;
 attribute float aKind;
 varying vec3 vObs;      // object-space position: flow banding stays fixed to the glass as it breaks
 varying float vKind;    // 0 facet · 1 bevel · 2 cut face
@@ -384,6 +388,27 @@ varying float vWorldY;
 #ifdef OBS_INSTANCED
   varying vec2 vInstFx;
 #endif
+
+/* The alpha the tail writes (fog as alpha; a reflection fading out below the
+   floor). One function, so a fragment the tail would drop can be dropped
+   before any shading, by exactly the same test. */
+float obsAlpha() {
+  float obsFogT = clamp((vViewPosition.z - uFogNear) / max(uFogFar - uFogNear, 1e-3), 0.0, 1.0);
+  float obsF = obsFogT * obsFogT * (3.0 - 2.0 * obsFogT);
+  #ifdef OBS_FRAG
+    obsF = max(obsF, vFx.z);
+  #endif
+  #ifdef OBS_INSTANCED
+    obsF = max(obsF, vInstFx.y);
+  #endif
+  float obsA = 1.0 - obsF;
+  #ifdef OBS_REFLECT
+    obsA *= 0.16 * (1.0 - smoothstep(0.0, uReflLen * uReflK, uFloorY - vWorldY)) * uReflect;
+  #elif defined(OBS_LITE)
+    if (uMirror > 0.5) obsA *= 0.16 * (1.0 - smoothstep(0.0, uReflLen * uReflK, uFloorY - vWorldY)) * uReflect;
+  #endif
+  return obsA;
+}
 
 float obsHash(vec3 p) {
   p = fract(p * 0.3183099 + 0.1);
@@ -592,9 +617,17 @@ const FRAG_CLIP = /* glsl */ `
   if (uMirror > 0.5 && vWorldY > uFloorY + 1e-3) discard;
 #endif
 #ifdef OBS_DEPTHONLY
-  // The reflection's depth pre-pass: nothing to shade.
+  // A depth pre-pass: nothing to shade. The stone's drops what its colour
+  // pass drops (a fully fogged fragment), so the two write the same depth.
+  #ifndef OBS_REFLECT
+    if (obsAlpha() < 0.004) discard;
+  #endif
   gl_FragColor = vec4(0.0);
   return;
+#else
+  // Dropped before any shading: exactly what the tail would drop (the same
+  // test) — a fully fogged fragment, a reflection faded out below the floor.
+  if (obsAlpha() < 0.004) discard;
 #endif
 `;
 
@@ -793,26 +826,14 @@ reflectedLight.indirectSpecular *= 1.0 - 0.5 * obsCut;
 const FRAG_TAIL = /* glsl */ `
 #include <dithering_fragment>
 {
-  float obsFogT = clamp((vViewPosition.z - uFogNear) / max(uFogFar - uFogNear, 1e-3), 0.0, 1.0);
-  float obsF = obsFogT * obsFogT * (3.0 - 2.0 * obsFogT);
-  #ifdef OBS_FRAG
-    obsF = max(obsF, vFx.z);
-  #endif
-  #ifdef OBS_INSTANCED
-    obsF = max(obsF, vInstFx.y);
-  #endif
-  float obsA = 1.0 - obsF;
+  float obsA = obsAlpha();
   vec3 obsRgb = gl_FragColor.rgb;
   #ifdef OBS_REFLECT
     // A mirror floor reflects only what stands above it.
     if (vWorldY > uFloorY + 1e-3) discard;
-    obsA *= 0.16 * (1.0 - smoothstep(0.0, uReflLen * uReflK, uFloorY - vWorldY)) * uReflect;
     obsRgb *= 0.85;
   #elif defined(OBS_LITE)
-    if (uMirror > 0.5) {
-      obsA *= 0.16 * (1.0 - smoothstep(0.0, uReflLen * uReflK, uFloorY - vWorldY)) * uReflect;
-      obsRgb *= 0.85;
-    }
+    if (uMirror > 0.5) obsRgb *= 0.85;
   #endif
   if (obsA < 0.004) discard;
   gl_FragColor = vec4(obsRgb * obsA, obsA);

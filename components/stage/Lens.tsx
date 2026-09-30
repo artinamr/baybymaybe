@@ -3,10 +3,11 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { dev } from "@/lib/dev";
+import { dev, perfFlags } from "@/lib/dev";
 import { sceneState } from "@/lib/sceneState";
 import { intro, perf, ready } from "@/lib/stores";
 import { compileFor } from "./compile";
+import { makeGpuTimer } from "./gpuTimer";
 
 /**
  * THE LENS — depth of field, the one thing that makes a real-time render read
@@ -81,10 +82,28 @@ void main() {
 }
 `;
 
+/* The widest blur that can reach each tile: its own and its eight
+   neighbours' — worked out once per tile here, not nine times per pixel. */
+const DIL_FRAG = /* glsl */ `
+uniform sampler2D tTile;
+uniform vec2 uTileTexel;
+varying vec2 vUv;
+void main() {
+  float r = 0.0;
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      r = max(r, textureLod(tTile, vUv + vec2(float(x), float(y)) * uTileTexel, 0.0).r);
+    }
+  }
+  gl_FragColor = vec4(r, 0.0, 0.0, 1.0);
+}
+`;
+
 const FRAG = /* glsl */ `
 uniform sampler2D tColor;
 uniform sampler2D tDepth;
 uniform sampler2D tTile;
+uniform sampler2D tDil;
 uniform vec2 uTexel;
 uniform vec2 uTileTexel;
 varying vec2 vUv;
@@ -92,13 +111,18 @@ ${COMMON}
 
 void main() {
   vec4 center = textureLod(tColor, vUv, 0.0);
-  // The widest blur that can reach this pixel: its tile and the eight round it.
+  // The widest blur that can reach this pixel: its tile and the eight round it
+  // (dilated once per tile, DIL_FRAG).
+  #ifdef LENS_DIL
+  float r = textureLod(tDil, vUv, 0.0).r;
+  #else
   float r = 0.0;
   for (int y = -1; y <= 1; y++) {
     for (int x = -1; x <= 1; x++) {
       r = max(r, textureLod(tTile, vUv + vec2(float(x), float(y)) * uTileTexel, 0.0).r);
     }
   }
+  #endif
   vec4 col = center;
   if (r > 0.6) {
     float zc = linDepth(textureLod(tDepth, vUv, 0.0).r);
@@ -179,16 +203,24 @@ export function Lens() {
       minFilter: THREE.NearestFilter,
       magFilter: THREE.NearestFilter,
     });
-    return { main, tile };
+    const dil = new THREE.WebGLRenderTarget(tile.width, tile.height, {
+      type: THREE.HalfFloatType,
+      depthBuffer: false,
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.NearestFilter,
+    });
+    return { main, tile, dil };
   }, [size.width, size.height, dpr]);
   useEffect(() => {
     // Allocated now, not on first use: that is the shatter, and allocating a
     // canvas-sized half-float MSAA target there was a visible hitch mid-scroll.
     gl.initRenderTarget(rts.main);
     gl.initRenderTarget(rts.tile);
+    gl.initRenderTarget(rts.dil);
     return () => {
       rts.main.dispose();
       rts.tile.dispose();
+      rts.dil.dispose();
     };
   }, [gl, rts]);
 
@@ -201,23 +233,47 @@ export function Lens() {
       depthWrite: false,
       blending: THREE.NoBlending,
     });
-    const mat = new THREE.ShaderMaterial({
+    const dilMat = new THREE.ShaderMaterial({
       vertexShader: VERT,
-      fragmentShader: FRAG,
-      uniforms: {
-        tColor: { value: null },
-        tDepth: { value: null },
-        tTile: { value: null },
-        uTexel: { value: new THREE.Vector2() },
-        uTileTexel: { value: new THREE.Vector2() },
-        ...lensUniforms(),
-      },
+      fragmentShader: DIL_FRAG,
+      uniforms: { tTile: { value: null }, uTileTexel: { value: new THREE.Vector2() } },
       depthTest: false,
       depthWrite: false,
       blending: THREE.NoBlending,
-      toneMapped: true,
     });
-    return { tileMat, mat, tileScene: fullScreen(tileMat), scene: fullScreen(mat), cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1) };
+    const gather = (dil: boolean) =>
+      new THREE.ShaderMaterial({
+        vertexShader: VERT,
+        fragmentShader: FRAG,
+        defines: dil ? { LENS_DIL: "" } : {},
+        uniforms: {
+          tColor: { value: null },
+          tDepth: { value: null },
+          tTile: { value: null },
+          tDil: { value: null },
+          uTexel: { value: new THREE.Vector2() },
+          uTileTexel: { value: new THREE.Vector2() },
+          ...lensUniforms(),
+        },
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.NoBlending,
+        toneMapped: true,
+      });
+    const mat = gather(true);
+    // (?perf=1 only: the old per-pixel neighbourhood, for an A/B.)
+    const mat9 = perfFlags.on ? gather(false) : null;
+    return {
+      tileMat,
+      dilMat,
+      mat,
+      mat9,
+      tileScene: fullScreen(tileMat),
+      dilScene: fullScreen(dilMat),
+      scene: fullScreen(mat),
+      scene9: mat9 ? fullScreen(mat9) : null,
+      cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1),
+    };
   }, []);
 
   // Its own two programs, compiled up front (the tile pass draws into a
@@ -226,11 +282,18 @@ export function Lens() {
   // no tone mapping into a target), and a draw into the target before those
   // were ready recompiled every glass program — a 2.5 s freeze mid-shatter.
   const passOK = useRef(false);
+  // (?perf=1 only: the GPU time of each pass, for the perf harness.)
+  const gpuT = useMemo(() => (perfFlags.on ? makeGpuTimer(gl.getContext() as WebGL2RenderingContext, perfFlags) : null), [gl]);
   const openAt = useRef(-1);
   useEffect(() => {
     let dead = false;
     const key = new THREE.WebGLRenderTarget(1, 1);
-    Promise.all([compileFor(gl, pass.tileScene, pass.cam, pass.tileScene, key), compileFor(gl, pass.scene, pass.cam, pass.scene)]).then(() => {
+    Promise.all([
+      compileFor(gl, pass.tileScene, pass.cam, pass.tileScene, key),
+      compileFor(gl, pass.dilScene, pass.cam, pass.dilScene, key),
+      compileFor(gl, pass.scene, pass.cam, pass.scene),
+      ...(pass.scene9 ? [compileFor(gl, pass.scene9, pass.cam, pass.scene9)] : []),
+    ]).then(() => {
       if (!dead) passOK.current = true;
     });
     return () => {
@@ -254,20 +317,27 @@ export function Lens() {
     if (openAt.current < 0 && passOK.current && ready.lens && ready.full) openAt.current = performance.now();
     const o = dev.freeze ? 1 : openAt.current < 0 ? 0 : Math.min(1, (performance.now() - openAt.current) / 900);
     // The lowest performance tier gives the lens up first.
-    const A = perf.tier >= 3 || (!dev.freeze && o <= 0) ? 0 : c.aperture * o * o * (3 - 2 * o);
+    const A = perf.tier >= 3 || perfFlags.nolens || (!dev.freeze && o <= 0) ? 0 : c.aperture * o * o * (3 - 2 * o);
+    gpuT?.poll();
     if (A < 0.05) {
+      gpuT?.begin("scene");
       gl.setRenderTarget(null);
       gl.render(scene, camera);
+      gpuT?.end();
       return;
     }
     const { main, tile } = rts;
+    if (perfFlags.on) main.resolveDepthBuffer = !perfFlags.noresolve;
+    gpuT?.begin("scene");
     gl.setRenderTarget(main);
     gl.clear();
     gl.render(scene, camera);
+    gpuT?.end();
 
     const focus = cam.position.distanceTo(c.target);
     const maxBlur = Math.min(16, (4 + A * 1.2) * dpr);
-    for (const U of [pass.tileMat.uniforms, pass.mat.uniforms]) {
+    const gatherMat = perfFlags.nodil && pass.mat9 ? pass.mat9 : pass.mat;
+    for (const U of [pass.tileMat.uniforms, gatherMat.uniforms]) {
       U.tDepth.value = main.depthTexture;
       (U.uTexel.value as THREE.Vector2).set(1 / main.width, 1 / main.height);
       U.uNear.value = cam.near;
@@ -276,15 +346,26 @@ export function Lens() {
       U.uAperture.value = A * dpr;
       U.uMaxBlur.value = maxBlur;
     }
+    gpuT?.begin("tile");
     gl.setRenderTarget(tile);
     gl.render(pass.tileScene, pass.cam);
+    gpuT?.end();
 
-    const U = pass.mat.uniforms;
+    const D = pass.dilMat.uniforms;
+    D.tTile.value = tile.texture;
+    (D.uTileTexel.value as THREE.Vector2).set(1 / tile.width, 1 / tile.height);
+    gl.setRenderTarget(rts.dil);
+    gl.render(pass.dilScene, pass.cam);
+
+    const U = gatherMat.uniforms;
     U.tColor.value = main.texture;
     U.tTile.value = tile.texture;
+    U.tDil.value = rts.dil.texture;
     (U.uTileTexel.value as THREE.Vector2).set(1 / tile.width, 1 / tile.height);
+    gpuT?.begin("gather");
     gl.setRenderTarget(null);
-    gl.render(pass.scene, pass.cam);
+    gl.render(gatherMat === pass.mat ? pass.scene : (pass.scene9 as THREE.Scene), pass.cam);
+    gpuT?.end();
   }, 1);
 
   return null;

@@ -77,22 +77,27 @@ function Words({ inverted = false }: { inverted?: boolean }) {
 export function Why() {
   const ref = useRef<HTMLDivElement>(null);
   const inv = useRef<HTMLDivElement>(null);
-  useEffect(
-    () =>
-      onScrollFrame((pageS) => {
-        // The claims follow the film (its clock holds under page sections).
-        const S = filmS(pageS);
-        const k = S < WHY_S[1] ? 0 : S < WHY_S[2] ? 1 : 2;
-        const v = String(k);
-        const p = Math.max(0, Math.min(1, (S - WHY_S[0]) / (WHY_S[3] - WHY_S[0]))).toFixed(4);
-        for (const el of [ref.current, inv.current]) {
-          if (!el) continue;
-          if (el.dataset.claim !== v) el.dataset.claim = v;
-          el.style.setProperty("--claim-p", p);
+  useEffect(() => {
+    let last = "";
+    return onScrollFrame((pageS) => {
+      // The claims follow the film (its clock holds under page sections).
+      const S = filmS(pageS);
+      const k = S < WHY_S[1] ? 0 : S < WHY_S[2] ? 1 : 2;
+      const v = String(k);
+      const p = Math.max(0, Math.min(1, (S - WHY_S[0]) / (WHY_S[3] - WHY_S[0]))).toFixed(4);
+      // (Only when it moves: a custom property restyles the whole chapter.)
+      const moved = p !== last;
+      last = p;
+      for (const el of [ref.current, inv.current]) {
+        if (!el) continue;
+        if (el.dataset.claim !== v) el.dataset.claim = v;
+        if (moved) {
+          const bar = el.querySelector<HTMLElement>(".claim-bar > span");
+          if (bar) bar.style.transform = `scaleX(${p})`;
         }
-      }),
-    []
-  );
+      }
+    });
+  }, []);
 
   return (
     <Section id="why" labelledBy="why-title">

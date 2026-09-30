@@ -78,24 +78,34 @@ function Nav({ onMenu }: { onMenu: () => void }) {
 function ChapterIndex() {
   const active = useActiveChapter();
   const ref = useRef<HTMLOListElement>(null);
-  useEffect(
-    () =>
-      onScrollFrame((S) => {
-        const el = ref.current;
-        if (!el) return;
-        const i = CHAPTERS.findLastIndex((c) => S >= c.S0 - 0.5);
-        const c = CHAPTERS[Math.max(0, i)];
-        const p = Math.max(0, Math.min(1, (S - c.S0) / Math.max(0.5, c.S1 - c.S0 - 0.5)));
-        el.style.setProperty("--p", p.toFixed(3));
-      }),
-    []
-  );
+  const rail = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    let last = "";
+    let lastI = -1;
+    return onScrollFrame((S) => {
+      const el = ref.current;
+      if (!el) return;
+      const i = Math.max(0, CHAPTERS.findLastIndex((c) => S >= c.S0 - 0.5));
+      const c = CHAPTERS[i];
+      const p = Math.max(0, Math.min(1, (S - c.S0) / Math.max(0.5, c.S1 - c.S0 - 0.5))).toFixed(3);
+      // The fill goes straight onto the active tick and the counter's rail —
+      // only when it moves (a custom property on the list restyled all of it).
+      if (p === last && i === lastI) return;
+      const ticks = el.querySelectorAll<HTMLElement>(".index-tick > span");
+      if (i !== lastI && ticks[lastI]) ticks[lastI].style.transform = "";
+      const t = `scaleX(${p})`;
+      if (ticks[i]) ticks[i].style.transform = t;
+      if (rail.current) rail.current.style.transform = t;
+      last = p;
+      lastI = i;
+    });
+  }, []);
   return (
     <>
     <p className="index-counter mono" aria-hidden>
       {CHAPTERS[active].num}/0{CHAPTERS.length - 1}
       <span className="index-rail">
-        <span />
+        <span ref={rail} />
       </span>
     </p>
     <ol className="index" ref={ref} aria-label="Chapters">

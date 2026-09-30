@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { getStone, stoneHullGeometry } from "@/lib/geo/crystal";
 import { createObsidian, obsidianUniforms, syncObsidianUniforms } from "@/shaders/obsidian";
-import { dev } from "@/lib/dev";
+import { dev, perfFlags } from "@/lib/dev";
 import { compileFor } from "./compile";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { M0 } from "@/lib/choreo";
@@ -36,15 +36,29 @@ export function Stone() {
     const mirrorDepth = createObsidian({ frag: true, reflection: true, depthOnly: true });
     mirrorDepth.colorWrite = false;
     mirrorDepth.depthWrite = true;
+    // The stone is drawn the same way: DEPTH FIRST (a cheap pass), then the
+    // glass only where it is the nearest surface. Forty shards and a core in
+    // one mesh put many hidden faces behind every pixel, and the glass's
+    // shader (it can discard) would otherwise run in full for each of them.
+    // The picture is the same: the same nearest surface, shaded once.
+    const solidDepth = createObsidian({ frag: true, depthOnly: true });
+    solidDepth.colorWrite = false;
+    solidDepth.depthWrite = true;
+    const solid = createObsidian({ frag: true });
+    const lite = createObsidian({ frag: true, lite: true });
+    solid.depthWrite = false;
+    lite.depthWrite = false;
     return {
-      solid: createObsidian({ frag: true }),
-      lite: createObsidian({ frag: true, lite: true }),
+      solid,
+      lite,
+      solidDepth,
       // (The lite glass's own program: a reflection needs no veins or light inside.)
       mirror: createObsidian({ frag: true, reflection: true, lite: true }),
       mirrorDepth,
     };
   }, []);
   const solid = useRef<THREE.Mesh>(null);
+  const solidDepth = useRef<THREE.Mesh>(null);
   const wake = useRef({ t0: -1 });
 
   // THE FULL GLASS. The stone first wears the lite glass: its program is
@@ -139,7 +153,12 @@ export function Stone() {
       m.matrix.makeScale(1, -1, 1);
       m.matrix.elements[13] = 2 * sceneState.u.floorY;
       m.matrixWorld.copy(m.matrix);
-      m.visible = sceneState.u.reflect > 0.002;
+      m.visible = sceneState.u.reflect > 0.002 && !perfFlags.nomirror;
+    }
+    if (perfFlags.on && solid.current && solidDepth.current) {
+      solid.current.visible = !perfFlags.nostone;
+      solidDepth.current.visible = !perfFlags.nostone && !perfFlags.noprepass;
+      mats.solid.depthWrite = mats.lite.depthWrite = perfFlags.noprepass;
     }
 
     // Hover only while the stone is whole enough for the proxy to be true.
@@ -176,6 +195,7 @@ export function Stone() {
 
   return (
     <group>
+      <mesh ref={solidDepth} geometry={build.geometry} material={mats.solidDepth} frustumCulled={false} renderOrder={0.5} />
       <mesh ref={solid} geometry={build.geometry} material={dev.freeze ? mats.solid : mats.lite} frustumCulled={false} renderOrder={1} />
 
       <mesh

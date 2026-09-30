@@ -183,6 +183,8 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
          keyed to where the floor's horizon lands on the page) and a soft pool
          of light behind the subject — barely there, never a picture ---------- */
   write("cove", sceneState.env.cove.toFixed(3), (val) => fieldEl?.style.setProperty("--cove", val));
+  // The haze drifts only while it can be seen (its opacity is the cove's).
+  write("haze", sceneState.env.cove > 0.0005 ? "1" : "0", (val) => fieldEl?.toggleAttribute("data-haze", val === "1"));
   if (sceneState.env.cove > 0.001 && !hidden) {
     camera.getWorldDirection(hz);
     const fwdY = hz.y;
@@ -192,10 +194,9 @@ export function runBridge(camera: THREE.PerspectiveCamera, W: number, H: number)
     let hy = project(hz, camera, W, H).y;
     // Looking steeply down, the horizon is above the frame.
     if (fwdY < -0.97) hy = -H;
-    write("horizon", Math.max(-H, Math.min(2 * H, hy)).toFixed(0), (val) => {
-      fieldEl?.style.setProperty("--horizon", `${val}px`);
-      markEl?.style.setProperty("--horizon", `${val}px`);
-    });
+    write("horizon", Math.max(-H, Math.min(2 * H, hy)).toFixed(0), (val) => fieldEl?.style.setProperty("--horizon", `${val}px`));
+    // (The finale's words only near the finale: a custom property restyles them.)
+    if (S > 9.25) write("markHorizon", Math.max(-H, Math.min(2 * H, hy)).toFixed(0), (val) => markEl?.style.setProperty("--horizon", `${val}px`));
     // The finale's words stand on the floor right under the stone — the line
     // its reflection starts from — not on the far horizon above it.
     if (S > 9.25) {

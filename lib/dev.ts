@@ -40,6 +40,24 @@ function parse(): Dev {
 
 export const dev: Dev = parse();
 
+/**
+ * PERFORMANCE LOOK-DEV (`?perf=1` only — inert otherwise): switches a test
+ * harness flips at runtime (window.__perf) to measure what each pass costs.
+ */
+export const perfFlags: { on: boolean; nolens: boolean; nomirror: boolean; nostone: boolean; noprepass: boolean; noresolve: boolean; nodil: boolean; gpu?: Record<string, { sum: number; n: number }> } = {
+  noprepass: false,
+  noresolve: false,
+  nodil: false,
+  on: false,
+  nolens: false,
+  nomirror: false,
+  nostone: false,
+};
+if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("perf") === "1") {
+  perfFlags.on = true;
+  (window as unknown as { __perf?: object }).__perf = perfFlags;
+}
+
 /** A numeric URL param for look-dev (`?yaw=135`), or null. Server-safe. */
 export function devNum(name: string): number | null {
   if (typeof window === "undefined") return null;

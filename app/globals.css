@@ -3688,3 +3688,25 @@ html[data-render] .stone-cursor {
     opacity 1100ms var(--ease-expo),
     transform 1300ms var(--ease-expo);
 }
+
+/* ==========================================================================
+   Idle animations rest while unseen — each one costs a style pass every frame
+   (the loader's glint once the loader is gone; the chapter card's cue and the
+   stone lens's pulse while they are hidden; the studio's haze while it has no
+   opacity). Paused, not removed: each picks up where it was when it returns.
+   ========================================================================== */
+html:not([data-intro="wait"]) .ld-glint {
+  animation: none;
+}
+html[data-scrolled] .cue-line > span,
+html[data-story] .cue-line > span {
+  animation-play-state: paused;
+}
+html:not([data-stone-hover]) .stone-cursor-dot,
+html[data-scrolled] .stone-cursor-dot,
+html[data-story] .stone-cursor-dot {
+  animation-play-state: paused;
+}
+#field:not([data-haze])::after {
+  animation-play-state: paused;
+}

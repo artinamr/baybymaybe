@@ -40,21 +40,25 @@ const DISCIPLINES = [
  */
 export function Build() {
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(
-    () =>
-      onScrollFrame((pageS) => {
-        const el = ref.current;
-        if (!el) return;
-        // The disciplines follow the film (its clock holds under page sections).
-        const S = filmS(pageS);
-        const d = S < DISCIPLINE_S[1] ? 0 : S < DISCIPLINE_S[2] ? 1 : 2;
-        const v = String(d);
-        if (el.dataset.disc !== v) el.dataset.disc = v;
-        const p = Math.max(0, Math.min(1, (S - DISCIPLINE_S[0]) / (DISCIPLINE_S[3] - DISCIPLINE_S[0])));
-        el.style.setProperty("--disc-p", p.toFixed(4));
-      }),
-    []
-  );
+  useEffect(() => {
+    let last = "";
+    return onScrollFrame((pageS) => {
+      const el = ref.current;
+      if (!el) return;
+      // The disciplines follow the film (its clock holds under page sections).
+      const S = filmS(pageS);
+      const d = S < DISCIPLINE_S[1] ? 0 : S < DISCIPLINE_S[2] ? 1 : 2;
+      const v = String(d);
+      if (el.dataset.disc !== v) el.dataset.disc = v;
+      const p = Math.max(0, Math.min(1, (S - DISCIPLINE_S[0]) / (DISCIPLINE_S[3] - DISCIPLINE_S[0]))).toFixed(4);
+      // Straight onto the bar, only when it moves (a custom property on the
+      // column restyled all of it, every frame).
+      if (p !== last) {
+        const bar = el.querySelector<HTMLElement>(".disc-bar > span");
+        if (bar) bar.style.transform = `scaleX(${(last = p)})`;
+      }
+    });
+  }, []);
 
   return (
     <Section id="build" labelledBy="build-title">
