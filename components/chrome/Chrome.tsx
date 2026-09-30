@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { CHAPTERS, jumpS, type ChapterId } from "@/lib/chapters";
 import { jumpToAudit, jumpToS, onScrollFrame, scrollToChapter, useActiveChapter } from "@/lib/scroll";
 import { LogoMark } from "./LogoMark";
@@ -67,7 +67,7 @@ function Nav({ onMenu }: { onMenu: () => void }) {
           </GhostPill>
         </span>
       </nav>
-      <button type="button" className="nav-menu mono intro intro-drop" style={{ "--d": "440ms" } as CSSProperties} onClick={onMenu}>
+      <button type="button" className="nav-menu mono intro intro-drop" style={{ "--d": "440ms" } as CSSProperties} onClick={onMenu} aria-haspopup="dialog">
         Menu
       </button>
     </header>
@@ -157,10 +157,39 @@ function SpecimenCard() {
   );
 }
 
+/**
+ * The phone's menu: a sheet over the page. Closed it is inert (out of the tab
+ * order and the accessibility tree); open it takes focus, Escape closes it,
+ * and focus goes back to the Menu button.
+ */
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const sheet = useRef<HTMLDivElement>(null);
+  const close = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const back = document.activeElement as HTMLElement | null;
+    close.current?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key !== "Tab" || !sheet.current) return;
+      // Keep Tab inside the sheet: from the last link round to Close, and back.
+      const f = sheet.current.querySelectorAll<HTMLElement>("button, a[href]");
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey ? document.activeElement === first : document.activeElement === last) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      if (back?.isConnected) back.focus({ preventScroll: true });
+    };
+  }, [open, onClose]);
   return (
-    <div className="menu-sheet" data-open={open || undefined} aria-hidden={!open}>
-      <button type="button" className="menu-close mono" onClick={onClose}>
+    <div className="menu-sheet" ref={sheet} data-open={open || undefined} inert={!open} role="dialog" aria-modal="true" aria-label="Menu">
+      <button type="button" className="menu-close mono" onClick={onClose} ref={close}>
         Close
       </button>
       <nav>
@@ -169,7 +198,6 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
             key={c.id}
             href={`#${c.id}`}
             style={{ "--i": i } as CSSProperties}
-            tabIndex={open ? 0 : -1}
             onClick={(e) => {
               e.preventDefault();
               onClose();
@@ -182,7 +210,6 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
         <a
           href="#story"
           style={{ "--i": CHAPTERS.length - 1 } as CSSProperties}
-          tabIndex={open ? 0 : -1}
           onClick={(e) => {
             e.preventDefault();
             onClose();
@@ -191,8 +218,19 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
         >
           <span className="mono">↗</span> The story
         </a>
-        <a href={`${BASE}/methodology/`} style={{ "--i": CHAPTERS.length } as CSSProperties} tabIndex={open ? 0 : -1}>
+        <a href={`${BASE}/methodology/`} style={{ "--i": CHAPTERS.length } as CSSProperties}>
           <span className="mono">↗</span> Methodology
+        </a>
+        <a
+          href="#contact"
+          style={{ "--i": CHAPTERS.length + 1 } as CSSProperties}
+          onClick={(e) => {
+            e.preventDefault();
+            onClose();
+            jumpToAudit();
+          }}
+        >
+          <span className="mono">↓</span> Free audit
         </a>
       </nav>
     </div>
@@ -201,12 +239,13 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 export function Chrome() {
   const [menu, setMenu] = useState(false);
+  const closeMenu = useCallback(() => setMenu(false), []);
   return (
     <>
       <Nav onMenu={() => setMenu(true)} />
       <ChapterIndex />
       <SpecimenCard />
-      <MobileMenu open={menu} onClose={() => setMenu(false)} />
+      <MobileMenu open={menu} onClose={closeMenu} />
       <div className="grain" aria-hidden />
     </>
   );

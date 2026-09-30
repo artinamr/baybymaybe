@@ -100,6 +100,31 @@ body {
   border-radius: 4px;
 }
 
+/* Anchor jumps and keyboard focus stop clear of the fixed nav. */
+html {
+  scroll-padding-top: calc(var(--nav-h) + 12px);
+}
+
+/* The keyboard's first stop, and only the keyboard's: past the nav to the page. */
+.skip-link {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 90;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+  text-decoration: none;
+  transform: translate(-50%, -200%);
+  transition: transform 300ms var(--ease-expo);
+}
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  outline-offset: 2px;
+}
+
 p,
 h1,
 h2,
@@ -1117,6 +1142,8 @@ html[data-intro-skip] .intro-mask > span {
   font-variation-settings: "opsz" 30;
   color: var(--ink);
   user-select: none;
+  /* Its line box rises over the last row of links — let clicks through. */
+  pointer-events: none;
 }
 .sf-logo {
   width: 8.4vw;
@@ -1456,15 +1483,18 @@ a:focus-visible .swap-b {
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
-  transition: opacity 400ms ease, transform 500ms var(--ease-expo);
+  transition: opacity 400ms ease, transform 500ms var(--ease-expo), visibility 0s;
 }
 /* The card belongs to the hero's opening; once the film starts moving it
-   bows out so every chapter frame is just type and the stone. */
+   bows out so every chapter frame is just type and the stone. (Hidden once
+   faded, so its button leaves the tab order too.) */
 html[data-clip] .specimen,
 html[data-scrolled] .specimen {
   opacity: 0;
   transform: translateY(20px);
   pointer-events: none;
+  visibility: hidden;
+  transition: opacity 400ms ease, transform 500ms var(--ease-expo), visibility 0s linear 500ms;
 }
 @keyframes roll-in {
   from { clip-path: inset(0 0 100% 0); transform: translateY(8px); }
@@ -1540,6 +1570,7 @@ html[data-scrolled] .specimen {
   z-index: 55;
   background: var(--paper);
   padding: 90px var(--g) var(--g);
+  overflow-y: auto;
   clip-path: inset(0 0 100% 0);
   transition: clip-path 600ms var(--ease-expo);
   pointer-events: none;
@@ -2417,7 +2448,6 @@ html[data-story] .specimen {
 }
 .fq-group {
   padding-top: 30px;
-  scroll-margin-top: calc(var(--nav-h) + 12px);
 }
 .fq-group + .fq-group {
   padding-top: calc(var(--vh) * 8);
@@ -2442,7 +2472,6 @@ html[data-story] .specimen {
 }
 .lg-sec {
   padding: 30px 0 12px;
-  scroll-margin-top: calc(var(--nav-h) + 12px);
 }
 .lg-sec + .lg-sec {
   border-top: 1px solid var(--hair-soft);
@@ -3665,12 +3694,19 @@ html[data-handoff] .nav-brand .nav-mark {
 /* Reading a page section: the chapter rail steps back (it would sit on the text). */
 .index,
 .index-counter {
-  transition: opacity 500ms ease;
+  transition:
+    opacity 500ms ease,
+    visibility 0s;
 }
+/* Hidden once the fade is done, so the keyboard skips what the eye can't see. */
 html[data-reading] .index,
 html[data-reading] .index-counter {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 500ms ease,
+    visibility 0s linear 500ms;
 }
 
 /* Look-dev `?render=1`: the film alone (stills for covers). */

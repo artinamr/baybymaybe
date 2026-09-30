@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import Lenis from "lenis";
-import { CHAPTERS, chapter, holds, inPage, jumpS, measureChapters, pageS, type ChapterId } from "./chapters";
+import { CHAPTERS, FOOT_S, chapter, holds, inPage, jumpS, measureChapters, pageS, type ChapterId } from "./chapters";
 import { bus, intro, pointer, scroll, type ChapterState } from "./stores";
 import { computeLayout, invalidateTextMetrics, layout, type Layout } from "./layout";
 import { easeInOutCubic, easeInOutQuart } from "./ease";
@@ -180,7 +180,20 @@ export function initScroll(): () => void {
   const inputs = ["wheel", "touchstart", "touchmove", "keydown", "pointerdown"] as const;
   inputs.forEach((t) => window.addEventListener(t, onUserInput, { passive: true }));
 
+  // Tabbing into a film chapter whose words are still waiting for their frame
+  // (the browser's scroll-into-view stops short of it): land on the chapter's
+  // frame, as the nav does. Keyboard focus only — never a pointer's.
+  const onFocus = (e: FocusEvent) => {
+    const el = e.target as Element | null;
+    const sec = el?.closest?.<HTMLElement>("section[data-chapter]");
+    if (!sec || sec.dataset.state === "active" || !el?.matches(":focus-visible")) return;
+    const c = CHAPTERS.find((d) => d.id === sec.dataset.chapter);
+    if (c?.kind === "film") requestAnimationFrame(() => jumpToS(jumpS(c)));
+  };
+  document.addEventListener("focusin", onFocus);
+
   return () => {
+    document.removeEventListener("focusin", onFocus);
     window.removeEventListener("resize", onResize);
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("wheel", onEarly);
@@ -203,9 +216,9 @@ export function initScroll(): () => void {
  * for you: the hero · the statement over the stone · the exploded view, exact
  * · the stair from above · the AI half way up it · the core at the top · the
  * colossus standing open · inside it, round the core · the colossus closed ·
- * let's talk · the page end. The top of every page section is a rest too, but
- * never while you are reading one. Chapter jumpF values sit on these — keep
- * them in sync.
+ * let's talk · the film's end. The top of every page section (and of the
+ * footer, the last rest) is one too, but never while you are reading one.
+ * Chapter jumpF values sit on these — keep them in sync.
  */
 const REST_FILM = [0, 1.62, 3.72, 4.9, 5.45, 5.94, 7.62, 8.2, 9.3, 10.75, 11.5];
 const restPts: number[] = [];
@@ -217,6 +230,12 @@ function anchors(): number[] {
   // Where a run of page sections has gone and its scene is back.
   for (const h of holds) restPts.push(h.S1);
   restPts.push(Math.max(0, (document.documentElement.scrollHeight - window.innerHeight) / Math.max(1, scroll.vh)));
+  // The footer is the page's last sheet: its top edge is the last rest, and
+  // nothing inside it is one (autoFrame leaves a reader there alone).
+  if (Number.isFinite(FOOT_S)) {
+    for (let i = restPts.length - 1; i >= 0; i--) if (restPts[i] > FOOT_S) restPts.splice(i, 1);
+    restPts.push(FOOT_S);
+  }
   restPts.sort((a, b) => a - b);
   return restPts;
 }
@@ -258,8 +277,9 @@ function autoFrame(now: number) {
   }
   if (!lenis || frame.gliding || intro.state !== "done") return;
   if (now - frame.lastInput < 900 || now - frame.lastMove < 200 || frame.lastInput === 0) return;
-  // Reading a page section: leave the page exactly where the reader put it.
-  if (inPage(scroll.S)) return;
+  // Reading a page section, or the footer: leave the page exactly where the
+  // reader put it.
+  if (inPage(scroll.S) || scroll.S >= FOOT_S - 0.01) return;
   const a = pickAnchor(scroll.S, frame.dir);
   const d = Math.abs(a - scroll.S);
   if (d < 0.012) return;

@@ -60,6 +60,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <noscript>
           <style>{`#loader{display:none!important}[data-rv]{opacity:1!important;transform:none!important;filter:none!important}#stage,#field-card,#stage-frame,.intro,.intro-mask>*{clip-path:none!important;opacity:1!important;transform:none!important;animation:none!important}`}</style>
         </noscript>
+        <a className="skip-link" href="#main">
+          Skip to content
+        </a>
         {children}
       </body>
     </html>
