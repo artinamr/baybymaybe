@@ -24,9 +24,15 @@ FAQ off the home page and Process shortened; the 3D kept to the home page.
 it already leaves readers alone in sheets and the footer); compressing the
 film to 10–12 screens (the client called faster motion "too fast, not
 smooth" — shorten the page around the film instead); Instrument Sans for
-headings and removing the hero card (liked parts of the look); MDX (typed TSX
+headings; removing the hero card was initially declined, then requested by
+the client on 2026-10-01 (see below); MDX (typed TSX
 content modules instead — no new build dependency). The "about fourteen
 days" promise stays until the client signs the copy off.
+
+**Homepage update, 2026-10-01:** the client requested removal of the numbered
+chapter rail and lower-left chapter card shown in their screenshot. The
+phone counter goes with the rail. The navigation, phone menu's chapter
+jumps and film remain. See `docs/HOME-CHROME-QA.md` for verification.
 
 ## Increment 1 — LIVE (commit 11b8131)
 

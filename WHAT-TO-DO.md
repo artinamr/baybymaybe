@@ -11,6 +11,10 @@ Written 2026-10-01 at the end of the session that started round 17.
 **Progress 2026-10-01:** increment 2 (Work) is complete. Review fixes and QA
 are recorded in `docs/WORK-QA.md`. Continue at section 2: Methodology.
 
+**Client update 2026-10-01:** remove the homepage's numbered chapter rail,
+its phone counter, and the lower-left chapter card. Keep them removed in
+future increments; chapter jumps remain in the phone menu.
+
 ---
 
 ## 0. Read this first
@@ -432,8 +436,8 @@ after (`document.documentElement.scrollHeight / innerHeight`).
 Everything that references it (as of this writing):
 - `lib/chapters.ts`: the `faq` entry in `RAW` (num "06") and `"faq"` in the
   `ChapterId` union. Remove both. Renumber `audit` to `"06"` (numbers are
-  read everywhere from `chapter(id).num`, so the rail, the markers, the menu,
-  the counter "0x/06" and the footer marker follow automatically).
+  read everywhere from `chapter(id).num`, so the section markers, the menu
+  and the footer marker follow automatically).
 - `app/page.tsx`: remove `<Faq />` and its import.
 - `components/chapters/Faq.tsx`: delete (the questions live at `/faq/`).
   `FAQ` in `lib/content.ts` is still used by `FAQ_ALL` (`QA` lookup) — keep it.
@@ -445,7 +449,7 @@ Everything that references it (as of this writing):
 What follows automatically (verify, don't assume): `holds` (the run of
 sheets after Why becomes just Process), page S of the audit chapter, the
 footer's `FOOT_S`, auto-framing anchors (REST_FILM is film time — unchanged;
-page tops and hold ends are measured), `jumpS` for the rail. The film at any
+page tops and hold ends are measured), `jumpS` for the menu. The film at any
 given film time must be pixel-identical: `domstills` at
 `F = 1.62, 3.72, 4.9, 5.45, 7.62, 9.3, 10.75, 11.5` before and after →
 `pixdiff` max ≤ 2/255. Then record a real wheel scroll from Why through
@@ -478,7 +482,8 @@ else to change. Check the film holds under it exactly as before.
 ### 4.4 Accept
 
 Page length measured and reported; `pixdiff` proof; scroll recording
-reviewed; rail shows 00–06; menu "On this page" lists six chapters; keyboard
+reviewed; rail, phone counter and chapter card stay removed; menu "On this
+page" lists six chapters; keyboard
 walk on home (`kbd.mjs`) clean; `qa3b.mjs` + `homecheck.mjs` clean at 1440
 and 390; reduced motion (`reduced.mjs`) still works; `CLAUDE.md` updated
 (site shape, chapter table, rest frames text "the film holds at 9.3 under How
@@ -543,9 +548,9 @@ we work").
   screenshots read at a readable size.
 - Known open item (the client said not to stress about it): on the smallest
   screens (320 px wide), the hero description's last line touches the hero
-  buttons and the "00/0x" counter sits on the ghost button. If fixing:
-  under `(max-width: 359px) and (max-height: 700px)`, lower the hero
-  description's font by 1 px and move the counter up above the actions.
+  buttons. The phone counter has been removed at the client's request.
+  If fixing: under `(max-width: 359px) and (max-height: 700px)`, lower the hero
+  description's font by 1 px.
   Screenshots before/after; nothing above 360 px may change.
 - Safari: the site can't be tested in Safari here. Ask the client (or anyone
   with an iPhone and a Mac) to open the live site and the three demos, and

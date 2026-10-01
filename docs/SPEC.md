@@ -1,3 +1,8 @@
+> Client update, 2026-10-01: the homepage's numbered chapter rail (including
+> its phone counter) and lower-left chapter card have been removed. Keep
+> them removed. References to those controls below record earlier rounds;
+> the phone menu still provides chapter jumps.
+
 ## Scoring
 
 | Proposal | a Impact | b Restraint | c Narrative | d White theme | e Feasibility | f Motion | Total |

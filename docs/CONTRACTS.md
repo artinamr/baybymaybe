@@ -110,7 +110,7 @@ Intro (SPEC §3) is read from `intro.ms` / `intro.state`: camera ×1.28 → ×1.
 `app/page.tsx`:
 ```tsx
 <Experience>            {/* E5: fixed layers, canvas, loop, gate, dev tools */}
-  <Chrome />            {/* E4: Nav, ChapterIndex, SpecimenCard, LeaderLines, Grain, MobileMenu */}
+  <Chrome />            {/* E4: Nav, Grain, MobileMenu; chapter rail/card removed 2026-10-01 */}
   <main>{7 chapters}</main>
 </Experience>
 ```

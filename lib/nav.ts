@@ -5,7 +5,7 @@ export type Here = "services" | "work" | "methodology" | "blog" | "studio" | "pr
 
 /**
  * The site's main navigation — the same on every page, home included (the
- * home page's own sections are reached from its chapter rail). The free
+ * home page's own sections are reached from its phone menu). The free
  * audit is the header's pill, not one of these.
  */
 export const NAV: { key: Here; label: string; href: string }[] = [

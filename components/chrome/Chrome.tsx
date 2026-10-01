@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import { CHAPTERS, jumpS } from "@/lib/chapters";
-import { jumpToAudit, jumpToS, onScrollFrame, useActiveChapter } from "@/lib/scroll";
+import { jumpToAudit, jumpToS } from "@/lib/scroll";
 import { NAV } from "@/lib/nav";
 import { PAGES } from "@/lib/content";
 import { LogoMark } from "./LogoMark";
@@ -55,89 +55,6 @@ function Nav({ onMenu }: { onMenu: () => void }) {
   );
 }
 
-/** Seven ticks on the right edge; the active one grows and fills with its chapter's progress. */
-function ChapterIndex() {
-  const active = useActiveChapter();
-  const ref = useRef<HTMLOListElement>(null);
-  const rail = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    let last = "";
-    let lastI = -1;
-    return onScrollFrame((S) => {
-      const el = ref.current;
-      if (!el) return;
-      const i = Math.max(0, CHAPTERS.findLastIndex((c) => S >= c.S0 - 0.5));
-      const c = CHAPTERS[i];
-      const p = Math.max(0, Math.min(1, (S - c.S0) / Math.max(0.5, c.S1 - c.S0 - 0.5))).toFixed(3);
-      // The fill goes straight onto the active tick and the counter's rail —
-      // only when it moves (a custom property on the list restyled all of it).
-      if (p === last && i === lastI) return;
-      const ticks = el.querySelectorAll<HTMLElement>(".index-tick > span");
-      if (i !== lastI && ticks[lastI]) ticks[lastI].style.transform = "";
-      const t = `scaleX(${p})`;
-      if (ticks[i]) ticks[i].style.transform = t;
-      if (rail.current) rail.current.style.transform = t;
-      last = p;
-      lastI = i;
-    });
-  }, []);
-  return (
-    <>
-    <p className="index-counter mono" aria-hidden>
-      {CHAPTERS[active].num}/0{CHAPTERS.length - 1}
-      <span className="index-rail">
-        <span ref={rail} />
-      </span>
-    </p>
-    <ol className="index" ref={ref} aria-label="Chapters">
-      {CHAPTERS.map((c, i) => (
-        <li key={c.id} className="index-row intro-tick" data-on={i === active || undefined} style={{ "--d": `${1300 + i * 50}ms` } as CSSProperties}>
-          <button type="button" onClick={() => jumpToS(jumpS(c))} aria-label={`${c.num} ${c.label}`} aria-current={i === active ? "step" : undefined}>
-            <span className="index-label">{c.label}</span>
-            <span className="index-num mono">{c.num}</span>
-            <span className="index-tick" aria-hidden>
-              <span />
-            </span>
-          </button>
-        </li>
-      ))}
-    </ol>
-    </>
-  );
-}
-
-/**
- * The chapter card (the example's late bottom-right card): where you are, one
- * plain line about it, and the way on.
- */
-function SpecimenCard() {
-  const active = useActiveChapter();
-  const c = CHAPTERS[active];
-  const next = CHAPTERS[active + 1];
-  return (
-    <aside className="specimen intro intro-card" style={{ "--d": "1250ms" } as CSSProperties} aria-label="Current chapter">
-      <div className="specimen-roll" key={c.id}>
-        <p className="specimen-top">
-          <span className="specimen-n">
-            {c.num} / 0{CHAPTERS.length - 1}
-          </span>
-          <span>{c.label}</span>
-        </p>
-        <p className="specimen-name">{c.specimen.name}</p>
-        <p className="specimen-line">{c.specimen.line}</p>
-        {next ? (
-          <button type="button" className="specimen-next" onClick={() => jumpToS(jumpS(next))}>
-            <span>Next — {next.label}</span>
-            <span className="cue-line" aria-hidden>
-              <span />
-            </span>
-          </button>
-        ) : null}
-      </div>
-    </aside>
-  );
-}
-
 /**
  * The phone's menu on the home page: the site's pages and the free audit, and
  * underneath, this page's own chapters — each a jump.
@@ -182,8 +99,6 @@ export function Chrome() {
   return (
     <>
       <Nav onMenu={() => setMenu(true)} />
-      <ChapterIndex />
-      <SpecimenCard />
       <MobileMenu open={menu} onClose={closeMenu} />
       <div className="grain" aria-hidden />
     </>

@@ -51,8 +51,10 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
   (`sceneState.S`, `filmS`); the chrome and reveals use page S.
 - Auto-framing rests are in film time (`REST_FILM`, + every page section's
   top, + each hold's end, + the footer's top — nothing past it) and never
-  pull a reader who stopped inside a page section or the footer. The chapter rail steps back while you read a sheet
-  (`html[data-reading]`).
+  pull a reader who stopped inside a page section or the footer.
+- **Homepage controls (client request, 2026-10-01):** the numbered chapter
+  rail, its phone counter, and the lower-left chapter card are removed.
+  Keep them removed. The phone menu's "On this page" chapter jumps remain.
 - **Content lives in `lib/content.ts`** (PROCESS, FAQ, contact),
   `content/services.ts` (disciplines) and `content/work.ts` (projects).
   Work covers are captures of the working demonstrations, with a portrait
@@ -93,7 +95,7 @@ better loading … make the whole website perfect").**
 - **The finale** ("Let's talk.", `Audit.tsx`): the two words stand ON the
   floor line (`--floorline`, projected in lib/project.ts for S > 9.25), one
   each side of the colossus; below, one line, the audit pill and the email.
-- **Jumps are instant:** nav, rail, menu, footer links call `jumpToS` →
+- **Jumps are instant:** nav, menu, footer links call `jumpToS` →
   `scroll.cutFrames = 2`; the Director and CameraRig SNAP on `scroll.cut`
   (clock, springs, rigid, camera) and suppress glints/cracks, so the film
   lands on the new frame in one frame. Only the reader's own scroll animates.
@@ -103,12 +105,10 @@ better loading … make the whole website perfect").**
   `FOOT_S` the canvas is not drawn (`covered`).
 - **Keyboard / a11y:** skip link; the phone menu is a real dialog (inert when
   closed, focus in, Tab kept inside, Escape, focus back) and carries Free
-  audit; the rail and hero card get `visibility: hidden` AFTER their fades
-  (no visual change, out of the tab order); Tab into a film chapter whose
+  audit; Tab into a film chapter whose
   words wait for their frame lands on that frame (`focusin`, keyboard only);
   `html { scroll-padding-top }` keeps focus/anchors clear of the nav.
-  Section markers read their numbers from `chapter(id).num` (Why said 03
-  while the rail said 04).
+  Section markers read their numbers from `chapter(id).num`.
 - **Head:** share card `public/og.jpg` (+ OG/Twitter tags, `SITE_URL` —
   set `NEXT_PUBLIC_SITE_URL` when the domain moves), `sitemap.xml`,
   `robots.txt`, the stone-mark icons (`app/icon.svg` flips to paper on dark

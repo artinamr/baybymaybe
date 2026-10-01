@@ -301,7 +301,6 @@ a {
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rise-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes drop-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-@keyframes card-in { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
 @keyframes line-in { from { transform: translateY(135%) skewY(3deg); } to { transform: none; } }
 @keyframes rule-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
@@ -310,27 +309,21 @@ html[data-intro="run"] #stage { animation: stage-open 1100ms var(--ease-expo) bo
 html[data-intro="run"] #field-card { animation: card-tint 1100ms var(--ease-expo) both; }
 html[data-intro="run"] #stage-frame { animation: frame-open 1100ms var(--ease-expo) both; }
 
-html[data-intro="wait"] .intro,
-html[data-intro="wait"] .intro-tick { opacity: 0; }
+html[data-intro="wait"] .intro { opacity: 0; }
 html[data-intro="wait"] .intro-mask > span { transform: translateY(135%) skewY(3deg); }
 html[data-intro="wait"] .intro-rule { transform: scaleX(0); }
 
 html[data-intro="run"] .intro { animation: fade-in 500ms ease-out var(--d, 0ms) both; }
 html[data-intro="run"] .intro-rise { animation: rise-in 700ms var(--ease-expo) var(--d, 0ms) both; }
 html[data-intro="run"] .intro-drop { animation: drop-in 600ms var(--ease-expo) var(--d, 0ms) both; }
-html[data-intro="run"] .intro-card { animation: card-in 800ms var(--ease-expo) var(--d, 0ms) both; }
 html[data-intro="run"] .intro-mask > span { animation: line-in var(--dur, 900ms) var(--ease-line) var(--d, 0ms) both; }
 html[data-intro="run"] .intro-rule { animation: rule-in 600ms var(--ease-expo) var(--d, 0ms) both; }
-html[data-intro="run"] .intro-tick { animation: fade-in 400ms ease-out var(--d, 0ms) both; }
-html[data-intro="run"] .intro-tick .index-tick { animation: rule-in 400ms var(--ease-expo) var(--d, 0ms) both; }
 
 /* First wheel/touch fast-forwards everything; scroll is never blocked. */
 html[data-intro-skip] #stage,
 html[data-intro-skip] #field-card,
 html[data-intro-skip] #stage-frame,
 html[data-intro-skip] .intro,
-html[data-intro-skip] .intro-tick,
-html[data-intro-skip] .intro-tick .index-tick,
 html[data-intro-skip] .intro-rule,
 html[data-intro-skip] .intro-mask > span {
   animation-duration: 300ms !important;
@@ -1407,162 +1400,6 @@ a:focus-visible .swap-b {
   color: var(--paper);
 }
 
-/* Chapter index — seven ticks on the right edge. */
-.index {
-  position: fixed;
-  right: 22px;
-  top: 42%;
-  transform: translateY(-50%);
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.index button {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  height: 16px;
-}
-.index-num {
-  font-size: 10.5px;
-  color: color-mix(in oklab, var(--ink) 42%, transparent);
-  transition: color 300ms ease;
-}
-.index-tick {
-  position: relative;
-  display: block;
-  width: 16px;
-  height: 1px;
-  background: color-mix(in oklab, var(--ink) 25%, transparent);
-  transform-origin: right;
-  transition: width 400ms var(--ease-expo);
-}
-.index-tick > span {
-  position: absolute;
-  inset: 0;
-  background: var(--indigo);
-  transform-origin: left;
-  transform: scaleX(0);
-}
-.index-row[data-on] .index-tick {
-  width: 32px;
-}
-.index-row[data-on] .index-tick > span {
-  transform: scaleX(var(--p, 0));
-}
-.index-row[data-on] .index-num {
-  color: var(--ink);
-}
-.index-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ink);
-  clip-path: inset(0 0 0 100%);
-  transition: clip-path 300ms var(--ease-expo);
-}
-.index button:hover .index-label,
-.index button:focus-visible .index-label {
-  clip-path: inset(0 0 0 0);
-}
-.index-counter {
-  display: none;
-}
-
-/* Specimen card. */
-.specimen {
-  position: fixed;
-  right: var(--g);
-  bottom: calc(var(--vh) * 3.5);
-  width: 232px;
-  z-index: 30;
-  padding: 16px 18px;
-  border-radius: 14px;
-  background: color-mix(in oklab, var(--paper) 72%, transparent);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
-  transition: opacity 400ms ease, transform 500ms var(--ease-expo), visibility 0s;
-}
-/* The card belongs to the hero's opening; once the film starts moving it
-   bows out so every chapter frame is just type and the stone. (Hidden once
-   faded, so its button leaves the tab order too.) */
-html[data-clip] .specimen,
-html[data-scrolled] .specimen {
-  opacity: 0;
-  transform: translateY(20px);
-  pointer-events: none;
-  visibility: hidden;
-  transition: opacity 400ms ease, transform 500ms var(--ease-expo), visibility 0s linear 500ms;
-}
-@keyframes roll-in {
-  from { clip-path: inset(0 0 100% 0); transform: translateY(8px); }
-  to { clip-path: inset(0 0 0 0); transform: none; }
-}
-.specimen-roll {
-  animation: roll-in 500ms var(--ease-expo) both;
-}
-.specimen-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
-}
-.specimen-n {
-  font-variant-numeric: tabular-nums;
-  color: var(--indigo);
-}
-.specimen-name {
-  margin-top: 8px;
-  font-family: var(--display);
-  font-size: 21px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-weight: 500;
-}
-.specimen-line {
-  margin-top: 6px;
-  font-size: 13px;
-  line-height: 1.45;
-  color: color-mix(in oklab, var(--ink) 68%, transparent);
-}
-.specimen-next {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 70%, transparent);
-}
-.specimen-next:hover {
-  color: var(--indigo);
-}
-.cue-line {
-  position: relative;
-  width: 24px;
-  height: 1px;
-  background: color-mix(in oklab, var(--ink) 20%, transparent);
-  overflow: hidden;
-}
-.cue-line > span {
-  position: absolute;
-  top: -1px;
-  left: 0;
-  width: 4px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--indigo);
-  animation: cue 2.4s var(--ease-io) infinite;
-}
-@keyframes cue {
-  from { transform: translateX(-4px); }
-  to { transform: translateX(24px); }
-}
-
 /* Mobile menu sheet. */
 .menu-sheet {
   position: fixed;
@@ -1652,16 +1489,11 @@ html[data-clip] #stage-frame {
 }
 main,
 .nav,
-.index,
-.index-counter,
 .stone-cursor {
   transition: opacity 700ms var(--ease-expo) 300ms;
 }
 html[data-story] main,
 html[data-story] .nav,
-html[data-story] .index,
-html[data-story] .index-counter,
-html[data-story] .specimen,
 html[data-story] .stone-cursor {
   opacity: 0;
   pointer-events: none;
@@ -2032,10 +1864,6 @@ html[data-stone-hover] {
   .story-hint {
     display: none;
   }
-}
-
-html[data-story] .specimen {
-  visibility: hidden;
 }
 
 /* ==========================================================================
@@ -2589,9 +2417,6 @@ html[data-nowebgl] .pot-fill {
    ========================================================================== */
 
 @media (max-width: 1099px) {
-  .specimen {
-    display: none;
-  }
   .h2 {
     font-size: min(4.2vw, calc(var(--vh) * 5.4));
   }
@@ -2626,32 +2451,6 @@ html[data-nowebgl] .pot-fill {
     padding: 0 14px;
     border: 1px solid var(--hair);
     border-radius: 999px;
-  }
-  .index {
-    display: none;
-  }
-  .index-counter {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    position: fixed;
-    right: var(--g);
-    bottom: 18px;
-    z-index: 30;
-    font-size: 10.5px;
-  }
-  .index-rail {
-    position: relative;
-    width: 44px;
-    height: 2px;
-    background: var(--hair);
-  }
-  .index-rail > span {
-    position: absolute;
-    inset: 0;
-    background: var(--indigo);
-    transform-origin: left;
-    transform: scaleX(var(--p, 0));
   }
   .hero-desc {
     font-size: 15px;
@@ -2734,9 +2533,6 @@ html[data-nowebgl] .pot-fill {
   .sf-mark {
     font-size: 17.5vw;
     padding-bottom: 5vw;
-  }
-  .specimen {
-    display: none;
   }
 }
 
@@ -3690,30 +3486,9 @@ html[data-handoff] .nav-brand .nav-mark {
   }
 }
 
-/* Reading a page section: the chapter rail steps back (it would sit on the text). */
-.index,
-.index-counter {
-  transition:
-    opacity 500ms ease,
-    visibility 0s;
-}
-/* Hidden once the fade is done, so the keyboard skips what the eye can't see. */
-html[data-reading] .index,
-html[data-reading] .index-counter {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-  transition:
-    opacity 500ms ease,
-    visibility 0s linear 500ms;
-}
-
 /* Look-dev `?render=1`: the film alone (stills for covers). */
 html[data-render] main,
 html[data-render] .nav,
-html[data-render] .index,
-html[data-render] .index-counter,
-html[data-render] .specimen,
 html[data-render] .grain,
 html[data-render] .stone-cursor {
   visibility: hidden !important;
@@ -3730,16 +3505,12 @@ html[data-render] .stone-cursor {
 
 /* ==========================================================================
    Idle animations rest while unseen — each one costs a style pass every frame
-   (the loader's glint once the loader is gone; the chapter card's cue and the
-   stone lens's pulse while they are hidden; the studio's haze while it has no
+   (the loader's glint once the loader is gone; the stone lens's pulse while
+   it is hidden; the studio's haze while it has no
    opacity). Paused, not removed: each picks up where it was when it returns.
    ========================================================================== */
 html:not([data-intro="wait"]) .ld-glint {
   animation: none;
-}
-html[data-scrolled] .cue-line > span,
-html[data-story] .cue-line > span {
-  animation-play-state: paused;
 }
 html:not([data-stone-hover]) .stone-cursor-dot,
 html[data-scrolled] .stone-cursor-dot,
