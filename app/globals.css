@@ -3033,10 +3033,6 @@ html[data-nowebgl] .pot-fill {
   color: color-mix(in oklab, var(--ink) 74%, transparent);
   margin: 6px 0 0;
 }
-.work-card[data-placeholder] .work-name,
-.work-card[data-placeholder] .work-client {
-  color: color-mix(in oklab, var(--ink) 38%, transparent);
-}
 
 /* ---- 05 · How we work: four days on one line -------------------------------- */
 
@@ -4279,5 +4275,410 @@ html[data-story] .stone-cursor-dot {
   }
   .af-kind-opt {
     font-size: 13px;
+  }
+}
+
+/* ==========================================================================
+   WORK — device frames for the studio demonstrations (live components; the
+   screen is a size container so each demo lays itself out for its frame),
+   the case studies and the work index.
+   ========================================================================== */
+
+.dev-browser {
+  overflow: hidden;
+  border: 1px solid var(--hair);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ink) 6%, transparent),
+    0 40px 80px -48px color-mix(in oklab, var(--ink) 45%, transparent);
+}
+.dev-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 40px;
+  padding: 0 14px;
+  background: #efeeea;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.dev-dots {
+  display: flex;
+  gap: 6px;
+}
+.dev-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d8d6d0;
+}
+.dev-url {
+  margin: 0 auto;
+  min-width: 36%;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: var(--paper);
+  font-size: 12px;
+  text-align: center;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  transform: translateX(-18px);
+}
+.dev-screen {
+  container-type: inline-size;
+  height: var(--dev-h, 660px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  background: #fff;
+}
+.dev-phone {
+  width: min(100%, 360px);
+  padding: 11px;
+  border-radius: 46px;
+  background: var(--ink);
+  box-shadow: 0 40px 80px -44px color-mix(in oklab, var(--ink) 60%, transparent);
+}
+.dev-phone-screen {
+  height: var(--dev-h, 700px);
+  border-radius: 36px;
+}
+
+/* A case study */
+.cs-hero .sp-h1 {
+  font-size: min(6vw, 92px);
+  max-width: 16ch;
+}
+.cs-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 5px 12px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+}
+.cs-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+.cs-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 44px;
+  margin: 34px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+.cs-meta li {
+  display: grid;
+  gap: 4px;
+}
+.cs-meta span {
+  font-size: 12px;
+  color: color-mix(in oklab, var(--ink) 50%, transparent);
+}
+.cs-meta a {
+  color: var(--indigo);
+}
+.cs-stage {
+  margin: 0 0 calc(var(--vh) * 4);
+}
+.cs-note {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+}
+.cs-touch-hint {
+  display: none;
+}
+.cs-views {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 36px;
+  align-items: end;
+}
+.cs-views figure,
+.cs-close {
+  margin: 0;
+}
+.cs-cap {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: color-mix(in oklab, var(--ink) 66%, transparent);
+  max-width: 60ch;
+}
+.cs-cap b {
+  flex: none;
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--indigo);
+  padding-top: 3px;
+}
+.cs-close {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 48px;
+  align-items: center;
+  margin-top: calc(var(--vh) * 10);
+}
+.cs-close-shot {
+  position: relative;
+  container-type: inline-size;
+  padding: 44px 36px;
+  border-radius: 24px;
+  background: #ece8df;
+}
+.cs-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.cs-notes li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.cs-notes li > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--indigo);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.cs-notes p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.cs-out {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 48px;
+}
+.cs-out h3 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+}
+.cs-out ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.cs-out li {
+  position: relative;
+  padding: 14px 0 14px 26px;
+  border-bottom: 1px solid var(--hair);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.cs-out li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 23px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+.cs-limits li::before {
+  background: transparent;
+  border: 1.5px solid color-mix(in oklab, var(--ink) 45%, transparent);
+}
+.cs-next {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+/* The work index */
+.work-punctuation {
+  font-weight: 500;
+  -webkit-text-stroke: 0.35px currentColor;
+}
+.wk-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 40px;
+}
+.wk-filter button {
+  padding: 8px 16px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    background 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
+}
+.wk-filter button[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.wk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 64px 32px;
+  padding-bottom: calc(var(--vh) * 12);
+}
+.wk-card {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+.wk-card[hidden] {
+  display: none;
+}
+.wk-card:first-child {
+  grid-column: 1 / -1;
+}
+.wk-img {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--hair-soft);
+  border-radius: 20px;
+  aspect-ratio: 16 / 10;
+  background: #eeede9;
+}
+.wk-card:first-child .wk-img {
+  aspect-ratio: 21 / 10;
+}
+.wk-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  transition: transform 1400ms var(--ease-expo);
+}
+.wk-card:hover .wk-img img {
+  transform: scale(1.025);
+}
+.wk-kind {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 55%, transparent);
+}
+.wk-kind b {
+  font-weight: 500;
+  color: var(--indigo);
+}
+.wk-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(2.8vw, 40px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+.wk-card:first-child .wk-title {
+  font-size: min(3.6vw, 52px);
+}
+.wk-sum {
+  font-size: 16px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  margin: 0;
+  max-width: 60ch;
+}
+
+@media (max-width: 900px) {
+  .cs-touch-hint {
+    display: block;
+    margin-top: 6px;
+  }
+  .cs-hero .sp-h1 {
+    font-size: 11vw;
+  }
+  .cs-views,
+  .cs-close,
+  .cs-out,
+  .cs-next,
+  .wk-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cs-views .dev-phone {
+    justify-self: center;
+  }
+  .cs-close-shot {
+    padding: 20px 14px;
+  }
+  .wk-card:first-child .wk-img {
+    aspect-ratio: 16 / 10;
+  }
+  .wk-title,
+  .wk-card:first-child .wk-title {
+    font-size: 8.4vw;
+  }
+  .dev-screen {
+    height: var(--dev-hm, 560px);
+  }
+  .dev-url {
+    min-width: 0;
+    transform: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .cs-views .dev-screen {
+    overflow: hidden;
+  }
+}
+
+/* The home page's work: covers are interfaces, anchored at their top left;
+   names link to their case studies; one link to all of it. */
+.work-media picture {
+  display: contents;
+}
+.work-media img {
+  object-position: top left;
+}
+.work-name a {
+  color: inherit;
+}
+.work-all {
+  margin: calc(var(--vh) * 8) 0 0;
+}
+/* A service page's case study. */
+.cs-feature {
+  margin-top: 30px;
+}
+.cs-feature .wk-img {
+  aspect-ratio: 21 / 9;
+}
+.cs-feature .svc-go {
+  justify-self: start;
+}
+@media (max-width: 900px) {
+  .cs-feature .wk-img {
+    aspect-ratio: 16 / 10;
   }
 }

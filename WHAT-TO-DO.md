@@ -8,6 +8,9 @@ nothing cheap anywhere.
 Written 2026-10-01 at the end of the session that started round 17.
 `docs/ROUND17.md` has the short hand-off; this is the long version.
 
+**Progress 2026-10-01:** increment 2 (Work) is complete. Review fixes and QA
+are recorded in `docs/WORK-QA.md`. Continue at section 2: Methodology.
+
 ---
 
 ## 0. Read this first
@@ -62,8 +65,7 @@ Written 2026-10-01 at the end of the session that started round 17.
   the GitHub Pages preview is `noindex` until `NEXT_PUBLIC_SITE_URL` is set.
 - Hand-off notes: `docs/ROUND17.md`. QA/image tools: `tools/qa/` (+ README).
 
-**Written but NOT committed (in the working tree — do not discard):**
-increment 2, Work.
+**Completed in round 17 part 2:** Work.
 - `components/demos/Frames.tsx` — `BrowserFrame` / `PhoneFrame` (size containers).
 - `components/demos/practice/*` — Tarn & Wick, a fictional accounting
   practice's website (home, service page, working booking flow).
@@ -78,19 +80,20 @@ increment 2, Work.
 - `content/work.ts` (the registry), `app/work/page.tsx`, `app/work/[slug]/page.tsx`.
 - `public/work/{practice-website,operations-portal,enquiry-desk}.webp` (16:10
   covers) and `operations-portal-tall.webp` (4:5, the home page's tall card).
-- Modified: `app/globals.css` (frames, case study, index styles), `lib/nav.ts`
+- Integrated: `app/globals.css` (frames, case study, index styles), `lib/nav.ts`
   (Work in the nav), `components/site/SiteFooter.tsx` (Work → /work/),
   `app/sitemap.ts`, `app/services/[slug]/page.tsx` ("See it working"),
   `components/chapters/Work.tsx` (home section reads the registry),
   `lib/content.ts` (the old placeholder `WORK` list removed).
-- `npm run build` passes with it. It has NOT been reviewed visually in full,
-  linted, Pages-built, committed or pushed.
+- Desktop/tablet/phone review, demo interaction QA, keyboard, overflow,
+  TypeScript, lint and production export are complete. Old placeholder
+  covers were removed. See `docs/WORK-QA.md` for the verification record.
 
 ---
 
-## 1. Finish increment 2 — Work
+## 1. [x] Finish increment 2 — Work
 
-### 1.1 Fix what the last review found
+### 1.1 [x] Fix what the last review found
 
 1. **The booking close-up numbers itself twice.** In `Stories.tsx` the pins
    (1, 2, 3, `.cs-pin`, hard-coded pixel positions) sit next to the booking
@@ -132,7 +135,7 @@ increment 2, Work.
    returns nothing. Remove Portal's unused `compact` prop (or use it). Remove
    the `.work-card[data-placeholder]` CSS if nothing sets it any more.
 
-### 1.2 Review everything you haven't looked at yet
+### 1.2 [x] Review everything you haven't looked at yet
 
 Build plain, serve `out/` on 3100, then:
 
@@ -162,7 +165,7 @@ Build plain, serve `out/` on 3100, then:
 - `/services/websites/` etc.: the "See it working" card shows the right cover
   and opens the right case study.
 
-### 1.3 Ship it
+### 1.3 Ship it — local verification complete; deployment checked after push
 
 `npx tsc --noEmit -p .` → `npx eslint app components lib content` (0 errors)
 → `npm run build` → Pages build → `grep` the Pages build for

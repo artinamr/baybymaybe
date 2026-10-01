@@ -1,8 +1,7 @@
 /**
  * THE PAGE'S WORDS AND ITEMS — every list the home page renders, in one place,
  * so the client's real material drops straight in. Plain, specific, no
- * invented numbers (CLAUDE.md). Items marked `placeholder` are layout slots
- * waiting for the client's real case studies.
+ * invented numbers (CLAUDE.md). Projects live in content/work.ts.
  */
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -21,50 +20,6 @@ export const DELIVERABLES: Record<"websites" | "platforms" | "ai", string[]> = {
   platforms: ["Client portals and dashboards", "Booking, payments and accounts", "Internal tools and admin", "Connected to the software you use"],
   ai: ["Site assistants that answer and book", "Inbox, document and data work", "Agents inside your team's tools", "A person in the loop where it matters"],
 };
-
-export type WorkItem = {
-  id: string;
-  /** Which of the three disciplines it shows. */
-  kind: "Website" | "Platform" | "AI automation";
-  name: string;
-  client: string;
-  line: string;
-  cover: string;
-  href?: string;
-  /** A layout slot, not a real project yet. */
-  placeholder?: boolean;
-};
-
-/** Selected work. PLACEHOLDERS until the client supplies three real projects. */
-export const WORK: WorkItem[] = [
-  {
-    id: "w1",
-    kind: "Website",
-    name: "Project name",
-    client: "Client · sector",
-    line: "One line on what we built, and what changed for the business once it was live.",
-    cover: `${BASE}/work/cover-1.jpg`,
-    placeholder: true,
-  },
-  {
-    id: "w2",
-    kind: "Platform",
-    name: "Project name",
-    client: "Client · sector",
-    line: "One line on the system we built, who uses it every day, and what it replaced.",
-    cover: `${BASE}/work/cover-2.jpg`,
-    placeholder: true,
-  },
-  {
-    id: "w3",
-    kind: "AI automation",
-    name: "Project name",
-    client: "Client · sector",
-    line: "One line on the work the automation now does, and the time it gave back to the team.",
-    cover: `${BASE}/work/cover-3.jpg`,
-    placeholder: true,
-  },
-];
 
 /** How we work — the methodology page's four steps. */
 export const PROCESS = [

@@ -10,6 +10,7 @@ export type Here = "services" | "work" | "methodology" | "blog" | "studio" | "pr
  */
 export const NAV: { key: Here; label: string; href: string }[] = [
   { key: "services", label: "Services", href: PAGES.services },
+  { key: "work", label: "Work", href: PAGES.work },
   { key: "methodology", label: "Methodology", href: PAGES.methodology },
   { key: "studio", label: "Studio", href: PAGES.studio },
   { key: "contact", label: "Contact", href: PAGES.contact },

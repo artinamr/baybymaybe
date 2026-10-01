@@ -1,0 +1,576 @@
+/* Tarn & Wick — a fictional practice's website (studio demonstration). Its own
+   brand, deliberately not Nerodyn's: deep green, cream, brass, a classic serif. */
+
+.root {
+  --g: #1f3b33;
+  --c: #f4efe6;
+  --card: #fffcf6;
+  --b: #a87c43;
+  --t: #1d2320;
+  --line: rgba(31, 59, 51, 0.12);
+  position: relative;
+  min-height: 100%;
+  background: var(--c);
+  color: var(--t);
+  font-family: var(--font-isans), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: left;
+}
+.root button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.root p,
+.root ol,
+.root ul {
+  margin: 0;
+  padding: 0;
+}
+.root ol,
+.root ul {
+  list-style: none;
+}
+.serif,
+.brandName,
+.h1,
+.h2,
+.cardTitle,
+.steps b,
+.days b {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+
+/* Header */
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 18px 36px;
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: grid;
+  text-align: left;
+  margin-right: auto;
+}
+.brandName {
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--g);
+}
+.brandSub {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--b);
+}
+.nav {
+  display: flex;
+  gap: 26px;
+  font-size: 14px;
+}
+.nav button:hover {
+  color: var(--g);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.root .headCta,
+.root .primary {
+  background: var(--g);
+  color: var(--c);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 200ms ease;
+}
+.root .headCta:hover,
+.root .primary:hover:not(:disabled) {
+  background: #2c5246;
+}
+.root .primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.root .secondary {
+  border: 1px solid rgba(31, 59, 51, 0.3);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--g);
+}
+.burger {
+  display: none !important;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  place-content: center;
+}
+.burger i {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--g);
+}
+.drop {
+  position: absolute;
+  z-index: 3;
+  top: 100%;
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 2px;
+  padding: 10px 20px 16px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 12px 24px -16px rgba(0, 0, 0, 0.3);
+}
+.drop button {
+  text-align: left;
+  padding: 10px 0 !important;
+  font-size: 16px;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+/* Home */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
+  gap: 40px;
+  align-items: center;
+  padding: 64px 36px 56px;
+}
+.kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--b);
+  margin-bottom: 16px !important;
+}
+.h1 {
+  font-size: 52px;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--g);
+  margin-bottom: 18px !important;
+}
+.lede {
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 46ch;
+  color: rgba(29, 35, 32, 0.78);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.dash {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: 0 24px 48px -32px rgba(31, 59, 51, 0.45);
+}
+.dashH {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--b);
+  margin-bottom: 12px !important;
+}
+.dash li {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+.dash em {
+  font-style: normal;
+  font-size: 12px;
+  color: rgba(29, 35, 32, 0.6);
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(29, 35, 32, 0.22);
+}
+.done {
+  background: #3b8a5a;
+}
+.soon {
+  background: var(--b);
+}
+.dashFoot {
+  margin-top: 12px !important;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: rgba(29, 35, 32, 0.6);
+}
+.services {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0 36px 52px;
+}
+.card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px;
+}
+.cardTitle {
+  font-size: 21px;
+  color: var(--g);
+}
+.card p {
+  font-size: 14px;
+  color: rgba(29, 35, 32, 0.75);
+}
+.root .card button {
+  justify-self: start;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b);
+}
+.steps {
+  padding: 44px 36px;
+  background: var(--g);
+  color: var(--c);
+}
+.h2 {
+  font-size: 26px;
+  line-height: 1.15;
+  color: inherit;
+  margin-bottom: 20px !important;
+}
+.steps ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  counter-reset: step;
+}
+.steps li {
+  display: grid;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(244, 239, 230, 0.25);
+}
+.steps b {
+  font-size: 18px;
+}
+.steps span {
+  font-size: 14px;
+  opacity: 0.78;
+}
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 36px;
+  font-size: 12px;
+  color: rgba(29, 35, 32, 0.6);
+}
+
+/* Inner pages */
+.page {
+  padding: 40px 36px 56px;
+}
+.crumb {
+  font-size: 12px;
+  color: rgba(29, 35, 32, 0.6);
+  margin-bottom: 18px !important;
+}
+.root .crumb button {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.page .h2 {
+  color: var(--g);
+}
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 36px;
+  margin-top: 36px;
+}
+.ticks li {
+  position: relative;
+  padding: 11px 0 11px 28px;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+}
+.ticks li::before {
+  content: "✓";
+  position: absolute;
+  left: 2px;
+  color: var(--b);
+  font-weight: 700;
+}
+.dates {
+  align-self: start;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+}
+.dates .h2 {
+  margin-bottom: 4px !important;
+}
+.dates ol {
+  margin: 14px 0 20px !important;
+}
+.dates li {
+  display: flex;
+  gap: 14px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+.dates b {
+  min-width: 56px;
+  color: var(--g);
+}
+.sample {
+  font-size: 11px;
+  font-style: italic;
+  color: rgba(29, 35, 32, 0.55);
+}
+
+/* Booking */
+.booking {
+  min-height: 0;
+  max-width: 600px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 28px 28px;
+  box-shadow: 0 24px 48px -36px rgba(31, 59, 51, 0.5);
+}
+.booking .h2 {
+  color: var(--g);
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 10px !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+.step b {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--g);
+  color: var(--c);
+  font-size: 11px;
+}
+.annotated .step b {
+  display: none;
+}
+.annotationTarget {
+  position: relative;
+}
+.root .annotationPin {
+  position: absolute;
+  left: -38px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--indigo);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--indigo) 22%, transparent);
+  pointer-events: none;
+}
+.tz {
+  font-weight: 400;
+  color: rgba(29, 35, 32, 0.55);
+}
+.chips,
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.slots {
+  min-height: 40px;
+  margin-top: 10px;
+}
+.root .chips button,
+.root .slots button {
+  border: 1px solid rgba(31, 59, 51, 0.22);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+.root .slots button {
+  border-radius: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.days {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.root .days button {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 10px 0;
+  border: 1px solid rgba(31, 59, 51, 0.18);
+  border-radius: 12px;
+}
+.days span {
+  font-size: 11px;
+  color: rgba(29, 35, 32, 0.6);
+}
+.days b {
+  font-size: 19px;
+}
+.root .chips button[aria-pressed="true"],
+.root .slots button[aria-pressed="true"],
+.root .days button[aria-pressed="true"] {
+  background: var(--g);
+  border-color: var(--g);
+  color: var(--c);
+}
+.root .days button[aria-pressed="true"] span {
+  color: rgba(244, 239, 230, 0.75);
+}
+.hint {
+  font-size: 13px;
+  color: rgba(29, 35, 32, 0.55);
+  align-self: center;
+}
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.fields label {
+  display: grid;
+  gap: 5px;
+}
+.fields span {
+  font-size: 12px;
+  color: rgba(29, 35, 32, 0.7);
+}
+.fields input {
+  font: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(31, 59, 51, 0.2);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--t);
+}
+.confirm {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  text-align: center;
+  padding: 18px 0 6px;
+}
+.tick {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--g);
+  color: var(--c);
+  font-size: 22px;
+}
+.confirm .h2 {
+  margin: 4px 0 0 !important;
+}
+
+@media (max-width: 900px) {
+  .root .annotationPin {
+    display: none;
+  }
+}
+
+/* The phone (or any narrow frame) */
+@container (max-width: 640px) {
+  .header {
+    padding: 14px 20px;
+  }
+  .nav,
+  .root .headCta {
+    display: none;
+  }
+  .burger {
+    display: grid !important;
+  }
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding: 36px 20px 32px;
+  }
+  .h1 {
+    font-size: 34px;
+  }
+  .lede {
+    font-size: 16px;
+  }
+  .services {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 20px 36px;
+  }
+  .steps {
+    padding: 32px 20px;
+  }
+  .steps ol,
+  .split,
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .page {
+    padding: 26px 20px 40px;
+  }
+  .booking {
+    padding: 20px 18px 22px;
+  }
+  .days {
+    gap: 5px;
+  }
+  .foot {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 4px;
+  }
+}

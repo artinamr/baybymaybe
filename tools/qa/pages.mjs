@@ -6,7 +6,7 @@ import fs from "node:fs";
 const [, , base, out, w = "1440", h = "900", list = "/services/"] = process.argv;
 fs.mkdirSync(out, { recursive: true });
 const mobile = +w < 700;
-const browser = await puppeteer.launch({ executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe", headless: true, args: ["--no-sandbox"] });
+const browser = await puppeteer.launch({ executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe", headless: true, args: ["--no-sandbox", "--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
 for (const p of list.split(",")) {
   const page = await browser.newPage();
   const errs = [];

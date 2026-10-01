@@ -32,7 +32,7 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
 - **Home = the film's five scenes with the page's plain sections between
   them** (`lib/chapters.ts`): potential (hero) · statement · build ("What we
   build" — now with what each discipline delivers) · **work** (page: selected
-  work, three placeholder projects) · why · **process** (page: how we work,
+  work, three working studio demonstrations) · why · **process** (page: how we work,
   the four days) · **faq** (page: straight answers) · audit ("Let's talk." +
   the audit FORM) · then the **site footer** (the page's last sheet: a closing
   line, the address, every link, the name signed across the bottom).
@@ -53,15 +53,16 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
   top, + each hold's end, + the footer's top — nothing past it) and never
   pull a reader who stopped inside a page section or the footer. The chapter rail steps back while you read a sheet
   (`html[data-reading]`).
-- **Content lives in `lib/content.ts`**: deliverables, WORK (placeholders —
-  covers are stills of our own film, rendered with `?render=1`), PROCESS,
-  FAQ, contact. The audit form (round 16) lives at the top of the footer
+- **Content lives in `lib/content.ts`** (PROCESS, FAQ, contact),
+  `content/services.ts` (disciplines) and `content/work.ts` (projects).
+  Work covers are captures of the working demonstrations, with a portrait
+  phone view for the middle home card. The audit form (round 16) lives at the top of the footer
   (`#contact`) and posts JSON to FormSubmit → `artin@nerodyn.com`
   (`FORM_ENDPOINT`; `NEXT_PUBLIC_FORM_ENDPOINT` overrides); if the post fails
   it offers the same message as a pre-written email (mailto).
 - The hero's primary action is the free audit; "Enter the story" is the
-  ghost button. Nav: What we build · Work · Why Nerodyn · How we work · Free
-  audit.
+  ghost button. Shared page nav: Services · Work · Methodology · Studio ·
+  Contact + Free audit. The home menu also lists the chapters on this page.
 - **Copy is ours, not nerodyn.com's** (the client: "nerodyn.com isn't a good
   website to copy"). Plain, specific, no invented numbers. Awaiting sign-off.
 - **The hero's door to the story** is the stone itself: over it the pointer
@@ -126,6 +127,31 @@ better loading … make the whole website perfect").**
   invisible CSS animations paused. Style recalc per frame 91 → 2 elements;
   scroll-hitch test 0 frames > 50 ms (was 14–19). Measure with `?perf=1`
   (GPU timer queries per pass, `window.__perf` toggles) and `?dpr=`.
+
+**ROUND 17 (2026-09-30 / 2026-10-01 — a complete business site around the film).**
+- Part 1: Services (+ websites, platforms and AI automation), Studio,
+  Investment (no published prices), Contact, shared Page shell and navigation,
+  breadcrumbs and `pageMeta`. The GitHub Pages preview remains `noindex`.
+- Part 2: `/work/` and three case studies from `content/work.ts`: Tarn & Wick
+  (website and booking), Kerrow (team/client portal, quote approval and sample
+  payment), Pellow (enquiry organisation, editable drafts and human handover).
+  All businesses/data are fictional and labelled; actions run locally and
+  send nothing. Proposed live scope is distinguished from demonstrated features.
+- Demos in `components/demos/` use size containers for browser/phone layouts.
+  Their own titles are paragraphs, and Portal has no nested main landmark.
+  The booking close-up owns its styles and layout-following annotations;
+  phones keep the numbered notes. Illustrative frames are clipped on touch;
+  the top frame remains scrollable with a phone hint. Reduced motion is honoured.
+- Work is linked from the home, services, nav and footer, and included in the
+  sitemap. Covers are WebP captures of the current demos; old film placeholders
+  are removed. Metadata image paths are relative to metadataBase so the Pages
+  prefix is applied once. Fine display punctuation is strengthened individually.
+- Verification: `tools/qa/work.mjs` exercises the demos, filters, touch and
+  reduced motion, blocking network mutations. Expanded `overflow.mjs` and
+  `live.mjs` fail on route/metadata/overflow errors. Details: `docs/WORK-QA.md`.
+  No film, stage, shader, scroll-clock or choreography code changed in part 2.
+- Remaining work is ordered in `WHAT-TO-DO.md`: five-stage Methodology next,
+  then the blog, home recomposition, quality pass and the domain move.
 
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
@@ -502,8 +528,9 @@ way relative to each other.
 
 ## Still owed by the client
 
-Three real projects for Selected work (the cards are labelled placeholders —
-name, client, one line on what changed, a cover; `lib/content.ts` WORK), a
+Three real projects for Selected work (the current projects are labelled studio
+demonstrations — name, permission, what changed, real screenshots and measured
+results if available; `content/work.ts`), a
 testimonial or two if they have them, ONE activation of the form (the first
 submission makes FormSubmit email an "Activate Form" link to
 artin@nerodyn.com — until it is clicked, submissions wait), the social links

@@ -47,13 +47,13 @@ days" promise stays until the client signs the copy off.
 - The footer loads `lib/scroll`/`lib/story` only on click (sub-pages no longer
   ship Lenis); `form={false}` on the contact page (its own form is #contact).
 
-## Increment 2 — IN PROGRESS (not committed)
+## Increment 2 — COMPLETE (2026-10-01)
 
 Work: three studio demonstrations as LIVE components in device frames (a size
 container — the same component is the desktop and the phone view):
 
 - `components/demos/Frames.tsx` — BrowserFrame (url bar, `.example` domain),
-  PhoneFrame. **Needs its global CSS** (`.dev-browser`, `.dev-bar`,
+  PhoneFrame. Global CSS is in place (`.dev-browser`, `.dev-bar`,
   `.dev-dots`, `.dev-url`, `.dev-screen` with `container-type: inline-size`,
   a fixed height and `overflow: auto`, `.dev-phone`, `.dev-phone-screen`).
 - `components/demos/practice/` — "Tarn & Wick", a fictional accounting
@@ -67,17 +67,16 @@ container — the same component is the desktop and the phone view):
   Approved, a log; the "chest tightness" email is never answered
   automatically (handed to a person, marked urgent). Sends nothing.
 
-**Status when the session ended:** everything below items 1–5 is WRITTEN and
-`npm run build` passes with no errors (all 3 case studies + /work/ generate);
-covers are captured in `public/work/*.webp` (+ `operations-portal-tall.webp`
-for the home page's tall card); NAV has Work; the home Work section now
-reads `content/work.ts`; the old placeholder `WORK` list was removed from
-lib/content.ts. NOT yet done: a visual review of /work/ and the case study
-pages (desktop + phone), lint, the Pages build, commit and push. The work is
-uncommitted in the working tree. `public/work/cover-1..3.jpg` are now unused
-(delete them once the review is done).
+All routes and links are complete. The demonstrations were checked through
+their full interactions, and pages reviewed on desktop, tablet and phones.
+The booking close-up has one set of responsive annotations, demo titles do
+not pollute the heading outline, touch illustration frames are clipped, and
+Portal respects reduced motion. Removed inactive buttons, nested main and
+unused placeholder covers. Corrected misleading demonstration claims and the
+Pages share-image prefix. Covers were refreshed after the demo fixes.
+See `docs/WORK-QA.md` for validation. The next unfinished increment is 3.
 
-Original list for increment 2:
+Completed list for increment 2:
 1. Frame CSS in globals.css (above).
 2. `content/work.ts` — records: slug (`practice-website`,
    `operations-portal`, `enquiry-desk` — already referenced by

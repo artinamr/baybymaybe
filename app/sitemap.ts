@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/content";
 import { SERVICES } from "@/content/services";
+import { WORK_ITEMS } from "@/content/work";
 
 export const dynamic = "force-static";
 
@@ -10,6 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["", 1],
     ["services/", 0.9],
     ...SERVICES.map((s): [string, number] => [`services/${s.slug}/`, 0.9]),
+    ["work/", 0.9],
+    ...WORK_ITEMS.map((p): [string, number] => [`work/${p.slug}/`, 0.8]),
     ["methodology/", 0.8],
     ["studio/", 0.6],
     ["pricing/", 0.7],

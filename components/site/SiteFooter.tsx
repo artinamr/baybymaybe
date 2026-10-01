@@ -14,7 +14,6 @@ const EMAIL = CONTACT.email;
 // on demand, so the other pages never download it for a footer they only link from.
 const jumpToAudit = () => import("@/lib/scroll").then((m) => m.jumpToAudit());
 const jumpToTop = () => import("@/lib/scroll").then((m) => m.jumpToS(0));
-const jumpToWork = () => import("@/lib/scroll").then((m) => m.scrollToChapter("work"));
 const openStory = () => import("@/lib/story").then((m) => m.openStory());
 
 /**
@@ -100,13 +99,7 @@ export function SiteFooter({ home = false, form = true }: { home?: boolean; form
           </div>
           <div className="f-col">
             <p className="f-h">Studio</p>
-            {home ? (
-              <button type="button" onClick={jumpToWork}>
-                Work
-              </button>
-            ) : (
-              <a href={`${PAGES.home}#work`}>Work</a>
-            )}
+            <a href={PAGES.work}>Work</a>
             <a href={PAGES.methodology}>Methodology</a>
             <a href={PAGES.studio}>Studio</a>
             {home ? (

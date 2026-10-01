@@ -2,14 +2,16 @@
 
 import type { CSSProperties } from "react";
 import { PageSection, PageMarker } from "./Section";
-import { WORK } from "@/lib/content";
+import { PAGES } from "@/lib/content";
+import { WORK_ITEMS } from "@/content/work";
+import { service } from "@/content/services";
 
 /**
  * 03 · SELECTED WORK — the proof, as a sheet over the film (held on the AI's
- * last frame). An editorial stagger of three projects: a big cover, the
- * discipline, the name, the client, one line on what changed. Covers catch a
- * white glint on hover — the glass's own light (CLAUDE.md "glints").
- * PLACEHOLDER entries mark the slots the client's real projects fill.
+ * last frame). An editorial stagger of three projects from content/work.ts: a
+ * big cover, the discipline, the name, what it is, one line. Covers catch a
+ * white glint on hover — the glass's own light (CLAUDE.md "glints"). For now
+ * they are studio demonstrations, labelled so; each opens its case study.
  */
 export function Work() {
   return (
@@ -17,49 +19,45 @@ export function Work() {
       <header className="ps-head">
         <PageMarker of="work">Selected work</PageMarker>
         <h2 id="work-title" className="ps-title" data-rv>
-          Recent work.
+          Click through it.
         </h2>
         <p className="ps-lede" data-rv>
-          Websites, platforms and automations we have designed and engineered — and what changed for the business once they
-          were live.
+          A website, a platform and an automation — each a working demonstration you can use, with the brief, the decisions
+          and the limits written up.
         </p>
       </header>
       <div className="work-grid">
-        {WORK.map((w, i) => (
-          <article
-            key={w.id}
-            className={`work-card work-card-${i + 1}`}
-            data-rv
-            data-placeholder={w.placeholder || undefined}
-            style={{ transitionDelay: `${i * 90}ms` } as CSSProperties}
-          >
-            <a
-              className="work-media"
-              href={w.href ?? "#work"}
-              aria-label={`${w.name} — ${w.kind}`}
-              onClick={w.href ? undefined : (e) => e.preventDefault()}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- static export, pre-sized covers */}
-              <img src={w.cover} alt="" loading="eager" fetchPriority="low" decoding="async" />
+        {WORK_ITEMS.map((w, i) => (
+          <article key={w.slug} className={`work-card work-card-${i + 1}`} data-rv style={{ transitionDelay: `${i * 90}ms` } as CSSProperties}>
+            <a className="work-media" href={PAGES.project(w.slug)} tabIndex={-1} aria-hidden>
+              {/* The middle card is tall on a wide screen: it shows the phone view where there is one. */}
+              <picture>
+                {i === 1 && w.coverTall ? <source media="(min-width: 1100px)" srcSet={w.coverTall} /> : null}
+                <img src={w.cover} alt="" width={2400} height={1500} loading="eager" fetchPriority="low" decoding="async" />
+              </picture>
               <span className="work-shine" aria-hidden />
-              {w.placeholder ? <span className="work-ph mono">Placeholder</span> : null}
+              {w.kind === "demo" ? <span className="work-ph mono">Studio demonstration</span> : null}
             </a>
             <div className="work-body">
               <p className="work-kind mono">
-                <span>{String(i + 1).padStart(2, "0")}</span> {w.kind}
+                <span>{String(i + 1).padStart(2, "0")}</span> {w.services.map((sl) => service(sl)?.name).join(" · ")}
               </p>
-              <h3 className="work-name">{w.name}</h3>
-              <p className="work-client">{w.client}</p>
-              <p className="work-line">{w.line}</p>
-              {w.href ? (
-                <a className="text-link work-more" href={w.href}>
-                  Read the case study <span aria-hidden>→</span>
-                </a>
-              ) : null}
+              <h3 className="work-name">
+                <a href={PAGES.project(w.slug)}>{w.client}</a>
+              </h3>
+              <p className="work-client">{w.title}</p>
+              <a className="text-link work-more" href={PAGES.project(w.slug)}>
+                Open the case study <span aria-hidden>→</span>
+              </a>
             </div>
           </article>
         ))}
       </div>
+      <p className="work-all" data-rv>
+        <a className="text-link" href={PAGES.work}>
+          All the work <span aria-hidden>→</span>
+        </a>
+      </p>
     </PageSection>
   );
 }

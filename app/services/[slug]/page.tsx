@@ -4,7 +4,9 @@ import { QaList } from "@/components/site/QaList";
 import { QaLd, ServiceLd } from "@/components/site/JsonLd";
 import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
+import { WorkTitle } from "@/components/work/WorkTitle";
 import { SERVICES, service } from "@/content/services";
+import { project } from "@/content/work";
 
 // Only the three disciplines exist; anything else under /services/ is a 404.
 export const dynamicParams = false;
@@ -141,6 +143,28 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           ))}
         </ul>
       </section>
+
+      {s.work.map((slug) => project(slug)).filter(Boolean).map((p) => (
+        <section key={p!.slug} className="sp-block" aria-labelledby={`work-${p!.slug}`}>
+          <Kicker>See it working</Kicker>
+          <a className="wk-card cs-feature" href={PAGES.project(p!.slug)} data-rv>
+            <span className="wk-img">
+              {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
+              <img src={p!.cover} alt="" width={2400} height={1500} loading="lazy" decoding="async" />
+            </span>
+            <span className="wk-kind">
+              <b>{p!.client}</b>
+              <span>{p!.kind === "demo" ? "Studio demonstration" : "Client project"}</span>
+            </span>
+            <h2 id={`work-${p!.slug}`} className="wk-title">
+              <WorkTitle text={p!.title} />
+            </h2>
+            <span className="svc-go">
+              Open the case study <span aria-hidden>→</span>
+            </span>
+          </a>
+        </section>
+      ))}
 
       <section className="sp-block split" aria-labelledby="faq-h">
         <header className="split-head">

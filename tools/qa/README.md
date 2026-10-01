@@ -32,7 +32,8 @@ They drive the machine's real Chrome on the real GPU
 | `homecheck.mjs` | Home page loads, intro reaches `done`, `nd:*` marks, console errors and 4xx/5xx | `node homecheck.mjs <url> [width]` (`390` = phone emulation) |
 | `pages.mjs` | Full-page screenshots of sub-pages with every reveal forced on; page height in screens; errors | `node pages.mjs <base> <outDir> <w> <h> "/a/,/b/"` |
 | `kbd.mjs` | Keyboard walk: Tabs through a page, flags focus stops that are invisible, off-screen or covered | `node kbd.mjs <url> [tabs] [w] [h] [shotDir]` |
-| `overflow.mjs` | Can any page be dragged sideways at 320 / 375 / 414 / 768? | `node overflow.mjs <base>` (edit its page list) |
+| `overflow.mjs` | Can any page be dragged sideways at 320 / 375 / 414 / 768? Exits nonzero on overflow | `node overflow.mjs <base> [comma-separated paths]` |
+| `work.mjs` | Work filters; all three demo flows on desktop/phone; real touch swipes; reduced motion. Blocks network mutations | `node work.mjs <base> <scratch-output-directory>` |
 | `heroclash.mjs` | Hero on phones: description × actions × counter collisions at 8 phone sizes | `node heroclash.mjs <base> [WxH,WxH]` |
 | `ctafit.mjs` | Hero actions fit on narrow phones; document width equals viewport | `node ctafit.mjs <base>` |
 | `menu.mjs` | Home phone menu: inert when closed, focus in, Tab wrap, Escape, focus back | `node menu.mjs <base>/` |
