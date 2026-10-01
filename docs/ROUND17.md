@@ -47,7 +47,7 @@ days" promise stays until the client signs the copy off.
 - The footer loads `lib/scroll`/`lib/story` only on click (sub-pages no longer
   ship Lenis); `form={false}` on the contact page (its own form is #contact).
 
-## Increment 2 — COMPLETE (2026-10-01)
+## Increment 2 — LIVE (2026-10-01, commit e1e9aff)
 
 Work: three studio demonstrations as LIVE components in device frames (a size
 container — the same component is the desktop and the phone view):
@@ -74,7 +74,8 @@ not pollute the heading outline, touch illustration frames are clipped, and
 Portal respects reduced motion. Removed inactive buttons, nested main and
 unused placeholder covers. Corrected misleading demonstration claims and the
 Pages share-image prefix. Covers were refreshed after the demo fixes.
-See `docs/WORK-QA.md` for validation. The next unfinished increment is 3.
+Plain and Pages builds pass; deployment and live checks pass. See
+`docs/WORK-QA.md` for validation. The next unfinished increment is 3.
 
 Completed list for increment 2:
 1. Frame CSS in globals.css (above).

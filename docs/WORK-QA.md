@@ -60,11 +60,16 @@ failure, not a site fix.
 
 ## Deployment
 
-Before push: build again with `NEXT_PUBLIC_BASE_PATH=/baybymaybe`, verify case
-canonicals and OG/Twitter images use exactly one Pages prefix, and preserve the
-preview's `noindex`. After push: wait for the Pages workflow and run
-`node tools/qa/live.mjs`. The script asserts every route/status, Work metadata,
-sitemap membership and home load without submitting the form.
+The local Pages build with `NEXT_PUBLIC_BASE_PATH=/baybymaybe` passed. Built
+case canonicals and OG/Twitter images use exactly one Pages prefix; the preview
+retains `noindex`, and the sitemap includes every Work route.
+
+Code commit `e1e9aff` was pushed to master. [Pages workflow 36844393927](https://github.com/artinamr/baybymaybe/actions/runs/36844393927)
+completed successfully (build and deploy). `node tools/qa/live.mjs` passed:
+all 16 page routes return 200, the unknown route returns the branded 404,
+Work metadata and sitemap assertions pass, and home reaches intro `done`
+with no errors. The audit jump remains at 76 px below the header after the
+auto-framing window. Its screenshot was inspected. No form was submitted.
 
 ## Remaining in the overall plan
 

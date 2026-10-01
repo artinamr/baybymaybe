@@ -165,7 +165,10 @@ Build plain, serve `out/` on 3100, then:
 - `/services/websites/` etc.: the "See it working" card shows the right cover
   and opens the right case study.
 
-### 1.3 Ship it — local verification complete; deployment checked after push
+### 1.3 [x] Ship it
+
+Shipped as `e1e9aff`; Pages workflow `36844393927` passed. Live route,
+metadata, sitemap and home checks passed on 2026-10-01 (`docs/WORK-QA.md`).
 
 `npx tsc --noEmit -p .` → `npx eslint app components lib content` (0 errors)
 → `npm run build` → Pages build → `grep` the Pages build for
