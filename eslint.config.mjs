@@ -23,6 +23,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Headless-Chrome QA and image tools (WHAT-TO-DO.md, tools/qa/README.md) — not site code.
+    "tools/**",
   ]),
 ]);
 

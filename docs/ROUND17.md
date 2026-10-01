@@ -4,6 +4,9 @@ Started 2026-09-30 from a plan the user pasted ("don't solely rely on this,
 but if you like bits of it, let's start"). This file is the hand-off: what was
 decided, what is live, what is in progress, what is next.
 
+**The full, step-by-step plan for everything left is `WHAT-TO-DO.md` (repo
+root). The QA and image tools are in `tools/qa/` (see its README).**
+
 ## Decided
 
 **Adopted from the plan:** a family of pages — Services (+ one per
