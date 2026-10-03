@@ -4537,3 +4537,863 @@ html[data-story] .stone-cursor-dot {
     aspect-ratio: 16 / 10;
   }
 }
+
+/* ==========================================================================
+   THE BLOG — the index and the articles: the same paper, ink and indigo, a
+   reading measure of about 68 characters, and diagrams drawn in the page's
+   own type and hairlines (components/blog).
+   ========================================================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- An article's head ---------------------------------------------------- */
+.ar-head {
+  padding: calc(var(--vh) * 13) 0 calc(var(--vh) * 6);
+}
+.ar-topic {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo);
+  margin: 0 0 18px;
+}
+.ar-h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(5.4vw, 78px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0 0 28px;
+  max-width: 17em;
+  text-wrap: balance;
+}
+.ar-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  font-size: 14px;
+  color: color-mix(in oklab, var(--ink) 64%, transparent);
+  margin: 0 0 40px;
+}
+.ar-meta span + span::before {
+  content: "·";
+  margin: 0 12px;
+  opacity: 0.6;
+}
+.ar-meta a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.ar-meta a:hover {
+  color: var(--indigo);
+}
+/* The answer first: a quiet bordered box. */
+.ar-short {
+  max-width: 780px;
+  padding: 24px 30px 28px;
+  border: 1px solid var(--hair);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+.ar-short-h {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo);
+  margin: 0 0 10px;
+}
+.ar-short-b {
+  font-size: 19px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 86%, transparent);
+  margin: 0;
+}
+.ar-doc {
+  padding: calc(var(--vh) * 7) 0 calc(var(--vh) * 10);
+  border-top: 0;
+}
+
+/* ---- The words ------------------------------------------------------------ */
+.prose {
+  font-size: 18px;
+  line-height: 1.7;
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+}
+.prose > * {
+  max-width: 68ch;
+}
+.prose > .ar-fig,
+.prose > .ar-table-wrap {
+  max-width: none;
+}
+.prose p {
+  margin: 0 0 22px;
+}
+.prose > :where(ul, ol) {
+  margin: 0 0 26px;
+  padding-left: 22px;
+}
+.prose > :where(ul) {
+  list-style: disc;
+}
+.prose > :where(ol) {
+  list-style: decimal;
+}
+.prose > :where(ul, ol) > li {
+  margin: 0 0 10px;
+  padding-left: 4px;
+}
+.prose li::marker {
+  color: var(--indigo);
+}
+.prose strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+.prose a {
+  color: var(--indigo);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.ar-h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(3vw, 40px);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 64px 0 22px;
+  scroll-margin-top: calc(var(--nav-h) + 24px);
+  text-wrap: balance;
+}
+.ar-anchor {
+  margin-left: 12px;
+  font-family: var(--font-isans), sans-serif;
+  font-size: 0.5em;
+  color: var(--indigo);
+  text-decoration: none !important;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.ar-h2:hover .ar-anchor {
+  opacity: 0.7;
+}
+.ar-h3 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 38px 0 12px;
+}
+.prose sup {
+  line-height: 0;
+}
+.ar-cite a {
+  margin-left: 2px;
+  padding: 0 2px;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Figures: original diagrams on a lighter card. */
+.ar-fig {
+  margin: 40px 0 44px;
+}
+.ar-fig-body {
+  container-type: inline-size;
+  padding: 28px;
+  border: 1px solid var(--hair-soft);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+.ar-fig figcaption {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.ar-callout {
+  margin: 34px 0;
+  padding: 22px 26px;
+  border-left: 2px solid var(--indigo);
+  border-radius: 0 16px 16px 0;
+  background: color-mix(in oklab, var(--indigo) 5%, var(--paper));
+}
+.ar-callout-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0 0 8px !important;
+}
+.ar-callout-b p {
+  margin: 0;
+  font-size: 17px;
+}
+.ar-steps,
+.ar-check {
+  list-style: none;
+  padding: 0;
+  margin: 30px 0 34px;
+  border-top: 1px solid var(--hair);
+}
+.ar-steps li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  column-gap: 14px;
+  padding: 20px 0 18px;
+  border-bottom: 1px solid var(--hair);
+}
+.ar-steps-n {
+  grid-row: 1 / 3;
+  color: var(--indigo);
+  padding-top: 7px;
+}
+.ar-steps-t {
+  grid-column: 2;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0 0 6px !important;
+}
+.ar-steps-b {
+  grid-column: 2;
+}
+.ar-steps-b p {
+  margin: 0 0 8px;
+}
+.ar-steps-b p:last-child {
+  margin: 0;
+}
+.ar-check li {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.ar-tick,
+.dg-tick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+.ar-tick svg,
+.dg-tick svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ar-table-wrap {
+  margin: 30px 0 36px;
+  overflow-x: auto;
+  border: 1px solid var(--hair);
+  border-radius: 18px;
+}
+.ar-table-wrap:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 3px;
+}
+.ar-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.ar-table caption {
+  caption-side: top;
+  text-align: left;
+  padding: 16px 20px 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.ar-table th,
+.ar-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.ar-table thead th {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ar-table tbody th {
+  font-weight: 500;
+  color: var(--ink);
+}
+.ar-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+/* A workflow's four parts (the AI article). */
+.ar-parts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  margin: 16px 0 30px;
+  border-top: 1px solid var(--hair);
+}
+.ar-parts div {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.ar-parts dt {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo);
+  margin: 0 0 6px;
+}
+.ar-parts dd {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.ar-sources {
+  margin-top: 72px;
+  border-top: 1px solid var(--hair);
+}
+.ar-sources .ar-h2 {
+  margin-top: 34px;
+  font-size: min(2.4vw, 30px);
+}
+.ar-sources-note {
+  font-size: 15px;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.ar-sources ol {
+  margin: 0;
+  padding-left: 22px;
+  list-style: decimal;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.ar-sources li {
+  margin: 0 0 10px;
+  scroll-margin-top: calc(var(--nav-h) + 24px);
+}
+.ar-sources li:target {
+  background: color-mix(in oklab, var(--indigo) 9%, transparent);
+  border-radius: 6px;
+}
+.ar-sources li::marker {
+  color: var(--indigo);
+}
+/* Where to go next. */
+.ar-rel .svc-other-name {
+  padding-right: 26px;
+  font-size: 26px;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.ar-rel .svc-line {
+  font-size: 15px;
+}
+
+/* ---- Diagrams --------------------------------------------------------------- */
+.dg {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.dg p {
+  margin: 0;
+}
+.dg ol,
+.dg ul,
+ol.dg {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dg .dg-n {
+  color: var(--indigo);
+}
+/* A decision: questions down a spine; "no" steps out to the right. */
+.dg-tree-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 64px;
+  padding-bottom: 44px;
+}
+.dg-q {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 16px 18px;
+  border: 1px solid var(--ink);
+  border-radius: 14px;
+  background: var(--paper);
+  font-weight: 500;
+}
+.dg-no {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.dg-no::before {
+  content: "";
+  position: absolute;
+  left: -58px;
+  width: 50px;
+  top: 50%;
+  height: 1px;
+  background: color-mix(in oklab, var(--ink) 40%, transparent);
+}
+.dg-no::after {
+  content: "";
+  position: absolute;
+  left: -13px;
+  top: calc(50% - 4px);
+  border: 4px solid transparent;
+  border-left: 6px solid color-mix(in oklab, var(--ink) 55%, transparent);
+}
+.dg-branch,
+.dg-yes {
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 58%, transparent);
+}
+.dg-branch {
+  position: absolute;
+  left: -50px;
+  top: calc(50% - 22px);
+}
+.dg-out {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px dashed color-mix(in oklab, var(--ink) 30%, transparent);
+  border-radius: 14px;
+}
+.dg-out-t {
+  font-weight: 600;
+}
+.dg-out-b {
+  font-size: 14px;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  margin-top: 4px !important;
+}
+.dg-yes {
+  position: absolute;
+  left: 28px;
+  bottom: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+}
+.dg-yes::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in oklab, var(--ink) 40%, transparent);
+}
+.dg-end {
+  width: calc(50% - 32px);
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--indigo);
+  color: var(--paper);
+}
+.dg-end .dg-out-b {
+  color: color-mix(in oklab, var(--paper) 85%, transparent);
+}
+@container (max-width: 560px) {
+  .dg-tree-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
+  }
+  .dg-no {
+    padding-left: 28px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dg-no::before,
+  .dg-no::after {
+    display: none;
+  }
+  .dg-branch {
+    position: static;
+    margin-bottom: 4px;
+  }
+  .dg-end {
+    width: 100%;
+  }
+}
+/* A flow: steps left to right, top to bottom when narrow. */
+.dg-flow {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 30px;
+}
+.dg-step {
+  position: relative;
+  padding: 14px 14px 16px;
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  background: var(--paper);
+}
+.dg-step + .dg-step::before {
+  content: "→";
+  position: absolute;
+  left: -23px;
+  top: 14px;
+  color: var(--indigo);
+}
+.dg-step[data-person] {
+  border-color: var(--indigo);
+  background: color-mix(in oklab, var(--indigo) 7%, var(--paper));
+}
+.dg-step-t {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 4px !important;
+}
+.dg-step-b {
+  font-size: 14px;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+}
+.dg-alt {
+  margin-top: 10px !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+.dg-person svg {
+  display: block;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: var(--indigo);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+@container (max-width: 640px) {
+  .dg-flow {
+    grid-auto-flow: row;
+    gap: 26px;
+  }
+  .dg-step + .dg-step::before {
+    content: "↓";
+    left: 16px;
+    top: -24px;
+  }
+}
+/* Routes: a source, an arrow, where it goes. */
+.dg-routes-list {
+  display: grid;
+  gap: 16px;
+}
+.dg-route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1.25fr);
+  column-gap: 10px;
+  align-items: center;
+}
+.dg-node {
+  padding: 11px 14px;
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: var(--paper);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+.dg-from {
+  border-color: color-mix(in oklab, var(--ink) 70%, transparent);
+}
+.dg-to {
+  display: grid;
+  gap: 8px;
+}
+.dg-to .dg-node {
+  border-color: color-mix(in oklab, var(--indigo) 45%, transparent);
+}
+.dg-arrow svg {
+  display: block;
+  width: 100%;
+  height: 12px;
+  fill: none;
+  stroke: var(--indigo);
+  stroke-width: 1.5;
+}
+.dg-route-note {
+  grid-column: 3;
+  margin-top: 6px !important;
+  font-size: 13px;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.dg-failure {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed color-mix(in oklab, var(--ink) 25%, transparent);
+  font-size: 14px;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+}
+@container (max-width: 520px) {
+  .dg-route {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 6px;
+  }
+  .dg-arrow {
+    width: 30px;
+    margin-left: 10px;
+    transform: rotate(90deg);
+  }
+  .dg-route-note {
+    grid-column: 1;
+  }
+}
+/* Layers: a website as a stack of accounts. */
+.dg-layer {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1.4fr) minmax(0, 1fr);
+  column-gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  margin-bottom: -1px;
+  border: 1px solid var(--hair);
+  background: var(--paper);
+}
+.dg-layer:first-child {
+  border-radius: 14px 14px 0 0;
+}
+.dg-layer:last-child {
+  border-radius: 0 0 14px 14px;
+}
+.dg-layer-t {
+  font-weight: 600;
+}
+.dg-layer-b {
+  font-size: 14px;
+  color: color-mix(in oklab, var(--ink) 68%, transparent);
+  margin-top: 2px !important;
+}
+.dg-layer-yours {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+.dg-layer-yours .dg-tick {
+  width: 20px;
+  height: 20px;
+  margin-top: 0;
+}
+@container (max-width: 560px) {
+  .dg-layer {
+    grid-template-columns: 30px minmax(0, 1fr);
+    row-gap: 10px;
+  }
+  .dg-layer-yours {
+    grid-column: 2;
+  }
+}
+
+/* ---- The index ------------------------------------------------------------ */
+.bl-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  column-gap: 52px;
+  align-items: center;
+  padding-bottom: calc(var(--vh) * 10);
+}
+.bl-feature-img {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--hair-soft);
+  border-radius: 22px;
+  background: #eeede9;
+}
+.bl-feature-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 62% 50%;
+  transition: transform 1400ms var(--ease-expo);
+}
+.bl-feature:hover .bl-feature-img img {
+  transform: scale(1.03);
+}
+.bl-kind {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 58%, transparent);
+  margin: 0;
+}
+.bl-kind b {
+  font-weight: 500;
+  color: var(--indigo);
+}
+.bl-feature-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(3.4vw, 50px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  margin: 16px 0 18px;
+  text-wrap: balance;
+}
+.bl-feature-title a:hover,
+.bl-title a:hover {
+  color: var(--indigo);
+}
+.bl-desc {
+  font-size: 16px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  margin: 0;
+  max-width: 60ch;
+}
+.bl-feature-go {
+  margin: 22px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+.bl-feature-go span {
+  display: inline-block;
+  transition: transform 450ms var(--ease-expo);
+}
+.bl-feature:hover .bl-feature-go span {
+  transform: translateX(5px);
+}
+.bl-more {
+  padding-bottom: calc(var(--vh) * 12);
+}
+.bl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.bl-row {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr) 130px;
+  column-gap: 32px;
+  align-items: baseline;
+  padding: 30px 0 32px;
+  border-bottom: 1px solid var(--hair);
+}
+.bl-row[hidden] {
+  display: none;
+}
+.bl-date {
+  font-size: 13px;
+  color: color-mix(in oklab, var(--ink) 58%, transparent);
+  margin: 0;
+}
+.bl-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: min(2.4vw, 32px);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  text-wrap: balance;
+}
+.bl-row .bl-kind {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.bl-none {
+  padding: 30px 0;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+
+@media (max-width: 900px) {
+  .ar-h1 {
+    font-size: 9.6vw;
+  }
+  .ar-short {
+    padding: 20px 20px 22px;
+    border-radius: 18px;
+  }
+  .ar-short-b {
+    font-size: 17px;
+  }
+  .prose {
+    font-size: 17px;
+  }
+  .ar-h2 {
+    font-size: max(26px, 6.6vw);
+    margin-top: 52px;
+  }
+  .ar-sources .ar-h2 {
+    font-size: 26px;
+  }
+  /* The contents as a box at the top, one entry per line. */
+  .ar-toc {
+    display: grid;
+    gap: 9px;
+    padding: 20px 22px;
+    margin-bottom: 34px;
+    border: 1px solid var(--hair);
+    border-radius: 18px;
+  }
+  .ar-fig-body {
+    padding: 18px;
+  }
+  .ar-parts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bl-feature {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 24px;
+  }
+  .bl-feature-title {
+    font-size: 8.4vw;
+  }
+  .bl-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
+  }
+  .bl-title {
+    font-size: 26px;
+  }
+  .bl-row .bl-kind {
+    flex-direction: row;
+    align-items: baseline;
+  }
+}

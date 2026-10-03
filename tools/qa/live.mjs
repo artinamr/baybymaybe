@@ -6,10 +6,11 @@ import path from "node:path";
 
 const base = "https://artinamr.github.io/baybymaybe";
 const work = ["/work/", "/work/practice-website/", "/work/operations-portal/", "/work/enquiry-desk/"];
+const blog = ["/blog/", "/blog/redesign-or-improve/", "/blog/website-quote-checklist/", "/blog/when-you-need-a-client-portal/", "/blog/connect-website-crm-booking/", "/blog/ai-automation-workflows/", "/blog/after-launch-ownership/"];
 const paths = [
   "/", "/services/", "/services/websites/", "/services/platforms/", "/services/ai-automation/",
   ...work, "/methodology/", "/studio/", "/pricing/", "/contact/", "/faq/", "/privacy/", "/terms/",
-  "/sitemap.xml", "/robots.txt", "/og.jpg", "/icon.svg", "/apple-icon.png", "/favicon.ico", "/no-such-page/",
+  ...blog, "/blog/feed.xml", "/sitemap.xml", "/robots.txt", "/og.jpg", "/icon.svg", "/apple-icon.png", "/favicon.ico", "/no-such-page/",
 ];
 const failures = [];
 const check = (ok, message) => { if (!ok) failures.push(message); };
@@ -55,7 +56,7 @@ for (const p of paths) {
     }
     if (p === "/sitemap.xml") {
       const locations = [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-      for (const pagePath of work) check(locations.includes(base + pagePath), `sitemap.xml: missing ${base + pagePath}`);
+      for (const pagePath of [...work, ...blog]) check(locations.includes(base + pagePath), `sitemap.xml: missing ${base + pagePath}`);
     }
     console.log(r.status, p, t.split(";")[0], extra);
   } catch (error) {

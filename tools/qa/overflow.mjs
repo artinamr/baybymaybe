@@ -7,6 +7,7 @@ const defaults = [
   "/", "/services/", "/services/websites/", "/services/platforms/", "/services/ai-automation/",
   "/work/", "/work/practice-website/", "/work/operations-portal/", "/work/enquiry-desk/",
   "/methodology/", "/studio/", "/pricing/", "/contact/", "/faq/", "/privacy/", "/terms/", "/404.html",
+  "/blog/", "/blog/redesign-or-improve/", "/blog/website-quote-checklist/", "/blog/when-you-need-a-client-portal/", "/blog/connect-website-crm-booking/", "/blog/ai-automation-workflows/", "/blog/after-launch-ownership/",
 ];
 const paths = process.argv[3] ? process.argv[3].split(",").map((p) => p.trim()).filter(Boolean) : defaults;
 if (!paths.length) throw new Error("Pass at least one page path.");

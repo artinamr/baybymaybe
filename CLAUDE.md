@@ -68,8 +68,9 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
   (`FORM_ENDPOINT`; `NEXT_PUBLIC_FORM_ENDPOINT` overrides); if the post fails
   it offers the same message as a pre-written email (mailto).
 - The hero's primary action is the free audit; "Enter the story" is the
-  ghost button. Shared page nav: Services · Work · Methodology · Studio ·
-  Contact + Free audit. The home menu also lists the chapters on this page.
+  ghost button. Shared page nav: Services · Work · Methodology · Blog ·
+  Contact + Free audit (Studio lives in the footer — six links and the pill
+  don't fit at 1100–1280 px). The home menu also lists the chapters on this page.
 - **Copy is ours, not nerodyn.com's** (the client: "nerodyn.com isn't a good
   website to copy"). Plain, specific, no invented numbers. Awaiting sign-off.
 - **The hero's door to the story** is the stone itself: over it the pointer
@@ -155,8 +156,24 @@ better loading … make the whole website perfect").**
   reduced motion, blocking network mutations. Expanded `overflow.mjs` and
   `live.mjs` fail on route/metadata/overflow errors. Details: `docs/WORK-QA.md`.
   No film, stage, shader, scroll-clock or choreography code changed in part 2.
-- Remaining work is ordered in `WHAT-TO-DO.md`: five-stage Methodology next,
-  then the blog, home recomposition, quality pass and the domain move.
+- Part 3 (2026-10-04): Methodology in five stages (Discover, Define, Design,
+  Build, Launch and care — happens / you bring / we produce / when; `STAGES`
+  in lib/content.ts, also read by the home Process sheet); the home page
+  recomposed (see SITE SHAPE); the BLOG: `/blog/` (newest set large, the rest
+  by date, topic filter) and six researched articles. Registry
+  `content/blog/index.ts` (title, ≤155-char description, the short answer,
+  topic, dates, minutes, cover, related, sources; `status: "draft"` keeps one
+  out of everything); bodies are typed TSX in `content/blog/<slug>.tsx`
+  (`toc` + `Body`), mapped in `content/blog/bodies.ts`; parts in
+  `components/blog/` (Article layout, Prose: H2/Figure/Callout/Steps/Compare/
+  Check/Cite, Diagrams: DecisionTree/Flow/Routes/Layers — HTML, not images,
+  reflowing by container query). BlogPosting + breadcrumb JSON-LD, RSS at
+  `/blog/feed.xml`, covers are film stills (`public/blog/*.webp`, 2400×1100).
+  Every factual claim is cited to a page fetched and checked on 2026-10-04;
+  citations are numbered in reading order. The full-site check is in
+  `docs/CHECK-2026-10-04.md`.
+- Remaining work is ordered in `WHAT-TO-DO.md`: the quality pass (speed,
+  accessibility, phones, form failure paths) and the domain move.
 
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
@@ -534,7 +551,12 @@ way relative to each other.
    `?at=` landed ×3 too far on phones. `.hero-h1 { overflow: clip }` fixed it
    (round 17). Check with a phone-emulated trace of `innerWidth` from the
    first frame after touching anything in the hero.
-9. **Parallel sub-agent builds hit the account's session limit** within ~15 min
+9. **JSX text loses its leading space after an element when the text holds
+   an HTML entity and wraps.** `<strong>Roles.</strong> The NCSC&rsquo;s
+   principle…` (wrapped onto a second line) rendered "Roles.The NCSC’s" in
+   this toolchain. Write ’ “ ” literally in JSX text (the blog does), and
+   grep the export for `</strong>[A-Za-z]` after writing long copy.
+10. **Parallel sub-agent builds hit the account's session limit** within ~15 min
    (each agent re-reads the ~100KB of spec). Build sequentially in the main
    session when usage is tight; if agents are used, make them write files early.
 

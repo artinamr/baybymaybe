@@ -17,7 +17,9 @@ Increment 3 (five-stage Methodology) and increment 5 (the home page
 recomposed: FAQ sheet off, Process compact, doors from the film) are done,
 shipped together so the two pages never disagreed. Found and fixed on the
 way: a phone's first load was laid out zoomed out for ~2.5 s (CLAUDE.md
-gotcha 8). Continue at section 3: the blog.
+gotcha 8). Increment 4 (the blog) is done too: `/blog/`, six articles (1,500–1,800
+words each — substance, not padding; every fact cited to a checked source),
+RSS, Blog in the nav and footer. Continue at section 5: the quality pass.
 
 **Client update 2026-10-01:** remove the homepage's numbered chapter rail,
 its phone counter, and the lower-left chapter card. Keep them removed in
@@ -270,7 +272,7 @@ zoom-in reveal (`.ms-img`).
 
 ---
 
-## 3. Increment 4 — the blog
+## 3. [x] Increment 4 — the blog
 
 ### 3.1 Structure
 

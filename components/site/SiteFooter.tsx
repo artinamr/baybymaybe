@@ -102,6 +102,7 @@ export function SiteFooter({ home = false, form = true }: { home?: boolean; form
             <a href={PAGES.work}>Work</a>
             <a href={PAGES.methodology}>Methodology</a>
             <a href={PAGES.studio}>Studio</a>
+            <a href={PAGES.blog}>Blog</a>
             {home ? (
               <button type="button" onClick={openStory}>
                 The story

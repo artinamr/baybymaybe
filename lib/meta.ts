@@ -16,6 +16,7 @@ export function pageMeta({
   image,
   published,
   modified,
+  feed = false,
 }: {
   title: string;
   description: string;
@@ -24,13 +25,15 @@ export function pageMeta({
   image?: { url: string; width: number; height: number; alt: string };
   published?: string;
   modified?: string;
+  /** Announce the blog's feed (the blog's pages). */
+  feed?: boolean;
 }): Metadata {
   const full = `${title} — Nerodyn`;
   const img = image ?? CARD;
   return {
     title: full,
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: path, ...(feed ? { types: { "application/rss+xml": [{ url: "blog/feed.xml", title: "Nerodyn — Blog" }] } } : {}) },
     openGraph:
       type === "article"
         ? { type, siteName: "Nerodyn", title: full, description, url: path, images: [img], publishedTime: published, modifiedTime: modified, authors: ["Nerodyn"] }

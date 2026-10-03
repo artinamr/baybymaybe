@@ -1,4 +1,5 @@
-import { CONTACT, FAQ_ALL, SITE_URL, abs } from "@/lib/content";
+import { CONTACT, FAQ_ALL, PAGES, SITE_URL, abs } from "@/lib/content";
+import type { ArticleMeta } from "@/content/blog";
 
 /**
  * Structured data for search engines and AI assistants: who Nerodyn is and
@@ -96,6 +97,27 @@ export function FaqLd() {
           name: it.q,
           acceptedAnswer: { "@type": "Answer", text: it.a },
         })),
+      }}
+    />
+  );
+}
+
+/** An article, matching what the page shows: its headline, dates, author (the studio) and cover. */
+export function ArticleLd({ a }: { a: ArticleMeta }) {
+  return (
+    <Ld
+      data={{
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: a.title,
+        description: a.description,
+        datePublished: a.published,
+        dateModified: a.updated ?? a.published,
+        author: { "@type": "Organization", name: "Nerodyn", url: abs(PAGES.studio) },
+        publisher: { "@type": "Organization", "@id": `${SITE_URL}/#org`, name: "Nerodyn", logo: { "@type": "ImageObject", url: `${SITE_URL}/apple-icon.png` } },
+        image: abs(a.cover.src),
+        mainEntityOfPage: { "@type": "WebPage", "@id": abs(PAGES.article(a.slug)) },
+        inLanguage: "en-NZ",
       }}
     />
   );
