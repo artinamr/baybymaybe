@@ -39,8 +39,9 @@ They drive the machine's real Chrome on the real GPU
 | `menu.mjs` | Home phone menu: inert when closed, focus in, Tab wrap, Escape, focus back | `node menu.mjs <base>/` |
 | `qa3.mjs` | Sub-page phone menu; contact form (project needs a description, subjects, success); MOCKED endpoint | `node qa3.mjs <base>` (its third block hits the home page with interception — see note 5; `qa3b.mjs` does that part without it) |
 | `qa3b.mjs` | Home phone menu items, "On this page" jump, desktop nav hrefs | `node qa3b.mjs <base>` |
+| `formpaths.mjs` | The contact form's failure paths with a MOCKED endpoint: validation per field, project description, server 500, `success:false`, 15 s timeout, retry, honeypot | `node formpaths.mjs <base>` |
 | `qa2.mjs` | Round-16 home QA: audit jumps, validation, success, error + mailto; MOCKED endpoint. Its nav section predates the round-17 nav (page links) — update the labels before relying on it | `node qa2.mjs <base> <outDir>` |
-| `reduced.mjs` | `prefers-reduced-motion: reduce`: intro, jumps, wheel scroll, errors, screenshots | `node reduced.mjs <base>/` |
+| `reduced.mjs` | `prefers-reduced-motion: reduce`: intro, desktop audit jump and wheel, phone menu chapter jumps, errors; exits nonzero on failure | `node reduced.mjs <base>/ [shotDir]` |
 | `footglide.mjs` | Auto-framing near/inside the footer leaves a reader alone | `node footglide.mjs <base>/` |
 | `auditland.mjs` | "Free audit" lands `#contact` exactly under the nav (desktop, phone, tablet) | `node auditland.mjs <base>/` |
 | `anchor.mjs` | In-page anchor landings (FAQ topics, legal sections) | `node anchor.mjs "<url>|<id>" ...` |

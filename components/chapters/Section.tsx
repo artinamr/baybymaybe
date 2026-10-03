@@ -95,12 +95,12 @@ export function Line({ children, i = 0, className = "" }: { children: ReactNode;
  * Chapter marker: its number (the chapter's own, as the rail shows it), a
  * hairline, its name. Plain, small, sentence case.
  */
-export function Marker({ of, children, i = 0 }: { of: ChapterId; children: ReactNode; i?: number }) {
+export function Marker({ of, children, i = 0, as: As = "p" }: { of: ChapterId; children: ReactNode; i?: number; as?: "p" | "h2" }) {
   return (
-    <p className="marker rv-fade" style={{ "--i": i } as CSSProperties}>
+    <As className="marker rv-fade" style={{ "--i": i } as CSSProperties}>
       <span className="marker-n">{chapter(of).num}</span>
       <span className="marker-rule" aria-hidden />
       <span>{children}</span>
-    </p>
+    </As>
   );
 }

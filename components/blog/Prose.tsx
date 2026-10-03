@@ -36,10 +36,10 @@ export function Figure({ children, caption, wide = false }: { children: ReactNod
 /** A quiet aside: the one thing to remember, or the honest caveat. */
 export function Callout({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <aside className="ar-callout">
+    <div className="ar-callout" role="note">
       <p className="ar-callout-t">{title}</p>
       <div className="ar-callout-b">{children}</div>
-    </aside>
+    </div>
   );
 }
 
@@ -68,11 +68,15 @@ export function Compare({ caption, head, rows }: { caption: string; head: string
         <caption>{caption}</caption>
         <thead>
           <tr>
-            {head.map((h) => (
-              <th key={h} scope="col">
-                {h}
-              </th>
-            ))}
+            {head.map((h) =>
+              h ? (
+                <th key={h} scope="col">
+                  {h}
+                </th>
+              ) : (
+                <td key="corner" />
+              )
+            )}
           </tr>
         </thead>
         <tbody>

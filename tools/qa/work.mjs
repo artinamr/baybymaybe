@@ -354,7 +354,7 @@ try {
       assert.equal(await page.$eval(`${scope} [data-flash]`, (element) => getComputedStyle(element).animationName), "none", "Portal update flash should respect reduced motion");
       await go(page, "enquiry-desk");
       await click(page, "Next: Organised");
-      const animations = await page.$$eval(`${scope} aside[aria-label="What happened"] li`, (elements) => elements.map((element) => getComputedStyle(element).animationName));
+      const animations = await page.$$eval(`${scope} [aria-label="What happened"] li`, (elements) => elements.map((element) => getComputedStyle(element).animationName));
       assert(animations.length > 1 && animations.every((name) => name === "none"), "Enquiry log should respect reduced motion");
     } finally { await page.close(); }
   });

@@ -19,7 +19,11 @@ shipped together so the two pages never disagreed. Found and fixed on the
 way: a phone's first load was laid out zoomed out for ~2.5 s (CLAUDE.md
 gotcha 8). Increment 4 (the blog) is done too: `/blog/`, six articles (1,500–1,800
 words each — substance, not padding; every fact cited to a checked source),
-RSS, Blog in the nav and footer. Continue at section 5: the quality pass.
+RSS, Blog in the nav and footer. The quality pass (section 5) is done except
+the measured speed numbers (5.1) and the client's contrast decision (5.2,
+7.5): axe clean but for contrast, no-WebGL hydration fixed, the 320 px hero
+fixed, `lang="en-NZ"`, every form failure path tested
+(`tools/qa/formpaths.mjs`). Record in `docs/CHECK-2026-10-04.md`.
 
 **Client update 2026-10-01:** remove the homepage's numbered chapter rail,
 its phone counter, and the lower-left chapter card. Keep them removed in

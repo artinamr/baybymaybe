@@ -13,6 +13,10 @@ import { CHAPTERS, type ChapterId } from "@/lib/chapters";
 import { jumpToAudit, scrollToChapter } from "@/lib/scroll";
 
 const StageCanvas = dynamic(() => import("@/components/stage/StageCanvas"), { ssr: false });
+// Without WebGL the stage stays empty — through a client-only component all
+// the same, so the server's markup (a client-render boundary) is what the
+// browser hydrates in either case (a bare null here was a hydration error).
+const NoStage = dynamic(() => Promise.resolve(() => null), { ssr: false });
 
 const INTRO_DONE_MS = 3400;
 /** The loader waits for the stone, its room and its compiled shaders — never
@@ -202,7 +206,7 @@ export function Experience({ children }: { children: ReactNode }) {
       <div id="field" aria-hidden />
       <div id="field-card" aria-hidden />
       <div id="stage" aria-hidden>
-        {gl ? <StageCanvas /> : null}
+        {gl ? <StageCanvas /> : <NoStage />}
       </div>
       <div id="stage-frame" aria-hidden />
       {children}

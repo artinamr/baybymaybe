@@ -73,7 +73,7 @@ export function Build() {
   return (
     <Section id="build" labelledBy="build-title">
       <div className="col-left build" ref={ref} data-disc="0">
-        <Marker of="build">
+        <Marker of="build" as="h2">
           <span id="build-title">What we build</span>
         </Marker>
         <div className="disc-rail rv-fade" style={{ "--i": 1 } as CSSProperties} aria-hidden>

@@ -108,17 +108,17 @@ export function Portal({ view: initial = "team" }: { view?: PortalView }) {
 
   return (
     <div className={s.root}>
-      <aside className={s.side}>
+      <div className={s.side}>
         <p className={s.logo}>
           <b>K</b> Kerrow
         </p>
-        <nav className={s.sideNav} aria-label="Demo portal">
+        <div className={s.sideNav} role="group" aria-label="Demo portal sections">
           {(view === "team" ? ["Overview", "Jobs", "Schedule", "Clients", "Invoices"] : ["My jobs", "Quotes", "Invoices", "Messages"]).map((n, i) => (
             <span key={n} data-on={i === (view === "team" ? 1 : 0) || undefined}>
               {n}
             </span>
           ))}
-        </nav>
+        </div>
         <div className={s.switch} role="group" aria-label="Whose view">
           <button type="button" aria-pressed={view === "team"} onClick={() => setView("team")}>
             Team
@@ -134,7 +134,7 @@ export function Portal({ view: initial = "team" }: { view?: PortalView }) {
             Client
           </button>
         </div>
-      </aside>
+      </div>
 
       <div className={s.main}>
         {view === "team" ? (

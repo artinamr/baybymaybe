@@ -3658,6 +3658,18 @@ html[data-story] .stone-cursor-dot {
     display: inline;
   }
 }
+/* Under 360 px the hero's sentence ran to four lines and its last line hid
+   behind the actions: a point smaller it keeps to three, and the actions sit
+   a little lower. From 360 px up nothing changes. */
+@media (max-width: 359px) and (max-aspect-ratio: 5/6) {
+  .hero-desc {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .hero-ctas {
+    top: calc(var(--vh) * 89.5);
+  }
+}
 
 /* ==========================================================================
    THE SITE'S PAGES, CONTINUED (services, studio, investment, contact): the

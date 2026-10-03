@@ -134,7 +134,7 @@ export function EnquiryDesk({ start = "booking", startStep = 0 }: { start?: stri
 
   return (
     <div className={s.root}>
-      <aside className={s.inbox} aria-label="Sample enquiries">
+      <div className={s.inbox} role="group" aria-label="Sample enquiries">
         <p className={s.brand}>
           <b>P</b> Pellow <span>· Enquiry desk</span>
         </p>
@@ -149,7 +149,7 @@ export function EnquiryDesk({ start = "booking", startStep = 0 }: { start?: stri
             {x.urgent ? <span className={s.urgentTag}>Urgent</span> : null}
           </button>
         ))}
-      </aside>
+      </div>
 
       <div className={s.main}>
         <ol className={s.steps} aria-label="Progress">
@@ -290,7 +290,7 @@ export function EnquiryDesk({ start = "booking", startStep = 0 }: { start?: stri
         </div>
       </div>
 
-      <aside className={s.log} aria-label="What happened">
+      <div className={s.log} role="group" aria-label="What happened">
         <p className={s.label}>Log</p>
         <ol>
           {log.map((l, i) => (
@@ -300,7 +300,7 @@ export function EnquiryDesk({ start = "booking", startStep = 0 }: { start?: stri
             </li>
           ))}
         </ol>
-      </aside>
+      </div>
     </div>
   );
 }

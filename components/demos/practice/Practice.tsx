@@ -40,11 +40,11 @@ function Header({ go: goTo }: { go: (s: PracticeScreen) => void }) {
         <span className={s.brandName}>Tarn &amp; Wick</span>
         <span className={s.brandSub}>Accountants &amp; advisers</span>
       </button>
-      <nav className={s.nav} aria-label="Demo site">
+      <div className={s.nav} role="group" aria-label="Demo site menu">
         <button type="button" onClick={() => go("service")}>
           Services
         </button>
-      </nav>
+      </div>
       <button type="button" className={s.headCta} onClick={() => go("booking")}>
         Book a call
       </button>
@@ -178,7 +178,7 @@ function Service({ go }: { go: (s: PracticeScreen) => void }) {
               <li>Answers to questions as they come up</li>
             </ul>
           </div>
-          <aside className={s.dates}>
+          <div className={s.dates}>
             <p className={s.h2}>Your next dates</p>
             <p className={s.sample}>Sample dates</p>
             <ol>
@@ -195,7 +195,7 @@ function Service({ go }: { go: (s: PracticeScreen) => void }) {
             <button type="button" className={s.primary} onClick={() => go("booking")}>
               Talk it through
             </button>
-          </aside>
+          </div>
         </div>
       </section>
       <footer className={s.foot}>

@@ -57,7 +57,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     // data-intro="wait" is server-rendered so the first paint is already the
     // intro's opening frame (no flash of the finished page before JS runs).
-    <html lang="en" data-intro="wait" className={`${isans.variable} ${bodoni.variable} ${gmono.variable} antialiased`}>
+    <html lang="en-NZ" data-intro="wait" className={`${isans.variable} ${bodoni.variable} ${gmono.variable} antialiased`}>
       <body>
         <noscript>
           <style>{`#loader{display:none!important}[data-rv]{opacity:1!important;transform:none!important;filter:none!important}#stage,#field-card,#stage-frame,.intro,.intro-mask>*{clip-path:none!important;opacity:1!important;transform:none!important;animation:none!important}`}</style>
