@@ -7,7 +7,7 @@ import { jumpToAudit } from "@/lib/scroll";
 import { CONTACT } from "@/lib/content";
 
 /**
- * 07 · LET'S TALK — the film's end card. Down at the floor's own level the
+ * 06 · LET'S TALK — the film's end card. Down at the floor's own level the
  * stone stands whole over its reflection, in the middle of the frame, and the
  * two words stand on the floor line either side of it: "Let's ◆ talk." Under
  * it, one sentence and the way on (the audit form opens the footer).

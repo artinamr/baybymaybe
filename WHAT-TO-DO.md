@@ -9,7 +9,15 @@ Written 2026-10-01 at the end of the session that started round 17.
 `docs/ROUND17.md` has the short hand-off; this is the long version.
 
 **Progress 2026-10-01:** increment 2 (Work) is complete. Review fixes and QA
-are recorded in `docs/WORK-QA.md`. Continue at section 2: Methodology.
+are recorded in `docs/WORK-QA.md`.
+
+**Progress 2026-10-04:** a full check of the live and local site passed (every
+route, link crawl, all QA suites; details in `docs/CHECK-2026-10-04.md`).
+Increment 3 (five-stage Methodology) and increment 5 (the home page
+recomposed: FAQ sheet off, Process compact, doors from the film) are done,
+shipped together so the two pages never disagreed. Found and fixed on the
+way: a phone's first load was laid out zoomed out for ~2.5 s (CLAUDE.md
+gotcha 8). Continue at section 3: the blog.
 
 **Client update 2026-10-01:** remove the homepage's numbered chapter rail,
 its phone counter, and the lower-left chapter card. Keep them removed in
@@ -183,7 +191,7 @@ deploy → `node tools/qa/live.mjs` (add the work URLs to its list).
 
 ---
 
-## 2. Increment 3 — Methodology, in five stages
+## 2. [x] Increment 3 — Methodology, in five stages
 
 Rebuild `app/methodology/page.tsx` around five stages, each saying **what
 happens, what you bring, what we produce**, and when it typically happens.
@@ -421,7 +429,7 @@ phone screenshots read comfortably (measure: ~65–72 characters per line).
 
 ---
 
-## 4. Increment 5 — the home page, recomposed (the careful one)
+## 4. [x] Increment 5 — the home page, recomposed (the careful one)
 
 Goal: a home page people finish, with the film untouched. The film's own
 chapters are fixed at 14.5 screens (hero 100 vh + statement 180 + build 414

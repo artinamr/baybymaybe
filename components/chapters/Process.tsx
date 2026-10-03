@@ -2,15 +2,15 @@
 
 import { useEffect, useRef, type CSSProperties } from "react";
 import { PageSection, PageMarker } from "./Section";
-import { PAGES, PROCESS } from "@/lib/content";
+import { PAGES, STAGES } from "@/lib/content";
 import { onScrollFrame } from "@/lib/scroll";
 import { scroll } from "@/lib/stores";
 
 /**
- * 05 · HOW WE WORK — the methodology's four steps as a sheet over the film
- * (held on the closed colossus). One hairline runs through the four days and
- * fills with indigo as you read down the section; each day lights as the line
- * reaches it.
+ * 05 · HOW WE WORK — the methodology's five stages as a sheet over the film
+ * (held on the closed colossus), one line each (the same STAGES as the
+ * methodology page). One hairline runs through the five and fills with indigo
+ * as you read down the section; each stage lights as the line reaches it.
  */
 export function Process() {
   const rail = useRef<HTMLOListElement>(null);
@@ -38,7 +38,7 @@ export function Process() {
       if (v === last) return;
       last = v;
       el.style.setProperty("--line", v);
-      const lit = Math.min(PROCESS.length, Math.floor(p * PROCESS.length + 0.35));
+      const lit = Math.min(STAGES.length, Math.floor(p * STAGES.length + 0.35));
       if (el.dataset.lit !== String(lit)) el.dataset.lit = String(lit);
     });
     return () => {
@@ -63,19 +63,18 @@ export function Process() {
         <span className="steps-line" aria-hidden>
           <span />
         </span>
-        {PROCESS.map((s, i) => (
+        {STAGES.map((s, i) => (
           <li key={s.title} className="step" data-i={i} data-rv style={{ transitionDelay: `${i * 90}ms` } as CSSProperties}>
             <span className="step-dot" aria-hidden />
-            <p className="step-day mono">{s.day}</p>
+            <p className="step-day mono">{s.whenShort}</p>
             <h3 className="step-title">{s.title}</h3>
-            <p className="step-body">{s.body}</p>
-            <p className="step-note mono">{s.note}</p>
+            <p className="step-body">{s.line}</p>
           </li>
         ))}
       </ol>
       <p className="ps-foot" data-rv>
         <a className="text-link" href={PAGES.methodology}>
-          Read the full methodology <span aria-hidden>→</span>
+          Read the methodology <span aria-hidden>→</span>
         </a>
       </p>
     </PageSection>

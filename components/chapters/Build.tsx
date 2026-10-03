@@ -5,7 +5,7 @@ import { Section, Marker } from "./Section";
 import { onScrollFrame } from "@/lib/scroll";
 import { filmS } from "@/lib/chapters";
 import { DISCIPLINE_S } from "@/lib/choreo";
-import { DELIVERABLES } from "@/lib/content";
+import { DELIVERABLES, PAGES } from "@/lib/content";
 
 const DISCIPLINES = [
   {
@@ -14,6 +14,8 @@ const DISCIPLINES = [
     title: "Designed and engineered from a blank page.",
     body: "No templates, no page builders. A site written for your business — instant on every device, and built to turn visitors into enquiries.",
     list: DELIVERABLES.websites,
+    href: PAGES.service("websites"),
+    more: "Explore websites",
   },
   {
     n: "02",
@@ -21,6 +23,8 @@ const DISCIPLINES = [
     title: "The systems your business runs on.",
     body: "Client portals, booking, dashboards and internal tools — engineered to carry real load, and connected to the software you already use.",
     list: DELIVERABLES.platforms,
+    href: PAGES.service("platforms"),
+    more: "Explore platforms",
   },
   {
     n: "03",
@@ -28,6 +32,8 @@ const DISCIPLINES = [
     title: "AI that does the work.",
     body: "Assistants that answer, qualify and book on your site. Agents that file, draft and follow up inside your team's tools.",
     list: DELIVERABLES.ai,
+    href: PAGES.service("ai-automation"),
+    more: "Explore AI automation",
   },
 ];
 
@@ -36,7 +42,8 @@ const DISCIPLINES = [
  * exploded view and assemble (websites), rebuild the stone at monument scale
  * course by course (platforms), then become a working system around the
  * glowing core (AI automation). The three disciplines share one slot and
- * change with the 3D.
+ * change with the 3D; each ends in a quiet way on to its own page (only the
+ * one on screen takes the keyboard's focus).
  */
 export function Build() {
   const ref = useRef<HTMLDivElement>(null);
@@ -49,7 +56,10 @@ export function Build() {
       const S = filmS(pageS);
       const d = S < DISCIPLINE_S[1] ? 0 : S < DISCIPLINE_S[2] ? 1 : 2;
       const v = String(d);
-      if (el.dataset.disc !== v) el.dataset.disc = v;
+      if (el.dataset.disc !== v) {
+        el.dataset.disc = v;
+        el.querySelectorAll<HTMLAnchorElement>(".disc-more").forEach((a, i) => (a.tabIndex = i === d ? 0 : -1));
+      }
       const p = Math.max(0, Math.min(1, (S - DISCIPLINE_S[0]) / (DISCIPLINE_S[3] - DISCIPLINE_S[0]))).toFixed(4);
       // Straight onto the bar, only when it moves (a custom property on the
       // column restyled all of it, every frame).
@@ -96,6 +106,9 @@ export function Build() {
                   </li>
                 ))}
               </ul>
+              <a className="text-link disc-more" href={d.href} tabIndex={i === 0 ? 0 : -1}>
+                {d.more} <span aria-hidden>→</span>
+              </a>
             </article>
           ))}
         </div>

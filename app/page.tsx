@@ -6,7 +6,6 @@ import { Build } from "@/components/chapters/Build";
 import { Work } from "@/components/chapters/Work";
 import { Why } from "@/components/chapters/Why";
 import { Process } from "@/components/chapters/Process";
-import { Faq } from "@/components/chapters/Faq";
 import { Audit } from "@/components/chapters/Audit";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PageReveal } from "@/components/chapters/PageReveal";
@@ -18,7 +17,7 @@ export const metadata = { alternates: { canonical: "./" } };
 
 /**
  * The home page: the film's scenes (hero, statement, what we build, why,
- * let's talk) with the page's plain sections (work, how we work, questions)
+ * let's talk) with the page's plain sections (work, how we work)
  * sliding over it between them — lib/chapters.ts.
  */
 export default function Home() {
@@ -32,7 +31,6 @@ export default function Home() {
         <Work />
         <Why />
         <Process />
-        <Faq />
         <Audit />
       </main>
       <SiteFooter home />

@@ -5,6 +5,7 @@ import { Section, Marker, Line } from "./Section";
 import { onScrollFrame } from "@/lib/scroll";
 import { filmS } from "@/lib/chapters";
 import { WHY_S } from "@/lib/choreo";
+import { PAGES } from "@/lib/content";
 
 const CLAIMS = [
   {
@@ -61,6 +62,16 @@ function Words({ inverted = false }: { inverted?: boolean }) {
             </article>
           ))}
         </div>
+        {/* The paper copy is a picture of the words: no second link for the keyboard or a screen reader. */}
+        {inverted ? (
+          <span className="text-link why-more">
+            How we&rsquo;re set up <span aria-hidden>→</span>
+          </span>
+        ) : (
+          <a className="text-link why-more" href={PAGES.studio}>
+            How we&rsquo;re set up <span aria-hidden>→</span>
+          </a>
+        )}
       </div>
     </>
   );

@@ -31,11 +31,15 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
 "don't lose this 3D world … don't skip the animations we built").**
 - **Home = the film's five scenes with the page's plain sections between
   them** (`lib/chapters.ts`): potential (hero) · statement · build ("What we
-  build" — now with what each discipline delivers) · **work** (page: selected
-  work, three working studio demonstrations) · why · **process** (page: how we work,
-  the four days) · **faq** (page: straight answers) · audit ("Let's talk." +
-  the audit FORM) · then the **site footer** (the page's last sheet: a closing
-  line, the address, every link, the name signed across the bottom).
+  build" — what each discipline delivers, and a quiet "Explore … →" to its
+  service page) · **work** (page: selected work, three working studio
+  demonstrations) · why (+ "How we're set up →" to /studio/) · **process**
+  (page: how we work — the methodology's five stages on one line, one sheet)
+  · audit ("Let's talk." + the audit FORM) · then the **site footer** (the
+  page's last sheet: a closing line, the address, every link, the name signed
+  across the bottom). The questions sheet left the home page in round 17
+  (they live on /faq/); "Let's talk" is chapter 06. ~18 screens before the
+  footer at 1440×900 (measured 17.98; was 19.63).
 - **TWO CLOCKS.** Page S = scrollY / vh; FILM TIME F runs the 3D (every key in
   lib/choreo.ts is film time and did not move). Film chapters run F 1:1 with
   the scroll; a PAGE section is a sheet of paper (z 5, opaque; a real card
@@ -55,7 +59,8 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
 - **Homepage controls (client request, 2026-10-01):** the numbered chapter
   rail, its phone counter, and the lower-left chapter card are removed.
   Keep them removed. The phone menu's "On this page" chapter jumps remain.
-- **Content lives in `lib/content.ts`** (PROCESS, FAQ, contact),
+- **Content lives in `lib/content.ts`** (STAGES — the methodology page and
+  the home Process sheet read the same five — FAQ, contact),
   `content/services.ts` (disciplines) and `content/work.ts` (projects).
   Work covers are captures of the working demonstrations, with a portrait
   phone view for the middle home card. The audit form (round 16) lives at the top of the footer
@@ -180,7 +185,7 @@ nothing too visible". No cuts, no white-outs:
 | 7.05–9.3 | WHY: F7 — the open colossus (a wide hollow round the core, the glass toward the camera standing aside); the camera flies in and round the core, and out as it closes, the crown seating last |
 | 9.3– | LET'S TALK: down at the floor's own level, the colossus and its reflection; "Let's talk." stands on the horizon |
 
-Rest frames (auto-framing, `lib/scroll.ts`, FILM time): 0 · 1.62 · 3.72 · 4.9 · 5.45 · 5.94 · 7.62 · 8.2 · 9.3 · 10.75 · 11.5 — the film holds at 5.94 under Work and at 9.3 under How we work + Questions.
+Rest frames (auto-framing, `lib/scroll.ts`, FILM time): 0 · 1.62 · 3.72 · 4.9 · 5.45 · 5.94 · 7.62 · 8.2 · 9.3 · 10.75 · 11.5 — the film holds at 5.94 under Work and at 9.3 under How we work.
 The lighting TURNS with the scroll past the statement (`scene.environmentRotation`,
 PlaceEnv.tsx). The camera BANKS into its turns (a `roll` channel on the keys).
 
@@ -522,7 +527,14 @@ way relative to each other.
    `.next\dev\build` node procs, `rm -rf .next`, restart. Never run two
    `next dev` instances.
 7. **SVG `<polyline points>` / `<path d>` do not accept `%` units.**
-8. **Parallel sub-agent builds hit the account's session limit** within ~15 min
+8. **A phone's first load widens to the widest thing on the page.** Before
+   the layout script runs, anything wider than the screen (the hero's desktop
+   fallback sizes: POTENTIAL ≈ 1350 px) makes Chrome widen the layout viewport
+   — the hero was then laid out for 1356 px and shrank back over ~2.5 s, and
+   `?at=` landed ×3 too far on phones. `.hero-h1 { overflow: clip }` fixed it
+   (round 17). Check with a phone-emulated trace of `innerWidth` from the
+   first frame after touching anything in the hero.
+9. **Parallel sub-agent builds hit the account's session limit** within ~15 min
    (each agent re-reads the ~100KB of spec). Build sequentially in the main
    session when usage is tight; if agents are used, make them write files early.
 

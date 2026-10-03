@@ -21,34 +21,6 @@ export const DELIVERABLES: Record<"websites" | "platforms" | "ai", string[]> = {
   ai: ["Site assistants that answer and book", "Inbox, document and data work", "Agents inside your team's tools", "A person in the loop where it matters"],
 };
 
-/** How we work — the methodology page's four steps. */
-export const PROCESS = [
-  {
-    day: "Day 1",
-    title: "Discover",
-    body: "A thirty-minute call. You tell us what is broken; we map the fix — the business, the people, the systems.",
-    note: "Call · audit · scope",
-  },
-  {
-    day: "Day 3",
-    title: "Design",
-    body: "A clickable prototype you approve before a line of code is written. No surprises later.",
-    note: "Prototype · sign-off",
-  },
-  {
-    day: "Day 11",
-    title: "Build",
-    body: "Native code on solid infrastructure, with AI wired in where it removes real work. Tested on every device.",
-    note: "Engineering · AI · testing",
-  },
-  {
-    day: "Day 14",
-    title: "Live",
-    body: "A clean launch. You own the code, the domain and every asset — and we stay on to look after it.",
-    note: "Launch · handover · care",
-  },
-];
-
 /** Questions a buyer asks before the first call. (For the client's sign-off.) */
 export const FAQ = [
   {
@@ -150,35 +122,96 @@ export const FAQ_ALL: { group: string; items: { q: string; a: string }[] }[] = [
   },
 ];
 
-/** The methodology page's four stages, in depth. */
-export const STAGES = [
+export type Stage = {
+  /** Two-digit number. */
+  n: string;
+  title: string;
+  /** What the stage is for, in one line. */
+  line: string;
+  /** What happens in it. */
+  happens: string;
+  /** What you bring to it. */
+  bring: string[];
+  /** What we produce in it. */
+  produce: string[];
+  /** When it typically happens, for a website (`whenShort` on the home page's band). */
+  when: string;
+  whenShort: string;
+  image: string;
+  imageAlt: string;
+};
+
+/**
+ * The methodology: five stages, each with what happens, what you bring and
+ * what we produce. The days are typical for a website — a platform or an
+ * automation is planned stage by stage in its own quote. ("About fourteen
+ * days" is the client's to confirm.)
+ */
+export const STAGES: Stage[] = [
   {
-    day: "Day 1",
+    n: "01",
     title: "Discover",
-    lede: "A thirty-minute call. You tell us what is broken; we map the fix — the business, the people, the systems.",
-    points: ["The free audit of what you have", "What your customers need to find, and do", "A written scope, price and date"],
+    line: "Understand the business before touching the website.",
+    happens:
+      "A thirty-minute call and the free audit. We look at what you have the way your customers do, how enquiries reach you today, and what is slowing you down.",
+    bring: ["Half an hour for the call", "Access to the current site, its analytics and the tools you use", "A few real enquiries — good and bad"],
+    produce: ["The audit write-up: what works, what costs you enquiries, what we would build", "Your goals and constraints, written down"],
+    when: "Days 1–2",
+    whenShort: "Days 1–2",
     image: `${BASE}/method/discover.webp`,
+    imageAlt: "The Nerodyn stone whole: one piece of polished black glass.",
   },
   {
-    day: "Day 3",
+    n: "02",
+    title: "Define",
+    line: "Agree exactly what is being built.",
+    happens:
+      "We turn what we learned into a written scope — the pages and screens, the features, the integrations, who supplies which content, how success is judged — and a fixed quote with a launch date.",
+    bring: ["Decisions on what matters most", "The person who signs off", "Any dates that can't move"],
+    produce: ["The written scope", "A fixed quote and a launch date", "A plan of who does what, and when"],
+    when: "By day 3",
+    whenShort: "By day 3",
+    image: `${BASE}/method/define.webp`,
+    imageAlt: "The stone in pieces, each one finding its place.",
+  },
+  {
+    n: "03",
     title: "Design",
-    lede: "A clickable prototype of the real thing, with your words in it, that you approve before a line of code is written.",
-    points: ["Every page planned, piece by piece", "Designed for your business, never a theme", "Your sign-off before we build"],
+    line: "See it working before it is built.",
+    happens:
+      "The plan of every page, the words — written with you — and a clickable prototype with your real content in it, which you approve before a line of production code is written.",
+    bring: ["The facts only you know", "Feedback within the agreed windows", "Your brand files, if you have them"],
+    produce: ["A plan of every page", "The copy", "A clickable prototype you approve"],
+    when: "From day 3",
+    whenShort: "From day 3",
     image: `${BASE}/method/design.webp`,
+    imageAlt: "The stone opened into an exploded view, its crown lifted clear of the pieces below.",
   },
   {
-    day: "Day 11",
+    n: "04",
     title: "Build",
-    lede: "Native code on solid infrastructure, with AI wired in where it removes real work. Tested on every phone and screen.",
-    points: ["Engineered by the people who designed it", "Connected to the tools you already use", "Fast, accessible, found in search"],
+    line: "Engineered properly, and connected to your tools.",
+    happens:
+      "Production code, the editor your team will use, the integrations and automations, testing on real phones and screens, accessibility and speed checks — on a review link you can click through.",
+    bring: ["Access to the systems it connects to", "Test data, where it is needed", "Time to try it"],
+    produce: ["The working site or platform on a review link", "Its test results"],
+    when: "To day 11",
+    whenShort: "To day 11",
     image: `${BASE}/method/build.webp`,
+    imageAlt: "The pieces of the stone climbing in a spiral round its glowing core.",
   },
   {
-    day: "Day 14",
-    title: "Live",
-    lede: "A careful launch. You own the code, the domain and every asset — and we stay on to look after it.",
-    points: ["Everything handed over in your name", "Plain notes on how it all works", "Looked after, as much as you want"],
+    n: "05",
+    title: "Launch and care",
+    line: "Live, handed over in your name, and looked after.",
+    happens:
+      "The launch checklist — old addresses redirected, analytics and search set up, backups on — then the handover and training, and care for as long as you want it.",
+    bring: ["Domain and hosting access, in your name", "The people who will use it"],
+    produce: ["The live site", "Every account, the code and the content in your name", "Plain notes on how it all works"],
+    when: "Day 14, and after",
+    whenShort: "Day 14",
     image: `${BASE}/method/live.webp`,
+    imageAlt: "The core of the stone, full of indigo light, with the pieces drifting round it.",
   },
 ];
 

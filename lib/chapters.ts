@@ -9,7 +9,7 @@
  *   film chapters   the pinned scenes (hero, statement, what we build, why,
  *                   let's talk) — sized in exact multiples of --vh; film time
  *                   runs 1:1 with the scroll through them.
- *   page sections   ordinary content (selected work, how we work, questions)
+ *   page sections   ordinary content (selected work, how we work)
  *                   that scrolls up OVER the film like a sheet of paper. The
  *                   film HOLDS while one is on screen — from the last screen of
  *                   the scene before (the sheet rising over its closing frame)
@@ -21,7 +21,7 @@
  * film's clock never changes: film chapter F0s are fixed sums of film vh.
  */
 
-export type ChapterId = "potential" | "statement" | "build" | "work" | "why" | "process" | "faq" | "audit";
+export type ChapterId = "potential" | "statement" | "build" | "work" | "why" | "process" | "audit";
 export type ChapterKind = "film" | "page";
 
 export type ChapterDef = {
@@ -115,30 +115,21 @@ const RAW: Raw[] = [
     specimen: { name: "Why Nerodyn", line: "One team builds it. You own it." },
   },
   {
+    // The five stages on one line. (The questions live on /faq/.)
     id: "process",
     num: "05",
     label: "How we work",
     kind: "page",
-    vh: 150,
+    vh: 100,
     sticky: false,
     jumpF: 0,
     specimen: { name: "How we work", line: "From first call to live." },
   },
   {
-    id: "faq",
-    num: "06",
-    label: "Questions",
-    kind: "page",
-    vh: 120,
-    sticky: false,
-    jumpF: 0,
-    specimen: { name: "Questions", line: "Straight answers before you ask." },
-  },
-  {
     // F 9.3 → 11.5: down to the floor, and let's talk. (Its first screen is
     // the last sheet leaving: the film still held there.)
     id: "audit",
-    num: "07",
+    num: "06",
     label: "Let's talk",
     kind: "film",
     vh: 320,

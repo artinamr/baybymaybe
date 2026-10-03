@@ -507,6 +507,11 @@ html[data-intro-skip] .intro-mask > span {
   inset: 0;
   font-weight: inherit;
   pointer-events: none;
+  /* Before the layout script has run the lines carry their desktop fallback
+     sizes (POTENTIAL ≈ 1350 px wide): unclipped, that widened a phone's
+     layout viewport on load and the hero was laid out for the wrong width
+     for ~2.5 s. Nothing drawn here ever lies outside the hero. */
+  overflow: clip;
 }
 .hl {
   position: absolute;
@@ -710,6 +715,28 @@ html[data-intro-skip] .intro-mask > span {
 [data-disc="2"] .disc:not([data-i="2"]) {
   pointer-events: none;
 }
+/* The way on to the discipline's own page: quiet, after its list. */
+.disc-more {
+  margin-top: 2px;
+  color: var(--indigo);
+  transition:
+    opacity 900ms var(--ease-expo) 640ms,
+    transform 1100ms var(--ease-expo) 640ms,
+    filter 900ms ease 640ms;
+}
+[data-disc="0"] .disc:not([data-i="0"]) .disc-more,
+[data-disc="1"] .disc:not([data-i="1"]) .disc-more,
+[data-disc="2"] .disc:not([data-i="2"]) .disc-more,
+.chapter[data-state="before"] .disc-more {
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(10px);
+  transition-delay: 0ms;
+  transition-duration: 450ms;
+  /* The three share one slot: a hidden one must never take the click
+     (links in .front are otherwise always clickable). */
+  pointer-events: none;
+}
 
 /* ==========================================================================
    01 · THE STUDIO — the statement, read through the stone
@@ -904,6 +931,18 @@ html[data-intro-skip] .intro-mask > span {
 [data-claim="1"] .claim:not([data-i="1"]),
 [data-claim="2"] .claim:not([data-i="2"]) {
   pointer-events: none;
+}
+/* Under the claims: the way on to how the studio is set up. */
+.why-more {
+  margin-top: calc(var(--vh) * 2.4);
+}
+/* The shortest phones have no room under the film for a second way on (the
+   menu still reaches every page): the chapter keeps its words clear. */
+@media (max-width: 767px) and (max-height: 600px) {
+  .disc-more,
+  .why-more {
+    display: none;
+  }
 }
 
 /* ==========================================================================
@@ -2045,7 +2084,7 @@ html[data-stone-hover] {
   object-fit: cover;
 }
 
-/* The four stages, each set against a frame of the film. */
+/* The five stages, each set against a frame of the film. */
 .ms {
   padding: calc(var(--vh) * 14) 0 calc(var(--vh) * 6);
 }
@@ -2054,10 +2093,13 @@ html[data-stone-hover] {
 }
 .ms-stage {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  column-gap: 7vw;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: 6vw;
   align-items: center;
   padding: calc(var(--vh) * 6) 0;
+}
+.ms-stage[data-flip] {
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
 }
 .ms-stage[data-flip] .ms-img {
   order: 2;
@@ -2102,12 +2144,33 @@ html[data-stone-hover] {
   letter-spacing: -0.035em;
   margin: 0 0 24px;
 }
+.ms-line {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  color: color-mix(in oklab, var(--ink) 90%, transparent);
+  margin: 0 0 14px;
+  max-width: 36ch;
+}
 .ms-lede {
-  font-size: 18px;
-  line-height: 1.6;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-  margin: 0 0 30px;
-  max-width: 42ch;
+  font-size: 17px;
+  line-height: 1.65;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  margin: 0 0 34px;
+  max-width: 52ch;
+}
+/* What you bring · what we produce: two short lists side by side. */
+.ms-lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+}
+.ms-list-h {
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 60%, transparent);
+  margin: 0 0 12px;
 }
 .ms-points {
   list-style: none;
@@ -2120,19 +2183,34 @@ html[data-stone-hover] {
   display: flex;
   gap: 14px;
   align-items: baseline;
-  padding: 14px 0;
+  padding: 13px 0;
   border-bottom: 1px solid var(--hair);
   font-size: 15px;
+  line-height: 1.45;
   color: color-mix(in oklab, var(--ink) 80%, transparent);
 }
+/* What you bring: a ring; what we produce: a filled dot. */
 .ms-points li::before {
   content: "";
   flex: none;
-  width: 6px;
-  height: 6px;
+  box-sizing: border-box;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--indigo);
+  border: 1.5px solid var(--indigo);
   transform: translateY(-2px);
+}
+.ms-points[data-produce] li::before {
+  background: var(--indigo);
+}
+.ms-note {
+  font-size: 15px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+  margin: calc(var(--vh) * 4) 0 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--hair-soft);
+  max-width: 64ch;
 }
 
 /* Principles. */
@@ -2341,6 +2419,16 @@ html[data-stone-hover] {
   }
   .ms-stage[data-flip] .ms-img {
     order: 0;
+  }
+  .ms-lists {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+  .ms-line {
+    font-size: 18px;
+  }
+  .ms-lede {
+    font-size: 16px;
   }
   .pr-grid {
     grid-template-columns: 1fr 1fr;
@@ -2830,13 +2918,13 @@ html[data-nowebgl] .pot-fill {
   margin: 6px 0 0;
 }
 
-/* ---- 05 · How we work: four days on one line -------------------------------- */
+/* ---- 05 · How we work: five stages on one line ------------------------------- */
 
 .steps {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 36px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 32px;
   margin: 0;
   padding: 46px 0 0;
   list-style: none;
@@ -2879,7 +2967,8 @@ html[data-nowebgl] .pot-fill {
 .steps[data-lit="1"] .step[data-i="0"] .step-dot,
 .steps[data-lit="2"] .step:is([data-i="0"], [data-i="1"]) .step-dot,
 .steps[data-lit="3"] .step:is([data-i="0"], [data-i="1"], [data-i="2"]) .step-dot,
-.steps[data-lit="4"] .step .step-dot {
+.steps[data-lit="4"] .step:not([data-i="4"]) .step-dot,
+.steps[data-lit="5"] .step .step-dot {
   background: var(--indigo);
   border-color: var(--indigo);
   box-shadow: 0 0 0 6px color-mix(in oklab, var(--indigo) 13%, transparent);
@@ -2892,46 +2981,21 @@ html[data-nowebgl] .pot-fill {
 .step-title {
   font-family: var(--display);
   font-weight: 400;
-  font-size: min(3.3vw, 48px);
+  font-size: min(2.7vw, 40px);
   line-height: 1;
   letter-spacing: -0.024em;
   margin: 0;
 }
 .step-body {
   font-size: 16px;
-  line-height: 1.6;
-  max-width: 30ch;
+  line-height: 1.55;
+  max-width: 26ch;
   color: color-mix(in oklab, var(--ink) 74%, transparent);
   margin: 0;
 }
-.step-note {
-  font-size: 11px;
-  color: color-mix(in oklab, var(--ink) 45%, transparent);
-  margin: 4px 0 0;
-}
 
-/* ---- 06 · Questions: the answers open in place ------------------------------ */
+/* ---- The questions' answers open in place (QaList: /faq/, services, pricing) - */
 
-.faq-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  column-gap: 6vw;
-  align-items: start;
-}
-.faq-head {
-  position: sticky;
-  top: calc(var(--vh) * 14);
-  margin-bottom: 0;
-}
-.faq .ps-title {
-  font-size: min(5.2vw, calc(var(--vh) * 8.6));
-}
-.faq-ask {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  margin: 0;
-}
 .qa-list {
   margin: 0;
   padding: 0;
@@ -3242,7 +3306,7 @@ html[data-nowebgl] .pot-fill {
     margin-top: 0;
   }
   .steps {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     row-gap: calc(var(--vh) * 6);
   }
   .steps-line {
@@ -3250,13 +3314,6 @@ html[data-nowebgl] .pot-fill {
   }
   .step-dot {
     top: -28px;
-  }
-  .faq-grid {
-    grid-template-columns: 1fr;
-    row-gap: calc(var(--vh) * 6);
-  }
-  .faq-head {
-    position: static;
   }
 }
 
@@ -3291,11 +3348,38 @@ html[data-nowebgl] .pot-fill {
   .work-name {
     font-size: 30px;
   }
+  /* Phones: the five down one hairline that fills as you read. */
   .steps {
     grid-template-columns: 1fr;
+    row-gap: 28px;
+    padding: 0 0 0 38px;
+  }
+  .steps-line {
+    display: block;
+    left: 7px;
+    right: auto;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    height: auto;
+  }
+  .steps-line > span {
+    transform: scaleY(var(--line, 0));
+    transform-origin: top;
+  }
+  .step {
+    gap: 8px;
+  }
+  .step-dot {
+    top: 1px;
+    left: -38px;
   }
   .step-title {
-    font-size: 36px;
+    font-size: 30px;
+  }
+  .step-body {
+    font-size: 15px;
+    max-width: none;
   }
   .qa-q {
     font-size: 17px;
