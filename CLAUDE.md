@@ -251,6 +251,13 @@ interactive footer … don't do the work on the home page and the works page").*
   fictional brand colours remain); keyboard focus reveals a `[data-rv]`
   element at once (`SubReveal` focusin); the form says what happens to your
   details, with a link to the privacy policy.
+- **Speed** (live, slow-4G profile): services 2.6 s, article 3.0 s, contact 2.1 s
+  LCP, CLS 0. `[data-rv]` STARTS AT OPACITY 0.01, NOT 0: Chrome ignores text
+  at opacity 0 for LCP, so a title rising from 0 was timed at the end of its
+  1.1 s rise. Never set it back to 0. Banners load eager but at normal
+  priority (`<Photo eager>`); `priority` (high) only for a picture that is
+  itself the largest thing in the first screen. Numbers in
+  docs/CHECK-2026-10-04.md.
 - Home and work pages: text-only edits (em dashes), the new footer, head
   data. The 3D stage chunk is byte-identical (`1duwm8q1dv2sg.js`).
 
