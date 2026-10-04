@@ -69,7 +69,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
       </section>
 
       <figure className="sp-banner svc-banner" data-rv>
-        <Photo p={s.photo} sizes={BANNER_SIZES} priority />
+        <Photo p={s.photo} sizes={BANNER_SIZES} eager />
       </figure>
 
       <section className="sp-block split" aria-labelledby="signs-h">

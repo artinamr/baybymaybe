@@ -48,7 +48,7 @@ export default function Services() {
         {SERVICES.map((s, i) => (
           <a key={s.slug} className="svc-card" href={PAGES.service(s.slug)} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
             <span className="svc-img">
-              <Photo p={s.cardPhoto} sizes="(min-width: 900px) 30vw, 92vw" priority={i === 0} decorative />
+              <Photo p={s.cardPhoto} sizes="(min-width: 900px) 30vw, 92vw" eager={i === 0} decorative />
             </span>
             <span className="svc-meta">
               <span className="svc-n mono">{s.n}</span>

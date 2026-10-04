@@ -66,7 +66,7 @@ export default function Methodology() {
       </nav>
 
       <figure className="sp-banner" data-rv>
-        <Photo p={PHOTOS["method-hero"]} sizes={BANNER_SIZES} priority />
+        <Photo p={PHOTOS["method-hero"]} sizes={BANNER_SIZES} eager />
       </figure>
 
       <section className="ms" aria-labelledby="ms-title">

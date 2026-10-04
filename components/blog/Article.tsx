@@ -71,7 +71,7 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
         </header>
 
         <figure className="sp-banner ar-cover" data-rv>
-          <Photo p={a.cover} sizes={BANNER_SIZES} priority />
+          <Photo p={a.cover} sizes={BANNER_SIZES} eager />
         </figure>
 
         <div className="doc ar-doc">

@@ -3,19 +3,24 @@ import type { Photo as PhotoData } from "@/content/images";
 /**
  * A photograph from content/images.ts: both sizes offered (the browser takes
  * the one the screen needs), its own width and height (no layout shift) and
- * its alt text. `sizes` says how wide it is drawn; `priority` is for the one
- * picture in the first screen (the page's banner).
+ * its alt text. `sizes` says how wide it is drawn. `eager` for a picture that
+ * may show in the first screen (a banner under the title): it loads at once
+ * but at normal priority, so it never holds up the stylesheet and the title,
+ * which are what the reader (and LCP) waits for. `priority` (high) only for a
+ * picture that is itself the largest thing in the first screen.
  */
 export function Photo({
   p,
   sizes,
   priority = false,
+  eager = false,
   decorative = false,
   className,
 }: {
   p: PhotoData;
   sizes: string;
   priority?: boolean;
+  eager?: boolean;
   /** Next to a title that already says it all (cards): empty alt. */
   decorative?: boolean;
   className?: string;
@@ -29,7 +34,7 @@ export function Photo({
       width={p.width}
       height={p.height}
       alt={decorative ? "" : p.alt}
-      loading={priority ? "eager" : "lazy"}
+      loading={priority || eager ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : undefined}
       decoding="async"
       className={className}

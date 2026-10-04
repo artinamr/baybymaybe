@@ -38,7 +38,7 @@ export default function Blog() {
       {first ? (
         <article className="bl-feature" data-rv aria-labelledby="bl-feature-title">
           <a className="bl-feature-img" href={PAGES.article(first.slug)} tabIndex={-1} aria-hidden>
-            <Photo p={first.cover} sizes="(min-width: 1000px) 58vw, 92vw" priority decorative />
+            <Photo p={first.cover} sizes="(min-width: 1000px) 58vw, 92vw" eager decorative />
           </a>
           <div className="bl-feature-text">
             <p className="bl-kind">
