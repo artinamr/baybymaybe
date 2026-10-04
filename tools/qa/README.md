@@ -46,6 +46,7 @@ They drive the machine's real Chrome on the real GPU
 | `auditland.mjs` | "Free audit" lands `#contact` exactly under the nav (desktop, phone, tablet) | `node auditland.mjs <base>/` |
 | `anchor.mjs` | In-page anchor landings (FAQ topics, legal sections) | `node anchor.mjs "<url>|<id>" ...` |
 | `hitcheck.mjs` | Footer links actually receive clicks (nothing overlaps them) | `node hitcheck.mjs <base>/` |
+| `vitals.mjs` | LCP (+FCP), CLS and INP (longest tap) per page under Lighthouse-like mobile throttling (150 ms, 1.6 Mbps, CPU ×4), cold profile per run; `ONLY=/a/,/b/` limits pages | `node vitals.mjs <base> [runs]` |
 | `live.mjs` | The deployed site: every page's status, 404, head tags, home load, markers, errors (read-only) | `node live.mjs` |
 
 ## Film, performance and pixel identity

@@ -309,6 +309,10 @@ html[data-intro="run"] #stage { animation: stage-open 1100ms var(--ease-expo) bo
 html[data-intro="run"] #field-card { animation: card-tint 1100ms var(--ease-expo) both; }
 html[data-intro="run"] #stage-frame { animation: frame-open 1100ms var(--ease-expo) both; }
 
+/* While the opaque loader covers it, the hero is not laid out for show: its
+   lines are placed by the layout script, and on a slow device that move
+   (unseen, under the loader) still counted as layout shift. */
+html[data-intro="wait"] [data-chapter="potential"] { visibility: hidden; }
 html[data-intro="wait"] .intro { opacity: 0; }
 html[data-intro="wait"] .intro-mask > span { transform: translateY(135%) skewY(3deg); }
 html[data-intro="wait"] .intro-rule { transform: scaleX(0); }

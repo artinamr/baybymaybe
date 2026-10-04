@@ -18,7 +18,7 @@ const bodoni = Bodoni_Moda({
   variable: "--font-bodoni",
   subsets: ["latin"],
   axes: ["opsz"],
-  style: ["normal", "italic"],
+  style: ["normal"],
   display: "swap",
 });
 
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en-NZ" data-intro="wait" className={`${isans.variable} ${bodoni.variable} ${gmono.variable} antialiased`}>
       <body>
         <noscript>
-          <style>{`#loader{display:none!important}[data-rv]{opacity:1!important;transform:none!important;filter:none!important}#stage,#field-card,#stage-frame,.intro,.intro-mask>*{clip-path:none!important;opacity:1!important;transform:none!important;animation:none!important}`}</style>
+          <style>{`#loader{display:none!important}[data-rv]{opacity:1!important;transform:none!important;filter:none!important}#stage,#field-card,#stage-frame,.intro,.intro-mask>*{clip-path:none!important;opacity:1!important;transform:none!important;animation:none!important}[data-chapter=potential]{visibility:visible!important}`}</style>
         </noscript>
         {/* The .ico for Safari and crawlers (Next drops its own favicon link
             under a basePath); sized 32x32 so browsers that read SVG keep
@@ -70,6 +70,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           Skip to content
         </a>
         {children}
+        {/* The first screen's reveal starts as soon as the page is parsed, not
+            when its scripts arrive (on a slow phone that was seconds of a blank
+            hero): whatever is already in view rises in now; the rest waits for
+            the scroll as before (SubReveal, PageReveal). Two frames later, so
+            the hidden start has been painted and the rise plays as before (a
+            change before the first frame shows at once, without transition). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){var h=innerHeight,a=[];document.querySelectorAll('[data-rv]').forEach(function(e){var r=e.getBoundingClientRect();if(r.height&&r.top<h*.9&&r.bottom>0)a.push(e)});a.length&&requestAnimationFrame(function(){requestAnimationFrame(function(){a.forEach(function(e){e.setAttribute('data-in','1')})})})})()",
+          }}
+        />
       </body>
     </html>
   );

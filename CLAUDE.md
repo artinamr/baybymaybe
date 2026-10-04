@@ -172,8 +172,20 @@ better loading … make the whole website perfect").**
   Every factual claim is cited to a page fetched and checked on 2026-10-04;
   citations are numbered in reading order. The full-site check is in
   `docs/CHECK-2026-10-04.md`.
-- Remaining work is ordered in `WHAT-TO-DO.md`: the quality pass (speed,
-  accessibility, phones, form failure paths) and the domain move.
+- Quality pass (2026-10-04): axe clean except muted-text contrast (the
+  client's call); no-WebGL hydration fixed (`NoStage`); the <360 px hero;
+  `lang="en-NZ"`; form failure paths (`tools/qa/formpaths.mjs`). Speed:
+  sub-pages' first-screen `[data-rv]` reveal no longer waits for React — an
+  inline script at the end of `<body>` (app/layout.tsx) marks what is in
+  view two frames after parse (one frame earlier and the transition never
+  plays); the hero is `visibility: hidden` while `data-intro="wait"` (under
+  the opaque loader its lines' placement counted as layout shift); the
+  unused Bodoni italic is gone (three font preloads, not four). Measure with
+  `tools/qa/vitals.mjs` (Lighthouse-like mobile throttling, cold cache).
+  Home LCP is the loader by design and its remaining CLS is the intro
+  frame animating `top/left` — both left for the client (WHAT-TO-DO §7).
+- Remaining work is ordered in `WHAT-TO-DO.md`: the client's decisions and
+  the domain move.
 
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
