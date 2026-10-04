@@ -2182,9 +2182,13 @@ html[data-stone-hover] {
   margin: 0 auto;
 }
 
-/* Rises into view once (SubReveal here; the home page's sheets use the same). */
+/* Rises into view once (SubReveal here; the home page's sheets use the same).
+   It starts at 1% opacity, not 0: blurred and at 1% it is as invisible as 0,
+   but the browser counts it as painted, so the title's Largest Contentful
+   Paint is its first paint, not the end of the rise (1.1 s later for every
+   visitor at 0; measured with tools/qa/vitals.mjs). */
 [data-rv] {
-  opacity: 0;
+  opacity: 0.01;
   transform: translateY(30px);
   filter: blur(6px);
   transition:
