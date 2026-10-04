@@ -18,7 +18,7 @@ type Job = { id: string; title: string; client: string; site: string; status: St
 const JOBS: Job[] = [
   { id: "J-2041", title: "Leaking skylight", client: "Harbour View Apartments", site: "Unit 4B", status: "In progress", who: "Tomas", due: "Today" },
   { id: "J-2038", title: "Replace fire-door closer", client: "Northside Medical", site: "Level 1 stairwell", status: "Scheduled", who: "Priya", due: "Thu" },
-  { id: "J-2035", title: "Repaint exterior handrails", client: "Harbour View Apartments", site: "Front entrance", status: "Awaiting approval", who: "—", due: "—" },
+  { id: "J-2035", title: "Repaint exterior handrails", client: "Harbour View Apartments", site: "Front entrance", status: "Awaiting approval", who: "Office", due: "TBC" },
   { id: "J-2031", title: "Heat pump service", client: "Kōwhai Kindergarten", site: "Main room", status: "Awaiting parts", who: "Tomas", due: "Next week" },
   { id: "J-2027", title: "Clear gutters", client: "Northside Medical", site: "Roof", status: "Done", who: "Priya", due: "Mon" },
 ];
@@ -84,7 +84,7 @@ function JobDetail({ job, back }: { job: Job; back: () => void }) {
         <section className={s.panel}>
           <p className={s.panelH}>Notes</p>
           <p className={s.note}>
-            <b>{job.who === "—" ? "Office" : job.who}</b> · Access through the side gate; the tenant is home after 2pm.
+            <b>{job.who}</b> · Access through the side gate; the tenant is home after 2pm.
           </p>
           <div className={s.photos}>
             <span>Before</span>

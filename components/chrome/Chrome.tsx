@@ -31,7 +31,7 @@ function Nav({ onMenu }: { onMenu: () => void }) {
           e.preventDefault();
           jumpToS(0);
         }}
-        aria-label="Nerodyn — back to the top"
+        aria-label="Nerodyn, back to the top"
       >
         <LogoMark className="nav-mark" />
         <span className="nav-word">Nerodyn</span>

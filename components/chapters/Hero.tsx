@@ -123,7 +123,7 @@ export function Hero() {
         </span>
       </p>
       <p className="hero-desc intro intro-rise" style={d(1100)}>
-        We design and engineer websites, platforms and AI automation — one system, built by one team, owned entirely by
+        We design and engineer websites, platforms and AI automation: one system, built by one team, owned entirely by
         you.
       </p>
       <div className="hero-ctas">

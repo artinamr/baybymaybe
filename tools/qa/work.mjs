@@ -267,7 +267,7 @@ async function enquiry(phone) {
     await has(page, "Possible urgent symptom");
     await click(page, "Next: Handed to a person");
     await currentStep(page, "Handed to a person");
-    await has(page, "no times were offered and no reply was drafted");
+    await has(page, "No times were offered and no reply was drafted");
     assert.equal(await page.$$eval(`${scope} textarea`, (elements) => elements.length), 0, "Urgent enquiry must never receive a draft");
     assert.equal(await page.$$eval(`${scope} button`, (buttons) => buttons.filter((button) => button.textContent.trim() === "Approve and send").length), 0, "Urgent enquiry must not be approvable as an automatic reply");
     await shot(page, `enquiry-${size}-urgent-human`);

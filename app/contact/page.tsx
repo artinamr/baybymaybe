@@ -1,17 +1,22 @@
 import { Page, Kicker } from "@/components/site/Page";
 import { AuditForm } from "@/components/contact/AuditForm";
-import { CONTACT, PAGES } from "@/lib/content";
+import { PageLd } from "@/components/site/JsonLd";
+import { NzTime } from "@/components/site/NzTime";
+import { CONTACT, PAGES, PLACE, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
+const DESCRIPTION =
+  "Ask Nerodyn, an Auckland studio, for a free website audit or tell us about a new project: a website, a platform or AI automation. We reply within two days.";
+
 export const metadata = pageMeta({
-  title: "Contact",
-  description:
-    "Ask Nerodyn for a free website audit or tell us about a new project — websites, platforms or AI automation. You’ll hear back within two days.",
+  title: "Contact: a free website audit or a new project",
+  description: DESCRIPTION,
   path: "contact/",
+  image: ogCard("contact", "Contact Nerodyn: a free website audit or a new project."),
 });
 
 const NEXT = [
-  { title: "We read it", body: "The people who would do the work read what you send — not a sales team." },
+  { title: "We read it", body: "The people who would do the work read what you send, not a sales team." },
   { title: "You hear back within two days", body: "With a straight answer, your audit, or a few questions if we need them." },
   { title: "A call, if it helps", body: "Thirty minutes to talk it through. No pitch, and no obligation." },
 ];
@@ -24,6 +29,7 @@ const NEXT = [
 export default function Contact() {
   return (
     <Page here="contact" crumbs={[{ name: "Contact", href: PAGES.contact }]} footerForm={false}>
+      <PageLd type="ContactPage" href={PAGES.contact} name="Contact Nerodyn" description={DESCRIPTION} />
       <section className="ct" id="contact" aria-labelledby="ct-title">
         <div className="ct-head">
           <Kicker>Contact</Kicker>
@@ -33,8 +39,8 @@ export default function Contact() {
             <em>what you need.</em>
           </h1>
           <p className="sp-lede" data-rv>
-            A free audit of the website you have, or a new project from scratch — pick one and tell us a little. Everything else can
-            wait for the reply.
+            A free audit of the website you have, or a new project from scratch. Pick one and tell us a little; everything else
+            can wait for the reply.
           </p>
         </div>
         <div className="ct-form" data-rv>
@@ -58,6 +64,12 @@ export default function Contact() {
             <a className="ct-email" href={`mailto:${CONTACT.email}`}>
               {CONTACT.email}
             </a>
+          </p>
+          <p className="ct-place" data-rv>
+            <span>
+              Based in {PLACE.city}, working with businesses across {PLACE.country}.
+            </span>
+            <NzTime />
           </p>
         </div>
       </section>

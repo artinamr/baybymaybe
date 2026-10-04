@@ -18,9 +18,9 @@ export default function Body() {
     <>
       <p>
         Two quotes for “a new website” can differ by several times, and both can be honest. They are usually
-        pricing different things — different amounts of work, different standards, different assumptions about who does
-        what. The trouble is that a quote rarely says so. This article lists what a good one should spell out, so you can
-        see what you are actually being offered, and compare two offers fairly.
+        pricing different things: different amounts of work, different standards and different assumptions about who
+        does what. The trouble is that a quote rarely says so. This article lists what a good one should spell out, so
+        you can see what you are actually being offered, and compare two offers fairly.
       </p>
       <p>
         It is written from the side of the business buying the website. It isn’t legal advice; for the contract
@@ -32,7 +32,7 @@ export default function Body() {
       <ul>
         <li>
           <strong>How much is designed.</strong> A site built from a few layouts reused across many pages costs less than
-          one where each page is designed on its own. A theme adjusted to fit costs less again — and looks it.
+          one where each page is designed on its own. A theme adjusted to fit costs less again, and looks it.
         </li>
         <li>
           <strong>Who writes the words.</strong> Writing, gathering and shaping content is often the largest hidden job in
@@ -48,7 +48,7 @@ export default function Body() {
         </li>
         <li>
           <strong>What happens after launch.</strong> Hosting, updates, backups and support are either in the quote, in a
-          separate agreement, or nowhere — until something breaks.
+          separate agreement, or nowhere until something breaks.
         </li>
       </ul>
       <Figure caption="A quote should cover the whole life of the site, not only the build.">
@@ -67,8 +67,8 @@ export default function Body() {
       <Check
         items={[
           <>
-            <strong>The scope.</strong> Which pages and templates, which features (forms, booking, search, accounts), and —
-            just as useful — what is <em>not</em> included.
+            <strong>The scope.</strong> Which pages and templates, which features (forms, booking, search, accounts) and,
+            just as useful, what is <em>not</em> included.
           </>,
           <>
             <strong>Content.</strong> Who writes the words, who supplies photographs, how many rounds of edits, and the date
@@ -83,9 +83,10 @@ export default function Body() {
             service runs on.
           </>,
           <>
-            <strong>The standard.</strong> Accessibility named against a published standard — the current one is WCAG 2.2,
-            from the W3C, whose success criteria come at three levels, A, AA and AAA
-            <Cite n={1} /> — and speed against something measurable, such as Google’s Core Web Vitals thresholds.
+            <strong>The standard.</strong> Accessibility named against a published standard, and speed against something
+            measurable. The current accessibility standard is WCAG 2.2, from the W3C; its success criteria come at three
+            levels, A, AA and AAA.
+            <Cite n={1} /> For speed, Google’s Core Web Vitals thresholds give you numbers to hold the work to.
             <Cite n={2} />
           </>,
           <>
@@ -94,7 +95,7 @@ export default function Body() {
           </>,
           <>
             <strong>Ownership and handover.</strong> That the domain, hosting, code, content and every account will be in
-            your business’s name — and what you will be given at the end.
+            your business’s name, and what you will be given at the end.
           </>,
           <>
             <strong>Running costs.</strong> Domain renewal, hosting, paid plug-ins or services, email: what each is for,
@@ -105,7 +106,7 @@ export default function Body() {
             can expect an answer, and what happens after the included period ends.
           </>,
           <>
-            <strong>The payment schedule.</strong> How much is paid when — typically tied to milestones — and what each
+            <strong>The payment schedule.</strong> How much is paid when (usually tied to milestones), and what each
             payment releases.
           </>,
           <>
@@ -122,7 +123,7 @@ export default function Body() {
       <ul>
         <li>
           <strong>A site you can’t take with you.</strong> Some arrangements build on a platform owned by the
-          provider: you pay monthly, and if you leave, the site stays. That can suit some businesses — but you should know
+          provider: you pay monthly, and if you leave, the site stays. That can suit some businesses, but you should know
           before you sign, not when you try to leave.
         </li>
         <li>
@@ -135,7 +136,7 @@ export default function Body() {
         </li>
         <li>
           <strong>Nothing about content.</strong> If the quote doesn’t mention words and images at all, the project
-          will stall waiting for them — usually on you.
+          will stall waiting for them, usually on you.
         </li>
         <li>
           <strong>No mention of redirects</strong> when you are replacing an existing site. Google’s guidance for
@@ -184,7 +185,7 @@ export default function Body() {
       />
       <Callout title="The cheapest quote isn’t always the cheapest website">
         <p>
-          Once the gaps are priced in — your time on content, fixes after launch, a move later — the two totals are often
+          Once the gaps are priced in (your time on content, fixes after launch, a move later), the two totals are often
           much closer than they first looked. Sometimes they swap places.
         </p>
       </Callout>
@@ -192,7 +193,7 @@ export default function Body() {
       <H2 id="fixed-price">How a fixed price works</H2>
       <p>
         A fixed price is a promise about a defined piece of work: if the scope stays the same, the price does. It moves
-        the risk of the work taking longer than expected onto the people doing it, which is where it belongs — they are
+        the risk of the work taking longer than expected onto the people doing it, which is where it belongs: they are
         the ones who can estimate it.
       </p>
       <p>That only holds if three things are written down:</p>
@@ -203,8 +204,8 @@ export default function Body() {
           from the adviser’s calendar and receive a confirmation email” is.
         </li>
         <li>
-          <strong>What you are providing, and when</strong> — content, decisions, access. If those arrive late, the date
-          can move; that is fair, and it should say so.
+          <strong>What you are providing, and when:</strong> content, decisions, access. If those arrive late, the date
+          can move. That is fair, and the quote should say so.
         </li>
         <li>
           <strong>How a change is handled.</strong> New ideas during a project are normal and often good. The healthy
@@ -213,8 +214,8 @@ export default function Body() {
         </li>
       </ul>
       <p>
-        Paying by milestones — a deposit to start, then payments as agreed stages are approved — keeps both sides
-        protected: you pay as you see the work, and the studio isn’t carrying months of unpaid time.
+        Paying by milestones (a deposit to start, then payments as agreed stages are approved) protects both sides: you
+        pay as you see the work, and the studio isn’t carrying months of unpaid time.
       </p>
 
       <H2 id="what-to-send">What to send to get a useful quote</H2>
@@ -223,7 +224,7 @@ export default function Body() {
         Before asking for a quote, it’s worth writing a page that covers:
       </p>
       <ul>
-        <li>What the business does, for whom, and what the website needs to achieve — in your words, not a brief template.</li>
+        <li>What the business does, for whom, and what the website needs to achieve, in your words rather than a brief template.</li>
         <li>The current site, if there is one, and what you like and dislike about it.</li>
         <li>The pages and features you think you need, marked “must have” or “nice to have”.</li>
         <li>The systems it should connect to: booking, CRM, payments, email, accounting.</li>

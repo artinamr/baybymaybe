@@ -33,7 +33,7 @@ const ENQUIRIES: Enquiry[] = [
     from: "Sam Ellis",
     address: "sam@example.com",
     at: "9:14",
-    subject: "Sore shoulder — appointment this week?",
+    subject: "Sore shoulder: appointment this week?",
     body: "Hi, I’ve had a sore right shoulder for about three weeks, since I moved house. Could I get an appointment this week, ideally after 4pm? Would it be covered by ACC? Thanks, Sam",
     fields: [
       { k: "Name", v: "Sam Ellis" },
@@ -41,7 +41,7 @@ const ENQUIRIES: Enquiry[] = [
       { k: "Reason", v: "Right shoulder pain, about three weeks" },
       { k: "Wants", v: "A first appointment this week" },
       { k: "Times", v: "After 4pm" },
-      { k: "Funding", v: "Asks about ACC", flag: "Injury while moving — the clinic confirms cover, not the system" },
+      { k: "Funding", v: "Asks about ACC", flag: "Injury while moving: the clinic confirms cover, not the system" },
       { k: "Priority", v: "Routine" },
     ],
     slots: [
@@ -50,7 +50,7 @@ const ENQUIRIES: Enquiry[] = [
     ],
     rules: ["First appointments are 45 minutes", "Only after-4pm times, as asked", "Times are held for 24 hours, not booked"],
     draft:
-      "Hi Sam,\n\nThanks for getting in touch — sorry to hear about your shoulder. We have two first appointments this week after 4pm:\n\n• Wednesday 14 October, 4:30pm with Jess\n• Thursday 15 October, 5:15pm with Aroha\n\nReply with the one that suits and we’ll confirm it. As it started with an injury while moving house, it may be covered by ACC — we’ll go through that with you at the appointment.\n\nPellow Physiotherapy",
+      "Hi Sam,\n\nThanks for getting in touch, and sorry to hear about your shoulder. We have two first appointments this week after 4pm:\n\n• Wednesday 14 October, 4:30pm with Jess\n• Thursday 15 October, 5:15pm with Aroha\n\nReply with the one that suits and we’ll confirm it. As it started with an injury while moving house, it may be covered by ACC. We’ll go through that with you at the appointment.\n\nPellow Physiotherapy",
   },
   {
     id: "move",
@@ -71,9 +71,9 @@ const ENQUIRIES: Enquiry[] = [
       { when: "Thu 22 Oct · 10:00am", who: "with Jess" },
       { when: "Thu 22 Oct · 11:30am", who: "with Jess" },
     ],
-    rules: ["Same physio as before", "More than 24 hours' notice — no late-change fee applies"],
+    rules: ["Same physio as before", "More than 24 hours' notice, so no late-change fee applies"],
     draft:
-      "Kia ora Alex,\n\nNo problem. Jess has Thursday 22 October at 10:00am free — the same time next week. Reply 'yes' and we’ll move it across; if that doesn’t suit, 11:30am the same day is also open.\n\nPellow Physiotherapy",
+      "Kia ora Alex,\n\nNo problem. Jess has Thursday 22 October at 10:00am free, the same time next week. Reply 'yes' and we’ll move it across; if that doesn’t suit, 11:30am the same day is also open.\n\nPellow Physiotherapy",
   },
   {
     id: "urgent",
@@ -86,10 +86,10 @@ const ENQUIRIES: Enquiry[] = [
       { k: "Name", v: "Jordan Lee" },
       { k: "Reply to", v: "jordan@example.com" },
       { k: "Reason", v: "Chest tightness and dizziness when running", flag: "Possible urgent symptom" },
-      { k: "Priority", v: "Urgent — needs a person" },
+      { k: "Priority", v: "Urgent: needs a person" },
     ],
     urgent:
-      "Symptoms like these are never answered automatically. The enquiry has gone straight to the clinic’s phone list, marked urgent, so a person calls Jordan back — no times were offered and no reply was drafted.",
+      "Symptoms like these are never answered automatically. The enquiry has gone straight to the clinic’s phone list, marked urgent, so a person calls Jordan back. No times were offered and no reply was drafted.",
   },
 ];
 
@@ -102,14 +102,14 @@ function logFor(e: Enquiry, step: number, approvedBy: string | null) {
   const out: { at: string; text: string; tone?: "flag" | "ok" }[] = [{ at: t(0), text: "Email received" }];
   if (step >= 1) {
     const flags = e.fields.filter((f) => f.flag).length;
-    out.push({ at: t(0), text: flags ? `Details organised — ${flags} to check` : "Details organised", tone: flags ? "flag" : undefined });
+    out.push({ at: t(0), text: flags ? `Details organised: ${flags} to check` : "Details organised", tone: flags ? "flag" : undefined });
   }
   if (e.urgent) {
     if (step >= 2) out.push({ at: t(0), text: "Marked urgent · sent to the clinic’s call list", tone: "flag" });
     return out;
   }
   if (step >= 2) out.push({ at: t(0), text: `${e.slots?.length} matching times found` });
-  if (step >= 3) out.push({ at: t(1), text: "Reply drafted — waiting for approval" });
+  if (step >= 3) out.push({ at: t(1), text: "Reply drafted, waiting for approval" });
   if (step >= 4 && approvedBy) out.push({ at: t(7), text: `Approved by ${approvedBy} · sent (simulated)`, tone: "ok" });
   return out;
 }
@@ -224,7 +224,7 @@ export function EnquiryDesk({ start = "booking", startStep = 0 }: { start?: stri
 
           {step === 3 && !e.urgent && !handed ? (
             <div>
-              <p className={s.stageH}>A reply, drafted in the clinic’s own words — edit anything</p>
+              <p className={s.stageH}>A reply, drafted in the clinic’s own words. Edit anything.</p>
               <label className={s.draftWrap}>
                 <span className={s.srOnly}>Draft reply</span>
                 <textarea className={s.draft} value={draft[e.id] ?? e.draft} onChange={(ev) => setDraft((d) => ({ ...d, [e.id]: ev.target.value }))} rows={9} />
@@ -240,7 +240,7 @@ export function EnquiryDesk({ start = "booking", startStep = 0 }: { start?: stri
               </span>
               <div>
                 <p className={s.stageH}>Approved by {approved ?? "Reception"}</p>
-                <p>Sent — in this demonstration, only on this page. In the clinic, the times are held until {e.from.split(" ")[0]} replies.</p>
+                <p>Sent (in this demonstration, only on this page). In the clinic, the times are held until {e.from.split(" ")[0]} replies.</p>
               </div>
             </div>
           ) : null}

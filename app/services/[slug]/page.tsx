@@ -2,11 +2,14 @@ import { notFound } from "next/navigation";
 import { Page, Crumbs, Kicker, Closing } from "@/components/site/Page";
 import { QaList } from "@/components/site/QaList";
 import { QaLd, ServiceLd } from "@/components/site/JsonLd";
-import { PAGES } from "@/lib/content";
+import { Photo, BANNER_SIZES } from "@/components/site/Photo";
+import { ArticleCard } from "@/components/blog/ArticleCard";
+import { PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { WorkTitle } from "@/components/work/WorkTitle";
 import { SERVICES, service } from "@/content/services";
 import { project } from "@/content/work";
+import { PUBLISHED } from "@/content/blog";
 
 // Only the three disciplines exist; anything else under /services/ is a 404.
 export const dynamicParams = false;
@@ -18,24 +21,27 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const s = service((await params).slug);
   if (!s) return {};
-  return pageMeta({ title: s.name, description: s.description, path: `services/${s.slug}/` });
+  return pageMeta({ title: s.seoTitle, description: s.description, path: `services/${s.slug}/`, image: ogCard(`services-${s.slug}`, s.photo.alt) });
 }
 
 /**
- * ONE DISCIPLINE — what it is for, what you get, how we approach it, what we
- * need from you, the questions people ask, and the other two disciplines.
+ * ONE DISCIPLINE: what it is for, what you get, how we approach it, what we
+ * need from you, the questions people ask, what we have written about it,
+ * and the other two disciplines.
  */
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const s = service((await params).slug);
   if (!s) notFound();
   const others = SERVICES.filter((o) => o.slug !== s.slug);
+  // What the blog says about this discipline: up to three articles, newest first.
+  const reading = PUBLISHED.filter((a) => a.related.services.includes(s.slug)).slice(0, 3);
   const crumbs = [
     { name: "Services", href: PAGES.services },
     { name: s.name, href: PAGES.service(s.slug) },
   ];
   return (
     <Page here="services" crumbs={crumbs}>
-      <ServiceLd name={s.name} description={s.description} href={PAGES.service(s.slug)} />
+      <ServiceLd name={s.name} description={s.description} href={PAGES.service(s.slug)} image={s.photo} />
       <QaLd items={s.faq} />
 
       <section className="sp-hero svc-hero">
@@ -63,8 +69,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
       </section>
 
       <figure className="sp-banner svc-banner" data-rv>
-        {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
-        <img src={s.image} alt={s.imageAlt} width={2400} height={1100} fetchPriority="high" decoding="async" />
+        <Photo p={s.photo} sizes={BANNER_SIZES} priority />
       </figure>
 
       <section className="sp-block split" aria-labelledby="signs-h">
@@ -183,6 +188,27 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
+      {reading.length ? (
+        <section className="sp-block bl-related" aria-labelledby="read-h">
+          <header className="split-head bl-related-head">
+            <Kicker>From the blog</Kicker>
+            <h2 id="read-h" className="sp-h2" data-rv>
+              Before you decide.
+            </h2>
+            <p className="split-more" data-rv>
+              <a className="text-link" href={PAGES.blog}>
+                All articles <span aria-hidden>→</span>
+              </a>
+            </p>
+          </header>
+          <div className="bl-grid bl-grid-3">
+            {reading.map((a, i) => (
+              <ArticleCard key={a.slug} a={a} level="h3" delay={i * 90} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <nav className="sp-block svc-others" aria-label="The other disciplines">
         <Kicker>Also from the same team</Kicker>
         <div className="svc-others-grid">
@@ -201,7 +227,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
       <Closing
         title="Start with what you have."
-        line="Send us your website — or tell us about the work that’s slowing you down. You’ll get a straight answer within two days."
+        line="Send us your website, or tell us about the work that’s slowing you down. You’ll get a straight answer within two days."
         more={{ label: "Or read how a project runs", href: PAGES.methodology }}
       />
     </Page>

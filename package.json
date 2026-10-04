@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/preload-stage.mjs",
+    "build": "next build && node scripts/preload-stage.mjs && node scripts/copy-guard.mjs",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:copy": "node scripts/copy-guard.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

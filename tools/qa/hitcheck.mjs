@@ -7,7 +7,7 @@ await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeig
 await new Promise((r) => setTimeout(r, 2500));
 console.log(await page.evaluate(() => {
   const out = [];
-  for (const a of document.querySelectorAll(".sf-cols a, .sf-cols button")) {
+  for (const a of document.querySelectorAll(".sf-cols a, .sf-cols button, .sf-bar button, .sf-sig-mark")) {
     const b = a.getBoundingClientRect();
     if (b.bottom < 0 || b.top > innerHeight) { out.push(`${a.textContent.trim()}: offscreen`); continue; }
     const t = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);

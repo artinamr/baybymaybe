@@ -30,8 +30,8 @@ export default function Body() {
         information from the other side, for every client at once.
       </p>
       <p>
-        It isn’t a replacement for talking to people. Good portals take the routine traffic — status, documents,
-        approvals, invoices — out of email, so that when you do talk, it’s about something that needs a person.
+        It isn’t a replacement for talking to people. Good portals take the routine traffic (status, documents,
+        approvals, invoices) out of email, so that when you do talk, it’s about something that needs a person.
       </p>
       <Figure caption="What moves out of the inbox: each routine exchange gets one place to live.">
         <Routes
@@ -41,21 +41,21 @@ export default function Body() {
             { from: "A quote to approve", to: ["Approved in one click, with a record"] },
             { from: "An invoice to chase", to: ["Paid online", "Accounts updated"] },
           ]}
-          failure={<p>Anything unusual still goes to a person — the portal just says who, and keeps the history.</p>}
+          failure={<p>Anything unusual still goes to a person. The portal just says who, and keeps the history.</p>}
         />
       </Figure>
 
       <H2 id="signals">Five signals that email has become the bottleneck</H2>
       <H3>1. The same status question, every day</H3>
       <p>
-        If a good share of incoming email is clients asking where things are, the information exists — it just lives
+        If a good share of incoming email is clients asking where things are, the information exists. It just lives
         somewhere they can’t see. A status page each client can check removes the question rather than answering it
         faster.
       </p>
       <H3>2. Chasing documents</H3>
       <p>
         When work regularly waits on a file from the client, and someone on your team spends time reminding, finding and
-        renaming attachments, a single place to upload — with a list of what’s still missing — pays for itself in
+        renaming attachments, a single place to upload, with a list of what’s still missing, pays for itself in
         hours.
       </p>
       <H3>3. Approvals buried in threads</H3>
@@ -71,7 +71,7 @@ export default function Body() {
       <H3>5. Requests after hours</H3>
       <p>
         Clients who want to check something at nine at night will either wait until morning or email you. Neither helps
-        them. Letting them look it up — or book, or pay — whenever suits them is often the change they notice most.
+        them. Letting them look it up (or book, or pay) whenever it suits them is often the change they notice most.
       </p>
       <p>
         One signal on its own can usually be solved with a better process or a shared folder. Three or more, every week,
@@ -82,7 +82,7 @@ export default function Body() {
       <p>
         Honestly: often off the shelf is the right first step. Many industries have established software with a client
         area built in, and many general tools offer shared workspaces. If one fits the way you work, it will be cheaper
-        and quicker than building — and you’ll learn what you really need.
+        and quicker than building, and you’ll learn what you really need.
       </p>
       <p>
         A custom portal earns its cost when your work doesn’t fit the shape of the tools: when your jobs have stages
@@ -106,7 +106,7 @@ export default function Body() {
       <H2 id="first-version">What the first version should do</H2>
       <p>
         The most common mistake is building everything at once. The first version should be the smallest thing that
-        removes the most email — and nothing else. A sensible order:
+        removes the most email, and nothing else. A sensible order:
       </p>
       <Steps
         items={[
@@ -117,7 +117,7 @@ export default function Body() {
           },
           { t: "Documents both ways", b: <p>Upload, download, and a list of what’s still needed.</p> },
           { t: "Approvals with a record", b: <p>The quote or the change, approved in one step, with the time and the name kept.</p> },
-          { t: "Then, and only then, the rest", b: <p>Payments, messaging, scheduling, reports — once the first version is in daily use and you know which would help most.</p> },
+          { t: "Then, and only then, the rest", b: <p>Payments, messaging, scheduling and reports, once the first version is in daily use and you know which would help most.</p> },
         ]}
       />
 
@@ -130,7 +130,7 @@ export default function Body() {
       <ul>
         <li>
           <strong>Updating it is part of the work, not extra work.</strong> If a job moves stage when someone does the
-          thing that moves it — approves, uploads, completes — the portal stays true without anyone remembering to update
+          thing that moves it (approves, uploads, completes), the portal stays true without anyone remembering to update
           it. Where a person must update a status, make it one click from the screen they already use.
         </li>
         <li>
@@ -138,16 +138,16 @@ export default function Body() {
           about it, and notices when something looks wrong.
         </li>
         <li>
-          <strong>Clients are shown, not told.</strong> A short welcome — what they’ll find, how to sign in, who to
-          call — and a link in every email that would previously have carried the update.
+          <strong>Clients are shown, not told.</strong> A short welcome (what they’ll find, how to sign in, who to
+          call) and a link in every email that would previously have carried the update.
         </li>
         <li>
           <strong>Email doesn’t vanish overnight.</strong> Some clients will keep emailing for a while. Answer with
           a link to the right page, and they learn where to look.
         </li>
         <li>
-          <strong>Running costs are known.</strong> Hosting, the services it relies on, and support — written down before
-          you commit, so the second year holds no surprises.
+          <strong>Running costs are known.</strong> Hosting, the services it relies on, and support, all written down
+          before you commit, so the second year holds no surprises.
         </li>
       </ul>
 
@@ -161,7 +161,7 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>Individual accounts.</strong> Every person signs in as themselves — no shared logins, for your team or for
+          <strong>Individual accounts.</strong> Every person signs in as themselves. No shared logins, for your team or for
           clients.
         </li>
         <li>
@@ -172,9 +172,9 @@ export default function Body() {
           <Cite n={3} /> Make it compulsory for your staff; offer it to clients.
         </li>
         <li>
-          <strong>Roles.</strong> The NCSC’s principle of least privilege — giving people the minimum access they need
-          to do their job
-          <Cite n={2} /> — applies to clients too: each sees only their own work.
+          <strong>Roles.</strong> The NCSC’s principle of least privilege, giving people the minimum access they need
+          to do their job,
+          <Cite n={2} /> applies to clients too: each sees only their own work.
         </li>
         <li>
           <strong>A record of who did what.</strong> An audit trail of approvals, uploads and changes protects you and your
@@ -182,8 +182,8 @@ export default function Body() {
         </li>
         <li>
           <strong>A plan for when something goes wrong.</strong> The Privacy Commissioner expects a privacy breach that has
-          caused, or might cause, serious harm to be notified to it within 72 hours of the business becoming aware of it —
-          even while still investigating — and the affected people to be told as soon as possible.
+          caused, or might cause, serious harm to be notified to it within 72 hours of the business becoming aware of it,
+          even while still investigating, and the affected people to be told as soon as possible.
           <Cite n={4} /> Know in advance who would make that call.
         </li>
       </ul>
@@ -196,8 +196,8 @@ export default function Body() {
 
       <H2 id="did-it-work">Judging whether it worked</H2>
       <p>
-        Decide before launch what you will look at afterwards, and measure it yourself — not from a vendor’s case
-        study. Useful things to count, before and after:
+        Decide before launch what you will look at afterwards, and measure it yourself rather than relying on a
+        vendor’s case study. Useful things to count, before and after:
       </p>
       <ul>
         <li>How many status questions arrive by email or phone in a typical week.</li>
@@ -208,7 +208,7 @@ export default function Body() {
       </ul>
       <p>
         Give it a couple of months of normal use before judging. If the numbers haven’t moved, find out why before
-        adding features — usually some part of the work is still happening outside the portal.
+        adding features. Usually some part of the work is still happening outside the portal.
       </p>
 
       <H2 id="example">An example you can click through</H2>
@@ -216,7 +216,7 @@ export default function Body() {
         We built a working demonstration of this kind of portal for a fictional building-maintenance company,{" "}
         <a href={PAGES.project("operations-portal")}>Kerrow</a>: one job board for the team, and one place for clients to
         follow their jobs, approve quotes and pay. Approving a quote in the client view moves the job on the team’s
-        board. It is a demonstration — the business and its data are invented, and nothing is sent — but it shows the
+        board. It is a demonstration (the business and its data are invented, and nothing is sent), but it shows the
         shape of a first version better than a description can.
       </p>
     </>

@@ -41,7 +41,7 @@ export function WorkIndex({ items }: { items: WorkCard[] }) {
             </p>
             <h2 className="wk-title">
               <a href={w.href}>
-                <WorkTitle text={`${w.client} — ${w.title.charAt(0).toLowerCase() + w.title.slice(1)}`} />
+                <WorkTitle text={`${w.client}: ${w.title.charAt(0).toLowerCase() + w.title.slice(1)}`} />
               </a>
             </h2>
             <p className="wk-sum">{w.summary}</p>

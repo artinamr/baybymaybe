@@ -33,7 +33,7 @@ export default function Body() {
           <strong>Can we change it ourselves when the business changes?</strong> That is the platform, and who owns it.
         </li>
         <li>
-          <strong>Does it work for the people using it</strong> — on a phone, quickly, for everyone? That is speed and
+          <strong>Does it work for the people using it</strong>, on a phone, quickly, for everyone? That is speed and
           accessibility.
         </li>
       </ul>
@@ -43,7 +43,7 @@ export default function Body() {
         broken, and how deep it goes.
       </p>
       <p>
-        It helps to separate the look from the foundations. The look — colours, type, photography — is what people notice
+        It helps to separate the look from the foundations. The look (colours, type, photography) is what people notice
         first, and what most redesigns change. The foundations are what decide whether a site works: what it says, how its
         pages are organised, what it is built on, and how it performs. A tired look on sound foundations needs a refresh. A
         fresh look on broken foundations is a rebuild that hasn’t been admitted yet.
@@ -56,12 +56,12 @@ export default function Body() {
           and how to start. (Ask someone outside the business to try it on their phone, and watch without helping.)
         </li>
         <li>
-          The pages follow the way customers think about what you sell — a page for each service they’d search for,
+          The pages follow the way customers think about what you sell: a page for each service they’d search for,
           not one long page listing everything.
         </li>
         <li>You, or someone on your team, can change the words, add a page and publish without waiting on a developer.</li>
         <li>
-          It works on a phone, or its problems sit in particular places — oversized images, a slow plug-in, a chat widget —
+          It works on a phone, or its problems sit in particular places (oversized images, a slow plug-in, a chat widget)
           rather than everywhere.
         </li>
         <li>It brings in enquiries, just not enough of them, or not enough of the right ones.</li>
@@ -87,7 +87,7 @@ export default function Body() {
         </li>
         <li>
           <strong>The slowness is built in.</strong> The theme loads heavy scripts on every page, important words are set
-          inside images, menus can’t be used with a keyboard — and fixing it means replacing the theme anyway.
+          inside images, menus can’t be used with a keyboard, and fixing it means replacing the theme anyway.
         </li>
         <li>
           <strong>Nobody is sure who owns it.</strong> If the domain, the hosting or the code sit in someone else’s
@@ -111,7 +111,7 @@ export default function Body() {
             b: (
               <p>
                 In your analytics, find the pages people arrive on, where they go next and where they leave. Most sites
-                have a handful of pages doing most of the work — and one or two where most people give up.
+                have a handful of pages doing most of the work, and one or two where most people give up.
               </p>
             ),
           },
@@ -137,9 +137,9 @@ export default function Body() {
             t: "Check the speed (day 3)",
             b: (
               <p>
-                Put the same pages through Google’s PageSpeed Insights. It reports two kinds of result: field data —
-                what real Chrome users experienced over the previous 28 days, where the site has enough visitors — and lab
-                data, a controlled test that is most useful for finding causes.
+                Put the same pages through Google’s PageSpeed Insights. It reports two kinds of result. Field data is
+                what real Chrome users experienced over the previous 28 days, where the site has enough visitors. Lab
+                data is a controlled test, most useful for finding causes.
                 <Cite n={1} /> Google calls a page good when, for three-quarters of visits, the main content appears within
                 2.5 seconds, the page responds to a tap or click within 200 milliseconds, and the layout barely jumps
                 (a layout-shift score of 0.1 or less).
@@ -195,7 +195,7 @@ export default function Body() {
         </li>
         <li>
           <strong>Titles and descriptions.</strong> Google’s own guidance is that every page should have its own
-          descriptive title — not a vague one like “Home” — and that identical descriptions on every page
+          descriptive title, not a vague one like “Home”, and that identical descriptions on every page
           don’t help anyone choosing between results.
           <Cite n={3} />
           <Cite n={4} /> They are small edits with a large effect on whether people click.
@@ -207,7 +207,7 @@ export default function Body() {
 
       <H2 id="protect">If you rebuild, protect what you’ve earned</H2>
       <p>
-        A new site can lose much of what the old one had earned in search — and break every link people have saved — if
+        A new site can lose much of what the old one had earned in search, and break every link people have saved, if
         its addresses change carelessly. Three things prevent most of the damage:
       </p>
       <ul>
@@ -216,7 +216,7 @@ export default function Body() {
           Decide for each one: keep, merge, rewrite or retire.
         </li>
         <li>
-          <strong>A redirect map.</strong> Every old address that changes should send people — and search engines — to its
+          <strong>A redirect map.</strong> Every old address that changes should send people (and search engines) to its
           closest new page with a permanent redirect. Google recommends server-side permanent redirects (301 or 308),
           keeping them for as long as possible and generally at least a year, and warns that rankings can fluctuate while
           it recrawls the site; on a medium-sized site it can take a few weeks or more before the new addresses replace
@@ -258,7 +258,7 @@ export default function Body() {
               no: { t: "Rebuild the message first", b: "Rewrite what you offer and for whom. If most pages change, plan a rebuild." },
             },
             {
-              q: "Can your team change it — and is it in your name?",
+              q: "Can your team change it, and is it in your name?",
               no: { t: "Rebuild on something you control", b: "Or move it into your name first, if the platform itself is sound." },
             },
             {
@@ -272,8 +272,8 @@ export default function Body() {
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        This is what our free audit is for. We look at your site the way your customers do — on a phone, on a laptop, in
-        search — and within two days you get a short, plain write-up: what is working, what is costing you enquiries, and
+        This is what our free audit is for. We look at your site the way your customers do (on a phone, on a laptop, in
+        search) and within two days you get a short, plain write-up: what is working, what is costing you enquiries, and
         what we would build instead. Sometimes the answer is “change three pages”. If it is, we’ll say
         so.
       </p>

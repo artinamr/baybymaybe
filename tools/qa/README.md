@@ -48,6 +48,7 @@ They drive the machine's real Chrome on the real GPU
 | `hitcheck.mjs` | Footer links actually receive clicks (nothing overlaps them) | `node hitcheck.mjs <base>/` |
 | `vitals.mjs` | LCP (+FCP), CLS and INP (longest tap) per page under Lighthouse-like mobile throttling (150 ms, 1.6 Mbps, CPU ×4), cold profile per run; `ONLY=/a/,/b/` limits pages | `node vitals.mjs <base> [runs]` |
 | `live.mjs` | The deployed site: every page's status, 404, head tags, home load, markers, errors (read-only) | `node live.mjs` |
+| `../../scripts/copy-guard.mjs` | The writing rules on the built site: em dashes and spaced en dashes anywhere visible (fail), stock phrases, US spelling, sources and photo credit in articles (fail), alt text (fail), long titles/descriptions and h1 count (warn). Runs inside `npm run build` | `npm run check:copy` |
 
 ## Film, performance and pixel identity
 
@@ -71,6 +72,7 @@ previous build (copy `out/` aside first) and the new one: max ≤ 2/255.
 | `coverwebp.py` | Converts every PNG in a folder to a 2400×1500 WebP — **only keep the three cover PNGs in that folder** (it converts everything it finds) | `python coverwebp.py <pngDir> public/work` |
 | `tallcover.mjs` + `tallwebp.py` | The 4:5 phone-frame cover for the home page's tall work card | `node tallcover.mjs <base> operations-portal <out.png>` then `python tallwebp.py <out.png> public/work/operations-portal-tall.webp` |
 | `sheet.py`, `crop.py` | Contact sheets and crops of screenshots, for reviewing at a readable size | `python sheet.py out.png <cols> <thumbW> a.png b.png ...` / `python crop.py in.png out.png <y0> <y1>` |
+| `ogcards.mjs` | The share cards `public/og/<name>.jpg` (1200×630): kicker, title, the page's photo or the mark, in the site's own Inter. Keep its list in step with the pages' `ogCard(...)` calls | `node ogcards.mjs <base> [outDir]` (plain build served) |
 
 Order for covers: build → serve → `covers.mjs` → `coverwebp.py` → `tallcover.mjs`
 → `tallwebp.py` → rebuild (the images are copied into `out/` at build time).

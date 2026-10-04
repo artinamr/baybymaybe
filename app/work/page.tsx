@@ -8,7 +8,7 @@ import { service } from "@/content/services";
 export const metadata = pageMeta({
   title: "Work",
   description:
-    "Websites, platforms and AI automation by Nerodyn — each shown as a working demonstration you can click through, with the brief, the decisions and the limits.",
+    "Websites, platforms and AI automation by Nerodyn, each shown as a working demonstration you can click through, with the brief, the decisions and the limits.",
   path: "work/",
 });
 
@@ -38,7 +38,7 @@ export default function Work() {
       <WorkIndex items={items} />
       <Closing
         title="Your project, next."
-        line="Start with the free audit — a straight answer on what you have, within two days."
+        line="Start with the free audit: a straight answer on what you have, within two days."
         more={{ label: "See the services", href: PAGES.services }}
       />
     </Page>

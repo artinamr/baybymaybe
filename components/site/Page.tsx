@@ -4,14 +4,14 @@ import type { Here } from "@/lib/nav";
 import { SubHeader } from "./SubHeader";
 import { SubReveal } from "./SubReveal";
 import { SiteFooter } from "./SiteFooter";
-import { CrumbsLd } from "./JsonLd";
+import { CrumbsLd, SiteLd } from "./JsonLd";
 
 export type Crumb = { name: string; href: string };
 
 /**
  * A page of the site (everything but the home film): the header, the reveal,
- * the page's breadcrumb trail for search engines, its content, and the footer
- * with the audit form. No 3D is loaded here.
+ * who publishes it and its breadcrumb trail for search engines, its content,
+ * and the footer with the audit form. No 3D is loaded here.
  */
 export function Page({
   here,
@@ -28,6 +28,7 @@ export function Page({
   return (
     <div className="sp">
       <SubReveal />
+      <SiteLd />
       {crumbs ? <CrumbsLd crumbs={[{ name: "Home", href: PAGES.home }, ...crumbs]} /> : null}
       <SubHeader here={here} />
       <main id="main" className="sp-main">

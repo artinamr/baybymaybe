@@ -64,7 +64,7 @@ const RAW: Raw[] = [
     vh: 100,
     sticky: false,
     jumpF: 0,
-    specimen: { name: "Nerodyn", line: "Digital infrastructure and AI automation — one team." },
+    specimen: { name: "Nerodyn", line: "Digital infrastructure and AI automation, by one team." },
   },
   {
     id: "statement",
@@ -74,7 +74,7 @@ const RAW: Raw[] = [
     vh: 180,
     sticky: true,
     jumpF: 1.62,
-    specimen: { name: "The studio", line: "Websites, platforms and AI — one team." },
+    specimen: { name: "The studio", line: "Websites, platforms and AI, by one team." },
   },
   {
     // F 2.8 → 5.94 (the shatter, websites, platforms, AI), then one screen

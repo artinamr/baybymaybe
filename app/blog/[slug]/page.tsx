@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { Article } from "@/components/blog/Article";
 import { pageMeta } from "@/lib/meta";
-import { PUBLISHED, article } from "@/content/blog";
+import { ogCard } from "@/lib/content";
+import { PUBLISHED, article, topicLabel } from "@/content/blog";
 import { BODIES } from "@/content/blog/bodies";
 
 // Only published articles exist; drafts and anything else under /blog/ are a 404.
@@ -21,8 +22,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     type: "article",
     published: a.published,
     modified: a.updated ?? a.published,
-    image: { url: `blog/${a.slug}.webp`, width: 2400, height: 1100, alt: a.cover.alt },
+    image: ogCard(`blog-${a.slug}`, a.cover.alt),
     feed: true,
+    section: topicLabel(a.topic),
   });
 }
 

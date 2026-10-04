@@ -29,6 +29,19 @@ first screen no longer waits for scripts; see the table in
 section 7 (now including the home page's LCP and intro-frame CLS), then the
 domain move (section 6).
 
+**Progress 2026-10-04 (round 18, pre-launch):** the client's pre-launch brief
+is done (CLAUDE.md, ROUND 18): every em dash rewritten and the build now
+fails on one (`scripts/copy-guard.mjs`); the binding writing guide
+`docs/BLOG-GUIDE.md`; outside CC0 photographs replace the film stills on the
+blog, methodology and services (`content/images.ts`); the SEO/GEO pass
+(entity graph, page types, HowTo, FAQPage, BlogPosting citations, image
+sitemap, manifest, `/llms.txt`, per-page share cards, Auckland/NZ); `/audit/`
+and `/cookies/` keep nerodyn.com's old addresses working; the blog redesigned
+as a publication; the footer signature; the contrast decision (7.5) taken in
+the direction recommended (62% ink), so axe is clean on every sub-page. The
+section 9 line "images are film stills" is replaced by: outside CC0
+photographs on the site's own pages, film stills only in the film.
+
 **Client update 2026-10-01:** remove the homepage's numbered chapter rail,
 its phone counter, and the lower-left chapter card. Keep them removed in
 future increments; chapter jumps remain in the phone menu.
@@ -633,7 +646,9 @@ Ask these together, with a recommendation each (don't send a menu):
 3. A testimonial or two (real, attributed, with permission).
 4. Prices: stay unpublished (recommended) or a "projects usually start from"
    line.
-5. Contrast fix for small muted text (5.2). Measured with axe: text at
+5. [done 2026-10-04, round 18: raised to 62% ink, 64% on the form card;
+   axe clean on every sub-page. Revert in app/globals.css if the client
+   prefers the lighter greys.] Contrast fix for small muted text (5.2). Measured with axe: text at
    40-56 % ink on paper is 2.66-4.27:1 (AA needs 4.5:1) — breadcrumbs,
    "Rather write?", the form's "— optional" hints and note, FAQ numbers,
    card meta labels, contents headings. Recommendation: raise them to ~62 %
@@ -644,6 +659,12 @@ Ask these together, with a recommendation each (don't send a menu):
    transform or clip-path version would avoid it but changes how the frame
    draws. Recommendation: accept the LCP; approve re-drawing the frame so
    it doesn't shift layout, judged side by side with the current intro.
+5c. From round 18: confirm "Auckland" (the site now says the studio is in
+   Auckland, from nerodyn.com's "Engineered in Auckland"; `PLACE` in
+   lib/content.ts); sign off the /audit/ page and the three questions under
+   each article; name an author with a short bio (recommended: it helps
+   search and AI answers more than "the Nerodyn studio"); approve the new
+   photographs and the footer signature.
 6. The hero's actions — keep "Get a free audit / Enter the story"
    (recommended) or the plan's "Discuss your project / Explore our work".
 7. Hosting for nerodyn.com (GitHub Pages vs a host with real redirects),
@@ -693,8 +714,9 @@ The site is finished when every line below is true and checked, not assumed.
 
 **Craft**
 - [ ] Same paper, ink, indigo, type and spacing on every page; no page looks
-      templated or out of family; images are film stills, live demos or
-      original diagrams — nothing stock.
+      templated or out of family; photographs are outside CC0 photos in the
+      site's grade (content/images.ts), the film's stills stay in the film,
+      demos are live and diagrams original. No stock clichés.
 - [ ] Copy signed off; no invented number, client, testimonial or result.
 
 **Everyone can use it**

@@ -45,7 +45,7 @@ export default function Body() {
         AI automation is most useful in a small or medium business where it is least exciting: taking the repetitive,
         rule-following parts of everyday work off people, and leaving the judgement with them. This article describes
         five workflows where that tends to hold, what each needs, and the privacy obligations that come with them in New
-        Zealand. It deliberately leaves out productivity figures — the only numbers worth trusting are the ones you
+        Zealand. It deliberately leaves out productivity figures. The only numbers worth trusting are the ones you
         measure on your own work.
       </p>
 
@@ -63,7 +63,7 @@ export default function Body() {
       />
       <p>
         A task that scores well on all four is a candidate. A task where a mistake would be serious can still be
-        automated, but only with a person approving every result — and sometimes that removes most of the saving.
+        automated, but only with a person approving every result, and sometimes that removes most of the saving.
       </p>
       <Figure caption="The pattern behind all five: the machine does the reading and the first draft; a person approves what matters.">
         <Flow
@@ -71,7 +71,7 @@ export default function Body() {
             { t: "Arrives", b: "An email, a document, a call, a question." },
             { t: "Read and sorted", b: "Key details pulled out; the kind of request named." },
             { t: "Checked against your rules", b: "What you allow, what needs a person.", alt: "Unsure or sensitive → straight to a person" },
-            { t: "Drafted", b: "A reply, a record, an answer — in your words." },
+            { t: "Drafted", b: "A reply, a record, an answer, in your words." },
             { t: "Approved", b: "A person reviews before anything goes out.", person: true },
           ]}
         />
@@ -79,15 +79,15 @@ export default function Body() {
 
       <H2 id="enquiries">1. Sorting enquiries and drafting replies</H2>
       <Parts
-        does="Reads each incoming enquiry, pulls out who it’s from and what they want, marks how urgent it is, and drafts a reply from your own approved answers — for example offering the next available times."
-        person="Someone reads every draft before it’s sent, edits it if needed, and approves it. Anything outside the rules — a complaint, a sensitive situation — is handed straight to a person with no draft at all."
+        does="Reads each incoming enquiry, pulls out who it’s from and what they want, marks how urgent it is, and drafts a reply from your own approved answers, for example offering the next available times."
+        person="Someone reads every draft before it’s sent, edits it if needed, and approves it. Anything outside the rules (a complaint, a sensitive situation) is handed straight to a person with no draft at all."
         wrong="A misread request gets a confident but wrong draft; an urgent message is marked routine. Both are why a person approves, and why the rules for 'hand this to a person' are written first."
         need="A set of real past enquiries to test on, your standard answers, and a clear list of what must always go to a person."
       />
 
       <H2 id="documents">2. Reading details out of documents</H2>
       <Parts
-        does="Takes invoices, forms, applications or delivery notes and pulls out the details you need — names, dates, amounts, reference numbers — into your system."
+        does="Takes invoices, forms, applications or delivery notes and pulls out the details you need (names, dates, amounts, reference numbers) into your system."
         person="A person checks anything the system is unsure of, and spot-checks a sample of the rest. Totals are cross-checked automatically against the document."
         wrong="A smudged scan or an unusual layout produces a wrong number that looks right. Checks on totals and a review queue for low-confidence results catch most of these."
         need="A collection of real documents of each type, the fields you need, and where each should go."
@@ -103,7 +103,7 @@ export default function Body() {
 
       <H2 id="assistant">4. A website assistant that answers from approved information</H2>
       <Parts
-        does="Answers visitors’ questions on your website — opening hours, what’s included, how to prepare, how to book — using only information you have written and approved, and hands over to a person when it can’t."
+        does="Answers visitors’ questions on your website (opening hours, what’s included, how to prepare, how to book) using only information you have written and approved, and hands over to a person when it can’t."
         person="Your team writes and owns the approved information, reviews conversations regularly, and receives every hand-over."
         wrong="An assistant that answers beyond what it was given can state things that aren’t true. It should say plainly when it doesn’t know, never give advice it isn’t qualified to give, and always offer a person."
         need="The questions customers actually ask, your answers to them, and a decision on what it must never answer."
@@ -131,15 +131,15 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>Decisions about people</strong> — hiring, credit, refunds outside policy, anything that changes how a
+          <strong>Decisions about people:</strong> hiring, credit, refunds outside policy, anything that changes how a
           customer or employee is treated.
         </li>
         <li>
-          <strong>Advice that needs a qualified person</strong> — medical, legal, financial or safety advice, even when the
+          <strong>Advice that needs a qualified person:</strong> medical, legal, financial or safety advice, even when the
           question looks simple. The assistant’s job is to recognise the question and hand it over.
         </li>
         <li>
-          <strong>Anything that can’t be undone</strong> — payments, deletions, messages to many people at once —
+          <strong>Anything that can’t be undone</strong> (payments, deletions, messages to many people at once)
           without a person approving that specific action.
         </li>
         <li>
@@ -175,8 +175,8 @@ export default function Body() {
         <li>
           <strong>Where the information goes.</strong> Many AI services process data outside New Zealand. Information
           privacy principle 12 limits disclosing personal information to someone overseas unless one of a set of
-          conditions applies — for example that the recipient is subject to comparable privacy safeguards, or the person
-          has authorised it after being told it may not be protected in the same way.
+          conditions applies: for example, that the recipient is subject to comparable privacy safeguards, or that the
+          person has authorised it after being told it may not be protected in the same way.
           <Cite n={2} /> Know where each service processes and stores data, what its terms say about keeping it, and take
           advice if you’re unsure which rules apply.
         </li>
@@ -212,8 +212,8 @@ export default function Body() {
       <p>
         You can see the shape of the first workflow in our{" "}
         <a href={PAGES.project("enquiry-desk")}>Pellow demonstration</a>: a fictional clinic’s inbox, where each
-        email is read and organised, the diary checked, a reply drafted in the clinic’s words and approved by a
-        person — and the message that mentions chest symptoms is handed straight to a person, with no draft at all. The
+        email is read and organised, the diary checked, and a reply drafted in the clinic’s words and approved by a
+        person. The message that mentions chest symptoms is handed straight to a person, with no draft at all. The
         clinic and its emails are invented, and nothing is sent.
       </p>
     </>

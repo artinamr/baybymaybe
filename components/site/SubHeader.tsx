@@ -11,7 +11,7 @@ import { SubMenu } from "./SubMenu";
 export function SubHeader({ here, audit = "#contact" }: { here?: Here; audit?: string }) {
   return (
     <header className="sp-nav">
-      <a href={PAGES.home} className="sp-brand" aria-label="Nerodyn — home">
+      <a href={PAGES.home} className="sp-brand" aria-label="Nerodyn, home">
         <LogoMark className="sp-mark" />
         <span>Nerodyn</span>
       </a>

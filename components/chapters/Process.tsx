@@ -55,7 +55,7 @@ export function Process() {
           From first call to live.
         </h2>
         <p className="ps-lede" data-rv>
-          Most websites go live in about fourteen days. Platforms and automation take longer — the quote after your audit
+          Most websites go live in about fourteen days. Platforms and automation take longer: the quote after your audit
           says exactly how long, and that is the date we work to.
         </p>
       </header>

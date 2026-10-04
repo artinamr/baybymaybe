@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const p = project((await params).slug);
   if (!p) return {};
   return pageMeta({
-    title: `${p.client} — ${p.kind === "demo" ? "studio demonstration" : "case study"}`,
+    title: `${p.client}: ${p.kind === "demo" ? "studio demonstration" : "case study"}`,
     description: p.summary,
     path: `work/${p.slug}/`,
     image: { url: `work/${p.slug}.webp`, width: 2400, height: 1500, alt: p.coverAlt },
@@ -75,7 +75,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
 
       <section className="cs-stage" aria-label="The working demonstration" data-rv>
         <Stage p={p} />
-        <p className="cs-note">This is the working thing, not a picture of it — click around. It runs on this page and sends nothing.</p>
+        <p className="cs-note">This is the working thing, not a picture of it. Click around: it runs on this page and sends nothing.</p>
         <p className="cs-note cs-touch-hint">Scroll inside the frame to see more.</p>
       </section>
 
@@ -105,7 +105,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
           <p className="sp-lede" data-rv>
             {p.kind === "demo"
               ? "The proposed scope for a live version. The demonstration shown here covers the key screens and interactions."
-              : "Designed, built and looked after by one team — so the parts fit together."}
+              : "Designed, built and looked after by one team, so the parts fit together."}
           </p>
         </div>
         <ul className="own-list own-list-s" data-rv>

@@ -3,23 +3,27 @@ import { SubHeader } from "@/components/site/SubHeader";
 import { SubReveal } from "@/components/site/SubReveal";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { QaList } from "@/components/site/QaList";
-import { CONTACT, FAQ_ALL } from "@/lib/content";
-import { FaqLd } from "@/components/site/JsonLd";
+import { CONTACT, FAQ_ALL, PAGES, ogCard } from "@/lib/content";
+import { CrumbsLd, FaqLd, SiteLd } from "@/components/site/JsonLd";
 import { pageMeta } from "@/lib/meta";
 
 export const metadata: Metadata = pageMeta({
-  title: "Questions",
-  description: "Straight answers to what people ask Nerodyn before the first call: price, time, ownership, working together and AI automation.",
+  title: "Questions: straight answers before the first call",
+  description:
+    "Straight answers to what people ask Nerodyn before the first call: price, time, ownership, working together and AI automation for NZ businesses.",
   path: "faq/",
+  image: ogCard("faq", "Straight answers: what people ask Nerodyn before the first call."),
 });
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z]+/g, "-").replace(/(^-|-$)/g, "");
 
-/** QUESTIONS — everything a buyer asks before the first call, grouped, with the topics alongside. */
+/** QUESTIONS: everything a buyer asks before the first call, grouped, with the topics alongside. */
 export default function Questions() {
   return (
     <div className="sp">
       <SubReveal />
+      <SiteLd />
+      <CrumbsLd crumbs={[{ name: "Home", href: PAGES.home }, { name: "Questions", href: PAGES.faq }]} />
       <FaqLd />
       <SubHeader here="faq" />
       <main id="main" className="sp-main">
@@ -34,8 +38,8 @@ export default function Questions() {
             What people ask us before the first call. Anything else, write to{" "}
             <a className="sp-inline" href={`mailto:${CONTACT.email}`}>
               {CONTACT.email}
-            </a>{" "}
-            — the people who answer are the people who build.
+            </a>
+            . The people who answer are the people who build.
           </p>
         </section>
 

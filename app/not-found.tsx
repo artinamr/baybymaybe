@@ -4,8 +4,7 @@ import { LogoMark } from "@/components/chrome/LogoMark";
 import { PAGES } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Not found — Nerodyn",
-  robots: { index: false },
+  title: "Not found | Nerodyn",
 };
 
 /** THE 404 — the same paper and voice: plainly lost, and the ways back. */

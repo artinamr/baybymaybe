@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
-
-export type BlogCard = { slug: string; href: string; title: string; description: string; topic: string; topicLabel: string; date: string; dateLabel: string; minutes: number };
+import { useState, type ReactNode } from "react";
 
 /**
- * The rest of the articles, newest first, filterable by topic. Every row is
- * in the static HTML (the filter only hides); a topic with nothing left to
- * show says so rather than leaving a gap.
+ * The topic filter over the blog's cards. Every card is in the static HTML
+ * (search engines and readers without scripts see them all); the filter only
+ * sets `data-on` on the list, and the page's own rule hides the other topics'
+ * cards (see app/blog/page.tsx). A topic with nothing to show says so.
  */
-export function BlogIndex({ items, topics }: { items: BlogCard[]; topics: { key: string; label: string }[] }) {
+export function BlogIndex({ topics, children }: { topics: { key: string; label: string; count: number }[]; children: ReactNode }) {
   const [on, setOn] = useState("all");
-  const shown = items.filter((a) => on === "all" || a.topic === on);
+  const empty = on !== "all" && (topics.find((t) => t.key === on)?.count ?? 0) === 0;
   return (
     <>
       <div className="wk-filter bl-filter" role="group" aria-label="Show articles about">
@@ -21,26 +20,10 @@ export function BlogIndex({ items, topics }: { items: BlogCard[]; topics: { key:
           </button>
         ))}
       </div>
-      <ol className="bl-list">
-        {items.map((a) => (
-          <li key={a.slug} className="bl-row" hidden={on !== "all" && a.topic !== on} data-rv>
-            <p className="bl-date">
-              <time dateTime={a.date}>{a.dateLabel}</time>
-            </p>
-            <div className="bl-text">
-              <h2 className="bl-title">
-                <a href={a.href}>{a.title}</a>
-              </h2>
-              <p className="bl-desc">{a.description}</p>
-            </div>
-            <p className="bl-kind">
-              <b>{a.topicLabel}</b>
-              <span>{a.minutes} min</span>
-            </p>
-          </li>
-        ))}
-      </ol>
-      {shown.length === 0 ? <p className="bl-none">Nothing else on this topic yet.</p> : null}
+      <div className="bl-index" data-on={on}>
+        {children}
+      </div>
+      {empty ? <p className="bl-none">Nothing on this topic yet.</p> : null}
     </>
   );
 }

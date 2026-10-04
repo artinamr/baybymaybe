@@ -58,7 +58,7 @@ await new Promise((r) => setTimeout(r, 400));
 log("nav Free audit -> #contact top at", await contactTop(), "px (nav-h 76 expected)");
 
 // 3. Back to top.
-await page.evaluate(() => [...document.querySelectorAll(".f-col button")].find((b) => b.textContent.includes("Back to the top")).click());
+await page.evaluate(() => [...document.querySelectorAll(".site-foot button")].find((b) => b.textContent.includes("Back to the top")).click());
 await new Promise((r) => setTimeout(r, 300));
 log("back to top -> S", (await S()).toFixed(3));
 

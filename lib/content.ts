@@ -1,8 +1,11 @@
 /**
- * THE PAGE'S WORDS AND ITEMS — every list the home page renders, in one place,
+ * THE PAGE'S WORDS AND ITEMS: every list the home page renders, in one place,
  * so the client's real material drops straight in. Plain, specific, no
- * invented numbers (CLAUDE.md). Projects live in content/work.ts.
+ * invented numbers and no em dashes (CLAUDE.md, docs/BLOG-GUIDE.md).
+ * Projects live in content/work.ts, photographs in content/images.ts.
  */
+
+import { PHOTOS, type Photo } from "@/content/images";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -25,7 +28,7 @@ export const DELIVERABLES: Record<"websites" | "platforms" | "ai", string[]> = {
 export const FAQ = [
   {
     q: "What does it cost?",
-    a: "It depends on what you need, so there is no price list. After the free audit you get a fixed quote in writing — scope, price and timeline — before anything starts.",
+    a: "It depends on what you need, so there is no price list. After the free audit you get a fixed quote in writing, with the scope, price and timeline, before anything starts.",
   },
   {
     q: "How long does it take?",
@@ -37,7 +40,7 @@ export const FAQ = [
   },
   {
     q: "Can you work with the tools we already use?",
-    a: "Yes. We connect to what you have — your CRM, accounting, booking and email — instead of asking you to replace it.",
+    a: "Yes. We connect to what you have (your CRM, accounting, booking and email) instead of asking you to replace it.",
   },
   {
     q: "Is AI safe to put in front of our customers?",
@@ -58,15 +61,15 @@ export const FAQ_ALL: { group: string; items: { q: string; a: string }[] }[] = [
     items: [
       {
         q: "What does the free audit include?",
-        a: "We look at your website the way your customers do — on a phone, on a laptop, in search. Within two days you get a short, plain write-up: what is working, what is costing you enquiries, and what we would build instead. No pitch, and no obligation.",
+        a: "We look at your website the way your customers do: on a phone, on a laptop and in search. Within two days you get a short, plain write-up: what is working, what is costing you enquiries, and what we would build instead. No pitch, and no obligation.",
       },
       {
         q: "What do you need from us to start?",
-        a: "A thirty-minute call, and access to what you already have — your current site, your brand files, the tools your team uses. We take it from there and tell you exactly what we need from you, and when.",
+        a: "A thirty-minute call, and access to what you already have: your current site, your brand files and the tools your team uses. We take it from there and tell you exactly what we need from you, and when.",
       },
       {
         q: "Can you take over our existing website?",
-        a: "Yes. We start with the audit, keep what is working, and rebuild or improve the rest — without taking your site offline while we do it.",
+        a: "Yes. We start with the audit, keep what is working, and rebuild or improve the rest, without taking your site offline while we do it.",
       },
     ],
   },
@@ -101,7 +104,7 @@ export const FAQ_ALL: { group: string; items: { q: string; a: string }[] }[] = [
       QA["Who owns the website and the code?"],
       {
         q: "Where is the site hosted?",
-        a: "On modern, secure infrastructure — set up in your name, so it stays fast, stays yours, and can move with you if you ever want it to.",
+        a: "On modern, secure hosting set up in your name, so it stays fast, stays yours and can move with you if you ever want it to.",
       },
       QA["What happens after launch?"],
     ],
@@ -111,7 +114,7 @@ export const FAQ_ALL: { group: string; items: { q: string; a: string }[] }[] = [
     items: [
       {
         q: "What can AI automation actually do for us?",
-        a: "Take repetitive work off your team: answering and routing enquiries, booking, handling documents and data, drafting replies — inside your website and inside the tools your team already uses.",
+        a: "Take repetitive work off your team: answering and routing enquiries, booking, handling documents and data, and drafting replies. It works inside your website and inside the tools your team already uses.",
       },
       QA["Is AI safe to put in front of our customers?"],
       {
@@ -137,13 +140,13 @@ export type Stage = {
   /** When it typically happens, for a website (`whenShort` on the home page's band). */
   when: string;
   whenShort: string;
-  image: string;
-  imageAlt: string;
+  /** Its photograph (content/images.ts). */
+  photo: Photo;
 };
 
 /**
  * The methodology: five stages, each with what happens, what you bring and
- * what we produce. The days are typical for a website — a platform or an
+ * what we produce. The days are typical for a website; a platform or an
  * automation is planned stage by stage in its own quote. ("About fourteen
  * days" is the client's to confirm.)
  */
@@ -154,73 +157,68 @@ export const STAGES: Stage[] = [
     line: "Understand the business before touching the website.",
     happens:
       "A thirty-minute call and the free audit. We look at what you have the way your customers do, how enquiries reach you today, and what is slowing you down.",
-    bring: ["Half an hour for the call", "Access to the current site, its analytics and the tools you use", "A few real enquiries — good and bad"],
+    bring: ["Half an hour for the call", "Access to the current site, its analytics and the tools you use", "A few real enquiries, good and bad"],
     produce: ["The audit write-up: what works, what costs you enquiries, what we would build", "Your goals and constraints, written down"],
     when: "Days 1–2",
     whenShort: "Days 1–2",
-    image: `${BASE}/method/discover.webp`,
-    imageAlt: "The Nerodyn stone whole: one piece of polished black glass.",
+    photo: PHOTOS["method-discover"],
   },
   {
     n: "02",
     title: "Define",
     line: "Agree exactly what is being built.",
     happens:
-      "We turn what we learned into a written scope — the pages and screens, the features, the integrations, who supplies which content, how success is judged — and a fixed quote with a launch date.",
+      "We turn what we learned into a written scope (the pages and screens, the features, the integrations, who supplies which content and how success is judged) and a fixed quote with a launch date.",
     bring: ["Decisions on what matters most", "The person who signs off", "Any dates that can’t move"],
     produce: ["The written scope", "A fixed quote and a launch date", "A plan of who does what, and when"],
     when: "By day 3",
     whenShort: "By day 3",
-    image: `${BASE}/method/define.webp`,
-    imageAlt: "The stone in pieces, each one finding its place.",
+    photo: PHOTOS["method-define"],
   },
   {
     n: "03",
     title: "Design",
     line: "See it working before it is built.",
     happens:
-      "The plan of every page, the words — written with you — and a clickable prototype with your real content in it, which you approve before a line of production code is written.",
+      "The plan of every page, the words (written with you) and a clickable prototype with your real content in it. You approve it before a line of production code is written.",
     bring: ["The facts only you know", "Feedback within the agreed windows", "Your brand files, if you have them"],
     produce: ["A plan of every page", "The copy", "A clickable prototype you approve"],
     when: "From day 3",
     whenShort: "From day 3",
-    image: `${BASE}/method/design.webp`,
-    imageAlt: "The stone opened into an exploded view, its crown lifted clear of the pieces below.",
+    photo: PHOTOS["method-design"],
   },
   {
     n: "04",
     title: "Build",
     line: "Engineered properly, and connected to your tools.",
     happens:
-      "Production code, the editor your team will use, the integrations and automations, testing on real phones and screens, accessibility and speed checks — on a review link you can click through.",
+      "Production code, the editor your team will use, the integrations and automations, testing on real phones and screens, and accessibility and speed checks, all on a review link you can click through.",
     bring: ["Access to the systems it connects to", "Test data, where it is needed", "Time to try it"],
     produce: ["The working site or platform on a review link", "Its test results"],
     when: "To day 11",
     whenShort: "To day 11",
-    image: `${BASE}/method/build.webp`,
-    imageAlt: "The pieces of the stone climbing in a spiral round its glowing core.",
+    photo: PHOTOS["method-build"],
   },
   {
     n: "05",
     title: "Launch and care",
     line: "Live, handed over in your name, and looked after.",
     happens:
-      "The launch checklist — old addresses redirected, analytics and search set up, backups on — then the handover and training, and care for as long as you want it.",
+      "The launch checklist (old addresses redirected, analytics and search set up, backups on), then the handover and training, and care for as long as you want it.",
     bring: ["Domain and hosting access, in your name", "The people who will use it"],
     produce: ["The live site", "Every account, the code and the content in your name", "Plain notes on how it all works"],
     when: "Day 14, and after",
     whenShort: "Day 14",
-    image: `${BASE}/method/live.webp`,
-    imageAlt: "The core of the stone, full of indigo light, with the pieces drifting round it.",
+    photo: PHOTOS["method-live"],
   },
 ];
 
 /** How we work, in four words (methodology, studio). */
 export const PRINCIPLES = [
-  { name: "Ownership", line: "You own it all — code, domain, every asset. No platform holds you hostage." },
+  { name: "Ownership", line: "You own it all: the code, the domain and every asset. No platform holds you hostage." },
   { name: "Craft", line: "Made to fit your business, not stamped from a theme ten others bought." },
   { name: "Clarity", line: "Straight answers in plain language, tied to your bottom line. Never left guessing." },
-  { name: "Proof", line: "Useful first: we audit what you have before you spend anything — free." },
+  { name: "Proof", line: "Useful first: we audit what you have, free, before you spend anything." },
 ];
 
 /** Contact. The social profiles show only once they are filled in (the client supplies them). */
@@ -229,6 +227,13 @@ export const CONTACT = {
   linkedin: "",
   instagram: "",
 };
+
+/**
+ * Where the studio is. nerodyn.com says "Engineered in Auckland"; no street
+ * address is published (there is no shopfront), so the city and country are
+ * all the site states, here and in the structured data.
+ */
+export const PLACE = { city: "Auckland", country: "New Zealand", timeZone: "Pacific/Auckland" };
 
 /**
  * Where the audit form posts (JSON, CORS). The static site has no server of its
@@ -246,6 +251,7 @@ export const PAGES = {
   work: `${BASE}/work/`,
   project: (slug: string) => `${BASE}/work/${slug}/`,
   methodology: `${BASE}/methodology/`,
+  audit: `${BASE}/audit/`,
   studio: `${BASE}/studio/`,
   pricing: `${BASE}/pricing/`,
   blog: `${BASE}/blog/`,
@@ -265,4 +271,10 @@ export const INDEXABLE = Boolean(process.env.NEXT_PUBLIC_SITE_URL);
 
 /** A page's absolute URL (for structured data) from its href (which carries the base path). */
 export const abs = (href: string) => `${SITE_URL}${href.slice(BASE.length)}`;
+
+/** A page's or file's path relative to the site root, for metadata (metadataBase adds the rest). */
+export const rel = (href: string) => href.slice(BASE.length).replace(/^\//, "");
+
+/** A page's share card (public/og/<name>.jpg, 1200×630, made by tools/qa/ogcards.mjs). */
+export const ogCard = (name: string, alt: string) => ({ url: `og/${name}.jpg`, width: 1200, height: 630, alt });
 

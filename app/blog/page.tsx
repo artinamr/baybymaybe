@@ -1,47 +1,44 @@
 import { Page, Kicker, Title, Closing } from "@/components/site/Page";
 import { BlogIndex } from "@/components/blog/BlogIndex";
-import { PAGES } from "@/lib/content";
+import { ArticleCard } from "@/components/blog/ArticleCard";
+import { BlogLd } from "@/components/site/JsonLd";
+import { Photo } from "@/components/site/Photo";
+import { PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { PUBLISHED, TOPICS, longDate, topicLabel } from "@/content/blog";
 
 export const metadata = pageMeta({
-  title: "Blog",
+  title: "Blog: websites, platforms and AI for NZ businesses",
   description:
-    "Plain, checked answers for small and medium businesses in New Zealand about websites, platforms and AI automation — from Nerodyn.",
+    "Plain, checked answers for New Zealand businesses about websites, platforms and AI automation, written by the Nerodyn team with every source listed.",
   path: "blog/",
   feed: true,
+  image: ogCard("blog", "The Nerodyn blog: plain, checked answers about websites, platforms and AI automation."),
 });
 
-/** THE BLOG — the newest article set large, then the rest by date, filterable by topic. */
+/** THE BLOG: the newest article set large, then the rest as cards, filterable by topic. */
 export default function Blog() {
   const [first, ...rest] = PUBLISHED;
-  const card = (a: (typeof PUBLISHED)[number]) => ({
-    slug: a.slug,
-    href: PAGES.article(a.slug),
-    title: a.title,
-    description: a.description,
-    topic: a.topic,
-    topicLabel: topicLabel(a.topic),
-    date: a.published,
-    dateLabel: longDate(a.published),
-    minutes: a.minutes,
-  });
+  const topics = TOPICS.map((t) => ({ ...t, count: rest.filter((a) => a.topic === t.key).length }));
+  // The filter's rule: the list carries the chosen topic, the other topics' cards step aside.
+  const filterCss = TOPICS.map((t) => `.bl-index[data-on="${t.key}"] [data-topic]:not([data-topic="${t.key}"]){display:none}`).join("");
   return (
     <Page here="blog" crumbs={[{ name: "Blog", href: PAGES.blog }]}>
+      <BlogLd articles={PUBLISHED} />
+      <style>{filterCss}</style>
       <section className="sp-hero">
         <Kicker>Blog</Kicker>
         <Title lines={["Questions owners ask,", "answered properly."]} />
         <p className="sp-lede" data-rv>
-          Longer answers to what small and medium businesses ask us about websites, platforms and AI automation — written
+          Longer answers to what small and medium businesses ask us about websites, platforms and AI automation. Written
           plainly, with the facts checked and the sources listed, so you can decide for yourself.
         </p>
       </section>
 
       {first ? (
-        <article className="bl-feature" data-rv>
+        <article className="bl-feature" data-rv aria-labelledby="bl-feature-title">
           <a className="bl-feature-img" href={PAGES.article(first.slug)} tabIndex={-1} aria-hidden>
-            {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
-            <img src={first.cover.src} alt="" width={2400} height={1100} decoding="async" />
+            <Photo p={first.cover} sizes="(min-width: 1000px) 58vw, 92vw" priority decorative />
           </a>
           <div className="bl-feature-text">
             <p className="bl-kind">
@@ -51,7 +48,7 @@ export default function Blog() {
               </span>
               <span>{first.minutes} min read</span>
             </p>
-            <h2 className="bl-feature-title">
+            <h2 className="bl-feature-title" id="bl-feature-title">
               <a href={PAGES.article(first.slug)}>{first.title}</a>
             </h2>
             <p className="bl-desc">{first.short}</p>
@@ -64,13 +61,29 @@ export default function Blog() {
 
       {rest.length ? (
         <section className="bl-more" aria-label="More articles">
-          <BlogIndex items={rest.map(card)} topics={TOPICS} />
+          <BlogIndex topics={topics}>
+            <div className="bl-grid">
+              {rest.map((a, i) => (
+                <ArticleCard key={a.slug} a={a} delay={(i % 3) * 90} />
+              ))}
+            </div>
+          </BlogIndex>
         </section>
       ) : null}
 
+      <section className="sp-block bl-feed" aria-label="Follow the blog">
+        <p className="bl-feed-line" data-rv>
+          Follow new articles with the{" "}
+          <a className="text-link" href={`${PAGES.blog}feed.xml`}>
+            RSS feed
+          </a>
+          .
+        </p>
+      </section>
+
       <Closing
         title="Rather ask about your own?"
-        line="Start with the free audit — a straight answer on what you have, within two days."
+        line="Start with the free audit: a straight answer on what you have, within two days."
         more={{ label: "See the services", href: PAGES.services }}
       />
     </Page>

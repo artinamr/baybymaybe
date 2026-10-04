@@ -24,7 +24,7 @@ export const STORY = [
   },
   {
     title: "Seconds",
-    text: "A buyer decides in seconds, before reading a word. Slow, dated or generic — they close the tab and call the next company. You never know it happened.",
+    text: "A buyer decides in seconds, before reading a word. Slow, dated or generic? They close the tab and call the next company. You never know it happened.",
   },
   {
     title: "The cut",
@@ -32,7 +32,7 @@ export const STORY = [
   },
   {
     title: "The light inside",
-    text: "Then we put intelligence inside it: AI that greets every visitor, asks the right questions, screens out the noise — and routes the serious ones straight to you.",
+    text: "Then we put intelligence inside it: AI that greets every visitor, asks the right questions, screens out the noise, and routes the serious ones straight to you.",
   },
   {
     title: "Yours",

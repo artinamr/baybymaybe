@@ -4,7 +4,7 @@ import { CONTACT } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
 export const metadata: Metadata = pageMeta({
-  title: "Privacy",
+  title: "Privacy policy",
   description: "What personal information the Nerodyn website collects, why, who else sees it, and how to have it corrected or deleted.",
   path: "privacy/",
 });
@@ -80,7 +80,7 @@ const SECTIONS: LegalSection[] = [
     title: "How long we keep it",
     body: (
       <p>
-        For as long as we need it to help you, or as long as the law requires — then we delete it. You can ask us to
+        For as long as we need it to help you, or as long as the law requires. Then we delete it. You can ask us to
         delete it sooner at any time.
       </p>
     ),

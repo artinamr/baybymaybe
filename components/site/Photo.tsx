@@ -1,0 +1,41 @@
+import type { Photo as PhotoData } from "@/content/images";
+
+/**
+ * A photograph from content/images.ts: both sizes offered (the browser takes
+ * the one the screen needs), its own width and height (no layout shift) and
+ * its alt text. `sizes` says how wide it is drawn; `priority` is for the one
+ * picture in the first screen (the page's banner).
+ */
+export function Photo({
+  p,
+  sizes,
+  priority = false,
+  decorative = false,
+  className,
+}: {
+  p: PhotoData;
+  sizes: string;
+  priority?: boolean;
+  /** Next to a title that already says it all (cards): empty alt. */
+  decorative?: boolean;
+  className?: string;
+}) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain
+    <img
+      src={p.src}
+      srcSet={p.srcSet}
+      sizes={sizes}
+      width={p.width}
+      height={p.height}
+      alt={decorative ? "" : p.alt}
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : undefined}
+      decoding="async"
+      className={className}
+    />
+  );
+}
+
+/** The width of a banner across the page: the content column (`--spw`, at most 1240 px; ~92 % below that). */
+export const BANNER_SIZES = "(min-width: 1360px) 1240px, 92vw";

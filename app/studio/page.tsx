@@ -1,12 +1,16 @@
 import { Page, Kicker, Title, Closing } from "@/components/site/Page";
-import { PAGES, PRINCIPLES } from "@/lib/content";
+import { PageLd } from "@/components/site/JsonLd";
+import { PAGES, PRINCIPLES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
+const DESCRIPTION =
+  "Nerodyn is one Auckland team of designers and engineers: who we work with, how we are set up, what we believe, and what we won’t do.";
+
 export const metadata = pageMeta({
-  title: "Studio",
-  description:
-    "Nerodyn is one team of designers and engineers who plan, build and look after websites, platforms and AI automation — who we work with, how we are set up, and what we won’t do.",
+  title: "Studio: designers and engineers in Auckland",
+  description: DESCRIPTION,
   path: "studio/",
+  image: ogCard("studio", "The Nerodyn studio: one team, from first call to launch."),
 });
 
 const FOR = [
@@ -39,16 +43,18 @@ const WONT = [
   "Promise results we can’t stand behind",
 ];
 
-/** STUDIO — who Nerodyn is for, how the team is set up, what it believes and what it won't do. */
+/** STUDIO: who Nerodyn is for, how the team is set up, what it believes and what it won't do. */
 export default function Studio() {
   return (
     <Page here="studio" crumbs={[{ name: "Studio", href: PAGES.studio }]}>
+      <PageLd type="AboutPage" href={PAGES.studio} name="About the Nerodyn studio" description={DESCRIPTION} />
       <section className="sp-hero">
         <Kicker>Studio</Kicker>
         <Title lines={["One team,", "from first call to launch."]} />
         <p className="sp-lede" data-rv>
-          Nerodyn designs, engineers and looks after websites, platforms and AI automation. The people you meet are the people who
-          do the work — with no account managers in between, and no subcontractors.
+          Nerodyn designs, engineers and looks after websites, platforms and AI automation, from Auckland, for businesses
+          across New Zealand. The people you meet are the people who do the work, with no account managers in between and
+          no subcontractors.
         </p>
       </section>
 

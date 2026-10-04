@@ -187,6 +187,73 @@ better loading … make the whole website perfect").**
 - Remaining work is ordered in `WHAT-TO-DO.md`: the client's decisions and
   the domain move.
 
+**ROUND 18 (2026-10-04, pre-launch: "the best website in New Zealand … SEO,
+GEO … the blog is where we get most of the customers … avoid m-dashes …
+images from outside, strictly not copyrighted, no watermarks … nicer, more
+interactive footer … don't do the work on the home page and the works page").**
+- **WRITING RULES ARE ENFORCED.** `docs/BLOG-GUIDE.md` is binding for all
+  copy (AGENTS.md points to it): no em dashes anywhere a reader or crawler
+  sees, no spaced en dashes, plain NZ English, banned stock phrases, every
+  fact cited with sources at the end. `scripts/copy-guard.mjs` runs inside
+  `npm run build` (so every deploy) and FAILS the build on an em dash, a
+  banned phrase or US spelling in an article, a missing source list or photo
+  credit, or an image without alt. Every em dash on the site was rewritten
+  (not swapped for commas); only code comments and GLSL still have them.
+- **PHOTOGRAPHS, NOT FILM STILLS, on the blog, methodology and services**
+  (the client: "not the stupid images of our own shader animations"). All
+  CC0 from StockSnap (found through the Openverse API; Unsplash is NOT
+  allowed: not CC0, and it blocks automated access), each with its licence
+  page, photographer and check date in `content/images.ts` (the one
+  registry; `components/site/Photo.tsx` renders it with srcset). Graded so
+  they sit together: saturation 0.62, a mild S-curve, black→RGB 14,15,21,
+  white→the paper. Two sizes each (`x.webp` + `x-<half>.webp`). The film
+  stills remain only in the home film itself and `public/og.jpg`.
+- **SEO/GEO.** Titles "Page | Nerodyn" with search-shaped titles
+  (`seoTitle` on services), descriptions ≤ 160, `en_NZ` Open Graph, large
+  image previews allowed once indexable, per-page share cards
+  (`public/og/*.jpg`, made by `tools/qa/ogcards.mjs` in the site's own
+  Inter), an entity graph on every page (`SiteLd`: ProfessionalService in
+  Auckland, NZ, areaServed NZ, contact point, knowsAbout; WebSite), page
+  types (AboutPage, ContactPage, CollectionPage), HowTo for the method,
+  FAQPage wherever questions show, BlogPosting with citations, keywords and
+  image licence data, Blog on the index. `sitemap.xml` with image entries,
+  `manifest.webmanifest`, `/llms.txt` (the site in Markdown for AI
+  assistants, from the registries), RSS with covers. nerodyn.com says
+  "Engineered in Auckland": the site now says Auckland (`PLACE` in
+  lib/content.ts; client to confirm). Old nerodyn.com URLs: `/audit/` is now
+  a real landing page (free audit + form + questions), `/cookies/` forwards
+  to `/privacy/` (noindex, canonical, meta refresh).
+- **The blog** looks like a publication now: photo cards with a topic filter
+  (CSS-driven, every card in the HTML), a reading-progress hairline
+  (scroll-driven CSS, no JS), contents that mark where you are (`Toc`),
+  three "Questions people ask" per article (registry `faq`, FAQPage), the
+  sources and the photo credit at the end, Copy link / LinkedIn / Email
+  (`Share`, plain links), photo cards for "where to go next". Service pages
+  list "From the blog".
+- **Methodology**: the shared `Page` shell (breadcrumb data), a five-stage
+  map at the top (anchors to each stage), real photos, a questions block.
+  Fixed a phone bug: every second ("flipped") stage was squeezed into two
+  columns because `.ms-stage[data-flip]` outranked the phone rule.
+- **THE SIGNATURE** (`components/site/Signature.tsx`): the mark and the name
+  edge to edge across the foot of every page (sized from the column with
+  container units, `--sig-k` = mark + gap + word in em, measured 4.17 in
+  Inter 600). Letters rise in on view; then each letter paints its share of
+  one indigo light that follows the pointer (`--mx/--my`, per-letter `--x`,
+  background-clip: text; the letter's box is padded to cover the y's tail or
+  the light clips it) and a narrow white glint (`--gx`, a registered
+  property) on arrival, on pointer enter and every ~9 s in view. The mark
+  leans toward the pointer, parts and fills indigo on hover (like the nav),
+  bursts on click and goes back to the top. Above it, a bar: ©, "Designed
+  and engineered in Auckland, New Zealand", the live Auckland time
+  (`NzTime`), back to the top.
+- **Accessibility**: muted small text raised to 62% ink (64% on the form
+  card) so axe reports 0 violations on every sub-page (only the work demos'
+  fictional brand colours remain); keyboard focus reveals a `[data-rv]`
+  element at once (`SubReveal` focusin); the form says what happens to your
+  details, with a link to the privacy policy.
+- Home and work pages: text-only edits (em dashes), the new footer, head
+  data. The 3D stage chunk is byte-identical (`1duwm8q1dv2sg.js`).
+
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
 One polished obsidian stone, shaped from the Nerodyn mark, fractured into 40
@@ -467,6 +534,10 @@ way relative to each other.
 
 - Warm paper `#F6F5F2`, ink `#0A0B10`, Electric Indigo `#5B3DF0` (never
   periwinkle; nothing indigo lighter than `#6B4BFF`).
+- Photographs on the site's own pages are outside CC0 photos in the site's
+  grade, recorded in `content/images.ts` (docs/BLOG-GUIDE.md, "Images"). Never
+  film stills or renders there; never stock clichés, watermarks or logos.
+- No em dashes in any copy (the build checks: `scripts/copy-guard.mjs`).
 - The canvas is TRANSPARENT and there is no bloom (it greys a light page); the
   only post pass is the Lens (depth of field), which keeps the page white.
   Type set in a chapter's `.back` layer sits UNDER the canvas and is genuinely
@@ -579,6 +650,23 @@ way relative to each other.
 10. **Parallel sub-agent builds hit the account's session limit** within ~15 min
    (each agent re-reads the ~100KB of spec). Build sequentially in the main
    session when usage is tight; if agents are used, make them write files early.
+11. **Unsplash blocks scripted access** (an Anubis proof-of-work page) and its
+   licence isn't CC0: don't use it. Openverse
+   (`api.openverse.org/v1/images/?license=cc0,pdm&source=stocksnap`) finds
+   CC0 photos; StockSnap's own download form (GET the page for the `_csrf`
+   and `photoId`, POST `/photo/download`) gives the original. A removed
+   StockSnap photo redirects to the home page: never use one without a live
+   licence page.
+12. **`background-clip: text` paints only inside the element's box.** With a
+   tight line-height a glyph's ascender or descender sticks out of its box
+   and vanishes when the text is transparent (the footer signature's y lost
+   its tail). Pad the box to cover the glyph and cancel it with a negative
+   margin.
+13. **A rule like `.x[data-flip]` (0,2,0) beats `.x` (0,1,0) inside a media
+   query.** List both selectors in the phone rule (methodology stages).
+14. **Puppeteer `screenshot({ clip })` is in document coordinates**: add
+   `scrollY` to a `getBoundingClientRect()` top. A DOMRect returned from
+   `page.evaluate` arrives empty: copy x/y/width/height into a plain object.
 
 ## Still owed by the client
 
@@ -591,4 +679,8 @@ artin@nerodyn.com — until it is clicked, submissions wait), the social links
 (`CONTACT.linkedin` / `instagram` — hidden until filled in), a legal review of
 /privacy and /terms (written for New Zealand), sign-off on the copy
 (including the FAQ answers and the "about fourteen days" promise), the brand
-font if different, and the real domain (`NEXT_PUBLIC_SITE_URL`).
+font if different, and the real domain (`NEXT_PUBLIC_SITE_URL`). From round
+18: confirm "Auckland" (`PLACE`, taken from nerodyn.com's "Engineered in
+Auckland"), sign off the /audit/ page's copy and the three questions under
+each article, and name an author (a person with a short bio would help search
+and AI answers more than "the Nerodyn studio").

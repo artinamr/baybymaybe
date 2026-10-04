@@ -1152,7 +1152,7 @@ html[data-intro-skip] .intro-mask > span {
 }
 .sfa-or {
   font-size: 14px;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .sf-email .email-text {
   font-size: min(2.1vw, 30px);
@@ -1163,28 +1163,219 @@ html[data-intro-skip] .intro-mask > span {
   gap: 24px;
   padding: calc(var(--vh) * 6) 0 calc(var(--vh) * 3);
 }
-/* The name, signed across the foot of the page. */
-.sf-mark {
+/* The bar under the links: who and where we are, the time there, and the way back up. */
+.sf-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 28px;
+  padding: 22px 0 0;
+  border-top: 1px solid var(--hair);
+  font-size: 13px;
+  color: color-mix(in oklab, var(--ink) 64%, transparent);
+}
+.sf-bar-c {
+  margin: 0;
+}
+.sf-bar-top {
+  font-size: 13px;
+}
+.nz-time {
+  display: inline-flex;
+  gap: 9px;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+.nz-time::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--indigo);
+  transform: translateY(-1px);
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+.nz-time[data-ready]::before {
+  opacity: 1;
+}
+.nz-time time {
+  color: var(--ink);
+}
+
+/* THE SIGNATURE (components/site/Signature.tsx): the mark and the name, signed
+   edge to edge across the foot of every page. One size from the column's
+   width: the mark, the gap and the word fill it exactly (--sig-k is their
+   width in em, measured in Inter 600). The letters rise into place; then each
+   paints its share of one light (--mx/--my, the pointer) and one glint (--gx). */
+@property --sig-r {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+@property --gx {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: -60vw;
+}
+.sf-sig-wrap {
+  container-type: inline-size;
+  padding-top: calc(var(--vh) * 6);
+}
+.sf-sig {
+  --sig-k: 4.17;
+  font-size: calc(100cqi / var(--sig-k));
   display: flex;
   align-items: flex-end;
-  gap: 2.4vw;
-  margin: 0;
-  padding-bottom: 4.6vw;
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: 18.5vw;
-  line-height: 0.9;
-  letter-spacing: -0.045em;
-  color: var(--ink);
+  gap: 0.1em;
+  line-height: 0.8;
+  padding-bottom: 0.1em;
   user-select: none;
-  /* Its line box rises over the last row of links — let clicks through. */
-  pointer-events: none;
+  -webkit-user-select: none;
 }
-.sf-logo {
-  width: 8.4vw;
-  height: auto;
+.sf-sig-mark {
   flex: none;
-  margin-bottom: 3.2vw;
+  width: 0.56em;
+  margin-bottom: 0.005em;
+  color: var(--ink);
+  border-radius: 0.04em;
+  opacity: 0;
+  translate: 0 0.25em;
+  transform-origin: 50% 62%;
+  transition:
+    opacity 900ms ease,
+    translate 1400ms var(--ease-expo),
+    transform 900ms var(--ease-expo);
+}
+.sf-sig[data-in] .sf-sig-mark {
+  opacity: 1;
+  translate: 0 0;
+}
+.sf-sig-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.sf-sig-logo path {
+  transition:
+    fill 450ms ease,
+    transform 800ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+/* Reach for the mark and its pieces part, as the stone does, and catch the indigo light. */
+.sf-sig-mark:hover path,
+.sf-sig-mark:focus-visible path {
+  fill: var(--indigo);
+}
+.sf-sig-mark:hover .lm-plate,
+.sf-sig-mark:focus-visible .lm-plate {
+  transform: translate(0, -60px);
+}
+.sf-sig-mark:hover .lm-left,
+.sf-sig-mark:focus-visible .lm-left {
+  transform: translate(-44px, 30px);
+}
+.sf-sig-mark:hover .lm-right,
+.sf-sig-mark:focus-visible .lm-right {
+  transform: translate(44px, 30px);
+}
+/* Pressed: a burst and a settle, then back to the top. */
+.sf-sig[data-part] .lm-plate {
+  animation: sig-part-plate 1100ms var(--ease-expo);
+}
+.sf-sig[data-part] .lm-left {
+  animation: sig-part-left 1100ms var(--ease-expo);
+}
+.sf-sig[data-part] .lm-right {
+  animation: sig-part-right 1100ms var(--ease-expo);
+}
+@keyframes sig-part-plate {
+  28% {
+    transform: translate(0, -170px);
+  }
+}
+@keyframes sig-part-left {
+  28% {
+    transform: translate(-130px, 80px) rotate(-6deg);
+  }
+}
+@keyframes sig-part-right {
+  28% {
+    transform: translate(130px, 80px) rotate(6deg);
+  }
+}
+.sf-sig-word {
+  --mx: -999px;
+  --my: -999px;
+  position: relative;
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+  color: var(--ink);
+  transition: --sig-r 900ms var(--ease-expo);
+}
+.sf-sig[data-hover] .sf-sig-word {
+  --sig-r: 0.95em;
+}
+/* Each letter's window: tall enough for the ascenders and the y's tail. */
+.sf-sig-c {
+  display: inline-block;
+  vertical-align: bottom;
+  overflow: hidden;
+  padding: 0.08em 0.03em 0.26em;
+  margin: -0.08em -0.03em -0.26em;
+}
+.sf-sig-l {
+  display: inline-block;
+  /* Its box must cover the whole glyph: the light is painted only inside it (background-clip: text). */
+  padding: 0.08em 0 0.26em;
+  margin: -0.08em 0 -0.26em;
+  transform: translateY(112%);
+  transition: transform 1350ms var(--ease-expo);
+  transition-delay: calc(var(--i) * 70ms + 60ms);
+}
+.sf-sig[data-in] .sf-sig-l {
+  transform: none;
+}
+.sf-sig[data-lit] .sf-sig-l {
+  color: transparent;
+  background-image:
+    linear-gradient(
+      100deg,
+      rgb(255 255 255 / 0) calc(var(--gx) - var(--x, 0px) - 0.42em),
+      rgb(255 255 255 / 0.95) calc(var(--gx) - var(--x, 0px)),
+      rgb(255 255 255 / 0) calc(var(--gx) - var(--x, 0px) + 0.42em)
+    ),
+    radial-gradient(circle var(--sig-r) at calc(var(--mx) - var(--x, 0px)) var(--my), #6b4bff 0%, #5b3df0 34%, rgb(91 61 240 / 0) 100%),
+    linear-gradient(var(--ink), var(--ink));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.sf-sig[data-glint] .sf-sig-word {
+  animation: sig-glint 1500ms var(--ease-io) both;
+}
+@keyframes sig-glint {
+  from {
+    --gx: -1.2em;
+  }
+  to {
+    --gx: calc(100cqi + 1.2em);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-sig-l,
+  .sf-sig-mark {
+    transform: none;
+    translate: none;
+    opacity: 1;
+    transition: none;
+  }
+  .sf-sig[data-part] path {
+    animation: none;
+  }
 }
 .f-col {
   display: flex;
@@ -1199,7 +1390,7 @@ html[data-intro-skip] .intro-mask > span {
 .f-h {
   font-size: 12px;
   font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
   margin-bottom: 4px;
 }
 
@@ -2058,7 +2249,7 @@ html[data-stone-hover] {
 }
 .sp-meta {
   font-size: 13px;
-  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
   margin: -14px 0 24px;
 }
 .sp-inline {
@@ -2345,7 +2536,7 @@ html[data-stone-hover] {
 .doc-toc-h {
   font-size: 12px;
   font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
   margin: 0 0 6px;
 }
 .doc-toc a {
@@ -2418,7 +2609,10 @@ html[data-stone-hover] {
   .sp-links .sp-link {
     display: none;
   }
+  /* [data-flip] too: its desktop columns (0,2,0) used to win here and squeezed
+     every second stage into two narrow columns on phones. */
   .ms-stage,
+  .ms-stage[data-flip],
   .own {
     grid-template-columns: 1fr;
     row-gap: 28px;
@@ -2624,9 +2818,12 @@ html[data-nowebgl] .pot-fill {
     grid-template-columns: 1fr 1fr;
     row-gap: 30px;
   }
-  .sf-mark {
-    font-size: 17.5vw;
-    padding-bottom: 5vw;
+  .sf-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sf-sig-wrap {
+    padding-top: calc(var(--vh) * 5);
   }
 }
 
@@ -3030,7 +3227,7 @@ html[data-nowebgl] .pot-fill {
 }
 .qa-n {
   font-size: 11px;
-  color: color-mix(in oklab, var(--ink) 40%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .qa-text {
   transition: color 300ms ease;
@@ -3118,7 +3315,7 @@ html[data-nowebgl] .pot-fill {
 }
 .af-opt {
   font-weight: 400;
-  color: color-mix(in oklab, var(--ink) 42%, transparent);
+  color: color-mix(in oklab, var(--ink) 64%, transparent);
 }
 .af-need {
   display: grid;
@@ -3236,7 +3433,7 @@ html[data-nowebgl] .pot-fill {
 .af-note {
   font-size: 13px;
   line-height: 1.5;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  color: color-mix(in oklab, var(--ink) 64%, transparent);
   margin: 0;
   max-width: 36ch;
 }
@@ -3695,7 +3892,7 @@ html[data-story] .stone-cursor-dot {
   gap: 6px 10px;
   font-size: 13px;
   font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .crumbs li {
   display: inline-flex;
@@ -3994,7 +4191,7 @@ html[data-story] .stone-cursor-dot {
   align-items: baseline;
   margin: 34px 0 0;
   font-size: 14px;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .ct-email {
   font-family: var(--display);
@@ -4086,7 +4283,7 @@ html[data-story] .stone-cursor-dot {
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
   margin: 0 0 12px;
 }
 .menu-here-links {
@@ -4197,7 +4394,7 @@ html[data-story] .stone-cursor-dot {
   background: var(--paper);
   font-size: 12px;
   text-align: center;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
   transform: translateX(-18px);
 }
 .dev-screen {
@@ -4259,7 +4456,7 @@ html[data-story] .stone-cursor-dot {
 }
 .cs-meta span {
   font-size: 12px;
-  color: color-mix(in oklab, var(--ink) 50%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .cs-meta a {
   color: var(--indigo);
@@ -4270,7 +4467,7 @@ html[data-story] .stone-cursor-dot {
 .cs-note {
   margin: 16px 0 0;
   font-size: 13px;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .cs-touch-hint {
   display: none;
@@ -4458,7 +4655,7 @@ html[data-story] .stone-cursor-dot {
   gap: 6px 14px;
   font-size: 12px;
   font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .wk-kind b {
   font-weight: 500;
@@ -4999,7 +5196,7 @@ ol.dg {
 .dg-yes {
   font-size: 12px;
   font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 58%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .dg-branch {
   position: absolute;
@@ -5276,7 +5473,7 @@ ol.dg {
   gap: 6px 14px;
   font-size: 12px;
   font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 58%, transparent);
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
   margin: 0;
 }
 .bl-kind b {
@@ -5317,47 +5514,97 @@ ol.dg {
   transform: translateX(5px);
 }
 .bl-more {
-  padding-bottom: calc(var(--vh) * 12);
+  padding: calc(var(--vh) * 4) 0 calc(var(--vh) * 10);
+  border-top: 1px solid var(--hair-soft);
 }
-.bl-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--hair);
+.bl-more .bl-filter {
+  margin-top: calc(var(--vh) * 6);
 }
-.bl-row {
+/* An article as a card: its photograph, the topic and date, the title, one line. */
+.bl-grid {
   display: grid;
-  grid-template-columns: 170px minmax(0, 1fr) 130px;
-  column-gap: 32px;
-  align-items: baseline;
-  padding: 30px 0 32px;
-  border-bottom: 1px solid var(--hair);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 72px 36px;
 }
-.bl-row[hidden] {
-  display: none;
+.bl-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.bl-date {
-  font-size: 13px;
-  color: color-mix(in oklab, var(--ink) 58%, transparent);
-  margin: 0;
+.bl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 22px;
 }
-.bl-title {
+.bl-card:focus-visible {
+  outline-offset: 8px;
+}
+.bl-card-img {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  margin-bottom: 8px;
+  border: 1px solid var(--hair-soft);
+  border-radius: 20px;
+  background: #eeede9;
+}
+.bl-card-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1400ms var(--ease-expo);
+}
+.bl-card:hover .bl-card-img img {
+  transform: scale(1.04);
+}
+.bl-card-title {
   font-family: var(--display);
   font-weight: 500;
-  font-size: min(2.4vw, 32px);
-  line-height: 1.14;
+  font-size: min(2vw, 27px);
+  line-height: 1.16;
   letter-spacing: -0.02em;
-  margin: 0 0 10px;
+  margin: 2px 0 0;
+  color: var(--ink);
   text-wrap: balance;
+  transition: color 300ms ease;
 }
-.bl-row .bl-kind {
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+.bl-card:hover .bl-card-title {
+  color: var(--indigo);
+}
+.bl-card-desc {
+  font-size: 15px;
+  line-height: 1.55;
+  color: color-mix(in oklab, var(--ink) 68%, transparent);
+  max-width: 46ch;
+}
+.bl-card-go {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+.bl-card-go span {
+  display: inline-block;
+  transition: transform 450ms var(--ease-expo);
+}
+.bl-card:hover .bl-card-go span {
+  transform: translateX(5px);
 }
 .bl-none {
   padding: 30px 0;
   color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.bl-feed {
+  padding-top: 0;
+}
+.bl-feed-line {
+  font-size: 15px;
+  color: color-mix(in oklab, var(--ink) 64%, transparent);
+}
+/* A few articles on another page (a service, the audit). */
+.bl-related .bl-related-head {
+  margin-bottom: calc(var(--vh) * 6);
 }
 
 @media (max-width: 900px) {
@@ -5403,15 +5650,311 @@ ol.dg {
   .bl-feature-title {
     font-size: 8.4vw;
   }
-  .bl-row {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 10px;
+}
+@media (max-width: 1100px) {
+  .bl-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .bl-title {
+  .bl-card-title {
+    font-size: 24px;
+  }
+}
+@media (max-width: 700px) {
+  .bl-grid,
+  .bl-grid-2 {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 56px;
+  }
+}
+
+/* ---- An article, part two: progress, where you are, questions, credit, share ---- */
+/* How far through you are: a hairline of indigo along the top, driven by the scroll (no script). */
+.ar-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 40;
+  background: var(--indigo);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  .ar-progress {
+    animation: ar-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@keyframes ar-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+/* The section you are reading, marked in the contents. */
+.ar-toc a {
+  position: relative;
+}
+.ar-toc a[aria-current="true"] {
+  color: var(--ink);
+}
+.ar-toc a::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--indigo);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 300ms ease,
+    transform 500ms var(--ease-expo);
+}
+.ar-toc a[aria-current="true"]::before {
+  opacity: 1;
+  transform: none;
+}
+.ar-faq {
+  margin-top: 72px;
+  border-top: 1px solid var(--hair);
+}
+.ar-faq .ar-h2 {
+  margin-top: 34px;
+  font-size: min(2.4vw, 30px);
+}
+.ar-faq dl {
+  margin: 0;
+  border-top: 1px solid var(--hair);
+}
+.ar-faq dl > div {
+  padding: 22px 0 20px;
+  border-bottom: 1px solid var(--hair);
+}
+.ar-faq dt {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.ar-faq dd {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.65;
+}
+.ar-credit {
+  margin: 26px 0 0 !important;
+  padding-top: 18px;
+  border-top: 1px solid var(--hair-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 64%, transparent);
+}
+.ar-credit-h {
+  margin-right: 8px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.prose .ar-credit a {
+  color: inherit;
+}
+.prose .ar-credit a:hover {
+  color: var(--indigo);
+}
+.ar-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-top: 56px;
+  padding: 24px 26px;
+  border: 1px solid var(--hair);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+.ar-share-h {
+  margin: 0 !important;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.ar-share-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.prose .ar-share-b,
+.ar-share-b {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper);
+  transition:
+    background 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease;
+}
+.prose .ar-share-b:hover,
+.ar-share-b:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.ar-share-b svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ar-rel .bl-grid {
+  margin: 30px 0 52px;
+}
+@media (max-width: 900px) {
+  .ar-faq .ar-h2 {
     font-size: 26px;
   }
-  .bl-row .bl-kind {
-    flex-direction: row;
-    align-items: baseline;
+  .ar-toc a::before {
+    display: none;
   }
+  .ar-share {
+    padding: 20px;
+  }
+}
+
+/* ---- The methodology at a glance: five stages on one line, each a way in ---- */
+.ms-map {
+  margin: 0 0 calc(var(--vh) * 7);
+}
+.ms-map ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+}
+.ms-map li + li {
+  border-left: 1px solid var(--hair-soft);
+}
+.ms-map a {
+  display: grid;
+  gap: 6px;
+  height: 100%;
+  padding: 20px 20px 22px;
+  transition: background 350ms ease;
+}
+.ms-map li:first-child a {
+  padding-left: 0;
+}
+.ms-map a:hover {
+  background: color-mix(in oklab, var(--indigo) 4%, transparent);
+}
+.ms-map-n {
+  color: var(--indigo);
+}
+.ms-map-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  transition: color 300ms ease;
+}
+.ms-map a:hover .ms-map-t {
+  color: var(--indigo);
+}
+.ms-map-w {
+  font-size: 13px;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.ms-stage {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
+@media (max-width: 900px) {
+  .ms-map ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ms-map li + li {
+    border-left: 0;
+    border-top: 1px solid var(--hair-soft);
+  }
+  .ms-map a,
+  .ms-map li:first-child a {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .ms-map-t {
+    font-size: 19px;
+  }
+}
+
+/* ---- Contact: where we are, and the time there; the form's privacy line ---- */
+.ct-place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 64%, transparent);
+}
+.af-privacy {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 64%, transparent);
+}
+.af-privacy a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.af-privacy a:hover {
+  color: var(--indigo);
+}
+
+/* The audit page: the contact layout, with a longer title. */
+.au .ct-head .sp-h1 {
+  font-size: min(4.3vw, 64px);
+}
+
+/* An old address that has moved (/cookies/): one line on the paper while it forwards. */
+.moved {
+  display: grid;
+  place-items: center;
+  min-height: 70vh;
+  padding: 0 var(--g);
+  text-align: center;
+}
+.moved a {
+  color: var(--indigo);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

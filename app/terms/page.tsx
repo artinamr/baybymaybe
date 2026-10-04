@@ -4,7 +4,7 @@ import { CONTACT } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
 export const metadata: Metadata = pageMeta({
-  title: "Terms",
+  title: "Terms of use",
   description: "The terms of using the Nerodyn website: its content, the free audit, links, liability and the law that applies.",
   path: "terms/",
 });
@@ -24,9 +24,10 @@ const SECTIONS: LegalSection[] = [
     title: "Our content",
     body: (
       <p>
-        Everything on this website — the words, the design, the 3D work, the images and the code — belongs to Nerodyn
-        unless we say otherwise. You are welcome to view it and to share links to it; please do not copy, reproduce or
-        reuse it without our written permission.
+        Everything on this website (the words, the design, the 3D work and the code) belongs to Nerodyn unless we say
+        otherwise. The photographs are public-domain images (CC0 1.0) from StockSnap. You are
+        welcome to view the site and to share links to it; please do not copy, reproduce or reuse our work without our
+        written permission.
       </p>
     ),
   },
@@ -46,8 +47,8 @@ const SECTIONS: LegalSection[] = [
     title: "The free audit",
     body: (
       <p>
-        The free audit is an honest, good-faith review of your website. It is our opinion and advice — not a guarantee of
-        any result — and asking for one does not commit you to anything.
+        The free audit is an honest, good-faith review of your website. It is our opinion and advice, not a guarantee of
+        any result, and asking for one does not commit you to anything.
       </p>
     ),
   },
@@ -66,7 +67,7 @@ const SECTIONS: LegalSection[] = [
           are not liable for any loss that comes from using it or from relying on what it says.
         </p>
         <p>
-          Nothing in these terms takes away any right you have under consumer law that cannot be excluded — in New
+          Nothing in these terms takes away any right you have under consumer law that cannot be excluded: in New
           Zealand, under the Consumer Guarantees Act 1993 and the Fair Trading Act 1986.
         </p>
       </>

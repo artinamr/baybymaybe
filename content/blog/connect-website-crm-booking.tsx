@@ -19,8 +19,8 @@ export default function Body() {
       <p>
         A website, a CRM, a booking tool and an accounting package can each be good at their job and still make a lot of
         work, if a person has to carry information between them by hand. Connecting them means each detail is entered
-        once — by the customer, usually — and arrives everywhere it is needed. This article covers what to connect, the
-        ways to do it, and the parts that are easy to forget: consent, and knowing when a connection has quietly stopped
+        once (usually by the customer) and arrives everywhere it is needed. This article covers what to connect, the ways
+        to do it, and the parts that are easy to forget: consent, and knowing when a connection has quietly stopped
         working.
       </p>
 
@@ -42,7 +42,7 @@ export default function Body() {
 
       <H2 id="common">The common connections</H2>
       <p>For most service businesses, a handful of connections do most of the work:</p>
-      <Figure caption="Where each thing a customer does on the website should end up — and what happens when a connection fails.">
+      <Figure caption="Where each thing a customer does on the website should end up, and what happens when a connection fails.">
         <Routes
           rows={[
             { from: "Enquiry form", to: ["CRM: contact + enquiry", "Team alert"], note: "Assigned to a person, with a reply due." },
@@ -50,7 +50,7 @@ export default function Body() {
             { from: "Online payment", to: ["Accounting: invoice marked paid"], note: "Receipt to the customer." },
             { from: "Newsletter sign-up", to: ["Email platform, with consent recorded"] },
           ]}
-          failure={<p>If any step fails, a named person is told the same day — and the original submission is kept, so nothing is lost.</p>}
+          failure={<p>If any step fails, a named person is told the same day, and the original submission is kept, so nothing is lost.</p>}
         />
       </Figure>
 
@@ -63,8 +63,9 @@ export default function Body() {
         </li>
         <li>
           <strong>A connector service.</strong> General-purpose automation services pass information between hundreds of
-          tools using rules you set up — “when a form is submitted, create a contact”. Quick to start, priced
-          by volume, and easy to change, but the logic lives outside both systems and needs someone to look after it.
+          tools using rules you set up, such as “when a form is submitted, create a contact”. Quick to start,
+          priced by volume, and easy to change, but the logic lives outside both systems and needs someone to look after
+          it.
         </li>
         <li>
           <strong>A custom integration.</strong> Code written against each system’s official interface (its API).
@@ -109,7 +110,7 @@ export default function Body() {
       />
       <Callout title="Decide which system is the source of truth">
         <p>
-          For each kind of information — contact details, bookings, invoices — name one system as the master. The others
+          For each kind of information (contact details, bookings, invoices), name one system as the master. The others
           read from it. Two-way syncing between systems that both think they’re in charge is where duplicates and
           overwrites come from.
         </p>
@@ -122,8 +123,8 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>Whose calendar is the truth.</strong> If staff also book appointments by phone, every booking — online or
-          not — has to land in the same calendar, or the website will offer times that are already taken.
+          <strong>Whose calendar is the truth.</strong> If staff also book appointments by phone, every booking, online or
+          not, has to land in the same calendar, or the website will offer times that are already taken.
         </li>
         <li>
           <strong>Time zones.</strong> Show times in New Zealand time and say so, especially if clients may be overseas or
@@ -138,7 +139,7 @@ export default function Body() {
           and what happens to the CRM record when they do.
         </li>
         <li>
-          <strong>Confirmations and reminders.</strong> What the customer receives, from which address, and when — and
+          <strong>Confirmations and reminders.</strong> What the customer receives, from which address and when, and
           that a reply to that email reaches a person.
         </li>
       </ul>
@@ -158,7 +159,7 @@ export default function Body() {
         <li>
           <strong>Marketing needs consent.</strong> The Department of Internal Affairs sums up the Unsolicited Electronic
           Messages Act 2007 in three steps for commercial messages: send them only with consent (express, inferred or
-          deemed), clearly identify who sent them and how to contact you, and include a working unsubscribe — honouring
+          deemed), clearly identify who sent them and how to contact you, and include a working unsubscribe, honouring
           requests within five working days.
           <Cite n={2} /> So an enquiry is not a newsletter sign-up: record marketing consent separately, with the date and
           the wording the person agreed to, and connect unsubscribes back to the CRM.
@@ -208,7 +209,7 @@ export default function Body() {
       <H2 id="start-small">Start with one connection</H2>
       <p>
         It is tempting to connect everything at once. It is usually better to connect the one thing that costs the most
-        time today — often enquiries into the CRM — run it for a few weeks, and fix what turns up. Each connection after
+        time today (often enquiries into the CRM), run it for a few weeks, and fix what turns up. Each connection after
         that is easier, because the field map, the alerts and the habit of checking already exist.
       </p>
       <p>
@@ -221,7 +222,7 @@ export default function Body() {
         items={[
           "Each kind of information has one system that is its source of truth.",
           "A written field map for every connection, agreed before building.",
-          "Official integrations or documented APIs only — no screen-scraping.",
+          "Official integrations or documented APIs only, never screen-scraping.",
           "Connections run on business accounts, with two-step sign-in.",
           "Every submission stored before it is passed on.",
           "Failures retried, then reported to a named person.",

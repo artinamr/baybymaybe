@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useRef, useState, type FormEvent } from "react";
-import { CONTACT, FORM_ENDPOINT } from "@/lib/content";
+import { CONTACT, FORM_ENDPOINT, PAGES } from "@/lib/content";
 
 const NEEDS = ["Website", "Platform", "AI automation", "Not sure yet"] as const;
 type State = "idle" | "sending" | "sent" | "error";
@@ -14,9 +14,9 @@ const COPY: Record<Kind, { tab: string; subject: string; send: string; note: str
     subject: "Free audit",
     send: "Start my free audit",
     note: "Free, and no pitch. We reply within two days.",
-    done: "It’s with us. You’ll have your audit — a straight answer, no pitch — within two days, at the address you gave.",
+    done: "It’s with us. You’ll have your audit, a straight answer with no pitch, within two days at the address you gave.",
     msgLabel: "Anything we should know?",
-    msgHint: "— optional",
+    msgHint: "(optional)",
     msgPlaceholder: "What’s working, what isn’t, what you’d like it to do.",
   },
   project: {
@@ -31,11 +31,11 @@ const COPY: Record<Kind, { tab: string; subject: string; send: string; note: str
   },
 };
 
-/** A plain email with everything the form holds — the way through if the post fails. */
+/** A plain email with everything the form holds: the way through if the post fails. */
 function mailto(f: { kind: Kind; name: string; email: string; site: string; need: string; message: string }) {
-  const subject = encodeURIComponent(`${COPY[f.kind].subject}${f.site ? ` — ${f.site}` : ""}`);
+  const subject = encodeURIComponent(`${COPY[f.kind].subject}${f.site ? `: ${f.site}` : ""}`);
   const body = encodeURIComponent(
-    `Name: ${f.name}\nEmail: ${f.email}\nWebsite: ${f.site || "—"}\nWhat we need: ${f.need}\n\n${f.message}`.trim() + "\n"
+    `Name: ${f.name}\nEmail: ${f.email}\nWebsite: ${f.site || "not given"}\nWhat we need: ${f.need}\n\n${f.message}`.trim() + "\n"
   );
   return `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
 }
@@ -99,10 +99,10 @@ export function AuditForm({ tone = "paper", intent = "audit" }: { tone?: "paper"
         body: JSON.stringify({
           name,
           email,
-          website: site || "—",
+          website: site || "Not given",
           need: needs,
-          message: message || "—",
-          _subject: `${copyFor.subject} — ${site || name}`,
+          message: message || "No message",
+          _subject: `${copyFor.subject}: ${site || name}`,
           _replyto: email,
           _template: "table",
           _captcha: "false",
@@ -221,7 +221,7 @@ export function AuditForm({ tone = "paper", intent = "audit" }: { tone?: "paper"
         </label>
         <label className="af-field af-wide">
           <span className="af-label">
-            Your website <span className="af-opt">— if you have one</span>
+            Your website <span className="af-opt">(if you have one)</span>
           </span>
           <input name="site" inputMode="url" autoComplete="url" placeholder="yourbusiness.com" />
         </label>
@@ -263,14 +263,18 @@ export function AuditForm({ tone = "paper", intent = "audit" }: { tone?: "paper"
               That didn’t go through.{" "}
               <a href={mailHref} className="af-mail">
                 Send it as an email instead
-              </a>{" "}
-              — it’s already written.
+              </a>
+              . It’s already written.
             </>
           ) : (
             <>{copyFor.note}</>
           )}
         </p>
       </div>
+      <p className="af-privacy">
+        We use your details only to reply to you, and never add you to a mailing list.{" "}
+        <a href={PAGES.privacy}>Privacy policy</a>
+      </p>
     </form>
   );
 }

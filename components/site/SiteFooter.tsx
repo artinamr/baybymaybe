@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { LogoMark } from "@/components/chrome/LogoMark";
 import { AuditForm } from "@/components/contact/AuditForm";
+import { Signature } from "./Signature";
+import { NzTime } from "./NzTime";
 import { ui } from "@/lib/stores";
 import { chapter } from "@/lib/chapters";
 import { CONTACT, PAGES } from "@/lib/content";
@@ -12,17 +13,22 @@ const EMAIL = CONTACT.email;
 
 // The home page's scroll and story code is already loaded there; these load it
 // on demand, so the other pages never download it for a footer they only link from.
-const jumpToAudit = () => import("@/lib/scroll").then((m) => m.jumpToAudit());
 const jumpToTop = () => import("@/lib/scroll").then((m) => m.jumpToS(0));
 const openStory = () => import("@/lib/story").then((m) => m.openStory());
 
 /**
- * THE FOOTER — every page ends on it. It opens with the audit form (every
+ * THE FOOTER: every page ends on it. It opens with the audit form (every
  * "free audit" on the site lands on #contact), then every way round the site,
- * and the name signed across the bottom. On the home page it is the last sheet,
- * rising over the film's final frame.
+ * where we are and the time there, and the name signed across the bottom,
+ * edge to edge (Signature). On the home page it is the last sheet, rising over
+ * the film's final frame.
  */
 export function SiteFooter({ home = false, form = true }: { home?: boolean; form?: boolean }) {
+  const top = () => {
+    if (home) return jumpToTop();
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+  };
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -53,7 +59,7 @@ export function SiteFooter({ home = false, form = true }: { home?: boolean; form
             <ol className="sfa-points">
               <li>
                 <span className="mono">01</span>
-                <p>What is working — and should stay.</p>
+                <p>What is working, and should stay.</p>
               </li>
               <li>
                 <span className="mono">02</span>
@@ -115,13 +121,7 @@ export function SiteFooter({ home = false, form = true }: { home?: boolean; form
             <p className="f-h">Help</p>
             <a href={PAGES.faq}>Questions</a>
             <a href={PAGES.contact}>Contact</a>
-            {home ? (
-              <button type="button" onClick={jumpToAudit}>
-                Free audit
-              </button>
-            ) : (
-              <a href="#contact">Free audit</a>
-            )}
+            <a href={PAGES.audit}>Free website audit</a>
             <a href={`mailto:${EMAIL}`}>Email us</a>
             {CONTACT.linkedin ? (
               <a href={CONTACT.linkedin} target="_blank" rel="noreferrer">
@@ -135,18 +135,19 @@ export function SiteFooter({ home = false, form = true }: { home?: boolean; form
             ) : null}
           </div>
           <div className="f-col">
-            <p className="f-h">© 2026 Nerodyn</p>
+            <p className="f-h">Legal</p>
             <a href={PAGES.privacy}>Privacy</a>
             <a href={PAGES.terms}>Terms</a>
-            <button type="button" className="text-link" onClick={() => (home ? jumpToTop() : window.scrollTo({ top: 0 }))}>
-              Back to the top <span aria-hidden>↑</span>
-            </button>
           </div>
         </nav>
-        <p className="sf-mark" aria-hidden>
-          <LogoMark className="sf-logo" />
-          <span>Nerodyn</span>
-        </p>
+        <div className="sf-bar">
+          <p className="sf-bar-c">© 2026 Nerodyn. Designed and engineered in Auckland, New Zealand.</p>
+          <NzTime className="nz-time sf-bar-t" />
+          <button type="button" className="text-link sf-bar-top" onClick={top}>
+            Back to the top <span aria-hidden>↑</span>
+          </button>
+        </div>
+        <Signature onTop={top} />
       </div>
     </footer>
   );

@@ -46,8 +46,8 @@ export const WORK_ITEMS: Project[] = [
     cover: `${BASE}/work/practice-website.webp`,
     coverAlt: "The Tarn & Wick home page: a deep green and cream accounting practice website with a booking call to action.",
     context: {
-      lede: "Small practices win clients by referral, then lose some of them at the website: a list of services, a phone number and a contact form that goes quiet. People choosing an accountant want three answers quickly — do you work with businesses like mine, roughly what will it cost, and how do I start?",
-      audience: "Owners of small businesses choosing or switching accountants — often reading on a phone, often in the evening.",
+      lede: "Small practices win clients by referral, then lose some of them at the website: a list of services, a phone number and a contact form that goes quiet. People choosing an accountant want three answers quickly. Do you work with businesses like mine, roughly what will it cost, and how do I start?",
+      audience: "Owners of small businesses choosing or switching accountants, often reading on a phone, often in the evening.",
     },
     scope: [
       "Positioning and a plan for every page",
@@ -68,7 +68,7 @@ export const WORK_ITEMS: Project[] = [
       },
       {
         title: "A booking flow, not a contact form",
-        body: "Three steps — topic, time, name — replace a form that waits for a reply. Only open times are offered, in New Zealand time.",
+        body: "Three steps (topic, time, name) replace a form that waits for a reply. Only open times are offered, in New Zealand time.",
       },
       {
         title: "Components, so it grows cleanly",
@@ -120,11 +120,11 @@ export const WORK_ITEMS: Project[] = [
       },
       {
         title: "Clients see their jobs, not the system",
-        body: "A short, plain view: what’s waiting for them, what’s happening, what they owe — and one button for each.",
+        body: "A short, plain view: what’s waiting for them, what’s happening, what they owe, and one button for each.",
       },
       {
         title: "Colour only where it means something",
-        body: "Status colours mark the states that need action — waiting for approval, waiting for parts — so a busy board still reads at a glance.",
+        body: "Status colours mark the states that need action (waiting for approval, waiting for parts), so a busy board still reads at a glance.",
       },
       {
         title: "Built for the phone in the van",
@@ -133,7 +133,7 @@ export const WORK_ITEMS: Project[] = [
     ],
     demonstrates: [
       "A job board shared by the office and the field",
-      "A client approval that moves the job on at once — try it above",
+      "A client approval that moves the job on at once (try it above)",
       "Team and client views of the same sample jobs",
       "Screens that work on a technician’s phone",
     ],
@@ -148,16 +148,16 @@ export const WORK_ITEMS: Project[] = [
     slug: "enquiry-desk",
     kind: "demo",
     client: "Pellow",
-    title: "An enquiry desk that drafts its own replies — and knows when not to",
+    title: "An enquiry desk that drafts its own replies, and knows when not to",
     summary:
-      "A fictional physiotherapy clinic, and the automation we would build for its inbox: enquiries read and organised, the diary checked, replies drafted in the clinic’s own words — and a person approving every one.",
+      "A fictional physiotherapy clinic, and the automation we would build for its inbox: enquiries read and organised, the diary checked, replies drafted in the clinic’s own words, and a person approving every one.",
     services: ["ai-automation"],
     url: "desk.pellow.example",
     year: "2026",
     cover: `${BASE}/work/enquiry-desk.webp`,
     coverAlt: "The Pellow enquiry desk: an inbox of sample emails, a step-by-step view of one being organised, and a log.",
     context: {
-      lede: "A clinic’s reception spends much of the day on email: booking requests, changes, questions about cover and cost. Most need the same few steps — read, find the details, check the diary, reply. A few need a clinician straight away.",
+      lede: "A clinic’s reception spends much of the day on email: booking requests, changes, questions about cover and cost. Most need the same few steps: read, find the details, check the diary, reply. A few need a clinician straight away.",
       audience: "The reception team, and the patients who write in.",
     },
     scope: [
@@ -171,7 +171,7 @@ export const WORK_ITEMS: Project[] = [
     approach: [
       {
         title: "Organise first, write second",
-        body: "The system pulls out who, what and when before it drafts a word, and shows its working — so a person can check it in seconds.",
+        body: "The system pulls out who, what and when before it drafts a word, and shows its working, so a person can check it in seconds.",
       },
       {
         title: "The clinic’s words, not the model’s",

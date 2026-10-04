@@ -20,23 +20,35 @@ const gmono = Geist_Mono({
   display: "swap",
 });
 
-const TITLE = "Nerodyn — Digital infrastructure & AI automation";
+// The home page's words for search results and shared links (every other page
+// states its own through pageMeta). Under 60 and 160 characters.
+const TITLE = "Nerodyn | Web design, platforms & AI automation, Auckland";
 const DESCRIPTION =
-  "Nerodyn designs, engineers and runs the websites and platforms companies run on — and the AI that works inside them.";
+  "An Auckland studio that designs, builds and looks after fast websites, client portals and AI automation for New Zealand businesses. Start with a free audit.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(`${SITE_URL}/`),
-  // The GitHub Pages preview stays out of search; the real domain is indexed.
-  ...(INDEXABLE ? {} : { robots: { index: false, follow: true } }),
+  applicationName: "Nerodyn",
+  // The GitHub Pages preview stays out of search; the real domain is indexed,
+  // with large image previews and full snippets allowed.
+  robots: INDEXABLE
+    ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } }
+    : { index: false, follow: true },
   title: TITLE,
   description: DESCRIPTION,
+  authors: [{ name: "Nerodyn", url: `${SITE_URL}/` }],
+  creator: "Nerodyn",
+  publisher: "Nerodyn",
+  formatDetection: { telephone: false, address: false, email: false },
   // The card a shared link shows: the stone, the name, the one line.
   openGraph: {
     type: "website",
     siteName: "Nerodyn",
+    locale: "en_NZ",
+    url: "./",
     title: TITLE,
     description: DESCRIPTION,
-    images: [{ url: "og.jpg", width: 1200, height: 630, alt: "Nerodyn — a polished obsidian stone with light inside it, and the name." }],
+    images: [{ url: "og.jpg", width: 1200, height: 630, alt: "Nerodyn: a polished obsidian stone with light inside it, and the name." }],
   },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["og.jpg"] },
 };

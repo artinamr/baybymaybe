@@ -16,16 +16,16 @@ export default function Body() {
   return (
     <>
       <p>
-        Launch day is the day a website starts working for you — and the day questions start that nobody asked during the
-        build. Who renews the domain? Where are the backups? Who do you call when the form stops sending? Can you move it
-        if you want to? The answers are easy to set up at launch and painful to discover later. This is what to have in
-        place.
+        Launch day is the day a website starts working for you. It is also the day the questions start that nobody asked
+        during the build. Who renews the domain? Where are the backups? Who do you call when the form stops sending? Can
+        you move it if you want to? The answers are easy to set up at launch and painful to discover later. This is what
+        to have in place.
       </p>
 
       <H2 id="owning">What owning your website really means</H2>
       <p>
         “You own it” is said a lot and checked rarely. A website is several separate things, each with its own
-        account, and owning the site means each of them is in your business’s name — with someone in your business
+        account, and owning the site means each of them is in your business’s name, with someone in your business
         able to get in.
       </p>
       <Figure caption="A website is a stack of separate accounts. Each one should be in your name.">
@@ -43,10 +43,10 @@ export default function Body() {
       <p>
         The domain matters most, because everything else hangs from it. For .nz names, the Domain Name Commission is
         explicit: if you ask someone to register a domain name on your behalf, they must register it in your name, not
-        theirs — and you can check whose name it is in with a WHOIS search on its website. If you want someone else to
+        theirs, and you can check whose name it is in with a WHOIS search on its website. If you want someone else to
         manage it for you, their details can go in the admin contact instead.
         <Cite n={1} /> Strictly, you hold a licence to use the name for as long as you keep renewing it, rather than owning
-        it outright — which is why renewals matter.
+        it outright. That is why renewals matter.
         <Cite n={1} />
       </p>
 
@@ -63,25 +63,25 @@ export default function Body() {
           ["Website editor", "The site’s admin", "You, as top-level admin", "Your team, with their own logins"],
           ["Analytics", "Your analytics account", "Your business", "Anyone you add"],
           ["Search Console", "Google Search Console", "Your business", "Anyone you add"],
-          ["Paid services", "Each service", "Your business, on your card", "—"],
-          ["Notes", "A document you keep", "Yours", "—"],
+          ["Paid services", "Each service", "Your business, on your card", "No one else needs to"],
+          ["Notes", "A document you keep", "Yours", "Whoever you share them with"],
         ]}
       />
       <p>
-        The notes matter more than they sound. A page or two in plain language — what each account is for, how the site
-        is put together, how to make the common changes, and who to call — turns a future handover from an investigation
+        The notes matter more than they sound. A page or two in plain language (what each account is for, how the site
+        is put together, how to make the common changes, and who to call) turns a future handover from an investigation
         into an afternoon.
       </p>
       <Callout title="Your own logins, not shared ones">
         <p>
-          Everyone who works on the site — you, your team, your developer — should have their own login to each account.
+          Everyone who works on the site (you, your team, your developer) should have their own login to each account.
           Shared passwords can’t be taken back from one person without changing them for everyone.
         </p>
       </Callout>
 
       <H2 id="hosting">Hosting in plain words</H2>
       <p>
-        Hosting is the computer — in practice, a service — that sends your website to every visitor. What matters to a
+        Hosting is the computer (in practice, a service) that sends your website to every visitor. What matters to a
         business is simple: that it’s fast for your visitors, reliable, secure, backed up, and billed to you. For a
         site that mostly shows information, very simple hosting is often the fastest and cheapest choice. A site with
         accounts, bookings or payments needs a server-side application and a database, which means more to look after.
@@ -94,14 +94,14 @@ export default function Body() {
 
       <H2 id="backups">Backups and updates</H2>
       <p>
-        Own Your Online — the National Cyber Security Centre’s advice for businesses and individuals — recommends having robust and tested
-        backups, kept offline or disconnected from your computers so an attacker can’t delete them, and regularly
-        installing updates so attackers can’t exploit known weaknesses.
+        Own Your Online, the National Cyber Security Centre’s advice for businesses and individuals, recommends having
+        reliable, tested backups, kept offline or disconnected from your computers so an attacker can’t delete them,
+        and regularly installing updates so attackers can’t exploit known weaknesses.
         <Cite n={2} /> For a website that means:
       </p>
       <ul>
         <li>
-          <strong>Backups of everything that changes</strong> — the content and any database — on a schedule, kept
+          <strong>Backups of everything that changes</strong> (the content and any database) on a schedule, kept
           somewhere separate from the site itself.
         </li>
         <li>
@@ -119,7 +119,7 @@ export default function Body() {
       <Check
         items={[
           <>
-            <strong>Two-step sign-in on every account</strong> — especially the registrar, hosting, email and the
+            <strong>Two-step sign-in on every account</strong>, especially the registrar, hosting, email and the
             site’s admin. Own Your Online recommends authenticator apps, tokens or physical keys over codes by text or
             email, which can be intercepted.
             <Cite n={4} />
@@ -158,7 +158,7 @@ export default function Body() {
         rows={[
           ["How it works", "A regular arrangement: updates, backups checked, small changes", "You ask; the work is quoted or charged as it’s done"],
           ["Cost", "Predictable, every month or year", "Only when you use it"],
-          ["Updates and checks", "Done on a schedule", "Done when someone remembers — or is asked"],
+          ["Updates and checks", "Done on a schedule", "Done when someone remembers, or is asked"],
           ["Response when something breaks", "Agreed in advance", "As soon as they can"],
           ["Suits", "Sites that change often, take bookings or payments", "Simple sites that rarely change"],
         ]}
@@ -197,7 +197,7 @@ export default function Body() {
             t: "Try to sign in",
             b: (
               <p>
-                For each account, check that someone in your business can sign in as an administrator — not through a
+                For each account, check that someone in your business can sign in as an administrator: not through a
                 supplier, and not with a password only one former staff member knew.
               </p>
             ),
@@ -206,8 +206,8 @@ export default function Body() {
             t: "Ask for what’s missing, in writing",
             b: (
               <p>
-                A polite email listing exactly what you need — the domain moved into your name, your own login to the
-                hosting, a copy of the code and content — is usually all it takes. Keep the replies.
+                A polite email listing exactly what you need (the domain moved into your name, your own login to the
+                hosting, a copy of the code and content) is usually all it takes. Keep the replies.
               </p>
             ),
           },
@@ -227,15 +227,15 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>Moving a .nz domain to another registrar</strong> needs its UDAI — a code that confirms the request.
+          <strong>Moving a .nz domain to another registrar</strong> needs its UDAI, a code that confirms the request.
           You get it from your current registrar, who, per the Domain Name Commission’s guide for registrants, must
           give it to you promptly and at no cost. Moving registrar doesn’t necessarily end other contracts with the
           old provider, such as hosting.
           <Cite n={1} />
         </li>
         <li>
-          <strong>Ask for the code and content</strong> in a standard form — a repository, an export of the content and
-          media — and check you can open it before the old service ends.
+          <strong>Ask for the code and content</strong> in a standard form (a repository, an export of the content and
+          media) and check you can open it before the old service ends.
         </li>
         <li>
           <strong>Plan the switch for a quiet time</strong>, keep the old hosting running until the new one is confirmed

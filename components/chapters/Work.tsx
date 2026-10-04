@@ -22,7 +22,7 @@ export function Work() {
           Click through it.
         </h2>
         <p className="ps-lede" data-rv>
-          A website, a platform and an automation — each a working demonstration you can use, with the brief, the decisions
+          A website, a platform and an automation: each a working demonstration you can use, with the brief, the decisions
           and the limits written up.
         </p>
       </header>

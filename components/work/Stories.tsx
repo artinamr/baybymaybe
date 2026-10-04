@@ -7,7 +7,7 @@ import type { Project } from "@/content/work";
 
 /** The working demonstration, large, at the top of its case study. */
 export function Stage({ p }: { p: Project }) {
-  const label = `${p.client} — a working studio demonstration`;
+  const label = `${p.client}, a working studio demonstration`;
   return (
     <BrowserFrame url={p.url} label={label} style={{ "--dev-h": "700px" } as CSSProperties}>
       {p.slug === "practice-website" ? <Practice /> : null}
@@ -42,7 +42,7 @@ export function Story({ p }: { p: Project }) {
             <PhoneFrame label="The Tarn & Wick home page, on a phone">
               <Practice />
             </PhoneFrame>
-            <Cap n="02">The same site on a phone — one column, and the call to action first.</Cap>
+            <Cap n="02">The same site on a phone: one column, and the call to action first.</Cap>
           </figure>
         </div>
         <figure className="cs-close" data-rv>
@@ -61,7 +61,7 @@ export function Story({ p }: { p: Project }) {
               </li>
               <li>
                 <span>3</span>
-                <p>The button says exactly what will happen — the day and time — before anyone presses it.</p>
+                <p>The button says exactly what will happen (the day and time) before anyone presses it.</p>
               </li>
             </ol>
           </figcaption>
@@ -76,7 +76,7 @@ export function Story({ p }: { p: Project }) {
           <BrowserFrame url={`${p.url}/client`} label="The Kerrow portal, as a client sees it">
             <Portal view="client" />
           </BrowserFrame>
-          <Cap n="01">The client’s view: what’s waiting for them, what’s happening and what they owe — one button each.</Cap>
+          <Cap n="01">The client’s view: what’s waiting for them, what’s happening and what they owe, with one button each.</Cap>
         </figure>
         <figure data-rv>
           <PhoneFrame label="The Kerrow job board, on a technician’s phone">

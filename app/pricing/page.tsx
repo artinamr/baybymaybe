@@ -1,28 +1,31 @@
 import { Page, Kicker, Title, Closing } from "@/components/site/Page";
 import { QaList } from "@/components/site/QaList";
-import { QaLd } from "@/components/site/JsonLd";
-import { FAQ_ALL, PAGES } from "@/lib/content";
+import { PageLd, QaLd } from "@/components/site/JsonLd";
+import { FAQ_ALL, PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
+const DESCRIPTION =
+  "How Nerodyn prices a website, platform or automation: a written scope and a fixed quote before anything starts, what moves the price, and the running costs.";
+
 export const metadata = pageMeta({
-  title: "Investment",
-  description:
-    "How Nerodyn prices a project: a written scope, a fixed quote and a date before anything starts — what moves the price, what every quote includes, and the running costs to plan for.",
+  title: "Investment: how our projects are priced",
+  description: DESCRIPTION,
   path: "pricing/",
+  image: ogCard("pricing", "What a Nerodyn project costs, and why."),
 });
 
 const QUOTE = [
   { title: "The free audit, or a first call", body: "We look at what you have and what you want it to do, and ask the questions that decide the size of the job." },
-  { title: "A written scope", body: "What’s included, what isn’t, what we need from you, and the milestones — in plain language." },
+  { title: "A written scope", body: "What’s included, what isn’t, what we need from you, and the milestones, in plain language." },
   { title: "A fixed quote and a date", body: "The price, when each part is paid and when it goes live. What is in the quote is what you pay." },
-  { title: "Changes agreed first", body: "If you want something new along the way, we price it and you decide — before any work on it starts." },
+  { title: "Changes agreed first", body: "If you want something new along the way, we price it and you decide before any work on it starts." },
 ];
 
 const MOVES = [
   { title: "Pages and screens", body: "Many pages built from a few layouts cost less than pages that each need a design of their own." },
   { title: "Content", body: "Whether you supply finished words and photos, or we write, source and shape them with you." },
   { title: "Functionality", body: "Booking, payments, accounts, search and forms with logic each add design, building and testing." },
-  { title: "Integrations", body: "Every system we connect to — accounting, CRM, calendar — is mapped, built and tested against real data." },
+  { title: "Integrations", body: "Every system we connect to (accounting, CRM, calendar) is mapped, built and tested against real data." },
   { title: "What moves across", body: "Content, customers or records brought over from an old system, and old addresses redirected to new ones." },
   { title: "Automation scope", body: "How many steps, how many systems, and how much review each automation needs to be safe." },
 ];
@@ -39,7 +42,7 @@ const INCLUDED = [
 const RUNNING = [
   { title: "Domain", body: "Renewed each year, in your name." },
   { title: "Hosting", body: "Sized to what the site or platform needs. We recommend the simplest option that fits." },
-  { title: "Services you choose", body: "Booking, payment, email or CRM subscriptions — billed to you directly by their providers." },
+  { title: "Services you choose", body: "Booking, payment, email or CRM subscriptions, billed to you directly by their providers." },
   { title: "AI usage", body: "AI services charge for what they process. We estimate it from your real volumes and set limits and alerts." },
   { title: "Looking after it", body: "Optional, and your call how much: ongoing care, or help when you need it." },
 ];
@@ -55,7 +58,7 @@ const QA = [
   ...FAQ_ALL.find((g) => g.group === "Price and time")!.items,
   {
     q: "Can we start small and add to it later?",
-    a: "Yes — it is often the best way. We plan the first version so the next parts fit onto it, rather than needing a rebuild.",
+    a: "Yes, and it is often the best way. We plan the first version so the next parts fit onto it, rather than needing a rebuild.",
   },
 ];
 
@@ -63,6 +66,7 @@ const QA = [
 export default function Pricing() {
   return (
     <Page here="pricing" crumbs={[{ name: "Investment", href: PAGES.pricing }]}>
+      <PageLd href={PAGES.pricing} name="Investment" description={DESCRIPTION} />
       <QaLd items={QA} />
       <section className="sp-hero">
         <Kicker>Investment</Kicker>
@@ -141,7 +145,7 @@ export default function Pricing() {
             The running costs to plan for.
           </h2>
           <p className="split-more sp-lede" data-rv>
-            Every one is listed in the quote — what it’s for, roughly what it costs and who you pay — so nothing arrives unexpectedly.
+            Every one is listed in the quote (what it’s for, roughly what it costs and who you pay), so nothing arrives unexpectedly.
           </p>
         </header>
         <ul className="items items-1">
@@ -185,7 +189,7 @@ export default function Pricing() {
 
       <Closing
         title="Get a real number."
-        line="Start with the free audit. You’ll have a straight answer within two days — and a written, fixed quote if you want one."
+        line="Start with the free audit. You’ll have a straight answer within two days, and a written, fixed quote if you want one."
         more={{ label: "See how a project runs", href: PAGES.methodology }}
       />
     </Page>

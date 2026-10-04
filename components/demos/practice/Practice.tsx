@@ -74,7 +74,7 @@ function Home({ go }: { go: (s: PracticeScreen) => void }) {
           <p className={s.kicker}>Accounting for owner-run businesses</p>
           <p className={s.h1}>Know your numbers before the year is out.</p>
           <p className={s.lede}>
-            Year-end accounts, GST, payroll and plain-English advice — for a fixed monthly fee, from one person who knows your
+            Year-end accounts, GST, payroll and plain-English advice for a fixed monthly fee, from one person who knows your
             business.
           </p>
           <div className={s.actions}>
@@ -112,7 +112,7 @@ function Home({ go }: { go: (s: PracticeScreen) => void }) {
       </section>
       <section className={s.services}>
         {[
-          ["Tax & compliance", "Returns, GST and provisional tax, filed on time — with a reminder before anything is due."],
+          ["Tax & compliance", "Returns, GST and provisional tax, filed on time, with a reminder before anything is due."],
           ["Bookkeeping & payroll", "Your books kept current each month, payroll run and payday filing done."],
           ["Advice & planning", "Cash flow, pricing and structure, in a short conversation every month."],
         ].map(([t, b]) => (
@@ -145,7 +145,7 @@ function Home({ go }: { go: (s: PracticeScreen) => void }) {
         </ol>
       </section>
       <footer className={s.foot}>
-        <span>Tarn &amp; Wick — a fictional practice</span>
+        <span>Tarn &amp; Wick, a fictional practice</span>
         <span>Privacy · Contact</span>
       </footer>
     </>
@@ -164,7 +164,7 @@ function Service({ go }: { go: (s: PracticeScreen) => void }) {
         </p>
         <p className={s.h1}>Tax &amp; compliance</p>
         <p className={s.lede}>
-          Everything the tax year asks of you, done on time and explained plainly — so the only surprise is how little you have to
+          Everything the tax year asks of you, done on time and explained plainly, so the only surprise is how little you have to
           think about it.
         </p>
         <div className={s.split}>
@@ -199,7 +199,7 @@ function Service({ go }: { go: (s: PracticeScreen) => void }) {
         </div>
       </section>
       <footer className={s.foot}>
-        <span>Tarn &amp; Wick — a fictional practice</span>
+        <span>Tarn &amp; Wick, a fictional practice</span>
         <span>Privacy · Contact</span>
       </footer>
     </>
