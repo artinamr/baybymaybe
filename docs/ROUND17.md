@@ -102,7 +102,11 @@ Completed list for increment 2:
    related case study.
 6. QA (desktop + phone, keyboard), `npm run build`, Pages build, commit, push.
 
-## Next increments
+## Increments 3-6 — LIVE (2026-10-04: f3d5940, b0ff562, c420648, 9cad5b8)
+
+All four below are done and deployed; details in `CLAUDE.md` (ROUND 17,
+part 3 and the quality pass) and `docs/CHECK-2026-10-04.md`. What remains
+is the client's decisions (`WHAT-TO-DO.md` section 7) and the domain move.
 
 3. Methodology: five stages with what the client brings / what we produce;
    milestones described as typical, not universal.

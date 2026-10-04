@@ -23,7 +23,11 @@ RSS, Blog in the nav and footer. The quality pass (section 5) is done except
 the measured speed numbers (5.1) and the client's contrast decision (5.2,
 7.5): axe clean but for contrast, no-WebGL hydration fixed, the 320 px hero
 fixed, `lang="en-NZ"`, every form failure path tested
-(`tools/qa/formpaths.mjs`). Record in `docs/CHECK-2026-10-04.md`.
+(`tools/qa/formpaths.mjs`). Speed measured live and improved (sub-pages'
+first screen no longer waits for scripts; see the table in
+`docs/CHECK-2026-10-04.md`). What's left is the client's: the decisions in
+section 7 (now including the home page's LCP and intro-frame CLS), then the
+domain move (section 6).
 
 **Client update 2026-10-01:** remove the homepage's numbered chapter rail,
 its phone counter, and the lower-left chapter card. Keep them removed in
@@ -505,7 +509,7 @@ we work").
 
 ---
 
-## 5. Increment 6 — the quality pass (make it bulletproof)
+## 5. [x] Increment 6 — the quality pass (make it bulletproof)
 
 ### 5.1 Speed (targets: LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1)
 
@@ -629,7 +633,17 @@ Ask these together, with a recommendation each (don't send a menu):
 3. A testimonial or two (real, attributed, with permission).
 4. Prices: stay unpublished (recommended) or a "projects usually start from"
    line.
-5. Contrast fix for small muted text (5.2) — before/after crops.
+5. Contrast fix for small muted text (5.2). Measured with axe: text at
+   40-56 % ink on paper is 2.66-4.27:1 (AA needs 4.5:1) — breadcrumbs,
+   "Rather write?", the form's "— optional" hints and note, FAQ numbers,
+   card meta labels, contents headings. Recommendation: raise them to ~62 %
+   ink (barely visible, passes); show before/after crops first.
+5b. The home page's speed under mobile throttling. LCP (11.4 s) is the
+   loader by design: the hero shows when the 3D is ready. CLS (0.107, just
+   over 0.1) is the intro's expanding frame, which animates top/left; a
+   transform or clip-path version would avoid it but changes how the frame
+   draws. Recommendation: accept the LCP; approve re-drawing the frame so
+   it doesn't shift layout, judged side by side with the current intro.
 6. The hero's actions — keep "Get a free audit / Enter the story"
    (recommended) or the plan's "Discuss your project / Explore our work".
 7. Hosting for nerodyn.com (GitHub Pages vs a host with real redirects),
