@@ -30,7 +30,7 @@ const DISCIPLINES = [
     n: "03",
     name: "AI automation",
     title: "AI that does the work.",
-    body: "Assistants that answer, qualify and book on your site. Agents that file, draft and follow up inside your team's tools.",
+    body: "Assistants that answer, qualify and book on your site. Agents that file, draft and follow up inside your team’s tools.",
     list: DELIVERABLES.ai,
     href: PAGES.service("ai-automation"),
     more: "Explore AI automation",

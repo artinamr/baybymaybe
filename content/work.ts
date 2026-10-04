@@ -53,18 +53,18 @@ export const WORK_ITEMS: Project[] = [
       "Positioning and a plan for every page",
       "Copy for the key pages",
       "A visual identity for the site: type, colour, components",
-      "A booking flow connected to the adviser's calendar",
+      "A booking flow connected to the adviser’s calendar",
       "Service and insight pages the practice edits itself",
       "Search foundations and analytics",
     ],
     approach: [
       {
-        title: "Lead with who it's for",
+        title: "Lead with who it’s for",
         body: "The first screen says who the practice serves and what changes for them, then offers one action: a 20-minute call.",
       },
       {
         title: "Say how fees work, early",
-        body: "A fixed monthly fee is the practice's advantage over hourly billing, so the home page says it before anyone has to ask.",
+        body: "A fixed monthly fee is the practice’s advantage over hourly billing, so the home page says it before anyone has to ask.",
       },
       {
         title: "A booking flow, not a contact form",
@@ -83,8 +83,8 @@ export const WORK_ITEMS: Project[] = [
     ],
     limits: [
       "Tarn & Wick is fictional: there are no real clients, fees or results here.",
-      "The booking flow uses sample availability and sends nothing. A live site would connect to the adviser's calendar and send a confirmation.",
-      "The demonstration has no content editor. Editing tools would be part of the live website's scope.",
+      "The booking flow uses sample availability and sends nothing. A live site would connect to the adviser’s calendar and send a confirmation.",
+      "The demonstration has no content editor. Editing tools would be part of the live website’s scope.",
       "Search performance can only be measured on a live site with real visitors.",
     ],
   },
@@ -110,7 +110,7 @@ export const WORK_ITEMS: Project[] = [
       "A team job board, schedule and job records",
       "A client portal for jobs, quotes, invoices and messages",
       "Roles and permissions between the two",
-      "Invoices and payments through the accounting software's own integration",
+      "Invoices and payments through the accounting software’s own integration",
       "Onboarding for the team and the first clients",
     ],
     approach: [
@@ -120,7 +120,7 @@ export const WORK_ITEMS: Project[] = [
       },
       {
         title: "Clients see their jobs, not the system",
-        body: "A short, plain view: what's waiting for them, what's happening, what they owe — and one button for each.",
+        body: "A short, plain view: what’s waiting for them, what’s happening, what they owe — and one button for each.",
       },
       {
         title: "Colour only where it means something",
@@ -128,18 +128,18 @@ export const WORK_ITEMS: Project[] = [
       },
       {
         title: "Built for the phone in the van",
-        body: "Technicians work from phones on site, so the same screens fold into a single column with the job's checklist first.",
+        body: "Technicians work from phones on site, so the same screens fold into a single column with the job’s checklist first.",
       },
     ],
     demonstrates: [
       "A job board shared by the office and the field",
       "A client approval that moves the job on at once — try it above",
       "Team and client views of the same sample jobs",
-      "Screens that work on a technician's phone",
+      "Screens that work on a technician’s phone",
     ],
     limits: [
       "Kerrow and its clients are fictional; the jobs, quotes and invoices are sample data.",
-      "Payments and accounting are simulated here. A live portal connects to the company's accounting software through its official integration.",
+      "Payments and accounting are simulated here. A live portal connects to the company’s accounting software through its official integration.",
       "The view switch demonstrates the screens, not sign-in or access controls. Those would be required in a live portal.",
       "No results are claimed: a real portal is judged on the time it saves the office, measured after launch.",
     ],
@@ -150,18 +150,18 @@ export const WORK_ITEMS: Project[] = [
     client: "Pellow",
     title: "An enquiry desk that drafts its own replies — and knows when not to",
     summary:
-      "A fictional physiotherapy clinic, and the automation we would build for its inbox: enquiries read and organised, the diary checked, replies drafted in the clinic's own words — and a person approving every one.",
+      "A fictional physiotherapy clinic, and the automation we would build for its inbox: enquiries read and organised, the diary checked, replies drafted in the clinic’s own words — and a person approving every one.",
     services: ["ai-automation"],
     url: "desk.pellow.example",
     year: "2026",
     cover: `${BASE}/work/enquiry-desk.webp`,
     coverAlt: "The Pellow enquiry desk: an inbox of sample emails, a step-by-step view of one being organised, and a log.",
     context: {
-      lede: "A clinic's reception spends much of the day on email: booking requests, changes, questions about cover and cost. Most need the same few steps — read, find the details, check the diary, reply. A few need a clinician straight away.",
+      lede: "A clinic’s reception spends much of the day on email: booking requests, changes, questions about cover and cost. Most need the same few steps — read, find the details, check the diary, reply. A few need a clinician straight away.",
       audience: "The reception team, and the patients who write in.",
     },
     scope: [
-      "Mapping the kinds of enquiry and the clinic's rules",
+      "Mapping the kinds of enquiry and the clinic’s rules",
       "The automation that reads, organises and drafts",
       "An approval screen and a log of every step",
       "Hand-over rules for anything clinical or uncertain",
@@ -174,7 +174,7 @@ export const WORK_ITEMS: Project[] = [
         body: "The system pulls out who, what and when before it drafts a word, and shows its working — so a person can check it in seconds.",
       },
       {
-        title: "The clinic's words, not the model's",
+        title: "The clinic’s words, not the model’s",
         body: "Replies are built from approved wording for bookings, changes and cover, then fitted to the enquiry.",
       },
       {
@@ -194,7 +194,7 @@ export const WORK_ITEMS: Project[] = [
     ],
     limits: [
       "Pellow and its patients are fictional; the emails, names and times are samples.",
-      "This page runs locally and sends nothing. A live system connects to the clinic's email and diary, with access agreed in writing.",
+      "This page runs locally and sends nothing. A live system connects to the clinic’s email and diary, with access agreed in writing.",
       "AI can misread a message. That is why a person approves every reply and every step is logged.",
     ],
   },

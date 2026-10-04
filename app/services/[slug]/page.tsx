@@ -69,7 +69,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
       <section className="sp-block split" aria-labelledby="signs-h">
         <header className="split-head">
-          <Kicker>When it&apos;s the right call</Kicker>
+          <Kicker>When it’s the right call</Kicker>
           <h2 id="signs-h" className="sp-h2" data-rv>
             Sound familiar?
           </h2>
@@ -124,7 +124,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         <div className="own-head">
           <Kicker>What you bring</Kicker>
           <h2 id="bring-h" className="sp-h2" data-rv>
-            What we&apos;ll need from you.
+            What we’ll need from you.
           </h2>
           <p className="sp-lede" data-rv>
             Not much, and we tell you exactly what and when. The rest is ours to do.
@@ -201,7 +201,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
       <Closing
         title="Start with what you have."
-        line="Send us your website — or tell us about the work that's slowing you down. You'll get a straight answer within two days."
+        line="Send us your website — or tell us about the work that’s slowing you down. You’ll get a straight answer within two days."
         more={{ label: "Or read how a project runs", href: PAGES.methodology }}
       />
     </Page>

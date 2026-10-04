@@ -36,7 +36,7 @@ export function Story({ p }: { p: Project }) {
             <BrowserFrame url={`${p.url}/services/tax`} label="The Tarn & Wick service page, on a desktop">
               <Practice screen="service" />
             </BrowserFrame>
-            <Cap n="01">A service page: what&apos;s included, and the dates that matter, beside one way to start.</Cap>
+            <Cap n="01">A service page: what’s included, and the dates that matter, beside one way to start.</Cap>
           </figure>
           <figure data-rv>
             <PhoneFrame label="The Tarn & Wick home page, on a phone">
@@ -76,13 +76,13 @@ export function Story({ p }: { p: Project }) {
           <BrowserFrame url={`${p.url}/client`} label="The Kerrow portal, as a client sees it">
             <Portal view="client" />
           </BrowserFrame>
-          <Cap n="01">The client&apos;s view: what&apos;s waiting for them, what&apos;s happening and what they owe — one button each.</Cap>
+          <Cap n="01">The client’s view: what’s waiting for them, what’s happening and what they owe — one button each.</Cap>
         </figure>
         <figure data-rv>
-          <PhoneFrame label="The Kerrow job board, on a technician's phone">
+          <PhoneFrame label="The Kerrow job board, on a technician’s phone">
             <Portal view="team" />
           </PhoneFrame>
-          <Cap n="02">The team&apos;s board on a technician&apos;s phone: the same jobs, one column.</Cap>
+          <Cap n="02">The team’s board on a technician’s phone: the same jobs, one column.</Cap>
         </figure>
       </div>
     );
@@ -93,7 +93,7 @@ export function Story({ p }: { p: Project }) {
         <BrowserFrame url={`${p.url}/inbox`} label="The Pellow enquiry desk, a reply waiting for approval">
           <EnquiryDesk start="move" startStep={3} />
         </BrowserFrame>
-        <Cap n="01">A change of appointment: found in the diary, drafted in the clinic&apos;s words, waiting for a person to approve.</Cap>
+        <Cap n="01">A change of appointment: found in the diary, drafted in the clinic’s words, waiting for a person to approve.</Cap>
       </figure>
       <figure data-rv>
         <PhoneFrame label="The Pellow enquiry desk, an urgent enquiry handed to a person">

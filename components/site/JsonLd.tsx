@@ -32,7 +32,7 @@ export function OrgLd() {
             makesOffer: [
               service("Websites", "Custom-designed, fast websites your team can edit."),
               service("Platforms", "Client portals, dashboards, booking, payments and internal tools."),
-              service("AI automation", "Assistants and agents inside your website and your team's tools."),
+              service("AI automation", "Assistants and agents inside your website and your team’s tools."),
               service("Free website audit", "What is working, what is costing you enquiries, and what we would build instead — within two days."),
             ],
             ...(sameAs.length ? { sameAs } : {}),

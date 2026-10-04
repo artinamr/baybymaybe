@@ -180,7 +180,7 @@ better loading … make the whole website perfect").**
   view two frames after parse (one frame earlier and the transition never
   plays); the hero is `visibility: hidden` while `data-intro="wait"` (under
   the opaque loader its lines' placement counted as layout shift); the
-  unused Bodoni italic is gone (three font preloads, not four). Measure with
+  unused Bodoni italic was dropped (Bodoni itself left with the switch to Inter). Measure with
   `tools/qa/vitals.mjs` (Lighthouse-like mobile throttling, cold cache).
   Home LCP is the loader by design and its remaining CLS is the intro
   frame animating `top/left` — both left for the client (WHAT-TO-DO §7).
@@ -443,10 +443,18 @@ way relative to each other.
 
 ## Typography (after the "texts are terrible" note)
 
-- **Display: Bodoni Moda** (`--font-bodoni`, opsz axis) for the hero line, every
-  chapter title, the statement and small display labels (weight 500 below
-  ~30px — Didone hairlines vanish at small sizes). Its hairlines echo the
-  stone's edge highlights. **Text: Instrument Sans**. Mono only for tiny numerals.
+- **ONE FAMILY: Inter** (`--font-inter`, self-hosted by next/font, `opsz`
+  axis on auto — the way Apple sets SF Pro: the Display cut at headline
+  sizes, the Text cut at reading sizes, from one file). Every title, the
+  hero line and the statement are Inter at **500** (`--display`); body text
+  is Inter at 400 with `letter-spacing: -0.011em` on `body`. Mono (Geist
+  Mono) only for tiny numerals. Client, 2026-10-04: Bodoni Moda was "trying
+  to be classy … not readable, not nice" — wanted "Apple, but even better …
+  practical but still classy". **Never bring back a Didone or any
+  hairline display face.** Compared side by side on the real pages: Inter,
+  Geist, Mona Sans, Onest; Inter won on reading comfort and its Display cut.
+  The share card (`public/og.jpg`) is set in Inter too (scratchpad
+  `ogcard.mjs`-style: render the card in the local site so the font is real).
 - Rejected in the first pass: the "sans line + serif-italic line" couplet on
   every chapter, bracketed mono caps eyebrows ("(01) THE CUT"), a camera
   AZ/EL readout, poetic AI-sounding taglines. Keep copy plain, confident and

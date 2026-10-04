@@ -54,7 +54,7 @@ function StoneCursor() {
 }
 
 /**
- * 00 · POTENTIAL. One display voice (Bodoni Moda) for the whole line. The
+ * 00 · POTENTIAL. One display voice (Inter Display) for the whole line. The
  * masthead-scale POTENTIAL crosses the frame BEHIND the canvas, so the stone
  * stands in the word and cuts it. It arrives as a hairline outline; the intro's
  * thread of light runs down the stone and, where it crosses the word, the fill

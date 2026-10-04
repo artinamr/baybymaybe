@@ -53,7 +53,7 @@ export const SERVICES: Service[] = [
     signs: [
       {
         title: "Your site no longer says what you do",
-        body: "The business has moved on and the website hasn't. A visitor can't tell in a few seconds what you offer, who it is for and how to start.",
+        body: "The business has moved on and the website hasn’t. A visitor can’t tell in a few seconds what you offer, who it is for and how to start.",
       },
       {
         title: "It looks fine, but brings in little",
@@ -61,7 +61,7 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Every change needs a developer",
-        body: "Editing a page, adding a service or publishing news means waiting on someone else — so it doesn't happen.",
+        body: "Editing a page, adding a service or publishing news means waiting on someone else — so it doesn’t happen.",
       },
     ],
     deliver: [
@@ -149,15 +149,15 @@ export const SERVICES: Service[] = [
     signs: [
       {
         title: "Work lives in spreadsheets and inboxes",
-        body: "Bookings, jobs, client files and approvals are spread across tools that don't talk to each other, and someone copies between them.",
+        body: "Bookings, jobs, client files and approvals are spread across tools that don’t talk to each other, and someone copies between them.",
       },
       {
         title: "Clients keep asking for updates",
-        body: "Where is it, what's next, what do I owe? The same questions take up hours that a portal would answer for them.",
+        body: "Where is it, what’s next, what do I owe? The same questions take up hours that a portal would answer for them.",
       },
       {
         title: "Off-the-shelf software almost fits",
-        body: "You pay for a tool and work around it. The part it doesn't fit is exactly where your business is different.",
+        body: "You pay for a tool and work around it. The part it doesn’t fit is exactly where your business is different.",
       },
     ],
     deliver: [
@@ -196,7 +196,7 @@ export const SERVICES: Service[] = [
         body: "Launch the part that removes the most friction first, then add to it — rather than a year-long project.",
       },
       {
-        title: "Connect, don't duplicate",
+        title: "Connect, don’t duplicate",
         body: "Use the official integrations of the tools you keep, so each piece of data has one home.",
       },
       {
@@ -213,7 +213,7 @@ export const SERVICES: Service[] = [
     faq: [
       {
         q: "Why not just use an off-the-shelf tool?",
-        a: "Often you should, and we will say so. Custom work makes sense when the part a tool doesn't fit is the part that makes your business different, or when several tools need to act as one.",
+        a: "Often you should, and we will say so. Custom work makes sense when the part a tool doesn’t fit is the part that makes your business different, or when several tools need to act as one.",
       },
       {
         q: "Can it connect to our accounting software?",
@@ -231,17 +231,17 @@ export const SERVICES: Service[] = [
     n: "03",
     name: "AI automation",
     h1: ["AI that does the work —", "and knows when to ask."],
-    line: "Assistants and automations in your website and your team's tools, with a person in the loop.",
+    line: "Assistants and automations in your website and your team’s tools, with a person in the loop.",
     lede: "Assistants and automations that take repetitive work off your team: answering and booking on your website, sorting the inbox, reading documents, moving data between systems. A person stays in the loop wherever it matters.",
     description:
-      "AI automation by Nerodyn: website assistants, inbox and document automation and agents inside your team's tools — tested on your real work, with a person in the loop.",
+      "AI automation by Nerodyn: website assistants, inbox and document automation and agents inside your team’s tools — tested on your real work, with a person in the loop.",
     image: `${BASE}/services/ai-automation-wide.webp`,
     card: `${BASE}/services/ai-automation.webp`,
     imageAlt: "Black glass blades turning like a turbine around a small core of indigo light.",
     signs: [
       {
         title: "The same task, over and over",
-        body: "Reading enquiries, copying details into a system, writing the same reply with small changes — work a person should check, but shouldn't have to do from scratch.",
+        body: "Reading enquiries, copying details into a system, writing the same reply with small changes — work a person should check, but shouldn’t have to do from scratch.",
       },
       {
         title: "Enquiries arrive out of hours",
@@ -262,7 +262,7 @@ export const SERVICES: Service[] = [
         body: "Incoming email sorted and summarised, details read from forms and PDFs, records updated in the systems you use.",
       },
       {
-        title: "Agents inside your team's tools",
+        title: "Agents inside your team’s tools",
         body: "Automations that run where your team already works — email, shared drives, your CRM — rather than in yet another app.",
       },
       {
@@ -281,7 +281,7 @@ export const SERVICES: Service[] = [
     approach: [
       {
         title: "Pick the right task",
-        body: "We look for work that is frequent, follows rules and can be checked — and we say plainly when a task isn't a good fit for AI.",
+        body: "We look for work that is frequent, follows rules and can be checked — and we say plainly when a task isn’t a good fit for AI.",
       },
       {
         title: "Test on your real examples",
@@ -293,7 +293,7 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Protect the data",
-        body: "We agree with you what the system may see, where it is processed and how long anything is kept — in line with New Zealand's Privacy Act 2020.",
+        body: "We agree with you what the system may see, where it is processed and how long anything is kept — in line with New Zealand’s Privacy Act 2020.",
       },
     ],
     bring: [
@@ -305,7 +305,7 @@ export const SERVICES: Service[] = [
     faq: [
       {
         q: "Is it safe to put AI in front of customers?",
-        a: "With limits, yes. The assistant answers from information you have approved, says when it doesn't know and hands over to a person. We test it on real questions before it goes live.",
+        a: "With limits, yes. The assistant answers from information you have approved, says when it doesn’t know and hands over to a person. We test it on real questions before it goes live.",
       },
       {
         q: "What does it cost to run?",

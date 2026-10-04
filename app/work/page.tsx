@@ -29,7 +29,7 @@ export default function Work() {
     <Page here="work" crumbs={[{ name: "Work", href: PAGES.work }]}>
       <section className="sp-hero">
         <Kicker>Work</Kicker>
-        <Title lines={["Don't take our word for it.", "Click through it."]} />
+        <Title lines={["Don’t take our word for it.", "Click through it."]} />
         <p className="sp-lede" data-rv>
           Each project here is a working demonstration: a fictional business, built the way we would build yours, with the brief,
           the decisions and the limits written up plainly. Client projects join them as they launch.

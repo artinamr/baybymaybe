@@ -130,14 +130,14 @@ const RAW: Raw[] = [
     // the last sheet leaving: the film still held there.)
     id: "audit",
     num: "06",
-    label: "Let's talk",
+    label: "Let’s talk",
     kind: "film",
     vh: 320,
     sticky: true,
     jumpF: 10.75,
     // The words rise as the stone settles on the floor between them.
     revealAt: 1.2,
-    specimen: { name: "Let's talk", line: "A free, honest audit of what you have." },
+    specimen: { name: "Let’s talk", line: "A free, honest audit of what you have." },
   },
 ];
 

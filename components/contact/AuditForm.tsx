@@ -14,20 +14,20 @@ const COPY: Record<Kind, { tab: string; subject: string; send: string; note: str
     subject: "Free audit",
     send: "Start my free audit",
     note: "Free, and no pitch. We reply within two days.",
-    done: "It's with us. You'll have your audit — a straight answer, no pitch — within two days, at the address you gave.",
+    done: "It’s with us. You’ll have your audit — a straight answer, no pitch — within two days, at the address you gave.",
     msgLabel: "Anything we should know?",
     msgHint: "— optional",
-    msgPlaceholder: "What's working, what isn't, what you'd like it to do.",
+    msgPlaceholder: "What’s working, what isn’t, what you’d like it to do.",
   },
   project: {
     tab: "A new project",
     subject: "New project",
     send: "Send my enquiry",
     note: "We reply within two days, with the next step.",
-    done: "It's with us. We'll reply within two days, at the address you gave, with what we'd suggest as the next step.",
+    done: "It’s with us. We’ll reply within two days, at the address you gave, with what we’d suggest as the next step.",
     msgLabel: "Tell us about the project",
     msgHint: "",
-    msgPlaceholder: "What you need, who it's for, and any dates that matter.",
+    msgPlaceholder: "What you need, who it’s for, and any dates that matter.",
   },
 };
 
@@ -260,11 +260,11 @@ export function AuditForm({ tone = "paper", intent = "audit" }: { tone?: "paper"
         <p className="af-note" aria-live="polite">
           {state === "error" ? (
             <>
-              That didn&apos;t go through.{" "}
+              That didn’t go through.{" "}
               <a href={mailHref} className="af-mail">
                 Send it as an email instead
               </a>{" "}
-              — it&apos;s already written.
+              — it’s already written.
             </>
           ) : (
             <>{copyFor.note}</>

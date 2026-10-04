@@ -82,7 +82,7 @@ function Home({ go }: { go: (s: PracticeScreen) => void }) {
               Book a 20-minute call
             </button>
             <button type="button" className={s.secondary} onClick={() => go("service")}>
-              What&apos;s included
+              What’s included
             </button>
           </div>
         </div>
@@ -169,7 +169,7 @@ function Service({ go }: { go: (s: PracticeScreen) => void }) {
         </p>
         <div className={s.split}>
           <div>
-            <p className={s.h2}>What&apos;s included</p>
+            <p className={s.h2}>What’s included</p>
             <ul className={s.ticks}>
               <li>Annual accounts and income tax return</li>
               <li>GST returns, prepared and filed</li>
@@ -221,7 +221,7 @@ export function Booking({ still = false, annotate = false }: { still?: boolean; 
           <span className={s.tick} aria-hidden>
             ✓
           </span>
-          <p className={s.h2}>You&apos;re booked{name ? `, ${name.split(" ")[0]}` : ""}.</p>
+          <p className={s.h2}>You’re booked{name ? `, ${name.split(" ")[0]}` : ""}.</p>
           <p>
             {d?.d} {d?.n} October at {time} · 20 minutes · {topic.toLowerCase()}
           </p>

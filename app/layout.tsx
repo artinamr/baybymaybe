@@ -1,24 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Bodoni_Moda, Geist_Mono, Instrument_Sans } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { INDEXABLE, PAGES, SITE_URL } from "@/lib/content";
 
 // Variable names must never equal an @theme --font-* token (CLAUDE.md gotcha #2).
-const isans = Instrument_Sans({
-  variable: "--font-isans",
-  subsets: ["latin"],
-  axes: ["wdth"],
-  display: "swap",
-});
-
-// The display voice: a Didone whose hairlines and knife-point serifs echo the
-// stone's edge highlights. The optical-size axis keeps hairlines razor-thin at
-// display sizes and sturdier at text sizes.
-const bodoni = Bodoni_Moda({
-  variable: "--font-bodoni",
+// One family for every voice, the way Apple sets SF Pro: Inter's optical-size
+// axis gives headlines its Display cut (tighter, finer) and reading sizes its
+// Text cut (open, sturdy) automatically, by size.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   axes: ["opsz"],
-  style: ["normal"],
   display: "swap",
 });
 
@@ -57,7 +49,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     // data-intro="wait" is server-rendered so the first paint is already the
     // intro's opening frame (no flash of the finished page before JS runs).
-    <html lang="en-NZ" data-intro="wait" className={`${isans.variable} ${bodoni.variable} ${gmono.variable} antialiased`}>
+    <html lang="en-NZ" data-intro="wait" className={`${inter.variable} ${gmono.variable} antialiased`}>
       <body>
         <noscript>
           <style>{`#loader{display:none!important}[data-rv]{opacity:1!important;transform:none!important;filter:none!important}#stage,#field-card,#stage-frame,.intro,.intro-mask>*{clip-path:none!important;opacity:1!important;transform:none!important;animation:none!important}[data-chapter=potential]{visibility:visible!important}`}</style>

@@ -34,7 +34,7 @@ const ENQUIRIES: Enquiry[] = [
     address: "sam@example.com",
     at: "9:14",
     subject: "Sore shoulder — appointment this week?",
-    body: "Hi, I've had a sore right shoulder for about three weeks, since I moved house. Could I get an appointment this week, ideally after 4pm? Would it be covered by ACC? Thanks, Sam",
+    body: "Hi, I’ve had a sore right shoulder for about three weeks, since I moved house. Could I get an appointment this week, ideally after 4pm? Would it be covered by ACC? Thanks, Sam",
     fields: [
       { k: "Name", v: "Sam Ellis" },
       { k: "Reply to", v: "sam@example.com" },
@@ -50,15 +50,15 @@ const ENQUIRIES: Enquiry[] = [
     ],
     rules: ["First appointments are 45 minutes", "Only after-4pm times, as asked", "Times are held for 24 hours, not booked"],
     draft:
-      "Hi Sam,\n\nThanks for getting in touch — sorry to hear about your shoulder. We have two first appointments this week after 4pm:\n\n• Wednesday 14 October, 4:30pm with Jess\n• Thursday 15 October, 5:15pm with Aroha\n\nReply with the one that suits and we'll confirm it. As it started with an injury while moving house, it may be covered by ACC — we'll go through that with you at the appointment.\n\nPellow Physiotherapy",
+      "Hi Sam,\n\nThanks for getting in touch — sorry to hear about your shoulder. We have two first appointments this week after 4pm:\n\n• Wednesday 14 October, 4:30pm with Jess\n• Thursday 15 October, 5:15pm with Aroha\n\nReply with the one that suits and we’ll confirm it. As it started with an injury while moving house, it may be covered by ACC — we’ll go through that with you at the appointment.\n\nPellow Physiotherapy",
   },
   {
     id: "move",
     from: "Alex Moana",
     address: "alex@example.com",
     at: "11:02",
-    subject: "Can I move Thursday's appointment?",
-    body: "Kia ora, something's come up at work. Is there any chance I can move my Thursday 10am to the same time next week? Cheers, Alex",
+    subject: "Can I move Thursday’s appointment?",
+    body: "Kia ora, something’s come up at work. Is there any chance I can move my Thursday 10am to the same time next week? Cheers, Alex",
     fields: [
       { k: "Name", v: "Alex Moana" },
       { k: "Reply to", v: "alex@example.com" },
@@ -73,7 +73,7 @@ const ENQUIRIES: Enquiry[] = [
     ],
     rules: ["Same physio as before", "More than 24 hours' notice — no late-change fee applies"],
     draft:
-      "Kia ora Alex,\n\nNo problem. Jess has Thursday 22 October at 10:00am free — the same time next week. Reply 'yes' and we'll move it across; if that doesn't suit, 11:30am the same day is also open.\n\nPellow Physiotherapy",
+      "Kia ora Alex,\n\nNo problem. Jess has Thursday 22 October at 10:00am free — the same time next week. Reply 'yes' and we’ll move it across; if that doesn’t suit, 11:30am the same day is also open.\n\nPellow Physiotherapy",
   },
   {
     id: "urgent",
@@ -81,7 +81,7 @@ const ENQUIRIES: Enquiry[] = [
     address: "jordan@example.com",
     at: "13:40",
     subject: "Chest tightness when running",
-    body: "Hi, I've been getting a tight feeling in my chest and some dizziness when I run. Can I book in to get it looked at? Jordan",
+    body: "Hi, I’ve been getting a tight feeling in my chest and some dizziness when I run. Can I book in to get it looked at? Jordan",
     fields: [
       { k: "Name", v: "Jordan Lee" },
       { k: "Reply to", v: "jordan@example.com" },
@@ -89,7 +89,7 @@ const ENQUIRIES: Enquiry[] = [
       { k: "Priority", v: "Urgent — needs a person" },
     ],
     urgent:
-      "Symptoms like these are never answered automatically. The enquiry has gone straight to the clinic's phone list, marked urgent, so a person calls Jordan back — no times were offered and no reply was drafted.",
+      "Symptoms like these are never answered automatically. The enquiry has gone straight to the clinic’s phone list, marked urgent, so a person calls Jordan back — no times were offered and no reply was drafted.",
   },
 ];
 
@@ -105,7 +105,7 @@ function logFor(e: Enquiry, step: number, approvedBy: string | null) {
     out.push({ at: t(0), text: flags ? `Details organised — ${flags} to check` : "Details organised", tone: flags ? "flag" : undefined });
   }
   if (e.urgent) {
-    if (step >= 2) out.push({ at: t(0), text: "Marked urgent · sent to the clinic's call list", tone: "flag" });
+    if (step >= 2) out.push({ at: t(0), text: "Marked urgent · sent to the clinic’s call list", tone: "flag" });
     return out;
   }
   if (step >= 2) out.push({ at: t(0), text: `${e.slots?.length} matching times found` });
@@ -191,7 +191,7 @@ export function EnquiryDesk({ start = "booking", startStep = 0 }: { start?: stri
 
           {step === 2 && !e.urgent ? (
             <div>
-              <p className={s.stageH}>Checked against the clinic&apos;s diary</p>
+              <p className={s.stageH}>Checked against the clinic’s diary</p>
               <ul className={s.slots}>
                 {e.slots?.map((sl) => (
                   <li key={sl.when}>
@@ -218,13 +218,13 @@ export function EnquiryDesk({ start = "booking", startStep = 0 }: { start?: stri
           {step === 3 && !e.urgent && handed ? (
             <div className={s.handover} role="note">
               <p className={s.stageH}>Handed to reception</p>
-              <p>The enquiry and the draft are in reception&apos;s queue, to finish and send themselves. Nothing was sent.</p>
+              <p>The enquiry and the draft are in reception’s queue, to finish and send themselves. Nothing was sent.</p>
             </div>
           ) : null}
 
           {step === 3 && !e.urgent && !handed ? (
             <div>
-              <p className={s.stageH}>A reply, drafted in the clinic&apos;s own words — edit anything</p>
+              <p className={s.stageH}>A reply, drafted in the clinic’s own words — edit anything</p>
               <label className={s.draftWrap}>
                 <span className={s.srOnly}>Draft reply</span>
                 <textarea className={s.draft} value={draft[e.id] ?? e.draft} onChange={(ev) => setDraft((d) => ({ ...d, [e.id]: ev.target.value }))} rows={9} />

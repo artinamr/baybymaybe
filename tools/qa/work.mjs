@@ -165,7 +165,7 @@ async function practice(phone) {
     await page.type(`${scope} input[placeholder="Your name"]`, "Casey Example");
     await page.type(`${scope} input[type="email"]`, "casey@example.com");
     await click(page, "Confirm Wed 14 at 12:00");
-    await has(page, "You're booked, Casey.");
+    await has(page, "You’re booked, Casey.");
     await has(page, "Wed 14 October at 12:00");
     await has(page, "switching accountants");
     await has(page, "This demo sends nothing.");
@@ -221,7 +221,7 @@ async function enquiry(phone) {
     await go(page, "enquiry-desk");
     for (const [name, subject, firstSlot] of [
       ["Sam Ellis", "Sore shoulder", "Wed 14 Oct · 4:30pm"],
-      ["Alex Moana", "Can I move Thursday's appointment?", "Thu 22 Oct · 10:00am"],
+      ["Alex Moana", "Can I move Thursday’s appointment?", "Thu 22 Oct · 10:00am"],
     ]) {
       await click(page, name, scope, false);
       await currentStep(page, "Arrives");

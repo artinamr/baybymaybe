@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/meta";
 export const metadata = pageMeta({
   title: "Studio",
   description:
-    "Nerodyn is one team of designers and engineers who plan, build and look after websites, platforms and AI automation — who we work with, how we are set up, and what we won't do.",
+    "Nerodyn is one team of designers and engineers who plan, build and look after websites, platforms and AI automation — who we work with, how we are set up, and what we won’t do.",
   path: "studio/",
 });
 
@@ -15,7 +15,7 @@ const FOR = [
     body: "You make the decisions, you want them made well, and you would rather talk to the people doing the work than to a sales team.",
   },
   {
-    title: "Teams whose systems haven't kept up",
+    title: "Teams whose systems haven’t kept up",
     body: "The business has grown past its website, its spreadsheets or its inbox, and the workarounds now cost real time every week.",
   },
   {
@@ -27,16 +27,16 @@ const FOR = [
 const SET_UP = [
   { title: "Designers and engineers, together", body: "The same people plan, design and build, so decisions are never lost in a hand-over." },
   { title: "No account managers", body: "You talk directly to the people doing the work, and you see progress as it happens." },
-  { title: "No subcontractors", body: "Your project is never passed on to someone you haven't met." },
+  { title: "No subcontractors", body: "Your project is never passed on to someone you haven’t met." },
   { title: "Plain English", body: "We explain every choice in terms of your business, not our tools." },
 ];
 
 const WONT = [
   "Lock you into our platform, or a licence you keep paying",
   "Sell you AI where a simpler fix would do the job",
-  "Add a cost you didn't agree to in writing",
-  "Hand your project to people you haven't met",
-  "Promise results we can't stand behind",
+  "Add a cost you didn’t agree to in writing",
+  "Hand your project to people you haven’t met",
+  "Promise results we can’t stand behind",
 ];
 
 /** STUDIO — who Nerodyn is for, how the team is set up, what it believes and what it won't do. */
@@ -71,7 +71,7 @@ export default function Studio() {
 
       <section className="sp-block split" aria-labelledby="setup-h">
         <header className="split-head">
-          <Kicker>How we&apos;re set up</Kicker>
+          <Kicker>How we’re set up</Kicker>
           <h2 id="setup-h" className="sp-h2" data-rv>
             Run by the people who build it.
           </h2>
@@ -107,9 +107,9 @@ export default function Studio() {
 
       <section className="sp-block own" aria-labelledby="wont-h">
         <div className="own-head">
-          <Kicker>And what we won&apos;t do</Kicker>
+          <Kicker>And what we won’t do</Kicker>
           <h2 id="wont-h" className="sp-h2" data-rv>
-            Five things you won&apos;t get from us.
+            Five things you won’t get from us.
           </h2>
         </div>
         <ul className="own-list own-list-s own-no" data-rv>
@@ -127,8 +127,8 @@ export default function Studio() {
       </section>
 
       <Closing
-        title="Let's see if we're a fit."
-        line="Start with the free audit, or tell us what you're working on. Either way, you'll hear back within two days."
+        title="Let’s see if we’re a fit."
+        line="Start with the free audit, or tell us what you’re working on. Either way, you’ll hear back within two days."
         more={{ label: "Contact us", href: PAGES.contact }}
       />
     </Page>

@@ -2,7 +2,7 @@
 
 /* ==========================================================================
    NERODYN — "One Stone"  (docs/SPEC.md)
-   White paper, black glass, indigo light. Display: Bodoni Moda; text: Instrument Sans. Everything geometric about the hero
+   White paper, black glass, indigo light. Type: Inter (Display cut for titles, Text cut for reading). Everything geometric about the hero
    comes from lib/layout.ts as CSS custom properties (written by lib/scroll.ts);
    the fallbacks here are the 1440×900 values.
    ========================================================================== */
@@ -41,11 +41,11 @@
   --g: clamp(20px, 4vw, 72px);
   --nav-h: 76px;
 
-  /* Display-face metrics (measured by lib/scroll.ts; Bodoni Moda defaults). */
-  --dA: 1.2;
-  --dD: 0.34;
-  --dCap: 0.68;
-  --display: var(--font-bodoni), "Bodoni Moda", Didot, Georgia, serif;
+  /* Display-face metrics (measured by lib/scroll.ts; Inter's as defaults). */
+  --dA: 0.969;
+  --dD: 0.242;
+  --dCap: 0.727;
+  --display: var(--font-inter), "Inter", system-ui, sans-serif;
 }
 
 @theme inline {
@@ -53,9 +53,8 @@
   --color-ink: var(--ink);
   --color-indigo: var(--indigo);
   --color-muted: var(--muted);
-  --font-sans: var(--font-isans);
-  --font-display: var(--font-bodoni);
-  --font-serif: var(--font-bodoni);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-inter);
   --font-mono: var(--font-gmono);
 }
 
@@ -82,9 +81,12 @@ body {
   margin: 0;
   color: var(--ink);
   background: var(--paper);
-  font-family: var(--font-isans), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.5;
+  /* Inter's text sizes read best a hair tight (its own guidance: about
+     -0.01em at 16 px); every display rule sets its own tracking. */
+  letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -401,8 +403,8 @@ html[data-intro-skip] .intro-mask > span {
   clip-path: inset(0 0 0 0);
   transition: clip-path 1500ms var(--ease-expo) 80ms, transform 1500ms var(--ease-expo) 80ms, filter 1300ms var(--ease-expo) 80ms;
 }
-/* 140%: the Didone's tall line box plus the mask's clip margin would let the
-   tops of waiting glyphs peek out at a smaller offset. */
+/* 140%: the line box plus the mask's clip margin would let the tops of
+   waiting glyphs peek out at a smaller offset. */
 .chapter[data-state="before"] .rv-in {
   transform: translateY(140%) skewY(4deg);
   filter: blur(6px);
@@ -434,8 +436,8 @@ html[data-intro-skip] .intro-mask > span {
 }
 
 /* ---- shared type ----
-   One display voice (Bodoni Moda, optical size on auto) for every title; one
-   text voice (Instrument Sans) for everything you read. */
+   One family, Inter, optical size on auto: its Display cut at 500 for every
+   title, its Text cut for everything you read. */
 .marker {
   display: flex;
   align-items: center;
@@ -460,7 +462,7 @@ html[data-intro-skip] .intro-mask > span {
 }
 .h2 {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(3.5vw, calc(var(--vh) * 5.8));
   line-height: 1.04;
   letter-spacing: -0.026em;
@@ -532,7 +534,7 @@ html[data-intro-skip] .intro-mask > span {
    line-height 1: the baseline sits (1 − A − D)/2 + A below the line box top. */
 .hl {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1;
   overflow-clip-margin: 0.3em;
 }
@@ -697,7 +699,7 @@ html[data-intro-skip] .intro-mask > span {
 }
 .disc-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(3.6vw, calc(var(--vh) * 6));
   line-height: 1.04;
   letter-spacing: -0.026em;
@@ -763,7 +765,7 @@ html[data-intro-skip] .intro-mask > span {
 }
 .statement {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(4.4vw, calc(var(--vh) * 7.2));
   line-height: 1.06;
   letter-spacing: -0.028em;
@@ -894,7 +896,7 @@ html[data-intro-skip] .intro-mask > span {
 }
 .claim-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(5vw, calc(var(--vh) * 8.4));
   line-height: 1;
   letter-spacing: -0.032em;
@@ -968,7 +970,7 @@ html[data-intro-skip] .intro-mask > span {
   position: absolute;
   top: calc(var(--floorline, var(--horizon, calc(var(--vh) * 49))) - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA)) * var(--md-size));
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: var(--md-size);
   line-height: 1;
   letter-spacing: -0.035em;
@@ -1109,7 +1111,7 @@ html[data-intro-skip] .intro-mask > span {
 }
 .sfa-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(3.9vw, calc(var(--vh) * 6.6));
   line-height: 1.04;
   letter-spacing: -0.028em;
@@ -1169,13 +1171,10 @@ html[data-intro-skip] .intro-mask > span {
   margin: 0;
   padding-bottom: 4.6vw;
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: 18.5vw;
   line-height: 0.9;
   letter-spacing: -0.045em;
-  /* A text optical size: at display sizes the Didone's hairlines thin to
-     nothing and the N reads as a slash. */
-  font-variation-settings: "opsz" 30;
   color: var(--ink);
   user-select: none;
   /* Its line box rises over the last row of links — let clicks through. */
@@ -1693,7 +1692,7 @@ html[data-story] .stone-cursor {
 }
 .story-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(6.4vw, calc(var(--vh) * 10.5));
   line-height: 0.98;
   letter-spacing: -0.032em;
@@ -1742,6 +1741,7 @@ html[data-story] .stone-cursor {
 }
 .story-end-line {
   font-family: var(--display);
+  font-weight: 500;
   font-size: min(4.8vw, calc(var(--vh) * 8));
   line-height: 1.02;
   letter-spacing: -0.03em;
@@ -2031,7 +2031,7 @@ html[data-stone-hover] {
 }
 .sp-h1 {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(8vw, 120px);
   line-height: 0.98;
   letter-spacing: -0.035em;
@@ -2043,7 +2043,7 @@ html[data-stone-hover] {
 }
 .sp-h2 {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(4.6vw, 64px);
   line-height: 1.02;
   letter-spacing: -0.03em;
@@ -2142,7 +2142,7 @@ html[data-stone-hover] {
 }
 .ms-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(6vw, 88px);
   line-height: 0.98;
   letter-spacing: -0.035em;
@@ -2280,6 +2280,7 @@ html[data-stone-hover] {
   padding: 20px 0;
   border-bottom: 1px solid var(--hair);
   font-family: var(--display);
+  font-weight: 500;
   font-size: min(2.6vw, 34px);
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -2312,6 +2313,7 @@ html[data-stone-hover] {
 }
 .sp-more-line {
   font-family: var(--display);
+  font-weight: 500;
   font-size: min(4.2vw, 56px);
   line-height: 1;
   letter-spacing: -0.03em;
@@ -2368,7 +2370,7 @@ html[data-stone-hover] {
   gap: 16px;
   align-items: baseline;
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(3vw, 40px);
   line-height: 1.05;
   letter-spacing: -0.025em;
@@ -2796,7 +2798,7 @@ html[data-nowebgl] .pot-fill {
 }
 .ps-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(6.6vw, calc(var(--vh) * 10.5));
   line-height: 0.98;
   letter-spacing: -0.032em;
@@ -2903,7 +2905,7 @@ html[data-nowebgl] .pot-fill {
 }
 .work-name {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(2.8vw, 40px);
   line-height: 1.04;
   letter-spacing: -0.022em;
@@ -2984,7 +2986,7 @@ html[data-nowebgl] .pot-fill {
 }
 .step-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(2.7vw, 40px);
   line-height: 1;
   letter-spacing: -0.024em;
@@ -3278,7 +3280,7 @@ html[data-nowebgl] .pot-fill {
 }
 .af-done-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: 42px;
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -3669,6 +3671,7 @@ html[data-story] .stone-cursor-dot {
   .hero-desc {
     font-size: 14px;
     line-height: 1.5;
+    letter-spacing: -0.02em;
   }
   .hero-ctas {
     top: calc(var(--vh) * 89.5);
@@ -3849,6 +3852,7 @@ html[data-story] .stone-cursor-dot {
 }
 .svc-name {
   font-family: var(--display);
+  font-weight: 500;
   font-size: min(3.4vw, 48px);
   line-height: 1;
   letter-spacing: -0.03em;
@@ -3905,6 +3909,7 @@ html[data-story] .stone-cursor-dot {
 }
 .svc-other-name {
   font-family: var(--display);
+  font-weight: 500;
   font-size: 38px;
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -3993,6 +3998,7 @@ html[data-story] .stone-cursor-dot {
 }
 .ct-email {
   font-family: var(--display);
+  font-weight: 500;
   font-size: 30px;
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -4385,10 +4391,6 @@ html[data-story] .stone-cursor-dot {
 }
 
 /* The work index */
-.work-punctuation {
-  font-weight: 500;
-  -webkit-text-stroke: 0.35px currentColor;
-}
 .wk-filter {
   display: flex;
   flex-wrap: wrap;
@@ -4464,7 +4466,7 @@ html[data-story] .stone-cursor-dot {
 }
 .wk-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(2.8vw, 40px);
   line-height: 1.06;
   letter-spacing: -0.025em;
@@ -4584,7 +4586,7 @@ html[data-story] .stone-cursor-dot {
 }
 .ar-h1 {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(5.4vw, 78px);
   line-height: 1.02;
   letter-spacing: -0.03em;
@@ -4684,7 +4686,7 @@ html[data-story] .stone-cursor-dot {
 }
 .ar-h2 {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(3vw, 40px);
   line-height: 1.12;
   letter-spacing: -0.02em;
@@ -4695,7 +4697,7 @@ html[data-story] .stone-cursor-dot {
 }
 .ar-anchor {
   margin-left: 12px;
-  font-family: var(--font-isans), sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-size: 0.5em;
   color: var(--indigo);
   text-decoration: none !important;
@@ -5283,7 +5285,7 @@ ol.dg {
 }
 .bl-feature-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(3.4vw, 50px);
   line-height: 1.06;
   letter-spacing: -0.025em;
@@ -5341,7 +5343,7 @@ ol.dg {
 }
 .bl-title {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: 500;
   font-size: min(2.4vw, 32px);
   line-height: 1.14;
   letter-spacing: -0.02em;

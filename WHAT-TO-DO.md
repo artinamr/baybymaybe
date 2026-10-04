@@ -64,7 +64,7 @@ future increments; chapter jumps remain in the phone menu.
    them. Copy is plain, specific and confident (see `CLAUDE.md` → Typography
    for the voice and what was rejected).
 6. **Visual language is locked**: paper `#F6F5F2`, ink `#0A0B10`, indigo
-   `#5B3DF0`, Bodoni Moda for display, Instrument Sans for text, mono only for
+   `#5B3DF0`, Inter for everything (titles at 500 — see CLAUDE.md Typography), mono only for
    tiny numerals. New pages reuse the `.sp*`, `.split`, `.items`, `.flow`,
    `.own-*`, `.closing` building blocks (in `app/globals.css`) and the
    `components/site/Page.tsx` shell. Don't invent a new style per page.

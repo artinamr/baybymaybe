@@ -6,7 +6,7 @@ import { pageMeta } from "@/lib/meta";
 export const metadata = pageMeta({
   title: "Contact",
   description:
-    "Ask Nerodyn for a free website audit or tell us about a new project — websites, platforms or AI automation. You'll hear back within two days.",
+    "Ask Nerodyn for a free website audit or tell us about a new project — websites, platforms or AI automation. You’ll hear back within two days.",
   path: "contact/",
 });
 

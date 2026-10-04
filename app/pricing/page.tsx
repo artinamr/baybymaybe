@@ -13,7 +13,7 @@ export const metadata = pageMeta({
 
 const QUOTE = [
   { title: "The free audit, or a first call", body: "We look at what you have and what you want it to do, and ask the questions that decide the size of the job." },
-  { title: "A written scope", body: "What's included, what isn't, what we need from you, and the milestones — in plain language." },
+  { title: "A written scope", body: "What’s included, what isn’t, what we need from you, and the milestones — in plain language." },
   { title: "A fixed quote and a date", body: "The price, when each part is paid and when it goes live. What is in the quote is what you pay." },
   { title: "Changes agreed first", body: "If you want something new along the way, we price it and you decide — before any work on it starts." },
 ];
@@ -45,7 +45,7 @@ const RUNNING = [
 ];
 
 const SAVE = [
-  { title: "Start with the smallest useful version", body: "Launch what removes the most friction first. Add the rest once it's earning its place." },
+  { title: "Start with the smallest useful version", body: "Launch what removes the most friction first. Add the rest once it’s earning its place." },
   { title: "Bring your content ready", body: "Finished words, photos and decisions shorten every stage after them." },
   { title: "Keep the tools that work", body: "Connecting to software you already pay for is usually cheaper than replacing it." },
   { title: "Give us one decision-maker", body: "One person who can say yes keeps the project on its date." },
@@ -68,7 +68,7 @@ export default function Pricing() {
         <Kicker>Investment</Kicker>
         <Title lines={["What it costs,", "and why."]} />
         <p className="sp-lede" data-rv>
-          Every project is quoted from a written scope, and the price is fixed before anything starts. We don&apos;t publish a rate
+          Every project is quoted from a written scope, and the price is fixed before anything starts. We don’t publish a rate
           card: two projects with the same name can differ a great deal in size, and a number without the scope behind it would only
           mislead.
         </p>
@@ -141,7 +141,7 @@ export default function Pricing() {
             The running costs to plan for.
           </h2>
           <p className="split-more sp-lede" data-rv>
-            Every one is listed in the quote — what it&apos;s for, roughly what it costs and who you pay — so nothing arrives unexpectedly.
+            Every one is listed in the quote — what it’s for, roughly what it costs and who you pay — so nothing arrives unexpectedly.
           </p>
         </header>
         <ul className="items items-1">
@@ -185,7 +185,7 @@ export default function Pricing() {
 
       <Closing
         title="Get a real number."
-        line="Start with the free audit. You'll have a straight answer within two days — and a written, fixed quote if you want one."
+        line="Start with the free audit. You’ll have a straight answer within two days — and a written, fixed quote if you want one."
         more={{ label: "See how a project runs", href: PAGES.methodology }}
       />
     </Page>

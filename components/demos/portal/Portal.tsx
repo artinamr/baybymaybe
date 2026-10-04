@@ -208,7 +208,7 @@ export function Portal({ view: initial = "team" }: { view?: PortalView }) {
             <section className={`${s.panel} ${s.ask}`}>
               {approved ? (
                 <p className={s.approved} role="status">
-                  <span aria-hidden>✓</span> Quote Q-1187 approved. We&apos;ll schedule the work and let you know the date.
+                  <span aria-hidden>✓</span> Quote Q-1187 approved. We’ll schedule the work and let you know the date.
                 </p>
               ) : (
                 <>

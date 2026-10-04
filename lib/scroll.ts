@@ -81,8 +81,8 @@ function measureDisplay(s: CSSStyleDeclaration) {
   metricsCtx ??= document.createElement("canvas").getContext("2d");
   const ctx = metricsCtx;
   if (!ctx) return;
-  const fam = getComputedStyle(document.documentElement).getPropertyValue("--font-bodoni").trim() || "Georgia, serif";
-  ctx.font = `400 100px ${fam}`;
+  const fam = getComputedStyle(document.documentElement).getPropertyValue("--font-inter").trim() || "Inter, system-ui, sans-serif";
+  ctx.font = `500 100px ${fam}`;
   const m = ctx.measureText("H");
   const a = m.fontBoundingBoxAscent / 100;
   const d = m.fontBoundingBoxDescent / 100;

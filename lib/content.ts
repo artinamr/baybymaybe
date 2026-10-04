@@ -18,7 +18,7 @@ export const SITE_URL = (
 export const DELIVERABLES: Record<"websites" | "platforms" | "ai", string[]> = {
   websites: ["Custom design, no templates", "Fast on every phone and screen", "Search foundations built in", "Content your team edits itself"],
   platforms: ["Client portals and dashboards", "Booking, payments and accounts", "Internal tools and admin", "Connected to the software you use"],
-  ai: ["Site assistants that answer and book", "Inbox, document and data work", "Agents inside your team's tools", "A person in the loop where it matters"],
+  ai: ["Site assistants that answer and book", "Inbox, document and data work", "Agents inside your team’s tools", "A person in the loop where it matters"],
 };
 
 /** Questions a buyer asks before the first call. (For the client's sign-off.) */
@@ -167,7 +167,7 @@ export const STAGES: Stage[] = [
     line: "Agree exactly what is being built.",
     happens:
       "We turn what we learned into a written scope — the pages and screens, the features, the integrations, who supplies which content, how success is judged — and a fixed quote with a launch date.",
-    bring: ["Decisions on what matters most", "The person who signs off", "Any dates that can't move"],
+    bring: ["Decisions on what matters most", "The person who signs off", "Any dates that can’t move"],
     produce: ["The written scope", "A fixed quote and a launch date", "A plan of who does what, and when"],
     when: "By day 3",
     whenShort: "By day 3",

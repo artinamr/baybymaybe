@@ -9,8 +9,8 @@
  * fields marked "additive" are extra outputs other modules may use.
  *
  * How the hero is solved (desktop; tablet/mobile swap the constants):
- *   1. POTENTIAL is fitted with canvas measureText in its real face (Instrument
- *      Sans wdth 75 / 700 caps) so its INK spans exactly W − 2G, unless its cap
+ *   1. POTENTIAL is fitted with canvas measureText in its real face (Inter
+ *      Display 500 caps) so its INK spans exactly W − 2G, unless its cap
  *      height would pass 0.21H — then it stops short, still left-aligned at G.
  *   2. Camera distance + principal-point y are solved by projecting the stone's
  *      real defining points through the K0 camera, so apex/culet land exactly on
@@ -529,7 +529,7 @@ export function computeLayout(vw: number, vh: number): Layout {
   const typeK = tablet ? 0.9 : 1;
   const potBaseline = (mobile ? 0.62 : 0.775) * Hh;
   const potCapMax = (mobile ? 0.075 : 0.21 * typeK) * Hh;
-  const l1CapTop = (mobile ? 0.13 : 0.2) * Hh;
+  const l1CapTop = (mobile ? 0.142 : 0.2) * Hh; // phone: a clear 16 px under the eyebrow
   const l2Baseline = (mobile ? 0.28 : 0.43) * Hh;
   const eyebrowTop = (mobile ? 0.1 : 0.155) * Hh;
   const culetY = mobile ? 0.71 : tablet ? 0.85 : 0.88;
@@ -537,13 +537,12 @@ export function computeLayout(vw: number, vh: number): Layout {
   const axisRange: [number, number] = mobile ? [0.56, 0.72] : tablet ? [0.56, 0.7] : [0.55, 0.66];
 
   /* ---- fonts ---- */
-  const serifFallback = "'Bodoni Moda', Didot, Georgia, serif";
-  // One display voice: Bodoni Moda, whose hairlines and knife-point serifs are
-  // the typographic twin of the stone's edge highlights.
-  const displayFamily = cssFamily("--font-bodoni", "[data-pot-outline]", serifFallback);
-  const potFont: FontSpec = { family: displayFamily, weight: 400, style: "normal", stretch: 100 };
-  const l1Font: FontSpec = { family: displayFamily, weight: 400, style: "normal", stretch: 100 };
-  const l2Font: FontSpec = { family: displayFamily, weight: 400, style: "normal", stretch: 100 };
+  const sansFallback = "Inter, system-ui, sans-serif";
+  // One display voice: Inter's Display cut at 500, the weight the lines are set in.
+  const displayFamily = cssFamily("--font-inter", "[data-pot-outline]", sansFallback);
+  const potFont: FontSpec = { family: displayFamily, weight: 500, style: "normal", stretch: 100 };
+  const l1Font: FontSpec = { family: displayFamily, weight: 500, style: "normal", stretch: 100 };
+  const l2Font: FontSpec = { family: displayFamily, weight: 500, style: "normal", stretch: 100 };
 
   /* ---- 1. POTENTIAL fit ---- */
   const pm = measureLine(POT_TEXT, potFont);

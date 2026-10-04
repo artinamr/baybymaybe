@@ -91,7 +91,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
             {p.context.lede}
           </p>
           <p className="item-b" data-rv style={{ marginTop: 22 }}>
-            <b>Who it&apos;s for:</b> {p.context.audience}
+            <b>Who it’s for:</b> {p.context.audience}
           </p>
         </div>
       </section>
@@ -158,7 +158,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
           </ul>
         </div>
         <div className="cs-limits" data-rv>
-          <h3>{p.kind === "demo" ? "What it doesn't" : "Results"}</h3>
+          <h3>{p.kind === "demo" ? "What it doesn’t" : "Results"}</h3>
           <ul>
             {p.limits.map((x) => (
               <li key={x}>{x}</li>
@@ -193,7 +193,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
 
       <Closing
         title="Want something like this?"
-        line="Tell us what you have and what's slowing you down. You'll get a straight answer within two days."
+        line="Tell us what you have and what’s slowing you down. You’ll get a straight answer within two days."
         more={{ label: "Or see all the work", href: PAGES.work }}
       />
     </Page>
