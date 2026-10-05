@@ -2,7 +2,7 @@
 // fails the build when the site's writing rules are broken. The rules are the
 // client's and are written out in docs/BLOG-GUIDE.md:
 //   - no em dashes anywhere a reader or a search engine sees (pages, attributes,
-//     structured data, the feed, llms.txt), and no spaced en dashes doing their job;
+//     structured data, the feed, llms.txt, JSON), and no spaced en dashes doing their job;
 //   - the blog (articles, the glossary, how we write): none of the stock phrases
 //     that make writing sound machine-made, and UK/NZ spelling; articles also
 //     need a sources list, a credit for the cover photograph, the short answer
@@ -51,7 +51,7 @@ const files = [];
     const p = path.join(d, f);
     if (fs.statSync(p).isDirectory()) {
       if (f !== "_next") walk(p);
-    } else if (/\.(html|xml|txt)$/.test(f) && !/^__next|^index\.txt$/.test(f)) files.push(p);
+    } else if (/\.(html|xml|txt|json)$/.test(f) && !/^__next|^index\.txt$/.test(f)) files.push(p);
   }
 })(root);
 

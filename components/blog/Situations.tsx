@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Photo } from "@/components/site/Photo";
 import type { Photo as PhotoData } from "@/content/images";
 
 export type Situation = {
@@ -11,7 +10,8 @@ export type Situation = {
   title: string;
   short: string;
   minutes: number;
-  cover: PhotoData;
+  /** Only what the panel draws (the photo is decorative here: the row says it all). */
+  cover: Pick<PhotoData, "src" | "srcSet" | "width" | "height">;
 };
 
 /**
@@ -50,7 +50,17 @@ export function Situations({ items }: { items: Situation[] }) {
         <span className="bl-peek-img">
           {items.map((s, i) => (
             <span key={s.slug} data-on={i === on ? "" : undefined}>
-              <Photo p={s.cover} sizes="(min-width: 1360px) 520px, 40vw" decorative />
+              {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
+              <img
+                src={s.cover.src}
+                srcSet={s.cover.srcSet}
+                sizes="(min-width: 1360px) 520px, 40vw"
+                width={s.cover.width}
+                height={s.cover.height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
             </span>
           ))}
         </span>

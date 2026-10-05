@@ -7,6 +7,8 @@ import { StageSpy } from "@/components/site/StageSpy";
 import { FAQ_ALL, PAGES, PRINCIPLES, STAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { PHOTOS } from "@/content/images";
+// Its own stylesheet: the stages, the sticky photograph, your part. No other page loads it.
+import "./methodology.css";
 
 const DESCRIPTION =
   "How a Nerodyn project runs in five stages: what happens in each, what you bring, what we produce, where you decide, and what is yours at the end.";

@@ -15,6 +15,9 @@ const ALL = [
   { path: "/services/websites/", taps: [".qa-q"] },
   { path: "/work/operations-portal/", taps: [".cs-stage button"] },
   { path: "/blog/redesign-or-improve/", taps: ["button.sp-menu"] },
+  { path: "/blog/", taps: [".bl-filter button:nth-child(2)"] },
+  { path: "/methodology/", taps: [".qa-q"] },
+  { path: "/services/", taps: [".qa-q"] },
   { path: "/contact/", taps: [".af-kind-opt:nth-child(2)", ".af-chips .chip"] },
 ];
 const PAGES = ONLY ? ALL.filter((p) => ONLY.includes(p.path)) : ALL;

@@ -3,34 +3,51 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { searchable } from "@/lib/search";
 
-type Item = { slug: string; topic: string; text: string };
+type Item = { slug: string; topic: string };
 type Word = { id: string; term: string; href: string; text: string };
+type Index = { items: { slug: string; text: string }[]; words: Word[] };
 
 /**
  * Search and topics over the blog's cards. Every card is in the static HTML
  * (search engines and readers without scripts see them all); typing or
  * choosing a topic writes one CSS rule that hides the cards that don't match.
- * A search also looks through the glossary and offers the matching terms,
- * and a search with no answer offers to take the question instead. "/" puts
- * the cursor in the field from anywhere on the page.
+ * What a search matches (`index`, /blog/search.json) is fetched the first
+ * time someone reaches for the field, so the page doesn't carry it. A search
+ * also looks through the glossary and offers the matching terms, and a search
+ * with no answer offers to take the question instead. "/" puts the cursor in
+ * the field from anywhere on the page.
  */
 export function BlogIndex({
   topics,
   items,
-  words,
+  index,
   ask,
   children,
 }: {
   topics: { key: string; label: string }[];
   items: Item[];
-  words: Word[];
+  /** The search index's address. */
+  index: string;
   /** Where an unanswered question goes (a mailto: with a subject). */
   ask: string;
   children: ReactNode;
 }) {
   const [q, setQ] = useState("");
   const [on, setOn] = useState("all");
+  const [idx, setIdx] = useState<Index | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const asked = useRef(false);
+
+  const load = () => {
+    if (asked.current) return;
+    asked.current = true;
+    fetch(index)
+      .then((r) => r.json())
+      .then((d: Index) => setIdx(d))
+      .catch(() => {
+        asked.current = false;
+      });
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -45,10 +62,12 @@ export function BlogIndex({
   }, []);
 
   const terms = searchable(q).split(" ").filter(Boolean);
+  const waiting = terms.length > 0 && !idx;
   const match = (text: string) => terms.every((w) => text.includes(w));
-  const shown = items.filter((it) => (on === "all" || it.topic === on) && match(it.text));
+  const textOf = (slug: string) => idx?.items.find((x) => x.slug === slug)?.text ?? "";
+  const shown = items.filter((it) => (on === "all" || it.topic === on) && (waiting || match(textOf(it.slug))));
   const hidden = items.filter((it) => !shown.includes(it));
-  const hits = terms.length ? words.filter((w) => match(w.text)).slice(0, 4) : [];
+  const hits = terms.length && idx ? idx.words.filter((w) => match(w.text)).slice(0, 4) : [];
   const css = hidden.map((it) => `.bl-index [data-slug="${it.slug}"]`).join(",");
   const topicName = topics.find((t) => t.key === on)?.label;
 
@@ -69,7 +88,12 @@ export function BlogIndex({
             id="bl-q"
             type="search"
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              load();
+              setQ(e.target.value);
+            }}
+            onFocus={load}
+            onPointerEnter={load}
             placeholder="Search: quotes, domains, privacy…"
             autoComplete="off"
             spellCheck={false}
@@ -85,7 +109,9 @@ export function BlogIndex({
         </div>
       </div>
       <p className="bl-count" aria-live="polite">
-        {shown.length === items.length
+        {waiting
+          ? "Searching…"
+          : shown.length === items.length
           ? `${items.length} articles`
           : `${shown.length} of ${items.length} articles${topicName && on !== "all" ? ` about ${topicName.toLowerCase()}` : ""}${terms.length ? ` matching “${q.trim()}”` : ""}`}
       </p>
@@ -100,7 +126,7 @@ export function BlogIndex({
         </p>
       ) : null}
       <div className="bl-index">{children}</div>
-      {shown.length === 0 ? (
+      {shown.length === 0 && !waiting ? (
         <div className="bl-none">
           <p>
             {terms.length ? `Nothing answers “${q.trim()}” yet.` : "Nothing on this topic yet."} Ask us, and if the answer would help other owners we’ll write it up.

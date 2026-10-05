@@ -1,0 +1,381 @@
+/* THE SERVICES PAGES' OWN STYLES: loaded only under /services/ (app/services/layout.tsx). */
+/* ==========================================================================
+   SERVICES (round 19): what each discipline delivers on its card, "which do
+   you need?", one enquiry's journey through all three, the three working
+   demonstrations, and on a service page the facts at a glance beside the
+   title and where the discipline fits.
+   ========================================================================== */
+.svc-points {
+  display: grid;
+  margin-top: 6px;
+  border-top: 1px solid var(--hair);
+}
+.svc-points span {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hair-soft);
+  font-size: 14px;
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+}
+.svc-points span::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  margin-top: 0.55em;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+
+/* Which do you need? */
+.svc-choose-note {
+  font-size: 16px;
+}
+.svc-choose {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.svc-choose a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 8px 28px;
+  padding: 22px 0 21px;
+  border-bottom: 1px solid var(--hair);
+}
+.svc-choose-if {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  transition: color 300ms ease;
+}
+.svc-choose-to {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--indigo);
+}
+.svc-choose-to span {
+  display: inline-block;
+  transition: transform 450ms var(--ease-expo);
+}
+.svc-choose a:hover .svc-choose-if {
+  color: var(--indigo);
+}
+.svc-choose a:hover .svc-choose-to span {
+  transform: translateX(5px);
+}
+
+/* A section with its heading above a wide figure (the journey). */
+.svc-system-head {
+  display: grid;
+  gap: 22px;
+  margin-bottom: calc(var(--vh) * 7);
+}
+.svc-system-head .sp-kicker {
+  margin: 0;
+}
+
+/* The journey: six steps on one line, each tagged with who does it. */
+.jr {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.jr-step {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  align-content: start;
+  gap: 12px;
+  transition: opacity 500ms ease;
+}
+/* On a service page the other disciplines' steps step back (still readable), and this one's come forward. */
+.jr-step[data-dim] .jr-dot,
+.jr-step[data-dim] .jr-person {
+  opacity: 0.4;
+}
+.jr .jr-step[data-dim] .jr-tag {
+  border-color: var(--hair);
+  background: transparent;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.jr-step[data-dim] .jr-t,
+.jr-step[data-dim] .jr-b {
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.jr[data-focus] .jr-step:not([data-dim]) .jr-t {
+  color: var(--indigo);
+}
+.jr-tag {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 11px;
+  border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.jr-step[data-by="platforms"] .jr-tag {
+  border-color: color-mix(in oklab, var(--indigo) 45%, transparent);
+  color: var(--indigo);
+}
+.jr-step[data-by="ai-automation"] .jr-tag {
+  border-color: var(--indigo);
+  background: var(--indigo);
+  color: #fff;
+}
+.jr-dot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 34px;
+}
+.jr-dot > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
+  border-radius: 50%;
+  background: var(--paper);
+  font-size: 11px;
+  color: var(--ink);
+}
+.jr-step[data-by="platforms"] .jr-dot > span {
+  border-color: color-mix(in oklab, var(--indigo) 55%, transparent);
+  color: var(--indigo);
+}
+.jr-step[data-by="ai-automation"] .jr-dot > span {
+  border-color: var(--indigo);
+  background: var(--indigo);
+  color: #fff;
+}
+.jr-dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 34px;
+  right: -18px;
+  height: 1px;
+  background: var(--hair);
+}
+.jr-step:last-child .jr-dot::after {
+  display: none;
+}
+.jr-t {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 19px;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.jr-person {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 6px;
+  vertical-align: -3px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--indigo) 10%, transparent);
+}
+.jr-person svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--indigo);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.jr-b {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: color-mix(in oklab, var(--ink) 66%, transparent);
+}
+
+/* The three demonstrations. */
+.svc-demo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+.svc-demo {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+.svc-demo-img {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 6px;
+  border: 1px solid var(--hair-soft);
+  border-radius: 18px;
+  background: #eeede9;
+}
+.svc-demo-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 0 0;
+  transition: transform 1400ms var(--ease-expo);
+}
+.svc-demo:hover .svc-demo-img img {
+  transform: scale(1.03);
+}
+.svc-demo-kind {
+  font-size: 12px;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.svc-demo-kind b {
+  font-weight: 500;
+  color: var(--indigo);
+}
+.svc-demo-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+  transition: color 300ms ease;
+}
+.svc-demo:hover .svc-demo-t {
+  color: var(--indigo);
+}
+.svc-demo:hover .svc-go span {
+  transform: translateX(5px);
+}
+.svc-start-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+}
+
+/* A service page: the facts at a glance beside the title. */
+.svc-hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+  gap: 40px 6vw;
+  align-items: start;
+}
+.svc-glance {
+  margin: 0;
+  padding: 6px 26px;
+  border: 1px solid var(--hair);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+.svc-glance div {
+  display: grid;
+  gap: 4px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.svc-glance div:last-child {
+  border-bottom: 0;
+}
+.svc-glance dt {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+.svc-glance dd {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+}
+.svc-glance a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.svc-glance a:hover {
+  color: var(--indigo);
+}
+.svc-others .svc-others-grid {
+  margin-top: calc(var(--vh) * 8);
+}
+
+@media (max-width: 1000px) {
+  .jr {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .jr-step {
+    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-rows: none;
+    column-gap: 16px;
+    row-gap: 6px;
+    padding-bottom: 26px;
+  }
+  .jr-dot {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: stretch;
+    align-items: flex-start;
+    height: auto;
+  }
+  .jr-dot::after {
+    top: 34px;
+    bottom: -26px;
+    left: 16.5px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .jr-tag {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .jr-t {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 2px 0 0;
+  }
+  .jr-b {
+    grid-column: 2;
+    grid-row: 3;
+    max-width: 52ch;
+  }
+  .svc-demo-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+}
+@media (max-width: 900px) {
+  .svc-hero-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .svc-choose a {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px 0;
+  }
+  .svc-choose-if {
+    font-size: 19px;
+  }
+}

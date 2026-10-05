@@ -6,7 +6,7 @@ import { ArticleCard } from "@/components/blog/ArticleCard";
 import { BlogLd } from "@/components/site/JsonLd";
 import { CONTACT, PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
-import { searchable } from "@/lib/search";
+
 import { ALL_SOURCES, BLOG_UPDATED, PUBLISHED, TOPICS, longDate, type ToolKind } from "@/content/blog";
 import { BODIES } from "@/content/blog/bodies";
 import { GLOSSARY } from "@/content/blog/glossary";
@@ -98,7 +98,7 @@ export default function Blog() {
               title: a.title,
               short: a.short,
               minutes: a.minutes,
-              cover: a.cover,
+              cover: { src: a.cover.src, srcSet: a.cover.srcSet, width: a.cover.width, height: a.cover.height },
             }))}
           />
         </section>
@@ -114,31 +114,8 @@ export default function Blog() {
         <BlogIndex
           topics={TOPICS}
           ask={ASK}
-          items={PUBLISHED.map((a) => ({
-            slug: a.slug,
-            topic: a.topic,
-            // What the article answers, in every form a reader might type: the words up front, the
-            // questions and their answers, its sections, and the glossary terms it goes further into.
-            text: searchable(
-              [
-                a.title,
-                a.description,
-                a.short,
-                a.situation ?? "",
-                a.keywords.join(" "),
-                ...a.faq.flatMap((f) => [f.q, f.a]),
-                ...(BODIES[a.slug]?.toc.map((t) => t.title) ?? []),
-                ...GLOSSARY.filter((t) => "see" in t && t.see.slug === a.slug).map((t) => `${t.term} ${"also" in t ? t.also : ""}`),
-                a.topic,
-              ].join(" ")
-            ),
-          }))}
-          words={GLOSSARY.map((t) => ({
-            id: t.id,
-            term: t.term,
-            href: `${PAGES.glossary}#${t.id}`,
-            text: searchable(`${t.term} ${"also" in t ? t.also : ""}`),
-          }))}
+          index={`${PAGES.blog}search.json`}
+          items={PUBLISHED.map((a) => ({ slug: a.slug, topic: a.topic }))}
         >
           <div className="bl-grid">
             {PUBLISHED.map((a, i) => (

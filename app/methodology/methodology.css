@@ -1,0 +1,496 @@
+/* THE METHODOLOGY PAGE'S OWN STYLES: loaded only on /methodology/ (its page.tsx). */
+/* The five stages, each set against a frame of the film. */
+.ms {
+  padding: calc(var(--vh) * 14) 0 calc(var(--vh) * 6);
+}
+.ms-head {
+  margin-bottom: calc(var(--vh) * 6);
+}
+.ms-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: 6vw;
+  align-items: center;
+  padding: calc(var(--vh) * 6) 0;
+}
+.ms-stage[data-flip] {
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+}
+.ms-stage[data-flip] .ms-img {
+  order: 2;
+}
+.ms-img {
+  border: 1px solid var(--hair-soft);
+  margin: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: #eeede9;
+}
+.ms-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.06);
+  transition: transform 1800ms var(--ease-expo);
+}
+.ms-img[data-in] img {
+  transform: none;
+}
+.ms-day {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  font-size: 14px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 60%, transparent);
+  margin: 0 0 18px;
+}
+.ms-day .mono {
+  font-size: 11px;
+  color: var(--indigo);
+}
+.ms-title {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: min(6vw, 88px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  margin: 0 0 24px;
+}
+.ms-line {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  color: color-mix(in oklab, var(--ink) 90%, transparent);
+  margin: 0 0 14px;
+  max-width: 36ch;
+}
+.ms-lede {
+  font-size: 17px;
+  line-height: 1.65;
+  color: color-mix(in oklab, var(--ink) 70%, transparent);
+  margin: 0 0 34px;
+  max-width: 52ch;
+}
+/* What you bring · what we produce: two short lists side by side. */
+.ms-lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+}
+.ms-list-h {
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 60%, transparent);
+  margin: 0 0 12px;
+}
+.ms-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 36em;
+  border-top: 1px solid var(--hair);
+}
+.ms-points li {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: 15px;
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--ink) 80%, transparent);
+}
+/* What you bring: a ring; what we produce: a filled dot. */
+.ms-points li::before {
+  content: "";
+  flex: none;
+  box-sizing: border-box;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--indigo);
+  transform: translateY(-2px);
+}
+.ms-points[data-produce] li::before {
+  background: var(--indigo);
+}
+.ms-note {
+  font-size: 15px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+  margin: calc(var(--vh) * 4) 0 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--hair-soft);
+  max-width: 64ch;
+}
+@media (max-width: 900px) {
+  .ms-stage[data-flip] .ms-img {
+    order: 0;
+  }
+  .ms-lists {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+  .ms-line {
+    font-size: 18px;
+  }
+  .ms-lede {
+    font-size: 16px;
+  }
+  .ms-title {
+    font-size: 13vw;
+  }
+  .ms-img {
+    border-radius: 20px;
+  }
+}
+
+/* ---- The methodology at a glance: five stages on one line, each a way in ---- */
+.ms-map {
+  margin: 0 0 calc(var(--vh) * 7);
+}
+.ms-map ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+}
+.ms-map li + li {
+  border-left: 1px solid var(--hair-soft);
+}
+.ms-map a {
+  display: grid;
+  gap: 6px;
+  height: 100%;
+  padding: 20px 20px 22px;
+  transition: background 350ms ease;
+}
+.ms-map li:first-child a {
+  padding-left: 0;
+}
+.ms-map a:hover {
+  background: color-mix(in oklab, var(--indigo) 4%, transparent);
+}
+.ms-map-n {
+  color: var(--indigo);
+}
+.ms-map-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  transition: color 300ms ease;
+}
+.ms-map a:hover .ms-map-t {
+  color: var(--indigo);
+}
+.ms-map-w {
+  font-size: 13px;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.ms-stage {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
+@media (max-width: 900px) {
+  .ms-map ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ms-map li + li {
+    border-left: 0;
+    border-top: 1px solid var(--hair-soft);
+  }
+  .ms-map a,
+  .ms-map li:first-child a {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .ms-map-t {
+    font-size: 19px;
+  }
+}
+
+/* ==========================================================================
+   METHODOLOGY (round 19): the five stages read beside one photograph that
+   stays in view and changes with the stage (StageSpy writes data-active),
+   with a rail of the five under it; on a phone each stage carries its own
+   photograph. Then your part (three decisions, what to have ready).
+   ========================================================================== */
+.mf {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: 6vw;
+  align-items: start;
+}
+.mf-media {
+  position: sticky;
+  top: calc(var(--nav-h) + 24px);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 18px;
+  height: min(calc(100vh - var(--nav-h) - 56px), 780px);
+}
+.mf-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--hair-soft);
+  border-radius: 24px;
+  background: #eeede9;
+}
+.mf-shot {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 800ms ease;
+}
+.mf-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.06);
+  transition: transform 2000ms var(--ease-expo);
+}
+.mf-count {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--paper) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 11px;
+  color: var(--ink);
+}
+.mf-count > span {
+  display: none;
+  color: var(--indigo);
+}
+.mf-rail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.mf-rail a {
+  display: grid;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+  transition: color 300ms ease;
+}
+.mf-rail a::before {
+  content: "";
+  height: 2px;
+  border-radius: 2px;
+  background: var(--hair);
+  transition: background 400ms ease;
+}
+.mf-rail a:hover {
+  color: var(--ink);
+}
+.mf[data-active="0"] .mf-shot[data-i="0"],
+.mf[data-active="1"] .mf-shot[data-i="1"],
+.mf[data-active="2"] .mf-shot[data-i="2"],
+.mf[data-active="3"] .mf-shot[data-i="3"],
+.mf[data-active="4"] .mf-shot[data-i="4"] {
+  opacity: 1;
+}
+.mf[data-active="0"] .mf-shot[data-i="0"] img,
+.mf[data-active="1"] .mf-shot[data-i="1"] img,
+.mf[data-active="2"] .mf-shot[data-i="2"] img,
+.mf[data-active="3"] .mf-shot[data-i="3"] img,
+.mf[data-active="4"] .mf-shot[data-i="4"] img {
+  transform: none;
+}
+.mf[data-active="0"] .mf-count [data-i="0"],
+.mf[data-active="1"] .mf-count [data-i="1"],
+.mf[data-active="2"] .mf-count [data-i="2"],
+.mf[data-active="3"] .mf-count [data-i="3"],
+.mf[data-active="4"] .mf-count [data-i="4"] {
+  display: inline;
+}
+.mf[data-active="0"] .mf-rail [data-i="0"],
+.mf[data-active="1"] .mf-rail [data-i="1"],
+.mf[data-active="2"] .mf-rail [data-i="2"],
+.mf[data-active="3"] .mf-rail [data-i="3"],
+.mf[data-active="4"] .mf-rail [data-i="4"] {
+  color: var(--ink);
+}
+.mf-rail a[aria-current]::before,
+.mf[data-active="0"] .mf-rail [data-i="0"]::before,
+.mf[data-active="1"] .mf-rail [data-i="1"]::before,
+.mf[data-active="2"] .mf-rail [data-i="2"]::before,
+.mf[data-active="3"] .mf-rail [data-i="3"]::before,
+.mf[data-active="4"] .mf-rail [data-i="4"]::before {
+  background: var(--indigo);
+}
+/* Each stage holds the screen for a while, so the photograph has time to belong to it. */
+.mf-stage {
+  display: grid;
+  align-content: center;
+  min-height: min(84vh, 860px);
+  padding: calc(var(--vh) * 6) 0;
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
+.mf-stage + .mf-stage {
+  border-top: 1px solid var(--hair-soft);
+}
+.mf-img {
+  display: none;
+}
+
+/* Your part: three decisions, and what to have ready. */
+.mf-decide-note {
+  font-size: 16px;
+}
+.mf-part {
+  display: grid;
+  gap: 40px;
+}
+.mf-decide {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.mf-decide li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  column-gap: 20px;
+  row-gap: 4px;
+  padding: 22px 26px 24px 22px;
+  border: 1px solid var(--hair);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+.mf-decide-n {
+  grid-column: 1;
+  grid-row: 1;
+  padding-top: 6px;
+  font-size: 11px;
+  color: var(--indigo);
+}
+.mf-decide-s {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.mf-decide .item-t {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  font-size: 22px;
+}
+.mf-decide .item-b {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 15px;
+}
+.mf-ready {
+  padding-top: 8px;
+}
+.mf-ready-h {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.mf-ready ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  border-top: 1px solid var(--hair);
+}
+.mf-ready li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: 15px;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+}
+.mf-ready .own-tick {
+  width: 22px;
+  height: 22px;
+}
+.mf-ready .own-tick svg {
+  width: 12px;
+  height: 12px;
+}
+
+@media (max-width: 560px) {
+  .mf-decide li {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    row-gap: 6px;
+  }
+  .mf-decide-n,
+  .mf-decide-s,
+  .mf-decide .item-t,
+  .mf-decide .item-b {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+@media (max-width: 900px) {
+  .mf {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mf-media {
+    display: none;
+  }
+  .mf-stage {
+    min-height: 0;
+    padding: calc(var(--vh) * 5) 0;
+  }
+  .mf-img {
+    display: block;
+    margin-bottom: 28px;
+    aspect-ratio: 4 / 3;
+  }
+  .mf-ready ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mf-shot,
+  .mf-shot img {
+    transition: none;
+  }
+}
+
+/* Reduced motion: the stage photographs arrive without the slow settle. (The global
+   rule that does this for every [data-rv] can't reach this sheet's later rules.) */
+@media (prefers-reduced-motion: reduce) {
+  .ms-img img {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
