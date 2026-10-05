@@ -4,12 +4,16 @@ import { QaList } from "@/components/site/QaList";
 import { QaLd, ServiceLd } from "@/components/site/JsonLd";
 import { Photo, BANNER_SIZES } from "@/components/site/Photo";
 import { ArticleCard } from "@/components/blog/ArticleCard";
+import { Journey } from "@/components/site/Journey";
 import { PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { WorkTitle } from "@/components/work/WorkTitle";
 import { SERVICES, service } from "@/content/services";
 import { project } from "@/content/work";
 import { PUBLISHED } from "@/content/blog";
+
+/** What the discipline is called in a sentence ("the steps a website takes care of"). */
+const ROLE = { websites: "a website", platforms: "a platform", "ai-automation": "automation" } as const;
 
 // Only the three disciplines exist; anything else under /services/ is a 404.
 export const dynamicParams = false;
@@ -25,9 +29,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 /**
- * ONE DISCIPLINE: what it is for, what you get, how we approach it, what we
- * need from you, the questions people ask, what we have written about it,
- * and the other two disciplines.
+ * ONE DISCIPLINE: the title with the facts at a glance beside it (how long,
+ * the first step, the price, what is yours), when it is the right call, what
+ * you get, how we approach it, what decides the price, what we need from you,
+ * a working demonstration, the questions people ask, what we have written
+ * about it, and where it fits with the other two.
  */
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const s = service((await params).slug);
@@ -51,20 +57,46 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           <br />
           <em>{s.h1[1]}</em>
         </h1>
-        <p className="sp-lede" data-rv>
-          {s.lede}
-        </p>
-        <div className="closing-actions" data-rv>
-          <a className="pill btn-shine" href="#contact">
-            <span>Start with a free audit</span>
-            <span className="pill-arrow" aria-hidden>
-              <span>→</span>
-              <span>→</span>
-            </span>
-          </a>
-          <a className="text-link" href={PAGES.methodology}>
-            How a project runs <span aria-hidden>→</span>
-          </a>
+        <div className="svc-hero-row">
+          <div className="svc-hero-text">
+            <p className="sp-lede" data-rv>
+              {s.lede}
+            </p>
+            <div className="closing-actions" data-rv>
+              <a className="pill btn-shine" href="#contact">
+                <span>Start with a free audit</span>
+                <span className="pill-arrow" aria-hidden>
+                  <span>→</span>
+                  <span>→</span>
+                </span>
+              </a>
+              <a className="text-link" href={PAGES.methodology}>
+                How a project runs <span aria-hidden>→</span>
+              </a>
+            </div>
+          </div>
+          <dl className="svc-glance" data-rv aria-label="At a glance">
+            <div>
+              <dt>How long</dt>
+              <dd>{s.timeline}</dd>
+            </div>
+            <div>
+              <dt>First step</dt>
+              <dd>
+                <a href={PAGES.audit}>A free audit</a>, answered within two days.
+              </dd>
+            </div>
+            <div>
+              <dt>Price</dt>
+              <dd>
+                Fixed, from a written scope, before anything starts. <a href="#price-h">What decides it</a>
+              </dd>
+            </div>
+            <div>
+              <dt>Yours to keep</dt>
+              <dd>The code, the data and every account, in your name.</dd>
+            </div>
+          </dl>
         </div>
       </section>
 
@@ -123,6 +155,28 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="sp-block split" aria-labelledby="price-h">
+        <header className="split-head">
+          <Kicker>What shapes the price</Kicker>
+          <h2 id="price-h" className="sp-h2" data-rv>
+            The size of the job, not its name.
+          </h2>
+          <p className="split-more" data-rv>
+            <a className="text-link" href={PAGES.pricing}>
+              How pricing works <span aria-hidden>→</span>
+            </a>
+          </p>
+        </header>
+        <ul className="items">
+          {s.price.map((it, i) => (
+            <li key={it.title} data-rv style={{ transitionDelay: `${(i % 2) * 90}ms` }}>
+              <h3 className="item-t">{it.title}</h3>
+              <p className="item-b">{it.body}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="sp-block own" aria-labelledby="bring-h">
@@ -209,9 +263,21 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </section>
       ) : null}
 
-      <nav className="sp-block svc-others" aria-label="The other disciplines">
-        <Kicker>Also from the same team</Kicker>
-        <div className="svc-others-grid">
+      <section className="sp-block svc-others" aria-labelledby="fits-h">
+        <header className="svc-system-head">
+          <Kicker>Where it fits</Kicker>
+          <h2 id="fits-h" className="sp-h2" data-rv>
+            One part of one system.
+          </h2>
+          <p className="sp-lede" data-rv>
+            One enquiry, start to finish: the steps {ROLE[s.slug]} takes care of, and the parts the other two do. The same team
+            builds all three.
+          </p>
+        </header>
+        <div data-rv>
+          <Journey focus={s.slug} />
+        </div>
+        <nav className="svc-others-grid" aria-label="The other disciplines">
           {others.map((o) => (
             <a key={o.slug} className="svc-other" href={PAGES.service(o.slug)} data-rv>
               <span className="svc-n mono">{o.n}</span>
@@ -222,8 +288,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               </span>
             </a>
           ))}
-        </div>
-      </nav>
+        </nav>
+      </section>
 
       <Closing
         title="Start with what you have."

@@ -42,7 +42,7 @@ const US = [
   "optimizing", "optimization", "analyze", "analyzed", "behavior", "behaviors", "favorite", "catalog", "traveling", "traveled",
   "canceled", "canceling", "labeled", "modeling", "fulfill", "enrollment", "defense", "gray", "realize", "realized",
   "recognize", "recognized", "prioritize", "prioritized", "customize", "customized", "minimize", "maximize", "summarize",
-  "utilize", "authorize", "authorized", "apologize", "specialize", "specialized", "standardize", "license fee",
+  "utilize", "authorize", "authorized", "apologize", "specialize", "specialized", "standardize", "license fee", "judgment",
 ];
 
 const files = [];

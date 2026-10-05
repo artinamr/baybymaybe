@@ -34,6 +34,10 @@ export type Service = {
   approach: Item[];
   /** What you bring. */
   bring: string[];
+  /** How long it takes, for the "at a glance" panel beside the title. */
+  timeline: string;
+  /** What decides the size of the job, for this discipline (the pricing page has the whole picture). */
+  price: Item[];
   faq: { q: string; a: string }[];
   /** Case studies (slugs in content/work.ts) that show it. */
   work: string[];
@@ -115,6 +119,13 @@ export const SERVICES: Service[] = [
       "Your content, or time with us to write it",
       "Access to your domain and current site",
       "One person who can make decisions",
+    ],
+    timeline: "About fourteen days for most websites. Larger sites take longer, and the quote gives the date.",
+    price: [
+      { title: "How many kinds of page", body: "Many pages built from a few layouts cost less than pages that each need a design of their own." },
+      { title: "Who writes the words", body: "Finished words and photos from you, or writing and shaping them together with us." },
+      { title: "What it connects to", body: "Booking, payments, a CRM or a newsletter each add design, building and testing." },
+      { title: "What moves across", body: "Pages and posts brought over from the current site, and its old addresses redirected." },
     ],
     faq: [
       {
@@ -212,6 +223,13 @@ export const SERVICES: Service[] = [
       "Example data, forms and documents",
       "Time to test it with the people who will use it",
     ],
+    timeline: "Released in stages: the smallest useful version first, then the rest. The quote gives each date.",
+    price: [
+      { title: "Who uses it", body: "Each role (staff, clients, contractors, administrators) needs its own screens and permissions." },
+      { title: "The steps it runs", body: "A job, booking or approval with more stages and more rules takes more to build and test." },
+      { title: "What it connects to", body: "Every system (accounting, CRM, calendar, payments) is mapped, built and tested against real data." },
+      { title: "What moves in", body: "Clients, jobs and records brought over from spreadsheets or an old system." },
+    ],
     faq: [
       {
         q: "Why not just use an off-the-shelf tool?",
@@ -304,6 +322,13 @@ export const SERVICES: Service[] = [
       "Access to the tools involved",
       "Someone to review results before launch",
     ],
+    timeline: "A trial on your own past examples first, then live. The quote gives the dates.",
+    price: [
+      { title: "How many steps and systems", body: "Reading one inbox is a smaller job than reading, deciding and updating three systems." },
+      { title: "How much review it needs", body: "Work with more at stake needs more approval steps, more logging and more testing." },
+      { title: "How varied the work is", body: "The more kinds of enquiry or document it handles, the more real examples it is tested on." },
+      { title: "How much it processes", body: "AI services charge by volume, so running costs follow yours. We estimate them from your numbers." },
+    ],
     faq: [
       {
         q: "Is it safe to put AI in front of customers?",
@@ -315,7 +340,7 @@ export const SERVICES: Service[] = [
       },
       {
         q: "Will it replace our staff?",
-        a: "That is not the aim. It takes the repetitive part of the work, so your people spend their time where judgment and relationships matter.",
+        a: "That is not the aim. It takes the repetitive part of the work, so your people spend their time where judgement and relationships matter.",
       },
     ],
     work: ["enquiry-desk"],

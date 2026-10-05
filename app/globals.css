@@ -7130,3 +7130,648 @@ ol.dg {
     background: none;
   }
 }
+
+/* ==========================================================================
+   SERVICES (round 19): what each discipline delivers on its card, "which do
+   you need?", one enquiry's journey through all three, the three working
+   demonstrations, and on a service page the facts at a glance beside the
+   title and where the discipline fits.
+   ========================================================================== */
+.svc-points {
+  display: grid;
+  margin-top: 6px;
+  border-top: 1px solid var(--hair);
+}
+.svc-points span {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hair-soft);
+  font-size: 14px;
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+}
+.svc-points span::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  margin-top: 0.55em;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+
+/* Which do you need? */
+.svc-choose-note {
+  font-size: 16px;
+}
+.svc-choose {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.svc-choose a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 8px 28px;
+  padding: 22px 0 21px;
+  border-bottom: 1px solid var(--hair);
+}
+.svc-choose-if {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  transition: color 300ms ease;
+}
+.svc-choose-to {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--indigo);
+}
+.svc-choose-to span {
+  display: inline-block;
+  transition: transform 450ms var(--ease-expo);
+}
+.svc-choose a:hover .svc-choose-if {
+  color: var(--indigo);
+}
+.svc-choose a:hover .svc-choose-to span {
+  transform: translateX(5px);
+}
+
+/* A section with its heading above a wide figure (the journey). */
+.svc-system-head {
+  display: grid;
+  gap: 22px;
+  margin-bottom: calc(var(--vh) * 7);
+}
+.svc-system-head .sp-kicker {
+  margin: 0;
+}
+
+/* The journey: six steps on one line, each tagged with who does it. */
+.jr {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.jr-step {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  align-content: start;
+  gap: 12px;
+  transition: opacity 500ms ease;
+}
+/* On a service page the other disciplines' steps step back (still readable), and this one's come forward. */
+.jr-step[data-dim] .jr-dot,
+.jr-step[data-dim] .jr-person {
+  opacity: 0.4;
+}
+.jr .jr-step[data-dim] .jr-tag {
+  border-color: var(--hair);
+  background: transparent;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.jr-step[data-dim] .jr-t,
+.jr-step[data-dim] .jr-b {
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.jr[data-focus] .jr-step:not([data-dim]) .jr-t {
+  color: var(--indigo);
+}
+.jr-tag {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 11px;
+  border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.jr-step[data-by="platforms"] .jr-tag {
+  border-color: color-mix(in oklab, var(--indigo) 45%, transparent);
+  color: var(--indigo);
+}
+.jr-step[data-by="ai-automation"] .jr-tag {
+  border-color: var(--indigo);
+  background: var(--indigo);
+  color: #fff;
+}
+.jr-dot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 34px;
+}
+.jr-dot > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
+  border-radius: 50%;
+  background: var(--paper);
+  font-size: 11px;
+  color: var(--ink);
+}
+.jr-step[data-by="platforms"] .jr-dot > span {
+  border-color: color-mix(in oklab, var(--indigo) 55%, transparent);
+  color: var(--indigo);
+}
+.jr-step[data-by="ai-automation"] .jr-dot > span {
+  border-color: var(--indigo);
+  background: var(--indigo);
+  color: #fff;
+}
+.jr-dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 34px;
+  right: -18px;
+  height: 1px;
+  background: var(--hair);
+}
+.jr-step:last-child .jr-dot::after {
+  display: none;
+}
+.jr-t {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 19px;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.jr-person {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 6px;
+  vertical-align: -3px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--indigo) 10%, transparent);
+}
+.jr-person svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--indigo);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.jr-b {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: color-mix(in oklab, var(--ink) 66%, transparent);
+}
+
+/* The three demonstrations. */
+.svc-demo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+.svc-demo {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+.svc-demo-img {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 6px;
+  border: 1px solid var(--hair-soft);
+  border-radius: 18px;
+  background: #eeede9;
+}
+.svc-demo-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 0 0;
+  transition: transform 1400ms var(--ease-expo);
+}
+.svc-demo:hover .svc-demo-img img {
+  transform: scale(1.03);
+}
+.svc-demo-kind {
+  font-size: 12px;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.svc-demo-kind b {
+  font-weight: 500;
+  color: var(--indigo);
+}
+.svc-demo-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+  transition: color 300ms ease;
+}
+.svc-demo:hover .svc-demo-t {
+  color: var(--indigo);
+}
+.svc-demo:hover .svc-go span {
+  transform: translateX(5px);
+}
+.svc-start-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+}
+
+/* A service page: the facts at a glance beside the title. */
+.svc-hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+  gap: 40px 6vw;
+  align-items: start;
+}
+.svc-glance {
+  margin: 0;
+  padding: 6px 26px;
+  border: 1px solid var(--hair);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+.svc-glance div {
+  display: grid;
+  gap: 4px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.svc-glance div:last-child {
+  border-bottom: 0;
+}
+.svc-glance dt {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+.svc-glance dd {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+}
+.svc-glance a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.svc-glance a:hover {
+  color: var(--indigo);
+}
+.svc-others .svc-others-grid {
+  margin-top: calc(var(--vh) * 8);
+}
+
+@media (max-width: 1000px) {
+  .jr {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .jr-step {
+    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-rows: none;
+    column-gap: 16px;
+    row-gap: 6px;
+    padding-bottom: 26px;
+  }
+  .jr-dot {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: stretch;
+    align-items: flex-start;
+    height: auto;
+  }
+  .jr-dot::after {
+    top: 34px;
+    bottom: -26px;
+    left: 16.5px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .jr-tag {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .jr-t {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 2px 0 0;
+  }
+  .jr-b {
+    grid-column: 2;
+    grid-row: 3;
+    max-width: 52ch;
+  }
+  .svc-demo-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+}
+@media (max-width: 900px) {
+  .svc-hero-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .svc-choose a {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px 0;
+  }
+  .svc-choose-if {
+    font-size: 19px;
+  }
+}
+
+/* ==========================================================================
+   METHODOLOGY (round 19): the five stages read beside one photograph that
+   stays in view and changes with the stage (StageSpy writes data-active),
+   with a rail of the five under it; on a phone each stage carries its own
+   photograph. Then your part (three decisions, what to have ready).
+   ========================================================================== */
+.mf {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: 6vw;
+  align-items: start;
+}
+.mf-media {
+  position: sticky;
+  top: calc(var(--nav-h) + 24px);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 18px;
+  height: min(calc(100vh - var(--nav-h) - 56px), 780px);
+}
+.mf-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--hair-soft);
+  border-radius: 24px;
+  background: #eeede9;
+}
+.mf-shot {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 800ms ease;
+}
+.mf-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.06);
+  transition: transform 2000ms var(--ease-expo);
+}
+.mf-count {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--paper) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 11px;
+  color: var(--ink);
+}
+.mf-count > span {
+  display: none;
+  color: var(--indigo);
+}
+.mf-rail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.mf-rail a {
+  display: grid;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+  transition: color 300ms ease;
+}
+.mf-rail a::before {
+  content: "";
+  height: 2px;
+  border-radius: 2px;
+  background: var(--hair);
+  transition: background 400ms ease;
+}
+.mf-rail a:hover {
+  color: var(--ink);
+}
+.mf[data-active="0"] .mf-shot[data-i="0"],
+.mf[data-active="1"] .mf-shot[data-i="1"],
+.mf[data-active="2"] .mf-shot[data-i="2"],
+.mf[data-active="3"] .mf-shot[data-i="3"],
+.mf[data-active="4"] .mf-shot[data-i="4"] {
+  opacity: 1;
+}
+.mf[data-active="0"] .mf-shot[data-i="0"] img,
+.mf[data-active="1"] .mf-shot[data-i="1"] img,
+.mf[data-active="2"] .mf-shot[data-i="2"] img,
+.mf[data-active="3"] .mf-shot[data-i="3"] img,
+.mf[data-active="4"] .mf-shot[data-i="4"] img {
+  transform: none;
+}
+.mf[data-active="0"] .mf-count [data-i="0"],
+.mf[data-active="1"] .mf-count [data-i="1"],
+.mf[data-active="2"] .mf-count [data-i="2"],
+.mf[data-active="3"] .mf-count [data-i="3"],
+.mf[data-active="4"] .mf-count [data-i="4"] {
+  display: inline;
+}
+.mf[data-active="0"] .mf-rail [data-i="0"],
+.mf[data-active="1"] .mf-rail [data-i="1"],
+.mf[data-active="2"] .mf-rail [data-i="2"],
+.mf[data-active="3"] .mf-rail [data-i="3"],
+.mf[data-active="4"] .mf-rail [data-i="4"] {
+  color: var(--ink);
+}
+.mf-rail a[aria-current]::before,
+.mf[data-active="0"] .mf-rail [data-i="0"]::before,
+.mf[data-active="1"] .mf-rail [data-i="1"]::before,
+.mf[data-active="2"] .mf-rail [data-i="2"]::before,
+.mf[data-active="3"] .mf-rail [data-i="3"]::before,
+.mf[data-active="4"] .mf-rail [data-i="4"]::before {
+  background: var(--indigo);
+}
+/* Each stage holds the screen for a while, so the photograph has time to belong to it. */
+.mf-stage {
+  display: grid;
+  align-content: center;
+  min-height: min(84vh, 860px);
+  padding: calc(var(--vh) * 6) 0;
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
+.mf-stage + .mf-stage {
+  border-top: 1px solid var(--hair-soft);
+}
+.mf-img {
+  display: none;
+}
+
+/* Your part: three decisions, and what to have ready. */
+.mf-decide-note {
+  font-size: 16px;
+}
+.mf-part {
+  display: grid;
+  gap: 40px;
+}
+.mf-decide {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.mf-decide li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  column-gap: 20px;
+  row-gap: 4px;
+  padding: 22px 26px 24px 22px;
+  border: 1px solid var(--hair);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+.mf-decide-n {
+  grid-column: 1;
+  grid-row: 1;
+  padding-top: 6px;
+  font-size: 11px;
+  color: var(--indigo);
+}
+.mf-decide-s {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.mf-decide .item-t {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  font-size: 22px;
+}
+.mf-decide .item-b {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 15px;
+}
+.mf-ready {
+  padding-top: 8px;
+}
+.mf-ready-h {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.mf-ready ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  border-top: 1px solid var(--hair);
+}
+.mf-ready li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: 15px;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+}
+.mf-ready .own-tick {
+  width: 22px;
+  height: 22px;
+}
+.mf-ready .own-tick svg {
+  width: 12px;
+  height: 12px;
+}
+
+@media (max-width: 560px) {
+  .mf-decide li {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    row-gap: 6px;
+  }
+  .mf-decide-n,
+  .mf-decide-s,
+  .mf-decide .item-t,
+  .mf-decide .item-b {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+@media (max-width: 900px) {
+  .mf {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mf-media {
+    display: none;
+  }
+  .mf-stage {
+    min-height: 0;
+    padding: calc(var(--vh) * 5) 0;
+  }
+  .mf-img {
+    display: block;
+    margin-bottom: 28px;
+    aspect-ratio: 4 / 3;
+  }
+  .mf-ready ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mf-shot,
+  .mf-shot img {
+    transition: none;
+  }
+}
