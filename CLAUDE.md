@@ -308,6 +308,11 @@ important … above and beyond perfection … genuinely useful and attracting").
   decisions, what to have ready); "Good to know".
 - **Work covers recaptured** (`tools/qa/covers.mjs` pipeline): the old images
   still had em dashes in them. Text inside images counts.
+- **Speed:** the round's CSS (+33 KB) had slowed EVERY page's first paint by
+  ~0.5 s (A/B under mobile throttling). Fixed by route stylesheets (gotcha
+  15) and a search index fetched on first use (`/blog/search.json`); now
+  faster than before the round on every page but the much richer blog home
+  (+0.27 s locally, uncompressed). The shared sheet is 20 KB gzipped.
 - QA: `tools/qa/blog.mjs` (search, topics, panel, term tip, time left, phone
   bar, glossary filter). axe 0 violations on every sub-page; overflow clean.
   `tools/qa/qa2.mjs` is stale since round 17 (it looks for the old home nav
@@ -726,6 +731,25 @@ way relative to each other.
 14. **Puppeteer `screenshot({ clip })` is in document coordinates**: add
    `scrollY` to a `getBoundingClientRect()` top. A DOMRect returned from
    `page.evaluate` arrives empty: copy x/y/width/height into a plain object.
+15. **Every rule in `app/globals.css` costs every page its first paint.**
+   Page-specific styles live in route stylesheets: `app/blog/blog.css`
+   (imported by `app/blog/layout.tsx`), `app/services/services.css`
+   (`app/services/layout.tsx`), `app/methodology/methodology.css` (its
+   page). Shared parts stay global (the article cards other pages show,
+   `.sr-only`, `.own`, `.pr-grid`). Route sheets load AFTER the global one,
+   so a rule there beats a later global rule of equal specificity: keep a
+   page's `@media`/`@container` overrides in the same sheet as the rules they
+   override (the diagrams' phone layout broke when only the base rules
+   moved). After moving CSS, prove it with full-page pixel diffs of every
+   affected page at two widths (round 19: 17 pages × 1440/390, identical).
+16. **Measure speed A/B, never against yesterday's live numbers.** Live
+   timings drift by a second from one day to the next (an unchanged page
+   went from 2.1 s to 3.1 s). Build the old commit (`git switch --detach`,
+   build, copy `out/` aside, switch back), serve both, and run
+   `tools/qa/vitals.mjs` against them alternately. `python -m http.server`
+   doesn't gzip, so local differences in bytes look bigger than live ones.
+   A git worktree with a junctioned `node_modules` does NOT build
+   (Turbopack refuses a symlink outside the project root).
 
 ## Still owed by the client
 
