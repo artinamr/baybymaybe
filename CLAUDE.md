@@ -261,6 +261,58 @@ interactive footer … don't do the work on the home page and the works page").*
 - Home and work pages: text-only edits (em dashes), the new footer, head
   data. The 3D stage chunk is byte-identical (`1duwm8q1dv2sg.js`).
 
+**ROUND 19 (2026-10-05 — "make the methodology page better, make the services
+page better … don't touch the home page … the blog is really really
+important … above and beyond perfection … genuinely useful and attracting").**
+- **The blog is a publication.** Home (`app/blog/page.tsx`): figures
+  (articles, sources checked, terms explained, last checked), "What are you
+  deciding?" (`situation` per article, the reader's own words; on a wide
+  screen the hovered row brings its photo and short answer into a panel,
+  `components/blog/Situations.tsx`), every article with SEARCH and topics
+  (`BlogIndex`: one CSS rule hides non-matches, every card stays in the HTML;
+  it matches titles, answers, FAQ answers, sections and the glossary terms an
+  article explains; "/" focuses it; a miss offers to take the question), the
+  TOOLKIT (each article's `tools`, linked to their sections), the glossary and
+  how we write, "Got a question we haven’t answered?" (mailto).
+- **Articles:** `audience` ("Who it’s for" / "Not for you if") beside the
+  short answer; the byline says when the sources were checked
+  (`checkedOn`); the contents show time left and Copy link / Print, and on a
+  phone become a sticky bar under the nav naming the section you're in
+  (`Toc`); glossary terms linked once each with `<Term id>` (definition on
+  hover/focus, `aria-describedby`); "About this article" (corrections by
+  email); a print stylesheet (the site around the article is left out).
+- **New pages:** `/blog/glossary/` (`content/blog/glossary.ts`: 34 terms in
+  five groups, facts cited and checked 2026-10-05, a find field,
+  DefinedTermSet data; the Privacy Act now includes IPP 3A from 1 May 2026)
+  and `/blog/how-we-write/` (the blog's public standards, linked as
+  `publishingPrinciples` in the organisation and article data). **Keep that
+  page and docs/BLOG-GUIDE.md in step: the page promises what the guide
+  requires.**
+- **docs/BLOG-GUIDE.md rewritten**: the registry fields (situation, audience,
+  tools), article types with skeletons, readability, the glossary, linking
+  and upkeep, a quality bar (publish at 4+ on every line), candidate
+  questions to write next.
+- **copy-guard** now also checks every internal link and `#section` (it
+  found the quote article's two `id="questions"`), duplicate ids, and the
+  short answer and audience on every article; banned phrases and US spelling
+  on every blog page. Home `#chapters` are film places, not ids: skipped.
+- **Services:** cards list what each delivers; "Which do you need?"; one
+  enquiry's journey through all three (`components/site/Journey.tsx`; on a
+  service page, `focus` brings its own steps forward, the others step back
+  but stay readable); the three demos; how it starts; questions; one
+  article per discipline. Each service page: at a glance beside the title
+  (`timeline` in the registry), what shapes the price (`price`), where it fits.
+- **Methodology:** the stages read beside ONE sticky photograph that changes
+  with the stage (`StageSpy` writes `data-active`; CSS cross-fades; a rail of
+  the five under it; phones keep a photo per stage); "Your part" (three
+  decisions, what to have ready); "Good to know".
+- **Work covers recaptured** (`tools/qa/covers.mjs` pipeline): the old images
+  still had em dashes in them. Text inside images counts.
+- QA: `tools/qa/blog.mjs` (search, topics, panel, term tip, time left, phone
+  bar, glossary filter). axe 0 violations on every sub-page; overflow clean.
+  `tools/qa/qa2.mjs` is stale since round 17 (it looks for the old home nav
+  labels); the home page itself was not touched this round.
+
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
 One polished obsidian stone, shaped from the Nerodyn mark, fractured into 40

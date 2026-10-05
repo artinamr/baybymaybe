@@ -6,11 +6,11 @@ import path from "node:path";
 
 const base = "https://artinamr.github.io/baybymaybe";
 const work = ["/work/", "/work/practice-website/", "/work/operations-portal/", "/work/enquiry-desk/"];
-const blog = ["/blog/", "/blog/redesign-or-improve/", "/blog/website-quote-checklist/", "/blog/when-you-need-a-client-portal/", "/blog/connect-website-crm-booking/", "/blog/ai-automation-workflows/", "/blog/after-launch-ownership/"];
+const blog = ["/blog/", "/blog/glossary/", "/blog/how-we-write/", "/blog/redesign-or-improve/", "/blog/website-quote-checklist/", "/blog/when-you-need-a-client-portal/", "/blog/connect-website-crm-booking/", "/blog/ai-automation-workflows/", "/blog/after-launch-ownership/"];
 const paths = [
   "/", "/services/", "/services/websites/", "/services/platforms/", "/services/ai-automation/",
   ...work, "/methodology/", "/audit/", "/cookies/", "/studio/", "/pricing/", "/contact/", "/faq/", "/privacy/", "/terms/",
-  ...blog, "/blog/feed.xml", "/sitemap.xml", "/robots.txt", "/llms.txt", "/manifest.webmanifest", "/og.jpg", "/og/blog-redesign-or-improve.jpg", "/og/methodology.jpg", "/blog/redesign-or-improve-1200.webp", "/icon.svg", "/apple-icon.png", "/favicon.ico", "/no-such-page/",
+  ...blog, "/blog/feed.xml", "/sitemap.xml", "/robots.txt", "/llms.txt", "/manifest.webmanifest", "/og.jpg", "/og/blog-redesign-or-improve.jpg", "/og/methodology.jpg", "/og/blog-glossary.jpg", "/blog/redesign-or-improve-1200.webp", "/icon.svg", "/apple-icon.png", "/favicon.ico", "/no-such-page/",
 ];
 const failures = [];
 const check = (ok, message) => { if (!ok) failures.push(message); };

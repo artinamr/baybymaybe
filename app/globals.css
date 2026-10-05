@@ -7775,3 +7775,33 @@ ol.dg {
     transition: none;
   }
 }
+
+/* The questions page: where each group is answered at length. */
+.fq-more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 22px;
+  margin: 18px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.fq-more > span {
+  font-weight: 500;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+.fq-more a {
+  color: var(--indigo);
+}
+.fq-more a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.fq-toc-more {
+  margin-top: 18px;
+}
+@media (max-width: 900px) {
+  .fq-toc-more {
+    margin-top: 8px;
+  }
+}

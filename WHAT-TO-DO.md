@@ -665,6 +665,14 @@ Ask these together, with a recommendation each (don't send a menu):
    each article; name an author with a short bio (recommended: it helps
    search and AI answers more than "the Nerodyn studio"); approve the new
    photographs and the footer signature.
+5d. From round 19 (new copy to sign off): `/blog/how-we-write/` (it promises
+   no sponsored content or paid mentions, corrections by email, and that a
+   person on the team checks every claim and approves every article before
+   it is published; edit it if any of that isn't how you'll work), the
+   glossary's definitions, each article's "Who it’s for / Not for you if",
+   the blog's "we’ll reply, and may write it up" promise, the methodology's
+   "three moments you decide" and "Good to know", the services page's
+   "Which do you need?" and journey, and each service's timeline line.
 6. The hero's actions — keep "Get a free audit / Enter the story"
    (recommended) or the plan's "Discuss your project / Explore our work".
 7. Hosting for nerodyn.com (GitHub Pages vs a host with real redirects),
