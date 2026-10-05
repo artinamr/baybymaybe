@@ -6,7 +6,7 @@ import { longDate, topicLabel, type ArticleMeta } from "@/content/blog";
  * An article as a card: its photograph, the topic, date and reading time, the
  * title and the one-line description. The whole card is the link; the title
  * is a real heading (h2 on the blog's index, h3 where a page lists a few).
- * `data-topic` is what the index's filter reads.
+ * `data-slug` is what the index's search and topic filter hide or show.
  */
 export function ArticleCard({
   a,
@@ -21,7 +21,7 @@ export function ArticleCard({
 }) {
   const H = level;
   return (
-    <a className="bl-card" href={PAGES.article(a.slug)} data-topic={a.topic} data-rv style={delay ? { transitionDelay: `${delay}ms` } : undefined}>
+    <a className="bl-card" href={PAGES.article(a.slug)} data-slug={a.slug} data-topic={a.topic} data-rv style={delay ? { transitionDelay: `${delay}ms` } : undefined}>
       <span className="bl-card-img">
         <Photo p={a.cover} sizes={sizes} decorative />
       </span>

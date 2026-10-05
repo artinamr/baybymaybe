@@ -1,5 +1,6 @@
 import { H2, Callout, Check, Compare, Figure, Cite } from "@/components/blog/Prose";
 import { Routes } from "@/components/blog/Diagrams";
+import { Term } from "@/components/blog/Term";
 
 export const toc = [
   { id: "what-it-saves", title: "What “connected” saves" },
@@ -17,7 +18,7 @@ export default function Body() {
   return (
     <>
       <p>
-        A website, a CRM, a booking tool and an accounting package can each be good at their job and still make a lot of
+        A website, a <Term id="crm">CRM</Term>, a booking tool and an accounting package can each be good at their job and still make a lot of
         work, if a person has to carry information between them by hand. Connecting them means each detail is entered
         once (usually by the customer) and arrives everywhere it is needed. This article covers what to connect, the ways
         to do it, and the parts that are easy to forget: consent, and knowing when a connection has quietly stopped
@@ -68,7 +69,7 @@ export default function Body() {
           it.
         </li>
         <li>
-          <strong>A custom integration.</strong> Code written against each system’s official interface (its API).
+          <strong>A custom integration.</strong> Code written against each system’s official interface (its <Term id="api">API</Term>).
           It costs more to build, but it can do exactly what your process needs, handle unusual cases, and report problems
           the way you want.
         </li>
@@ -91,7 +92,7 @@ export default function Body() {
 
       <H2 id="field-map">Mapping the data</H2>
       <p>
-        Before anything is connected, write down which piece of information goes where. A field map is a simple table,
+        Before anything is connected, write down which piece of information goes where. A <Term id="field-map">field map</Term> is a simple table,
         and it settles most of the questions that otherwise surface as bugs: what if the name is one box on the form but
         two in the CRM? Which system wins when they disagree?
       </p>
@@ -151,14 +152,14 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>Tell people what happens to their details.</strong> Under the Privacy Act 2020, information privacy
+          <strong>Tell people what happens to their details.</strong> Under the <Term id="privacy-act">Privacy Act 2020</Term>, information privacy
           principle 3 expects people to be made aware, when you collect their information, of the fact it is being
           collected, why, who will receive it, and their rights to access and correct it.
           <Cite n={1} /> A short line next to the form, linking to your privacy policy, covers most of this.
         </li>
         <li>
-          <strong>Marketing needs consent.</strong> The Department of Internal Affairs sums up the Unsolicited Electronic
-          Messages Act 2007 in three steps for commercial messages: send them only with consent (express, inferred or
+          <strong>Marketing needs consent.</strong> The Department of Internal Affairs sums up the{" "}
+          <Term id="uema">Unsolicited Electronic Messages Act 2007</Term> in three steps for commercial messages: send them only with consent (express, inferred or
           deemed), clearly identify who sent them and how to contact you, and include a working unsubscribe, honouring
           requests within five working days.
           <Cite n={2} /> So an enquiry is not a newsletter sign-up: record marketing consent separately, with the date and
@@ -167,7 +168,7 @@ export default function Body() {
         <li>
           <strong>Keep it safe on every system.</strong> Principle 5 asks for reasonable security safeguards wherever
           personal information is held, including when a service provider holds it for you.
-          <Cite n={3} /> Each connected tool is one more place to secure: individual logins, two-step sign-in, and access
+          <Cite n={3} /> Each connected tool is one more place to secure: individual logins, <Term id="two-factor">two-step sign-in</Term>, and access
           only for the people who need it.
         </li>
         <li>

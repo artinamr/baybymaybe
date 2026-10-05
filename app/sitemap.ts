@@ -8,7 +8,7 @@ import { PHOTOS } from "@/content/images";
 export const dynamic = "force-static";
 
 /** When the pages last changed in substance (the round that rewrote them). Bump a page's date when you change it. */
-const SITE_UPDATED = "2026-10-04";
+const SITE_UPDATED = "2026-10-05";
 
 type Row = { path: string; priority: number; modified?: string; images?: string[] };
 
@@ -28,6 +28,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "methodology/", priority: 0.8, images: [abs(PHOTOS["method-hero"].src), ...STAGES.map((s) => abs(s.photo.src))] },
     { path: "blog/", priority: 0.8, modified: PUBLISHED[0]?.updated ?? PUBLISHED[0]?.published },
     ...PUBLISHED.map((a) => ({ path: `blog/${a.slug}/`, priority: 0.7, modified: a.updated ?? a.published, images: [abs(a.cover.src)] })),
+    { path: "blog/glossary/", priority: 0.6 },
+    { path: "blog/how-we-write/", priority: 0.4 },
     { path: "studio/", priority: 0.6 },
     { path: "pricing/", priority: 0.7 },
     { path: "contact/", priority: 0.7 },

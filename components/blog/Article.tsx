@@ -2,23 +2,25 @@ import type { ReactNode } from "react";
 import { Page, Crumbs, Closing, Kicker } from "@/components/site/Page";
 import { ArticleLd, QaLd } from "@/components/site/JsonLd";
 import { Photo, BANNER_SIZES } from "@/components/site/Photo";
-import { PAGES, abs } from "@/lib/content";
+import { CONTACT, PAGES, abs } from "@/lib/content";
 import { service } from "@/content/services";
 import { project } from "@/content/work";
 import { CC0_URL } from "@/content/images";
-import { article as findArticle, longDate, topicLabel, type ArticleMeta } from "@/content/blog";
+import { article as findArticle, checkedOn, longDate, topicLabel, type ArticleMeta } from "@/content/blog";
 import type { TocItem } from "@/content/blog/bodies";
 import { ArticleCard } from "./ArticleCard";
 import { Toc } from "./Toc";
 import { Share } from "./Share";
 
 /**
- * AN ARTICLE: the trail, the topic, the title, who wrote it and when, the
- * short answer up front, the cover photograph, then the article with its
- * contents alongside (sticky on wide screens, marking where you are), a few
- * questions answered in a line or two, and at the end everything it rests on:
- * the sources its facts were checked against and the photograph's credit.
- * Then a way to pass it on, where to go next, and one ask.
+ * AN ARTICLE: the trail, the topic, the title, who wrote it, when, and when
+ * its facts were checked; the short answer up front with who it is for (and
+ * who can skip it) beside it; the cover photograph; then the article with its
+ * contents alongside (sticky on wide screens, marking where you are, with the
+ * time left; a bar under the navigation on phones), a few questions answered
+ * in a line or two, and at the end everything it rests on: the sources its
+ * facts were checked against, the photograph's credit, and how we write and
+ * correct. Then a way to pass it on (or print it), where to go next, and one ask.
  */
 export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; children: ReactNode }) {
   const crumbs = [
@@ -32,6 +34,9 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
   const svc = a.related.services.slice(0, 1).map((sl) => service(sl)!);
   const work = a.related.work.slice(0, 1).map((sl) => project(sl)!);
   const c = a.cover.credit;
+  const checked = checkedOn(a);
+  const url = abs(PAGES.article(a.slug));
+  const fix = `mailto:${CONTACT.email}?subject=${encodeURIComponent(`A correction: ${a.title}`)}`;
   return (
     <Page here="blog" crumbs={crumbs}>
       <ArticleLd a={a} />
@@ -61,12 +66,24 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
             ) : null}
             <span>{a.minutes} min read</span>
             <span>
-              <a href="#sources">{a.sources.length} sources</a>
+              <a href="#sources">{a.sources.length} sources</a>, checked <time dateTime={checked}>{longDate(checked)}</time>
             </span>
           </p>
-          <div className="ar-short" data-rv>
-            <p className="ar-short-h">The short answer</p>
-            <p className="ar-short-b">{a.short}</p>
+          <div className="ar-lead">
+            <div className="ar-short" data-rv>
+              <p className="ar-short-h">The short answer</p>
+              <p className="ar-short-b">{a.short}</p>
+            </div>
+            <dl className="ar-for" data-rv>
+              <div>
+                <dt>Who it’s for</dt>
+                <dd>{a.audience.for}</dd>
+              </div>
+              <div>
+                <dt>Not for you if</dt>
+                <dd>{a.audience.skip}</dd>
+              </div>
+            </dl>
           </div>
         </header>
 
@@ -75,13 +92,17 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
         </figure>
 
         <div className="doc ar-doc">
-          <Toc items={[...toc, ...(a.faq.length ? [{ id: "questions", title: "Questions" }] : []), { id: "sources", title: "Sources" }]} />
+          <Toc
+            items={[...toc, ...(a.faq.length ? [{ id: "people-ask", title: "Questions people ask" }] : []), { id: "sources", title: "Sources" }]}
+            minutes={a.minutes}
+            url={url}
+          />
           <div className="doc-body prose">
             {children}
 
             {a.faq.length ? (
-              <section className="ar-faq" aria-labelledby="questions">
-                <h2 id="questions" className="ar-h2">
+              <section className="ar-faq" aria-labelledby="people-ask">
+                <h2 id="people-ask" className="ar-h2">
                   Questions people ask
                 </h2>
                 <dl>
@@ -133,14 +154,26 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
               </p>
             </section>
 
-            <Share url={abs(PAGES.article(a.slug))} title={a.title} />
+            <aside className="ar-about" aria-label="About this article">
+              <p className="ar-about-h">About this article</p>
+              <p>
+                Written by the Nerodyn studio in Auckland and checked against the sources above on {longDate(checked)}. Nothing
+                here is sponsored, and no one paid to be mentioned. <a href={PAGES.standards}>How we write and check our articles</a>.
+              </p>
+              <p>
+                Spotted something wrong or out of date? <a href={fix}>Tell us</a>, and we’ll fix it and mark the article as
+                updated.
+              </p>
+            </aside>
+
+            <Share url={url} title={a.title} />
           </div>
         </div>
       </article>
 
       <section className="sp-block ar-rel" aria-labelledby="ar-rel-h">
         <Kicker>
-          <span id="ar-rel-h">Where to go next</span>
+          <span id="ar-rel-h">Keep reading</span>
         </Kicker>
         {next.length ? (
           <div className="bl-grid bl-grid-2">

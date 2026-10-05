@@ -76,6 +76,7 @@ function orgNode(withOffers: boolean) {
           },
         }
       : {}),
+    publishingPrinciples: abs(PAGES.standards),
     ...(sameAs().length ? { sameAs: sameAs() } : {}),
   };
 }
@@ -268,10 +269,40 @@ export function ArticleLd({ a, words }: { a: ArticleMeta; words?: number }) {
         ...(words ? { wordCount: words } : {}),
         isAccessibleForFree: true,
         inLanguage: "en-NZ",
+        publishingPrinciples: abs(PAGES.standards),
+        ...(a.audience ? { audience: { "@type": "BusinessAudience", audienceType: a.audience.for } } : {}),
         isPartOf: { "@type": "Blog", "@id": `${abs(PAGES.blog)}#blog`, name: "Nerodyn blog" },
         mainEntityOfPage: { "@type": "WebPage", "@id": abs(PAGES.article(a.slug)) },
         about: { "@type": "Thing", name: topicLabel(a.topic) },
         citation: a.sources.map((s) => ({ "@type": "CreativeWork", name: s.title, url: s.url, publisher: { "@type": "Organization", name: s.publisher } })),
+      }}
+    />
+  );
+}
+
+/** The glossary: a set of defined terms, each with its own address on the page. */
+export function GlossaryLd({ name, description, terms }: { name: string; description: string; terms: { id: string; term: string; also?: string; def: string }[] }) {
+  const url = abs(PAGES.glossary);
+  return (
+    <Ld
+      data={{
+        "@context": "https://schema.org",
+        "@type": "DefinedTermSet",
+        "@id": `${url}#terms`,
+        name,
+        description,
+        url,
+        inLanguage: "en-NZ",
+        publisher: { "@id": ORG_ID },
+        hasDefinedTerm: terms.map((t) => ({
+          "@type": "DefinedTerm",
+          "@id": `${url}#${t.id}`,
+          name: t.term,
+          ...(t.also ? { alternateName: t.also } : {}),
+          description: t.def,
+          url: `${url}#${t.id}`,
+          inDefinedTermSet: { "@id": `${url}#terms` },
+        })),
       }}
     />
   );
@@ -290,6 +321,7 @@ export function BlogLd({ articles }: { articles: ArticleMeta[] }) {
         url: abs(PAGES.blog),
         inLanguage: "en-NZ",
         publisher: { "@id": ORG_ID },
+        publishingPrinciples: abs(PAGES.standards),
         blogPost: articles.map((a) => ({
           "@type": "BlogPosting",
           headline: a.title,

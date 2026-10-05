@@ -1,5 +1,6 @@
 import { H2, H3, Callout, Steps, Compare, Figure, Cite } from "@/components/blog/Prose";
 import { Routes } from "@/components/blog/Diagrams";
+import { Term } from "@/components/blog/Term";
 import { PAGES } from "@/lib/content";
 
 export const toc = [
@@ -153,8 +154,8 @@ export default function Body() {
 
       <H2 id="security">Security and privacy basics</H2>
       <p>
-        A portal holds your clients’ information, so it carries real responsibility. Under New Zealand’s
-        Privacy Act 2020, information privacy principle 5 requires a business holding personal information to protect it
+        A portal holds your clients’ information, so it carries real responsibility. Under New Zealand’s{" "}
+        <Term id="privacy-act">Privacy Act 2020</Term>, information privacy principle 5 requires a business holding personal information to protect it
         with security safeguards that are reasonable in the circumstances, against loss, unauthorised access, use,
         modification or disclosure, and other misuse.
         <Cite n={1} /> In practice, for a portal, that means at least:
@@ -165,7 +166,7 @@ export default function Body() {
           clients.
         </li>
         <li>
-          <strong>Two-step sign-in.</strong> The National Cyber Security Centre calls enforcing multi-factor authentication
+          <strong>Two-step sign-in.</strong> The National Cyber Security Centre calls enforcing <Term id="two-factor">multi-factor authentication</Term>{" "}
           the most critical control for preventing unauthorised access,
           <Cite n={2} /> and its Own Your Online guidance notes that codes sent by text or email can be intercepted,
           recommending authenticator apps, tokens or physical keys instead.

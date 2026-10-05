@@ -1,5 +1,6 @@
 import { H2, Callout, Check, Compare, Figure, Steps, Cite } from "@/components/blog/Prose";
 import { Layers } from "@/components/blog/Diagrams";
+import { Term } from "@/components/blog/Term";
 
 export const toc = [
   { id: "owning", title: "What owning your website means" },
@@ -119,7 +120,10 @@ export default function Body() {
       <Check
         items={[
           <>
-            <strong>Two-step sign-in on every account</strong>, especially the registrar, hosting, email and the
+            <strong>
+              <Term id="two-factor">Two-step sign-in</Term> on every account
+            </strong>
+            , especially the <Term id="registrar">registrar</Term>, hosting, email and the
             site’s admin. Own Your Online recommends authenticator apps, tokens or physical keys over codes by text or
             email, which can be intercepted.
             <Cite n={4} />
@@ -227,7 +231,7 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>Moving a .nz domain to another registrar</strong> needs its UDAI, a code that confirms the request.
+          <strong>Moving a .nz domain to another registrar</strong> needs its <Term id="udai">UDAI</Term>, a code that confirms the request.
           You get it from your current registrar, who, per the Domain Name Commission’s guide for registrants, must
           give it to you promptly and at no cost. Moving registrar doesn’t necessarily end other contracts with the
           old provider, such as hosting.

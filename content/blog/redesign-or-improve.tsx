@@ -1,5 +1,6 @@
 import { H2, Callout, Steps, Compare, Figure, Cite } from "@/components/blog/Prose";
 import { DecisionTree } from "@/components/blog/Diagrams";
+import { Term } from "@/components/blog/Term";
 
 export const toc = [
   { id: "the-question", title: "The question behind the question" },
@@ -137,7 +138,7 @@ export default function Body() {
             t: "Check the speed (day 3)",
             b: (
               <p>
-                Put the same pages through Google’s PageSpeed Insights. It reports two kinds of result. Field data is
+                Put the same pages through Google’s <Term id="pagespeed-insights">PageSpeed Insights</Term>. It reports two kinds of result. Field data is
                 what real Chrome users experienced over the previous 28 days, where the site has enough visitors. Lab
                 data is a controlled test, most useful for finding causes.
                 <Cite n={1} /> Google calls a page good when, for three-quarters of visits, the main content appears within
@@ -151,7 +152,7 @@ export default function Body() {
             t: "Look at what people search for (day 4)",
             b: (
               <p>
-                If you have Google Search Console, it shows the searches your pages appear for. Searches where you appear
+                If you have <Term id="search-console">Google Search Console</Term>, it shows the searches your pages appear for. Searches where you appear
                 but are rarely chosen usually point to a weak title or description. Searches you’d expect to appear
                 for, and don’t, usually point to a page that doesn’t exist.
               </p>
@@ -217,7 +218,7 @@ export default function Body() {
         </li>
         <li>
           <strong>A redirect map.</strong> Every old address that changes should send people (and search engines) to its
-          closest new page with a permanent redirect. Google recommends server-side permanent redirects (301 or 308),
+          closest new page with a <Term id="redirect">permanent redirect</Term>. Google recommends server-side permanent redirects (301 or 308),
           keeping them for as long as possible and generally at least a year, and warns that rankings can fluctuate while
           it recrawls the site; on a medium-sized site it can take a few weeks or more before the new addresses replace
           the old ones in results.

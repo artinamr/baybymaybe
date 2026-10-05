@@ -23,6 +23,8 @@ const CARDS = [
   ["methodology", "Methodology", "From first call to live,", "in about fourteen days.", "/method/hero.webp"],
   ["services", "Services", "Three disciplines.", "One system.", "/services/websites.webp"],
   ["blog", "Blog", "Questions owners ask,", "answered properly.", "/blog/website-quote-checklist.webp"],
+  ["blog-glossary", "Blog · Glossary", "Web words,", "in plain English.", null],
+  ["blog-how-we-write", "Blog · How we write", "How we write", "and check our articles.", null],
   ["audit", "Free website audit", "Send us your website.", "A straight answer in two days.", null],
   ["studio", "Studio", "One team,", "from first call to launch.", null],
   ["pricing", "Investment", "What it costs,", "and why.", null],
@@ -62,7 +64,9 @@ await page.setViewport({ width: 1200, height: 630, deviceScaleFactor: 1 });
 // Any page of the site: it brings the site's own Inter (next/font) with it.
 await page.goto(`${base}/privacy/`, { waitUntil: "networkidle0" });
 await page.evaluate(() => document.fonts.ready);
-for (const c of CARDS) {
+// ONLY=name,name renders just those cards (the others stay byte for byte as they are).
+const ONLY = (process.env.ONLY || "").split(",").filter(Boolean);
+for (const c of CARDS.filter((c) => !ONLY.length || ONLY.includes(c[0]))) {
   await page.evaluate((html) => {
     document.getElementById("card")?.remove();
     document.body.insertAdjacentHTML("beforeend", html);

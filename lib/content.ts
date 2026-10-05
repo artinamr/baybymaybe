@@ -256,6 +256,8 @@ export const PAGES = {
   pricing: `${BASE}/pricing/`,
   blog: `${BASE}/blog/`,
   article: (slug: string) => `${BASE}/blog/${slug}/`,
+  glossary: `${BASE}/blog/glossary/`,
+  standards: `${BASE}/blog/how-we-write/`,
   contact: `${BASE}/contact/`,
   faq: `${BASE}/faq/`,
   privacy: `${BASE}/privacy/`,

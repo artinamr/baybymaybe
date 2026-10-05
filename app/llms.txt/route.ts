@@ -2,6 +2,7 @@ import { CONTACT, FAQ_ALL, PAGES, PLACE, STAGES, abs } from "@/lib/content";
 import { SERVICES } from "@/content/services";
 import { WORK_ITEMS } from "@/content/work";
 import { PUBLISHED } from "@/content/blog";
+import { GLOSSARY } from "@/content/blog/glossary";
 
 // Written once at build time into the static export (out/llms.txt).
 export const dynamic = "force-static";
@@ -38,6 +39,10 @@ export function GET() {
     "",
     "## Articles",
     ...PUBLISHED.map((a) => `- [${a.title}](${abs(PAGES.article(a.slug))}): ${a.short}`),
+    `- [How we write and check our articles](${abs(PAGES.standards)}): primary sources checked on a stated date, no sponsored content or affiliate links, public-domain photographs, corrections shown as updates.`,
+    "",
+    `## Glossary ([web, platform and AI terms in plain English](${abs(PAGES.glossary)}))`,
+    ...GLOSSARY.map((t) => `- **${t.term}**${"also" in t ? ` (${t.also})` : ""}: ${t.def} [${abs(PAGES.glossary)}#${t.id}]`),
     "",
     "## Work (studio demonstrations; the businesses are fictional and labelled as such)",
     ...WORK_ITEMS.map((p) => `- [${p.client}: ${p.title}](${abs(PAGES.project(p.slug))}): ${p.summary}`),

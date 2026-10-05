@@ -3,8 +3,10 @@
 import { useState } from "react";
 
 /**
- * Pass it on: copy the article's address, share it on LinkedIn, or email it.
- * Plain links, no share scripts and no tracking. `url` is the canonical address.
+ * Pass it on: copy the article's address, share it on LinkedIn, email it, or
+ * print it (the page has a print stylesheet: the words, the tools and the
+ * sources, without the site around them). Plain links, no share scripts and
+ * no tracking. `url` is the canonical address.
  */
 export function Share({ url, title }: { url: string; title: string }) {
   const [copied, setCopied] = useState(false);
@@ -40,6 +42,12 @@ export function Share({ url, title }: { url: string; title: string }) {
           </svg>
           <span>Email</span>
         </a>
+        <button type="button" className="ar-share-b" onClick={() => window.print()}>
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path d="M7 9V4h10v5M7 17H5a1 1 0 01-1-1v-5a2 2 0 012-2h12a2 2 0 012 2v5a1 1 0 01-1 1h-2M7 14h10v6H7z" />
+          </svg>
+          <span>Print</span>
+        </button>
       </div>
     </div>
   );

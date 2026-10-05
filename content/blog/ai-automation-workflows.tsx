@@ -1,5 +1,6 @@
 import { H2, Callout, Steps, Compare, Figure, Cite } from "@/components/blog/Prose";
 import { Flow } from "@/components/blog/Diagrams";
+import { Term } from "@/components/blog/Term";
 import { PAGES } from "@/lib/content";
 
 export const toc = [
@@ -154,7 +155,7 @@ export default function Body() {
 
       <H2 id="privacy">The privacy part</H2>
       <p>
-        The Privacy Act 2020 applies to AI tools as it does to everything else. The Office of the Privacy Commissioner has
+        The <Term id="privacy-act">Privacy Act 2020</Term> applies to AI tools as it does to everything else. The Office of the Privacy Commissioner has
         set out what it expects of businesses using generative AI:
         <Cite n={1} />
       </p>

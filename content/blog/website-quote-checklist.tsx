@@ -1,5 +1,6 @@
 import { H2, Callout, Check, Compare, Figure, Cite } from "@/components/blog/Prose";
 import { Flow } from "@/components/blog/Diagrams";
+import { Term } from "@/components/blog/Term";
 import { PAGES } from "@/lib/content";
 
 export const toc = [
@@ -39,7 +40,7 @@ export default function Body() {
           a project. Some quotes include it; many assume you’ll supply everything, finished, on time.
         </li>
         <li>
-          <strong>What it connects to.</strong> A booking system, a CRM, payments or an accounting package each add design,
+          <strong>What it connects to.</strong> A booking system, a <Term id="crm">CRM</Term>, payments or an accounting package each add design,
           building and testing.
         </li>
         <li>
@@ -84,7 +85,7 @@ export default function Body() {
           </>,
           <>
             <strong>The standard.</strong> Accessibility named against a published standard, and speed against something
-            measurable. The current accessibility standard is WCAG 2.2, from the W3C; its success criteria come at three
+            measurable. The current accessibility standard is <Term id="wcag">WCAG 2.2</Term>, from the W3C; its success criteria come at three
             levels, A, AA and AAA.
             <Cite n={1} /> For speed, Google’s Core Web Vitals thresholds give you numbers to hold the work to.
             <Cite n={2} />

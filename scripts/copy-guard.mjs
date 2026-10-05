@@ -3,9 +3,12 @@
 // client's and are written out in docs/BLOG-GUIDE.md:
 //   - no em dashes anywhere a reader or a search engine sees (pages, attributes,
 //     structured data, the feed, llms.txt), and no spaced en dashes doing their job;
-//   - articles: none of the stock phrases that make writing sound machine-made,
-//     UK/NZ spelling, a sources list, and a credit for the cover photograph;
-//   - every image has alt text.
+//   - the blog (articles, the glossary, how we write): none of the stock phrases
+//     that make writing sound machine-made, and UK/NZ spelling; articles also
+//     need a sources list, a credit for the cover photograph, the short answer
+//     and who it's for; the glossary its sources;
+//   - every image has alt text, no id is used twice on a page, and every link
+//     to a page of the site (and to a #section of it) lands somewhere real.
 // Softer things (long titles and descriptions, words to use sparingly) are warnings.
 // usage: node scripts/copy-guard.mjs [outDir=out]
 import fs from "node:fs";
@@ -64,6 +67,19 @@ const textOf = (html) =>
 
 const context = (t, i) => t.slice(Math.max(0, i - 50), i + 50).replace(/\s+/g, " ").trim();
 
+// Internal links: every href to a page of the site, and every #section on it.
+const BASE = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "");
+const idsCache = new Map();
+const idsOf = (file) => {
+  if (!idsCache.has(file)) idsCache.set(file, new Set([...fs.readFileSync(file, "utf8").matchAll(/\sid="([^"]+)"/g)].map((m) => m[1])));
+  return idsCache.get(file);
+};
+const pageFile = (p) => {
+  const clean = decodeURIComponent(p.replace(/[?#].*$/, ""));
+  const cands = clean.endsWith("/") ? [`${clean}index.html`] : [clean, `${clean}.html`, `${clean}/index.html`];
+  return cands.map((c) => path.join(root, c)).find((c) => fs.existsSync(c) && fs.statSync(c).isFile());
+};
+
 for (const f of files) {
   const rel = path.relative(root, f).replace(/\\/g, "/");
   let raw = fs.readFileSync(f, "utf8");
@@ -92,14 +108,51 @@ for (const f of files) {
     if (h1s !== 1) warn(rel, `${h1s} h1 headings (one per page)`);
   }
 
-  // Articles: the writing rules proper.
-  const isArticle = /^blog\/[^/]+\/index\.html$/.test(rel);
+  // One id per page: a glossary term is linked once per article (components/blog/Term.tsx).
+  const seenIds = new Set();
+  for (const m of raw.matchAll(/\sid="([^"]+)"/g)) {
+    if (seenIds.has(m[1])) fail(rel, `id "${m[1]}" is used twice on the page`);
+    seenIds.add(m[1]);
+  }
+
+  // Links within the site land on a real page, and on a real section of it.
+  for (const m of raw.matchAll(/\shref="([^"]+)"/g)) {
+    let href = m[1].replace(/&amp;/g, "&");
+    if (/^(https?:|mailto:|tel:|data:|javascript:)/.test(href)) continue;
+    if (href.startsWith("#")) {
+      if (href.length > 1 && !seenIds.has(href.slice(1)) && !idsOf(f).has(href.slice(1))) fail(rel, `link to #${href.slice(1)}: no such section on the page`);
+      continue;
+    }
+    if (!href.startsWith("/")) continue;
+    if (BASE && href.startsWith(`${BASE}/`)) href = href.slice(BASE.length);
+    if (href.startsWith("/_next/")) continue;
+    const target = pageFile(href);
+    if (!target) {
+      fail(rel, `link to ${href}: no such page or file`);
+      continue;
+    }
+    const frag = href.includes("#") ? decodeURIComponent(href.split("#")[1]) : "";
+    // The home page's #chapters are places in the film, found by its own script (lib/chapters.ts), not ids.
+    const home = path.relative(root, target).replace(/\\/g, "/") === "index.html";
+    if (frag && !home && target.endsWith(".html") && !idsOf(target).has(frag)) fail(rel, `link to ${href}: no section #${frag} there`);
+  }
+
+  // The blog: the writing rules proper. Articles are the pages built from components/blog/Article.tsx.
+  const isBlog = /^blog\//.test(rel) && !/feed\.xml$/.test(rel);
+  const isArticle = /<article class="ar"/.test(raw);
+  if (/^blog\/glossary\//.test(rel)) {
+    if (!/class="ar-sources[ "]/.test(raw)) fail(rel, "no Sources section");
+  }
   if (isArticle) {
-    if (!/class="ar-sources"/.test(raw)) fail(rel, "no Sources section");
+    if (!/class="ar-sources[ "]/.test(raw)) fail(rel, "no Sources section");
     else if ((raw.match(/id="source-\d+"/g) || []).length < 2) fail(rel, "fewer than two sources");
     if (!/class="ar-credit"/.test(raw)) fail(rel, "no credit for the cover photograph");
+    if (!/class="ar-short"/.test(raw)) fail(rel, "no short answer");
+    if (!/class="ar-for"/.test(raw)) fail(rel, "doesn't say who it's for (audience in the registry)");
+  }
+  if (isBlog) {
     // The sources' own titles are quoted as published, so they are not held to our spelling.
-    const body = textOf(raw.replace(/<section class="ar-sources"[\s\S]*?<\/section>/, " ")).toLowerCase();
+    const body = textOf(raw.replace(/<section class="ar-sources[^"]*"[\s\S]*?<\/section>/, " ")).toLowerCase();
     for (const p of BANNED) {
       const i = body.indexOf(p.toLowerCase());
       if (i >= 0) fail(rel, `stock phrase “${p}”: “…${context(body, i)}…”`);

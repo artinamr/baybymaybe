@@ -28,6 +28,9 @@ export const topicLabel = (t: Topic) => TOPICS.find((x) => x.key === t)?.label ?
 
 export type Source = { title: string; publisher: string; url: string; accessed: string };
 
+/** What kind of practical tool a section of an article is (the blog's toolkit lists them). */
+export type ToolKind = "Checklist" | "Steps" | "Decision path" | "Comparison" | "Template" | "Test";
+
 export type ArticleMeta = {
   slug: string;
   title: string;
@@ -35,6 +38,21 @@ export type ArticleMeta = {
   description: string;
   /** The two-or-three-sentence answer at the top of the article. It must stand on its own. */
   short: string;
+  /**
+   * Where the reader is when this is the article they need, in their own
+   * words ("We’re comparing quotes for a new website."). It is the article's
+   * line on the blog's "Start where you are" list. Optional: give one only to
+   * articles that answer a buyer's starting point, and keep that list at six
+   * to eight.
+   */
+  situation?: string;
+  /**
+   * Who it is for, and when it isn't for you: shown beside the short answer,
+   * under "Who it’s for" and "Not for you if". One or two plain sentences each.
+   */
+  audience: { for: string; skip: string };
+  /** The practical tools inside it (a section id from the body's `toc`), listed in the blog's toolkit. */
+  tools: { title: string; kind: ToolKind; id: string }[];
   topic: Topic;
   /** What people search for when this article is the answer (structured data). */
   keywords: string[];
@@ -62,6 +80,15 @@ export const ARTICLES: ArticleMeta[] = [
       "When a website needs rebuilding and when it only needs fixing: the signs, a one-week diagnosis you can do yourself, and what to protect if you rebuild.",
     short:
       "Rebuild when the foundations are wrong: what the site says, how it is organised, a platform you can’t change, or speed and accessibility you can’t fix in place. When the foundations are sound and particular pages underperform, improve those pages instead. It is faster and cheaper, and it keeps what the site has already earned.",
+    situation: "Our website isn’t bringing in the enquiries it should.",
+    audience: {
+      for: "Businesses with a website that works, but not well enough, wondering whether to start again.",
+      skip: "You don’t have a website yet. Start with what a website quote should include instead.",
+    },
+    tools: [
+      { title: "A one-week website diagnosis", kind: "Steps", id: "diagnosis" },
+      { title: "Rebuild or improve: the decision path", kind: "Decision path", id: "deciding" },
+    ],
     topic: "websites",
     keywords: ["website redesign", "website improvements", "rebuild or refresh a website", "Core Web Vitals", "301 redirects", "New Zealand small business website"],
     published: "2026-10-04",
@@ -108,6 +135,16 @@ export const ARTICLES: ArticleMeta[] = [
       "The lines a good website quote has (scope, content, standards, launch, ownership, running costs and changes), plus red flags and how to compare quotes.",
     short:
       "A good quote says exactly what will be built, who supplies the words and pictures, how designs are approved, what it connects to, the accessibility and speed standard, what happens at launch, who owns what afterwards, what it costs to run, how support works, when you pay, and how changes are handled. If a line is missing, ask for it in writing before you sign.",
+    situation: "We’re comparing quotes for a new website.",
+    audience: {
+      for: "Anyone about to ask for, or choose between, quotes for a business website.",
+      skip: "You’re happy with your site and only need small changes made to it.",
+    },
+    tools: [
+      { title: "The website quote checklist", kind: "Checklist", id: "the-lines" },
+      { title: "Questions to ask before you sign", kind: "Checklist", id: "questions" },
+      { title: "Comparing two quotes, line by line", kind: "Comparison", id: "comparing" },
+    ],
     topic: "websites",
     keywords: ["website quote", "web design quote", "website proposal checklist", "website cost", "website ownership", "New Zealand"],
     published: "2026-10-04",
@@ -147,6 +184,15 @@ export const ARTICLES: ArticleMeta[] = [
       "Five signs email has become the bottleneck, when an off-the-shelf portal is the right answer, what the first version should do, and the security basics.",
     short:
       "When the same questions, documents and approvals pass between you and your clients so often that email has become the bottleneck, and your clients would rather look things up themselves. An off-the-shelf tool is often the right first step. A custom portal earns its cost when your work doesn’t fit one.",
+    situation: "Client work is buried in email and spreadsheets.",
+    audience: {
+      for: "Service businesses whose clients send documents, approvals and questions back and forth by email.",
+      skip: "Most of your customers buy once and never send you paperwork.",
+    },
+    tools: [
+      { title: "Off the shelf or custom: a comparison", kind: "Comparison", id: "off-the-shelf" },
+      { title: "What a portal’s first version should do", kind: "Steps", id: "first-version" },
+    ],
     topic: "platforms",
     keywords: ["client portal", "customer portal", "custom portal vs off-the-shelf", "multi-factor authentication", "Privacy Act 2020", "New Zealand business software"],
     published: "2026-10-04",
@@ -197,6 +243,15 @@ export const ARTICLES: ArticleMeta[] = [
       "Connect forms, bookings, your CRM and accounts so each detail is entered once: the options, a field map, consent, and knowing when a connection fails.",
     short:
       "Connect them so each piece of information is entered once: an enquiry form goes into the CRM, a booking goes into the calendar and the CRM, a payment goes into the accounts. Use each tool’s official integration where it does the job, write down which field goes where, record consent properly, and make sure someone is told when a connection fails.",
+    situation: "We type the same details into three different systems.",
+    audience: {
+      for: "Businesses that take enquiries, bookings or payments online and then enter them again somewhere else.",
+      skip: "Nearly every enquiry still arrives by phone. Start with the website itself.",
+    },
+    tools: [
+      { title: "A field map you can copy", kind: "Template", id: "field-map" },
+      { title: "The connection checklist", kind: "Checklist", id: "checklist" },
+    ],
     topic: "platforms",
     keywords: ["CRM integration", "website booking system", "connect website to CRM", "field mapping", "Unsolicited Electronic Messages Act", "New Zealand"],
     published: "2026-10-04",
@@ -241,6 +296,15 @@ export const ARTICLES: ArticleMeta[] = [
       "Where AI automation earns its keep in a small or medium business: five workflows, where a person stays in the loop, what can go wrong, and privacy.",
     short:
       "Start with work that is frequent, follows rules and can be checked: sorting and drafting replies to enquiries, reading details out of documents, turning call notes into CRM records, a website assistant that answers only from approved information, and searching your own documents. Keep a person approving anything that matters.",
+    situation: "We want to know where AI could actually help.",
+    audience: {
+      for: "Small and medium businesses curious about AI, and wary of the hype.",
+      skip: "You want to know how AI models work inside. This is about putting them to work.",
+    },
+    tools: [
+      { title: "Is this task a good fit for AI?", kind: "Test", id: "good-fit" },
+      { title: "A privacy check before you start", kind: "Steps", id: "privacy" },
+    ],
     topic: "automation",
     keywords: ["AI automation", "AI for small business", "workflow automation", "human in the loop", "Privacy Act 2020 and AI", "New Zealand"],
     published: "2026-10-04",
@@ -290,6 +354,16 @@ export const ARTICLES: ArticleMeta[] = [
       "What owning your website means (domain, code, content and accounts in your name), plus a handover checklist, backups, security and support options.",
     short:
       "Own the domain, the code, the content and every account in your own name. Know where the site is hosted, how it is backed up and who fixes what when something breaks. Then decide how much ongoing care you want: a monthly arrangement, or help when you ask for it.",
+    situation: "We’re launching a website, or taking one over.",
+    audience: {
+      for: "Anyone launching a new site, inheriting one, or unsure who controls theirs.",
+      skip: "Your domain, hosting and code are already in your name, with notes on how it all works.",
+    },
+    tools: [
+      { title: "The website handover checklist", kind: "Checklist", id: "handover" },
+      { title: "Security basics for a business website", kind: "Checklist", id: "security" },
+      { title: "Find out what you own today", kind: "Steps", id: "today" },
+    ],
     topic: "websites",
     keywords: ["website ownership", "web hosting", "website support", ".nz domain", "website backups", "website security"],
     published: "2026-10-04",
@@ -348,6 +422,19 @@ export const PUBLISHED: ArticleMeta[] = ARTICLES.map((a, i) => ({ a, i }))
   .map(({ a }) => a);
 
 export const article = (slug: string) => PUBLISHED.find((a) => a.slug === slug);
+
+/** When an article's facts were last checked: the latest date among its sources. */
+export const checkedOn = (a: ArticleMeta) => a.sources.reduce((d, s) => (s.accessed > d ? s.accessed : d), a.published);
+
+/** Every distinct page the published articles rest on (the blog's "sources checked" count). */
+export const ALL_SOURCES = [...new Map(PUBLISHED.flatMap((a) => a.sources).map((s) => [s.url, s])).values()];
+
+/** The blog's latest date: a publication, a revision or a check. */
+export const BLOG_UPDATED = PUBLISHED.map((a) => [a.updated ?? a.published, checkedOn(a)])
+  .flat()
+  .reduce((d, x) => (x > d ? x : d), "");
+
+export { searchable } from "@/lib/search";
 
 /** "4 October 2026": the dates as people read them here. */
 export const longDate = (iso: string) =>
