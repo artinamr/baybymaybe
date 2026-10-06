@@ -116,7 +116,7 @@ const AI = [4.97, 5.92];
 const GATHER = [5.98, 7.34];
 /** Where the colossus's shot begins (the WHY section). */
 export const LAND_S = 7.05;
-const CLOSE = [8.55, 9.2];
+const CLOSE = [8.68, 9.26];
 /** Where the climbing stone's origin is (world y) while it lays the stair (front = the step being laid). */
 function climbHomeY(front: number): number {
   // Hovering a little over the step it is laying; never lower than it stood
@@ -172,10 +172,14 @@ function keys(L: Layout): Key[] {
     if (mob) return [TOWER_C.x, TOWER_C.y, TOWER_C.z];
     return [0, climbHomeY(frontAt(S)) + STONE.centerY + dy, 0];
   };
+  // The AI: the camera looks down the well from ABOVE the whole stair (it
+  // once rode just over the core, and the steps above it filled the lens),
+  // its aim following the core halfway, so the light rises toward the lens
+  // through the spiral and every blade stays in the frame.
   const climb = (S: number, dy: number): [number, number, number] => {
     if (mob) return [TOWER_C.x, TOWER_C.y + 1, TOWER_C.z];
     aiCore(range(S, AI[0], AI[1]), _fc);
-    return [0, _fc.y + dy, 0];
+    return [0, lerp(TOWER_C.y, _fc.y, 0.55) + dy, 0];
   };
   const upD = (d: number) => (mob ? 92 : d);
   const aiD = (d: number) => (mob ? 64 : d);
@@ -198,14 +202,14 @@ function keys(L: Layout): Key[] {
     { S: 2.7, pivot: [0, lY, 0], az: -178, el: 3, dist: D(4.3), fov: 42, pp: [0.5, 0.5], roll: -3 },
     { S: 2.95, pivot: [0, lY, 0], az: -196, el: 5, dist: D(6.2), fov: 36, pp: pp(0.56, 0.5), roll: -1 },
     // WEBSITES — the exploded view, a turntable: loose, then exact.
-    { S: 3.2, pivot: [0, lY, 0], az: -206, el: 6, dist: D(8.8), fov: 30, pp: pp(0.64, 0.5) },
-    { S: 3.45, pivot: [0, lY, 0], az: -214, el: 6, dist: D(8.9), fov: 30, pp: pp(0.64, 0.5) },
-    { S: 3.8, pivot: [0, lY - 0.1, 0], az: -224, el: 5, dist: D(9.6), fov: 30, pp: pp(0.64, 0.5) },
+    { S: 3.2, pivot: [0, lY + 0.06, 0], az: -206, el: 6, dist: D(9.5), fov: 30, pp: pp(0.64, 0.5) },
+    { S: 3.45, pivot: [0, lY + 0.06, 0], az: -214, el: 6, dist: D(9.7), fov: 30, pp: pp(0.64, 0.5) },
+    { S: 3.8, pivot: [0, lY - 0.04, 0], az: -224, el: 5, dist: D(10.4), fov: 30, pp: pp(0.64, 0.5) },
     // PLATFORMS — the stone lifts off its heart and climbs, laying a step as
     // it passes each one's height; the camera rises with it, then
     // cranes up over the top as the last is laid, and looks down the spiral.
-    { S: 4.02, pivot: [0, lY - 0.2, 0], az: -232, el: 8, dist: D(12), fov: 34, pp: pp(0.64, 0.5) },
-    { S: 4.15, pivot: riser(4.15, -1.2), az: -244, el: 10, dist: upD(14), fov: 36, pp: pp(0.64, 0.5) },
+    { S: 4.02, pivot: [0, lY - 0.5, 0], az: -232, el: 9, dist: D(13.6), fov: 34, pp: pp(0.64, 0.5) },
+    { S: 4.15, pivot: riser(4.15, -1.4), az: -244, el: 10, dist: upD(15.5), fov: 36, pp: pp(0.64, 0.5) },
     { S: 4.35, pivot: riser(4.35, -1.4), az: -262, el: 10, dist: upD(15), fov: 36, pp: pp(0.64, 0.5), roll: -1 },
     { S: 4.55, pivot: riser(4.55, -1.5), az: -280, el: 11, dist: upD(15), fov: 36, pp: pp(0.64, 0.5), roll: -1 },
     { S: 4.72, pivot: riser(4.72, -1.5), az: -292, el: 12, dist: upD(16), fov: 36, pp: pp(0.64, 0.5) },
@@ -215,29 +219,30 @@ function keys(L: Layout): Key[] {
     // the light at its foot; the light rises toward the lens through the
     // spiral, every step turning into a blade as it passes, the camera turning
     // with it — a vortex.
-    { S: 5.08, pivot: climb(5.08, 0), az: -318, el: 44, dist: aiD(24), fov: 40, pp: pp(0.63, 0.5) },
-    { S: 5.35, pivot: climb(5.35, 0), az: -342, el: 60, dist: aiD(21), fov: 42, pp: pp(0.63, 0.5) },
-    { S: 5.6, pivot: climb(5.6, 0), az: -372, el: 66, dist: aiD(20), fov: 42, pp: pp(0.63, 0.5) },
-    { S: 5.84, pivot: climb(5.84, 0), az: -396, el: 58, dist: aiD(22), fov: 40, pp: pp(0.62, 0.5) },
-    { S: 5.97, pivot: mob ? [TC[0], TC[1] + 1, TC[2]] : [0, TOWER_TOP_Y, 0], az: -406, el: 36, dist: mob ? 70 : 27, fov: 38, pp: pp(0.56, 0.5) },
+    { S: 5.08, pivot: climb(5.08, -1), az: -320, el: 56, dist: aiD(35), fov: 40, pp: pp(0.63, 0.5) },
+    { S: 5.35, pivot: climb(5.35, 0), az: -344, el: 61, dist: aiD(32), fov: 40, pp: pp(0.63, 0.5) },
+    { S: 5.6, pivot: climb(5.6, 0), az: -372, el: 63, dist: aiD(29.5), fov: 40, pp: pp(0.63, 0.5) },
+    { S: 5.84, pivot: climb(5.84, 0), az: -396, el: 57, dist: aiD(30), fov: 39, pp: pp(0.62, 0.5) },
+    { S: 5.97, pivot: mob ? [TC[0], TC[1] + 1, TC[2]] : [0, TOWER_TOP_Y - 3.5, 0], az: -406, el: 40, dist: mob ? 70 : 32, fov: 38, pp: pp(0.56, 0.5) },
     // THE GATHER — the core drops back down the well and the stair winds
     // itself round it into the colossus, from the foot up; the camera draws
     // back and down, circling…
-    { S: 6.18, pivot: [0, mob ? 11 : 11.5, 0], az: -420, el: 13, dist: mob ? 96 : 46, fov: 36, pp: pp(0.56, 0.5), roll: -2 },
-    { S: 6.6, pivot: [0, 10, 0], az: -448, el: 8, dist: mob ? 100 : 52, fov: 35, pp: pp(0.56, 0.5), roll: -1 },
-    { S: LAND_S, pivot: CC, az: -486, el: 5, dist: floorD(58), fov: 34, pp: pp(0.56, 0.5) },
-    { S: 7.32, pivot: CC, az: -494, el: 3, dist: D(46), fov: 33, pp: pp(0.57, 0.5) },
+    { S: 6.18, pivot: [0, mob ? 11 : 11, 0], az: -420, el: 14, dist: mob ? 96 : 58, fov: 36, pp: pp(0.56, 0.5), roll: -2 },
+    { S: 6.6, pivot: [0, 10, 0], az: -448, el: 10, dist: mob ? 100 : 66, fov: 35, pp: pp(0.56, 0.5), roll: -1 },
+    { S: LAND_S, pivot: CC, az: -486, el: 6, dist: floorD(64), fov: 34, pp: pp(0.56, 0.5) },
+    { S: 7.32, pivot: CC, az: -494, el: 3, dist: D(48), fov: 33, pp: pp(0.57, 0.5) },
     // …flies into it…
     { S: 7.62, pivot: CC, az: -502, el: 2, dist: 28, fov: 36, pp: [0.54, 0.5] },
     { S: 7.88, pivot: CC, az: -516, el: 4, dist: 15, fov: 46, pp: [0.5, 0.5], roll: 2.5 },
     // …round the burning core…
     { S: 8.15, pivot: CC, az: -554, el: 6, dist: 8.6, fov: 50, pp: [0.5, 0.5], roll: 3 },
     { S: 8.4, pivot: CC, az: -614, el: 5, dist: 8.3, fov: 50, pp: [0.5, 0.5], roll: 1.5 },
-    { S: 8.62, pivot: CC, az: -656, el: 4, dist: 10, fov: 46, pp: [0.5, 0.5] },
-    // …and out, the glass closing in front of it, the crown seating last.
-    { S: 8.9, pivot: CC, az: -668, el: 2, dist: 24, fov: 38, pp: [0.52, 0.5] },
-    { S: 9.08, pivot: [CC[0], CC[1] + 1.2, CC[2]], az: -671, el: 2, dist: D(35), fov: 34, pp: pp(0.57, 0.5) },
-    { S: 9.3, pivot: CC, az: -674, el: 2, dist: D(46), fov: 32, pp: pp(0.6, 0.5) },
+    { S: 8.62, pivot: CC, az: -656, el: 4, dist: 11, fov: 46, pp: [0.5, 0.5] },
+    // …and out through the open glass, which closes behind the camera — the
+    // whole stone in the frame as it seats, the crown last.
+    { S: 8.86, pivot: CC, az: -668, el: 2, dist: 32, fov: 37, pp: [0.53, 0.5] },
+    { S: 9.08, pivot: [CC[0], CC[1] + 1.1, CC[2]], az: -671, el: 2, dist: D(47), fov: 33, pp: pp(0.57, 0.5) },
+    { S: 9.3, pivot: [CC[0], CC[1] + 0.5, CC[2]], az: -674, el: 2, dist: D(49), fov: 32, pp: pp(0.6, 0.5) },
     // LET'S TALK — down to the floor's own level: the stone whole on its
     // reflection, in the middle of the frame — "Let's ◆ talk." stands on the
     // horizon either side of it (Audit.tsx).
@@ -548,12 +553,12 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
     ap = 8.5 * smoother(range(S, 2.15, 2.4));
     ap = lerp(ap, 4.5, smoother(range(S, 3.0, 3.4)));
     ap = lerp(ap, 3, smoother(range(S, 3.9, 4.2)));
-    ap = lerp(ap, 7, smoother(range(S, 4.95, 5.15)));
+    ap = lerp(ap, 6, smoother(range(S, 4.95, 5.15)));
     ap = lerp(ap, 8, smoother(range(S, 5.9, 6.2)));
     ap = lerp(ap, 5, smoother(range(S, 6.9, 7.2)));
     ap = lerp(ap, 9, smoother(range(S, 7.7, 7.95)));
     ap = lerp(ap, 4, smoother(range(S, 8.7, 9.1)));
-    ap = lerp(ap, 2, smoother(range(S, 9.4, 9.9)));
+    ap = lerp(ap, 0, smoother(range(S, 9.4, 9.9)));
   }
   out.cam.aperture = ap;
 

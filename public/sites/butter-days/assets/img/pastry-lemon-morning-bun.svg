@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Lemon morning bun with sugar crust and lemon glaze">
+  <defs>
+    <radialGradient id="dough" cx="36%" cy="26%" r="92%">
+      <stop offset="0" stop-color="#FFE2A0"/>
+      <stop offset=".55" stop-color="#EFAC4E"/>
+      <stop offset="1" stop-color="#C07822"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <ellipse cx="200" cy="322" rx="128" ry="24" fill="#5A3315" opacity=".16" filter="url(#soft)"/>
+  <circle cx="200" cy="218" r="96" fill="url(#dough)"/>
+  <g fill="none" stroke="#A96615" stroke-width="7" opacity=".55" stroke-linecap="round">
+    <path d="M268,214 a68,68 0 1,1 -136,0 a54,54 0 1,1 108,0 a40,40 0 1,1 -80,0 a26,26 0 1,1 52,0"/>
+  </g>
+  <path d="M120,178 C142,124 254,116 286,164" stroke="#FFF6E0" stroke-width="24" fill="none" stroke-linecap="round" opacity=".92"/>
+  <path d="M116,196 C120,158 158,124 204,120" stroke="#FFF6E0" stroke-width="16" fill="none" stroke-linecap="round" opacity=".7"/>
+  <path d="M142,132 C180,110 232,112 262,136" stroke="#FBE9A8" stroke-width="9" fill="none" stroke-linecap="round" opacity=".95"/>
+  <path d="M126,206 C158,192 244,190 278,206" stroke="#FBE9A8" stroke-width="7" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M150,262 C186,276 230,272 258,252" stroke="#8A4A12" stroke-width="6" fill="none" stroke-linecap="round" opacity=".3"/>
+  <path d="M232,140 c10,-14 26,-16 34,-8 c-6,10 -22,16 -34,8 Z" fill="#E8C93F"/>
+  <path d="M244,132 c4,-4 10,-6 14,-4" stroke="#B99A1E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <g fill="#FFFDF4" opacity=".85">
+    <circle cx="168" cy="146" r="2.8"/><circle cx="212" cy="136" r="2.6"/><circle cx="256" cy="152" r="2.8"/>
+    <circle cx="146" cy="172" r="2.4"/><circle cx="276" cy="184" r="2.6"/><circle cx="132" cy="222" r="2.6"/>
+    <circle cx="262" cy="236" r="2.4"/><circle cx="222" cy="278" r="2.6"/>
+  </g>
+  <path d="M144,166 C170,136 240,132 268,160" stroke="#FFE9B8" stroke-width="12" fill="none" stroke-linecap="round" opacity=".5" filter="url(#soft)"/>
+</svg>

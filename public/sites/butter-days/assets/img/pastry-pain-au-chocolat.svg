@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Pain au chocolat with dark chocolate batons at each end">
+  <defs>
+    <radialGradient id="dough" cx="38%" cy="24%" r="95%">
+      <stop offset="0" stop-color="#FFDD9C"/>
+      <stop offset=".52" stop-color="#EFAB4A"/>
+      <stop offset="1" stop-color="#B76F1E"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <ellipse cx="200" cy="318" rx="140" ry="24" fill="#5A3315" opacity=".16" filter="url(#soft)"/>
+  <rect x="74" y="188" width="20" height="86" rx="10" fill="#472A18"/>
+  <rect x="306" y="188" width="20" height="86" rx="10" fill="#472A18"/>
+  <rect x="78" y="192" width="6" height="66" rx="3" fill="#6B4530" opacity=".8"/>
+  <rect x="310" y="192" width="6" height="66" rx="3" fill="#6B4530" opacity=".8"/>
+  <rect x="88" y="164" width="224" height="122" rx="32" fill="url(#dough)"/>
+  <path d="M96,168 C130,150 270,150 304,168 L304,192 C268,176 132,176 96,192 Z" fill="#F8D085" opacity=".9"/>
+  <path d="M156,158 C148,200 148,256 156,290" stroke="#A2611C" stroke-width="6" fill="none" stroke-linecap="round" opacity=".42"/>
+  <path d="M252,158 C260,200 260,256 252,290" stroke="#A2611C" stroke-width="6" fill="none" stroke-linecap="round" opacity=".42"/>
+  <path d="M112,190 C112,230 112,252 116,270" stroke="#8A4A12" stroke-width="5" fill="none" stroke-linecap="round" opacity=".3"/>
+  <path d="M296,190 C296,230 296,252 292,270" stroke="#8A4A12" stroke-width="5" fill="none" stroke-linecap="round" opacity=".3"/>
+  <path d="M112,178 C150,162 250,162 288,178" stroke="#FFE9B8" stroke-width="14" fill="none" stroke-linecap="round" opacity=".55" filter="url(#soft)"/>
+  <g fill="#FFFDF4" opacity=".6">
+    <circle cx="134" cy="158" r="2.8"/><circle cx="200" cy="152" r="2.4"/><circle cx="268" cy="160" r="2.8"/>
+    <circle cx="118" cy="272" r="2.6"/><circle cx="206" cy="282" r="2.6"/><circle cx="290" cy="266" r="2.4"/>
+  </g>
+</svg>

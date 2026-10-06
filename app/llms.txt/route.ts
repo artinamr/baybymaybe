@@ -1,6 +1,6 @@
 import { CONTACT, FAQ_ALL, PAGES, PLACE, STAGES, abs } from "@/lib/content";
 import { SERVICES } from "@/content/services";
-import { WORK_ITEMS } from "@/content/work";
+import { KIND_LABEL, WORK_ITEMS } from "@/content/work";
 import { PUBLISHED } from "@/content/blog";
 import { GLOSSARY } from "@/content/blog/glossary";
 
@@ -44,8 +44,11 @@ export function GET() {
     `## Glossary ([web, platform and AI terms in plain English](${abs(PAGES.glossary)}))`,
     ...GLOSSARY.map((t) => `- **${t.term}**${"also" in t ? ` (${t.also})` : ""}: ${t.def} [${abs(PAGES.glossary)}#${t.id}]`),
     "",
-    "## Work (studio demonstrations; the businesses are fictional and labelled as such)",
-    ...WORK_ITEMS.map((p) => `- [${p.client}: ${p.title}](${abs(PAGES.project(p.slug))}): ${p.summary}`),
+    "## Work (concept websites and studio demonstrations; the businesses are fictional and labelled as such)",
+    ...WORK_ITEMS.map(
+      (p) =>
+        `- [${p.client}: ${p.title}](${abs(PAGES.project(p.slug))}) (${KIND_LABEL[p.kind].toLowerCase()}): ${p.summary}${p.site ? ` The site itself: ${abs(p.site.live)}` : ""}`
+    ),
     "",
     "## Questions and answers",
     ...qa.map((it) => `- **${it.q}** ${it.a}`),

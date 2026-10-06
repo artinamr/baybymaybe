@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" role="img" aria-label="A cut loaf of country sourdough showing its open crumb, dusted with flour, close-up on a linen ground">
+  <defs>
+    <radialGradient id="crust" cx="36%" cy="26%" r="95%">
+      <stop offset="0" stop-color="#E8A655"/><stop offset=".55" stop-color="#B26B22"/><stop offset="1" stop-color="#7C4312"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="10"/></filter>
+    <clipPath id="heroClip"><path d="M0,0 H1200 V860 H0 Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#heroClip)">
+    <rect width="1200" height="860" fill="#F6EBD8"/>
+    <path d="M0,180 C300,150 900,190 1200,160 V0 H0 Z" fill="#EFE0C6"/>
+    <g stroke="#E2D2B4" stroke-width="4" opacity=".8">
+      <path d="M0,240 H1200 M0,330 H1200 M0,420 H1200 M0,510 H1200 M0,600 H1200 M0,690 H1200"/>
+    </g>
+    <ellipse cx="600" cy="740" rx="500" ry="60" fill="#8A6A45" opacity=".3" filter="url(#soft)"/>
+    <rect x="180" y="620" width="840" height="56" rx="28" fill="#C79A62"/>
+    <rect x="180" y="606" width="840" height="56" rx="28" fill="#DDB184"/>
+    <g>
+      <path d="M300,560 C282,452 340,360 436,336 C504,318 610,318 678,340 C772,370 820,458 802,560 C786,656 686,718 550,718 C416,718 316,656 300,560 Z" fill="url(#crust)"/>
+      <g stroke="#6B3A0E" stroke-width="16" fill="none" stroke-linecap="round" opacity=".85">
+        <path d="M452,352 C470,440 474,560 460,668"/>
+        <path d="M562,330 C572,440 572,580 562,692"/>
+        <path d="M672,352 C660,442 658,562 672,664"/>
+      </g>
+      <path d="M384,392 C368,458 366,552 378,622" stroke="#8A4A12" stroke-width="11" fill="none" stroke-linecap="round" opacity=".4"/>
+      <path d="M742,392 C756,458 758,552 746,622" stroke="#8A4A12" stroke-width="11" fill="none" stroke-linecap="round" opacity=".4"/>
+      <path d="M420,384 C520,320 680,318 780,388" stroke="#F0BC77" stroke-width="30" fill="none" stroke-linecap="round" opacity=".5" filter="url(#soft)"/>
+    </g>
+    <g transform="translate(852,300) rotate(16)">
+      <path d="M0,420 C-16,300 -16,120 0,0" stroke="#8A6A2E" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <g fill="#D9B24C">
+        <ellipse cx="-34" cy="56" rx="24" ry="40" transform="rotate(-30 -34 56)"/>
+        <ellipse cx="34" cy="92" rx="24" ry="40" transform="rotate(30 34 92)"/>
+        <ellipse cx="-34" cy="150" rx="24" ry="40" transform="rotate(-30 -34 150)"/>
+        <ellipse cx="34" cy="186" rx="24" ry="40" transform="rotate(30 34 186)"/>
+        <ellipse cx="-34" cy="244" rx="24" ry="40" transform="rotate(-30 -34 244)"/>
+        <ellipse cx="34" cy="280" rx="24" ry="40" transform="rotate(30 34 280)"/>
+      </g>
+      <g fill="#C79A2E" opacity=".7">
+        <ellipse cx="-30" cy="66" rx="13" ry="22" transform="rotate(-30 -30 66)"/>
+        <ellipse cx="30" cy="102" rx="13" ry="22" transform="rotate(30 30 102)"/>
+        <ellipse cx="-30" cy="160" rx="13" ry="22" transform="rotate(-30 -30 160)"/>
+        <ellipse cx="30" cy="196" rx="13" ry="22" transform="rotate(30 30 196)"/>
+      </g>
+    </g>
+    <g fill="#FFFDF4" opacity=".8">
+      <circle cx="330" cy="330" r="7"/><circle cx="470" cy="290" r="6"/><circle cx="640" cy="280" r="7"/>
+      <circle cx="790" cy="330" r="6"/><circle cx="860" cy="470" r="6"/><circle cx="290" cy="520" r="6"/>
+      <circle cx="380" cy="690" r="6"/><circle cx="760" cy="700" r="6"/>
+    </g>
+    <path d="M120,120 C120,96 148,88 158,108 C164,88 194,92 194,114 C194,134 158,152 158,152 C158,152 120,140 120,120 Z" fill="none" stroke="#B0453B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

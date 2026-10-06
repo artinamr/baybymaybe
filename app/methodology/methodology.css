@@ -149,75 +149,8 @@
   }
 }
 
-/* ---- The methodology at a glance: five stages on one line, each a way in ---- */
-.ms-map {
-  margin: 0 0 calc(var(--vh) * 7);
-}
-.ms-map ol {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--hair);
-  border-bottom: 1px solid var(--hair);
-}
-.ms-map li + li {
-  border-left: 1px solid var(--hair-soft);
-}
-.ms-map a {
-  display: grid;
-  gap: 6px;
-  height: 100%;
-  padding: 20px 20px 22px;
-  transition: background 350ms ease;
-}
-.ms-map li:first-child a {
-  padding-left: 0;
-}
-.ms-map a:hover {
-  background: color-mix(in oklab, var(--indigo) 4%, transparent);
-}
-.ms-map-n {
-  color: var(--indigo);
-}
-.ms-map-t {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: 22px;
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  color: var(--ink);
-  transition: color 300ms ease;
-}
-.ms-map a:hover .ms-map-t {
-  color: var(--indigo);
-}
-.ms-map-w {
-  font-size: 13px;
-  color: color-mix(in oklab, var(--ink) 62%, transparent);
-}
 .ms-stage {
   scroll-margin-top: calc(var(--nav-h) + 16px);
-}
-@media (max-width: 900px) {
-  .ms-map ol {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .ms-map li + li {
-    border-left: 0;
-    border-top: 1px solid var(--hair-soft);
-  }
-  .ms-map a,
-  .ms-map li:first-child a {
-    grid-template-columns: 34px minmax(0, 1fr) auto;
-    align-items: baseline;
-    gap: 12px;
-    padding: 14px 0;
-  }
-  .ms-map-t {
-    font-size: 19px;
-  }
 }
 
 /* ==========================================================================
@@ -491,6 +424,436 @@
     opacity: 1;
     transform: none;
     filter: none;
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   THE PLAN (round 21): a typical website's fourteen days, stage by stage, with
+   the moments you decide pinned beneath. Each bar opens its stage below; the
+   bars draw themselves as the plan comes into view.
+   ========================================================================== */
+.mp {
+  --name-w: 200px;
+  --row-h: 50px;
+  margin: 0 0 calc(var(--vh) * 8);
+  padding: 30px 32px 26px;
+  border: 1px solid var(--hair);
+  border-radius: 28px;
+  background: color-mix(in oklab, var(--paper) 62%, #fff);
+}
+.mp-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-bottom: 18px;
+}
+.mp-h {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.015em;
+}
+.mp-key {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.mp-key-pin,
+.mp-pin {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  background: var(--ink);
+  transform: rotate(45deg);
+}
+.mp-chart {
+  position: relative;
+}
+.mp-days,
+.mp-row,
+.mp-pins {
+  display: grid;
+  grid-template-columns: var(--name-w) repeat(14, minmax(0, 1fr));
+  align-items: center;
+}
+.mp-days {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.mp-days li {
+  text-align: center;
+}
+.mp-days .mp-days-label {
+  text-align: left;
+}
+.mp-rows {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+}
+.mp-row {
+  position: relative;
+  height: var(--row-h);
+  color: inherit;
+}
+.mp-name {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  transition: color 250ms ease;
+}
+.mp-name .mono {
+  font-size: 11px;
+  color: var(--indigo);
+}
+.mp-bar {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  height: 34px;
+  margin: 0 3px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--indigo) 13%, var(--paper));
+  box-shadow: inset 3px 0 0 var(--indigo);
+  overflow: hidden;
+  transform-origin: left center;
+  transform: scaleX(0.02);
+  transition:
+    transform 1100ms var(--ease-expo) calc(var(--i) * 110ms + 200ms),
+    background 250ms ease;
+}
+.mp[data-in] .mp-bar {
+  transform: none;
+}
+.mp-when {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--indigo);
+  opacity: 0;
+  transition:
+    opacity 600ms ease calc(var(--i) * 110ms + 700ms),
+    color 250ms ease;
+}
+.mp[data-in] .mp-when {
+  opacity: 1;
+}
+.mp-row:hover .mp-bar,
+.mp-row:focus-visible .mp-bar {
+  background: var(--indigo);
+}
+.mp-row:hover .mp-when,
+.mp-row:focus-visible .mp-when {
+  color: #fff;
+}
+.mp-row:hover .mp-name {
+  color: var(--indigo);
+}
+.mp-pins {
+  list-style: none;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--hair);
+  align-items: start;
+}
+.mp-pins li {
+  position: relative;
+  grid-row: 1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 700ms ease calc(var(--i) * 120ms + 900ms);
+}
+.mp[data-in] .mp-pins li {
+  opacity: 1;
+}
+/* A hairline from each pin up through the plan. */
+.mp-pins li::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 50%;
+  height: calc(5 * var(--row-h) + 26px);
+  border-left: 1px dashed color-mix(in oklab, var(--ink) 28%, transparent);
+  pointer-events: none;
+}
+.mp-pin-t {
+  max-width: 13ch;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* What you receive, drawn as the thing itself. */
+.ma {
+  margin: 34px 0 0;
+  max-width: 560px;
+  padding: 24px 26px 22px;
+  border: 1px solid var(--hair);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ink) 4%, transparent),
+    0 36px 70px -50px color-mix(in oklab, var(--ink) 45%, transparent);
+}
+.ma-k {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.ma-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+.ma-title {
+  margin: 0 0 16px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+.ma-rows {
+  margin: 0;
+  border-top: 1px solid var(--hair);
+}
+.ma-rows div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.ma-rows-tight div {
+  grid-template-columns: 150px minmax(0, 1fr);
+  padding: 9px 0;
+}
+.ma-rows dt {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+.ma-rows dd {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 80%, transparent);
+}
+.ma-rows b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.ma-foot {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.ma-sign {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 22px 0 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.ma-sign i {
+  flex: 1;
+  max-width: 260px;
+  height: 26px;
+  border-bottom: 1px solid var(--ink);
+  background: no-repeat left 2px bottom 4px / 120px 22px
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 22'%3E%3Cpath d='M3 17c8-10 13-13 15-9s-4 9-1 9 9-12 14-12-3 11 2 11 7-8 11-8 2 7 6 7 9-6 13-6 4 5 9 5 18-3 46-4' fill='none' stroke='%235b3df0' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.ma-browser {
+  overflow: hidden;
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  background: #fff;
+}
+.ma-browser img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.ma-url {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--paper) 80%, var(--ink) 4%);
+  font-size: 13px;
+  color: var(--muted);
+}
+.ma-lock {
+  position: relative;
+  flex: none;
+  width: 9px;
+  height: 8px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--indigo);
+}
+.ma-lock::before {
+  content: "";
+  position: absolute;
+  left: 1.5px;
+  bottom: 6px;
+  width: 6px;
+  height: 5px;
+  border: 1.5px solid var(--indigo);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  box-sizing: border-box;
+}
+.ma-checks,
+.ma-keys {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.ma-checks li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hair-soft);
+  font-size: 15px;
+}
+.ma-tick {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--indigo);
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ma-keys li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hair-soft);
+  font-size: 15px;
+}
+.ma-keys b {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--indigo) 11%, var(--paper));
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+
+@media (max-width: 900px) {
+  .mp {
+    --name-w: 104px;
+    --row-h: 44px;
+    padding: 22px 16px 20px;
+    border-radius: 22px;
+  }
+  .mp-name {
+    font-size: 14px;
+    gap: 6px;
+  }
+  .mp-name .mono {
+    display: none;
+  }
+  .mp-bar {
+    height: 28px;
+    margin: 0 1px;
+    padding: 0 8px;
+  }
+  .mp-when {
+    font-size: 10.5px;
+  }
+  .mp-days {
+    font-size: 9.5px;
+  }
+  .mp-pins {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px 14px;
+  }
+  .mp-pins li {
+    grid-column: auto !important;
+    grid-row: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mp-pins li::before {
+    display: none;
+  }
+  .mp-pin-t {
+    max-width: none;
+    text-align: left;
+  }
+  .mp-pin-t .sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    clip: auto;
+    overflow: visible;
+    white-space: normal;
+    color: var(--muted);
+  }
+  .ma {
+    padding: 20px 18px 18px;
+  }
+  .ma-rows div,
+  .ma-rows-tight div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+@media (max-width: 600px) {
+  .mp-when {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mp-bar,
+  .mp-when,
+  .mp-pins li {
     transition: none;
   }
 }

@@ -2,13 +2,13 @@ import { Page, Kicker, Title, Closing } from "@/components/site/Page";
 import { WorkIndex } from "@/components/work/WorkIndex";
 import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
-import { WORK_ITEMS } from "@/content/work";
+import { KIND_LABEL, WORK_ITEMS } from "@/content/work";
 import { service } from "@/content/services";
 
 export const metadata = pageMeta({
   title: "Work",
   description:
-    "Websites, platforms and AI automation by Nerodyn, each shown as a working demonstration you can click through, with the brief, the decisions and the limits.",
+    "Three complete websites you can click through, and working demonstrations of a client portal and an AI enquiry desk, each with the brief and the decisions.",
   path: "work/",
 });
 
@@ -16,13 +16,14 @@ export const metadata = pageMeta({
 export default function Work() {
   const items = WORK_ITEMS.map((p) => ({
     slug: p.slug,
+    kind: p.kind,
     href: PAGES.project(p.slug),
     client: p.client,
     title: p.title,
     summary: p.summary,
     cover: p.cover,
     coverAlt: p.coverAlt,
-    demo: p.kind === "demo",
+    label: KIND_LABEL[p.kind],
     services: p.services.map((sl) => ({ slug: sl, name: service(sl)?.name ?? sl })),
   }));
   return (
@@ -31,8 +32,9 @@ export default function Work() {
         <Kicker>Work</Kicker>
         <Title lines={["Don’t take our word for it.", "Click through it."]} />
         <p className="sp-lede" data-rv>
-          Each project here is a working demonstration: a fictional business, built the way we would build yours, with the brief,
-          the decisions and the limits written up plainly. Client projects join them as they launch.
+          Three complete websites, and working pieces of a platform and an automation. The businesses are fictional; the
+          work is real, built the way we would build yours, and every one of them runs here for you to try. Client projects
+          join them as they launch.
         </p>
       </section>
       <WorkIndex items={items} />

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" role="img" aria-label="A tall celebration cake with blush frosting and dried flowers on a pedestal stand, with a smaller lemon cake beside it and scattered petals">
+  <defs>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
+    <clipPath id="cakeClip"><path d="M0,0 H900 V760 H0 Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#cakeClip)">
+    <rect width="900" height="760" fill="#F9EBDC"/>
+    <circle cx="742" cy="132" r="150" fill="#F0BFD0" opacity=".6"/>
+    <circle cx="742" cy="132" r="92" fill="#EEB2C6" opacity=".55"/>
+    <path d="M0,520 C260,486 640,516 900,494 V760 H0 Z" fill="#EFE0C9"/>
+    <ellipse cx="430" cy="642" rx="330" ry="46" fill="#9C7B54" opacity=".3" filter="url(#soft)"/>
+    <g>
+      <path d="M300,620 h260 v26 h-260 Z" fill="#D8B98C"/>
+      <path d="M414,470 h32 v150 h-32 Z" fill="#E3C79E"/>
+      <ellipse cx="430" cy="470" rx="132" ry="24" fill="#E9D2AB"/>
+      <ellipse cx="430" cy="464" rx="132" ry="24" fill="#F6EAD2"/>
+      <g>
+        <path d="M330,464 C330,456 356,450 386,450 L386,300 C386,282 474,282 474,300 L474,450 C504,450 530,456 530,464 Z" fill="#F6DCDD"/>
+        <path d="M330,464 C330,456 356,450 386,450 L386,432 C356,432 330,440 330,456 Z" fill="#F2CDD0"/>
+        <path d="M530,464 C530,456 504,450 474,450 L474,432 C504,432 530,440 530,456 Z" fill="#F2CDD0"/>
+        <path d="M386,444 C412,452 448,452 474,444" stroke="#E8B4BB" stroke-width="4" fill="none" opacity=".8"/>
+        <path d="M330,464 C380,478 480,478 530,464" stroke="#E8B4BB" stroke-width="4" fill="none" opacity=".6"/>
+        <ellipse cx="430" cy="298" rx="44" ry="16" fill="#FBE7E9"/>
+        <path d="M386,320 C420,330 440,330 474,320" stroke="#F4CDD3" stroke-width="4" fill="none"/>
+        <path d="M386,368 C420,378 440,378 474,368" stroke="#F4CDD3" stroke-width="4" fill="none"/>
+        <path d="M386,414 C420,424 440,424 474,414" stroke="#F4CDD3" stroke-width="4" fill="none"/>
+        <ellipse cx="416" cy="330" rx="8" ry="4" fill="#FFFFFF" opacity=".5" transform="rotate(-16 416 330)"/>
+      </g>
+      <g transform="translate(430,296)">
+        <path d="M-6,0 C-14,-28 -30,-40 -48,-40 C-40,-16 -26,-2 -6,0 Z" fill="#8A7B4F"/>
+        <path d="M6,0 C14,-30 30,-44 50,-46 C42,-18 26,-2 6,0 Z" fill="#9C8B5B"/>
+        <g fill="#B0453B">
+          <circle cx="-58" cy="-46" r="8"/><circle cx="-70" cy="-34" r="7"/><circle cx="-56" cy="-30" r="6.4"/>
+          <circle cx="62" cy="-52" r="8"/><circle cx="74" cy="-40" r="7"/><circle cx="58" cy="-36" r="6.4"/>
+        </g>
+        <g fill="#C95C4E"><circle cx="-58" cy="-46" r="2.6"/><circle cx="-70" cy="-34" r="2.4"/><circle cx="62" cy="-52" r="2.6"/><circle cx="74" cy="-40" r="2.4"/></g>
+        <g fill="#8A7B4F"><circle cx="-48" cy="-24" r="3.4"/><circle cx="52" cy="-26" r="3.4"/></g>
+        <path d="M-2,0 C-2,-10 2,-14 8,-16" stroke="#8A7B4F" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </g>
+    </g>
+    <g>
+      <ellipse cx="742" cy="600" rx="128" ry="22" fill="#9C7B54" opacity=".3" filter="url(#soft)"/>
+      <rect x="700" y="560" width="84" height="22" rx="8" fill="#D8B98C"/>
+      <rect x="730" y="520" width="24" height="46" fill="#E3C79E"/>
+      <ellipse cx="742" cy="520" rx="88" ry="18" fill="#E9D2AB"/>
+      <ellipse cx="742" cy="514" rx="88" ry="18" fill="#F6EAD2"/>
+      <path d="M672,512 C672,506 690,502 708,502 L708,434 C708,422 776,422 776,434 L776,502 C794,502 812,506 812,512 Z" fill="#FCE9B6"/>
+      <path d="M672,512 C708,522 776,522 812,512" stroke="#EBC96E" stroke-width="4" fill="none" opacity=".8"/>
+      <path d="M708,440 C736,448 748,448 776,440" stroke="#F0D483" stroke-width="4" fill="none" opacity=".9"/>
+      <ellipse cx="742" cy="430" rx="34" ry="10" fill="#FEF3CE"/>
+      <path d="M742,428 C738,416 744,406 752,402" stroke="#8A7B4F" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="756" cy="398" rx="9" ry="5" fill="#E8C93F" transform="rotate(-24 756 398)"/>
+    </g>
+    <g fill="#F0BFD0">
+      <path d="M236,600 c8,-12 26,-12 32,0 c6,12 -8,26 -16,26 c-8,0 -24,-14 -16,-26 Z" opacity=".8"/>
+      <path d="M606,648 c8,-12 26,-12 32,0 c6,12 -8,26 -16,26 c-8,0 -24,-14 -16,-26 Z" opacity=".7"/>
+      <path d="M150,668 c7,-10 22,-10 27,0 c5,10 -7,22 -13,22 c-7,0 -19,-12 -14,-22 Z" opacity=".8"/>
+    </g>
+    <path d="M118,96 C118,78 140,72 148,86 C152,72 176,74 176,92 C176,108 148,120 148,120 C148,120 118,110 118,96 Z" fill="none" stroke="#B0453B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M96,180 l6,14 14,6 -14,6 -6,14 -6,-14 -14,-6 14,-6 Z" fill="#F6CD5A"/>
+  </g>
+</svg>

@@ -7,7 +7,7 @@ import { ArticleCard } from "@/components/blog/ArticleCard";
 import { DELIVERABLES, FAQ_ALL, PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { SERVICES, service, type Service } from "@/content/services";
-import { WORK_ITEMS } from "@/content/work";
+import { FEATURED, KIND_LABEL, project } from "@/content/work";
 import { PUBLISHED, TOPICS } from "@/content/blog";
 
 const DESCRIPTION =
@@ -77,8 +77,8 @@ const QA = QS.map((q) => FAQ_ALL.flatMap((g) => g.items).find((it) => it.q === q
 
 /**
  * SERVICES: the three disciplines (what each delivers), which one you need,
- * how one enquiry passes through all three, the three working
- * demonstrations, what every project includes, how working together starts,
+ * how one enquiry passes through all three, one piece of work for each to
+ * try (FEATURED), what every project includes, how working together starts,
  * the questions people ask, and the blog's answers, one per discipline.
  */
 export default function Services() {
@@ -166,7 +166,7 @@ export default function Services() {
         <header className="split-head bl-related-head">
           <Kicker>See them working</Kicker>
           <h2 id="demos-h" className="sp-h2" data-rv>
-            Three studio demonstrations.
+            One of each, to try.
           </h2>
           <p className="split-more" data-rv>
             <a className="text-link" href={PAGES.work}>
@@ -175,14 +175,14 @@ export default function Services() {
           </p>
         </header>
         <div className="svc-demo-grid">
-          {WORK_ITEMS.map((p, i) => (
+          {SERVICES.map((s) => project(FEATURED[s.slug])!).map((p, i) => (
             <a key={p.slug} className="svc-demo" href={PAGES.project(p.slug)} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
               <span className="svc-demo-img">
                 {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
                 <img src={p.cover} alt="" width={2400} height={1500} loading="lazy" decoding="async" />
               </span>
               <span className="svc-demo-kind">
-                <b>{service(p.services[0])?.name}</b> · {p.client}, a {p.kind === "demo" ? "studio demonstration" : "client project"}
+                <b>{service(p.services[0])?.name}</b> · {p.client}, a {KIND_LABEL[p.kind].toLowerCase()}
               </span>
               <span className="svc-demo-t">{p.title}</span>
               <span className="svc-go">

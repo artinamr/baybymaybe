@@ -86,3 +86,11 @@ Order for covers: build → serve → `covers.mjs` → `coverwebp.py` → `tallc
   with the editor tool instead of `cat <<EOF`.
 - The browser pane in the desktop app pauses `requestAnimationFrame` while it
   is hidden — the intro stays at `wait` there. Time things in headless Chrome.
+
+## The concept websites (tools/showcase/, round 21)
+
+| Script | Purpose | Usage |
+|---|---|---|
+| `../showcase/import.py` | Copy the three concept websites from the client's folders into `public/sites/<slug>/`: trimmed, photos recompressed, every page `noindex`, visible em dashes rewritten. Never hand-edit `public/sites` | `python tools/showcase/import.py [slug ...]` |
+| `../showcase/shots.mjs` | Screenshots of the hosted sites for their case studies (first screens, every page, phones, features in use) | `node tools/showcase/shots.mjs http://127.0.0.1:3100 <scratch> [slug,slug]` |
+| `../showcase/webp.py` | Those PNGs into the WebPs and covers in `public/work/` | `python tools/showcase/webp.py <scratch> [slug ...]` |

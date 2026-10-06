@@ -9,7 +9,7 @@ import { PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { WorkTitle } from "@/components/work/WorkTitle";
 import { SERVICES, service } from "@/content/services";
-import { project } from "@/content/work";
+import { KIND_LABEL, project } from "@/content/work";
 import { PUBLISHED } from "@/content/blog";
 
 /** What the discipline is called in a sentence ("the steps a website takes care of"). */
@@ -32,13 +32,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  * ONE DISCIPLINE: the title with the facts at a glance beside it (how long,
  * the first step, the price, what is yours), when it is the right call, what
  * you get, how we approach it, what decides the price, what we need from you,
- * a working demonstration, the questions people ask, what we have written
+ * everything that is included, how it runs, how it is built, the work that
+ * shows it, after launch, the questions people ask, what we have written
  * about it, and where it fits with the other two.
  */
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const s = service((await params).slug);
   if (!s) notFound();
   const others = SERVICES.filter((o) => o.slug !== s.slug);
+  const work = s.work.map((slug) => project(slug)!).filter(Boolean);
   // What the blog says about this discipline: up to three articles, newest first.
   const reading = PUBLISHED.filter((a) => a.related.services.includes(s.slug)).slice(0, 3);
   const crumbs = [
@@ -139,6 +141,42 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </ul>
       </section>
 
+      <section className="sp-block svc-spec" aria-labelledby="spec-h">
+        <header className="svc-sec-head">
+          <Kicker>In full</Kicker>
+          <h2 id="spec-h" className="sp-h2" data-rv>
+            Everything that’s included.
+          </h2>
+          <p className="sp-lede" data-rv>
+            The whole list, so you can compare it with any other quote. Your written scope confirms every line before anything
+            starts.
+          </p>
+        </header>
+        <div className="svc-spec-grid">
+          {s.includes.map((g, i) => (
+            <section key={g.group} className="svc-spec-card" data-rv style={{ transitionDelay: `${(i % 3) * 80}ms` }} aria-labelledby={`spec-${i}`}>
+              <p className="svc-spec-n mono">{String(i + 1).padStart(2, "0")}</p>
+              <h3 id={`spec-${i}`} className="svc-spec-t">
+                {g.group}
+              </h3>
+              <ul>
+                {g.items.map((x) => (
+                  <li key={x}>{x}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
+          <div className="svc-spec-card svc-spec-own" data-rv style={{ transitionDelay: "160ms" }}>
+            <p className="svc-spec-n mono">At the end</p>
+            <p className="svc-spec-t">Yours, all of it.</p>
+            <p className="svc-spec-own-line">The code, the data, the content and every account, in your name. No licence to keep paying.</p>
+            <a className="text-link" href={PAGES.pricing}>
+              How pricing works <span aria-hidden>→</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
       <section className="sp-block split" aria-labelledby="approach-h">
         <header className="split-head">
           <Kicker>How we approach it</Kicker>
@@ -148,6 +186,54 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </header>
         <ol className="flow flow-4">
           {s.approach.map((it, i) => (
+            <li key={it.title} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
+              <span className="flow-n mono">{String(i + 1).padStart(2, "0")}</span>
+              <h3 className="item-t">{it.title}</h3>
+              <p className="item-b">{it.body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="sp-block svc-runs" aria-labelledby="runs-h">
+        <header className="svc-sec-head">
+          <Kicker>How it runs</Kicker>
+          <h2 id="runs-h" className="sp-h2" data-rv>
+            {s.runs.title}
+          </h2>
+          <p className="sp-lede" data-rv>
+            {s.runs.lede}
+          </p>
+        </header>
+        <ol className="svc-run-line">
+          {s.runs.steps.map((st, i) => (
+            <li key={st.title} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
+              <span className="svc-run-dot" aria-hidden />
+              <p className="svc-run-when mono">{st.when}</p>
+              <h3 className="svc-run-t">{st.title}</h3>
+              <p className="svc-run-b">{st.body}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="svc-runs-more" data-rv>
+          <a className="text-link" href={PAGES.methodology}>
+            The whole method, stage by stage <span aria-hidden>→</span>
+          </a>
+        </p>
+      </section>
+
+      <section className="sp-block split" aria-labelledby="built-h">
+        <header className="split-head">
+          <Kicker>How it’s built</Kicker>
+          <h2 id="built-h" className="sp-h2" data-rv>
+            Made to last, and to leave.
+          </h2>
+          <p className="sp-lede" data-rv>
+            Built so it keeps working after we hand it over, and so you could take it to anyone.
+          </p>
+        </header>
+        <ol className="flow">
+          {s.built.map((it, i) => (
             <li key={it.title} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
               <span className="flow-n mono">{String(i + 1).padStart(2, "0")}</span>
               <h3 className="item-t">{it.title}</h3>
@@ -203,27 +289,63 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </ul>
       </section>
 
-      {s.work.map((slug) => project(slug)).filter(Boolean).map((p) => (
-        <section key={p!.slug} className="sp-block" aria-labelledby={`work-${p!.slug}`}>
+      <section className="sp-block svc-work" aria-labelledby="work-h">
+        <header className="split-head bl-related-head">
           <Kicker>See it working</Kicker>
-          <a className="wk-card cs-feature" href={PAGES.project(p!.slug)} data-rv>
-            <span className="wk-img">
-              {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
-              <img src={p!.cover} alt="" width={2400} height={1500} loading="lazy" decoding="async" />
-            </span>
-            <span className="wk-kind">
-              <b>{p!.client}</b>
-              <span>{p!.kind === "demo" ? "Studio demonstration" : "Client project"}</span>
-            </span>
-            <h2 id={`work-${p!.slug}`} className="wk-title">
-              <WorkTitle text={p!.title} />
-            </h2>
-            <span className="svc-go">
-              Open the case study <span aria-hidden>→</span>
-            </span>
-          </a>
-        </section>
-      ))}
+          <h2 id="work-h" className="sp-h2" data-rv>
+            {work.length > 1 ? "Click through the work." : "Click through it."}
+          </h2>
+          <p className="split-more" data-rv>
+            <a className="text-link" href={PAGES.work}>
+              All the work <span aria-hidden>→</span>
+            </a>
+          </p>
+        </header>
+        <div className="svc-work-grid" data-n={work.length}>
+          {work.map((p, i) => (
+            <a key={p.slug} className="wk-card svc-work-card" href={PAGES.project(p.slug)} data-rv style={{ transitionDelay: `${(i % 3) * 80}ms` }}>
+              <span className="wk-img">
+                {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
+                <img src={p.cover} alt="" width={2400} height={1500} loading="lazy" decoding="async" />
+              </span>
+              <span className="wk-kind">
+                <b>{p.client}</b>
+                <span>{KIND_LABEL[p.kind]}</span>
+              </span>
+              <span className="wk-title">
+                <WorkTitle text={p.title} />
+              </span>
+              <span className="svc-go">
+                Open the case study <span aria-hidden>→</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section className="sp-block own" aria-labelledby="care-h">
+        <div className="own-head">
+          <Kicker>After launch</Kicker>
+          <h2 id="care-h" className="sp-h2" data-rv>
+            Looked after, if you want it.
+          </h2>
+          <p className="sp-lede" data-rv>
+            As much or as little as you choose, for as long as you choose. Everything stays in your name either way.
+          </p>
+        </div>
+        <ul className="own-list own-list-s" data-rv>
+          {s.care.map((c) => (
+            <li key={c}>
+              <span className="own-tick" aria-hidden>
+                <svg viewBox="0 0 24 24">
+                  <path d="M5 12.5l4.4 4.3L19 7.5" />
+                </svg>
+              </span>
+              {c}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="sp-block split" aria-labelledby="faq-h">
         <header className="split-head">

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Cheddar and chive scroll with melted cheese on top">
+  <defs>
+    <radialGradient id="dough" cx="36%" cy="26%" r="92%">
+      <stop offset="0" stop-color="#FFD98F"/>
+      <stop offset=".55" stop-color="#E9A03A"/>
+      <stop offset="1" stop-color="#B26618"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <ellipse cx="200" cy="320" rx="128" ry="24" fill="#5A3315" opacity=".16" filter="url(#soft)"/>
+  <circle cx="200" cy="220" r="94" fill="url(#dough)"/>
+  <g fill="none" stroke="#9C5D16" stroke-width="7" opacity=".5" stroke-linecap="round">
+    <path d="M266,216 a66,66 0 1,1 -132,0 a52,52 0 1,1 104,0 a38,38 0 1,1 -76,0 a24,24 0 1,1 48,0"/>
+  </g>
+  <path d="M128,186 C142,142 186,118 234,126 C276,134 300,164 302,196 C280,178 246,164 210,168 C176,172 148,178 128,186 Z" fill="#F6C05C" stroke="#D9972E" stroke-width="3"/>
+  <path d="M132,192 C160,180 200,172 240,178 C266,182 286,192 298,200 C282,208 252,210 224,204 C188,196 154,194 132,192 Z" fill="#F2B84B"/>
+  <path d="M160,206 C158,222 160,236 166,248" stroke="#E9A03A" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M238,208 C240,222 238,234 232,244" stroke="#E9A03A" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <g fill="#55703F">
+    <rect x="150" y="168" width="14" height="4.6" rx="2.3" transform="rotate(-16 157 170)"/>
+    <rect x="186" y="152" width="14" height="4.6" rx="2.3" transform="rotate(8 193 154)"/>
+    <rect x="222" y="158" width="14" height="4.6" rx="2.3" transform="rotate(-12 229 160)"/>
+    <rect x="254" y="176" width="14" height="4.6" rx="2.3" transform="rotate(16 261 178)"/>
+    <rect x="176" y="186" width="14" height="4.6" rx="2.3" transform="rotate(-6 183 188)"/>
+    <rect x="212" y="190" width="14" height="4.6" rx="2.3" transform="rotate(10 219 192)"/>
+    <rect x="246" y="196" width="14" height="4.6" rx="2.3" transform="rotate(-14 253 198)"/>
+  </g>
+  <g fill="#7FA35C">
+    <rect x="166" y="174" width="10" height="3.6" rx="1.8" transform="rotate(20 171 176)"/>
+    <rect x="232" y="172" width="10" height="3.6" rx="1.8" transform="rotate(-18 237 174)"/>
+    <rect x="200" y="164" width="10" height="3.6" rx="1.8" transform="rotate(6 205 166)"/>
+  </g>
+  <path d="M150,150 C186,126 244,128 272,154" stroke="#FFEBBE" stroke-width="12" fill="none" stroke-linecap="round" opacity=".5" filter="url(#soft)"/>
+  <g fill="#FFFDF4" opacity=".45">
+    <circle cx="172" cy="148" r="2.4"/><circle cx="238" cy="144" r="2.4"/><circle cx="286" cy="186" r="2.2"/>
+    <circle cx="128" cy="238" r="2.4"/><circle cx="206" cy="292" r="2.4"/>
+  </g>
+</svg>

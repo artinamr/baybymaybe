@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Fruit danish with custard centre, pear slices and blackberries">
+  <defs>
+    <radialGradient id="dough" cx="38%" cy="28%" r="90%">
+      <stop offset="0" stop-color="#FFDD9C"/>
+      <stop offset=".55" stop-color="#EDAA4C"/>
+      <stop offset="1" stop-color="#B76F1E"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <ellipse cx="200" cy="318" rx="128" ry="24" fill="#5A3315" opacity=".16" filter="url(#soft)"/>
+  <circle cx="200" cy="216" r="94" fill="#D99A34"/>
+  <g fill="url(#dough)">
+    <circle cx="200" cy="130" r="34"/><circle cx="258" cy="148" r="34"/><circle cx="282" cy="206" r="34"/>
+    <circle cx="262" cy="266" r="34"/><circle cx="200" cy="288" r="34"/><circle cx="138" cy="266" r="34"/>
+    <circle cx="118" cy="206" r="34"/><circle cx="142" cy="148" r="34"/>
+  </g>
+  <circle cx="200" cy="216" r="70" fill="#F4CD84"/>
+  <circle cx="200" cy="212" r="60" fill="#F8DFAE"/>
+  <g stroke="#C9AE5C" stroke-width="2.4" fill="#EFDCA0">
+    <path d="M172,190 C182,160 214,152 234,168 C222,192 196,202 172,190 Z"/>
+    <path d="M226,186 C238,160 224,138 202,136 C198,160 208,182 226,186 Z"/>
+    <path d="M182,232 C158,224 148,200 158,182 C180,190 192,212 182,232 Z"/>
+  </g>
+  <g>
+    <g fill="#4A3552">
+      <circle cx="240" cy="222" r="7"/><circle cx="252" cy="230" r="7"/><circle cx="238" cy="238" r="7"/>
+      <circle cx="250" cy="244" r="7"/><circle cx="238" cy="252" r="7"/><circle cx="252" cy="212" r="6"/>
+    </g>
+    <g fill="#7A5E8A">
+      <circle cx="238" cy="220" r="2.2"/><circle cx="250" cy="228" r="2.2"/><circle cx="236" cy="250" r="2.2"/>
+    </g>
+    <g fill="#4A3552">
+      <circle cx="164" cy="212" r="6"/><circle cx="156" cy="222" r="6"/><circle cx="168" cy="226" r="6"/><circle cx="158" cy="234" r="6"/>
+    </g>
+    <circle cx="162" cy="216" r="1.8" fill="#7A5E8A"/>
+  </g>
+  <path d="M226,180 C238,176 250,178 256,186" stroke="#55703F" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M256,182 C264,172 274,170 280,174" stroke="#55703F" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="188" cy="188" rx="10" ry="5" fill="#FFFFFF" opacity=".35" transform="rotate(-24 188 188)"/>
+  <g fill="#FFFDF4" opacity=".55">
+    <circle cx="200" cy="128" r="2.6"/><circle cx="262" cy="150" r="2.4"/><circle cx="284" cy="208" r="2.6"/>
+    <circle cx="136" cy="150" r="2.4"/><circle cx="116" cy="208" r="2.6"/><circle cx="200" cy="290" r="2.4"/>
+  </g>
+</svg>

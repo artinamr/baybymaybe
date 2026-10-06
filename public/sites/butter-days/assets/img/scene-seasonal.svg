@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" role="img" aria-label="A pear, an almond slice tart on a plate and a brown-butter pastry, styled with scattered leaves and handwritten-feel marks">
+  <defs>
+    <radialGradient id="pearG" cx="34%" cy="26%" r="95%">
+      <stop offset="0" stop-color="#E9D63C"/><stop offset=".55" stop-color="#C9B62B"/><stop offset="1" stop-color="#967F1B"/>
+    </radialGradient>
+    <radialGradient id="tartG" cx="38%" cy="28%" r="90%">
+      <stop offset="0" stop-color="#FFDD9C"/><stop offset=".55" stop-color="#EDAA4C"/><stop offset="1" stop-color="#B76F1E"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8"/></filter>
+    <clipPath id="pearClip"><path d="M0,0 H900 V700 H0 Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#pearClip)">
+    <rect width="900" height="700" fill="#FBF3E7"/>
+    <circle cx="212" cy="150" r="148" fill="#F6CD5A" opacity=".4"/>
+    <path d="M0,470 C300,440 620,470 900,448 V700 H0 Z" fill="#EFE3CD"/>
+    <path d="M0,486 C300,458 620,486 900,464" stroke="#DFCFB2" stroke-width="3" fill="none"/>
+    <ellipse cx="470" cy="600" rx="380" ry="42" fill="#9C7B54" opacity=".22" filter="url(#soft)"/>
+    <g>
+      <ellipse cx="700" cy="580" rx="180" ry="30" fill="#4A2A10" opacity=".18" filter="url(#soft)"/>
+      <ellipse cx="700" cy="560" rx="176" ry="34" fill="#FBF6EC"/>
+      <ellipse cx="700" cy="552" rx="176" ry="34" fill="#FFFDF8"/>
+      <ellipse cx="700" cy="552" rx="120" ry="22" fill="#DCEBE0"/>
+      <g>
+        <path d="M668,556 C656,536 660,516 676,508 C684,486 716,486 724,508 C740,516 744,536 732,556 C724,570 676,570 668,556 Z" fill="url(#tartG)"/>
+        <path d="M676,542 C690,554 710,554 724,542" stroke="#EFC27E" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <path d="M684,516 C696,508 704,508 716,516" stroke="#8A4A12" stroke-width="4" fill="none" stroke-linecap="round" opacity=".4"/>
+        <ellipse cx="700" cy="522" rx="14" ry="8" fill="#F6D9A4"/>
+      </g>
+      <path d="M756,548 C762,540 774,540 780,548 C786,556 778,566 768,566 C758,566 750,556 756,548 Z" fill="#4A3552"/>
+      <circle cx="766" cy="554" r="1.8" fill="#7A5E8A"/>
+    </g>
+    <g>
+      <ellipse cx="356" cy="562" rx="128" ry="26" fill="#4A2A10" opacity=".2" filter="url(#soft)"/>
+      <path d="M300,470 C292,420 314,378 348,362 C340,330 372,300 400,314 C436,262 512,286 508,352 C506,382 488,406 464,414 C482,444 474,488 442,514 C404,546 328,532 300,470 Z" fill="url(#pearG)"/>
+      <path d="M398,320 C392,352 392,420 400,470" stroke="#A08A16" stroke-width="5" fill="none" stroke-linecap="round" opacity=".45"/>
+      <path d="M352,372 C346,400 348,440 360,470" stroke="#A08A16" stroke-width="4" fill="none" stroke-linecap="round" opacity=".35"/>
+      <path d="M452,376 C458,404 454,444 442,472" stroke="#A08A16" stroke-width="4" fill="none" stroke-linecap="round" opacity=".35"/>
+      <ellipse cx="372" cy="368" rx="14" ry="26" fill="#F4EA7E" opacity=".65" transform="rotate(-18 372 368)"/>
+      <path d="M400,314 C398,296 404,282 418,274" stroke="#7A6414" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M418,274 C438,258 466,262 474,282 C452,296 428,292 418,274 Z" fill="#6F8451"/>
+      <path d="M424,278 C438,270 454,272 464,282" stroke="#596B3E" stroke-width="3" fill="none"/>
+      <g fill="#B08D1E" opacity=".6">
+        <circle cx="344" cy="430" r="3"/><circle cx="470" cy="430" r="3"/><circle cx="384" cy="500" r="2.6"/><circle cx="438" cy="494" r="2.6"/>
+      </g>
+    </g>
+    <g fill="none" stroke="#8A6A2E" stroke-width="3.4" stroke-linecap="round">
+      <path d="M118,356 C130,342 148,338 160,344"/>
+      <path d="M596,238 C604,226 620,222 630,226"/>
+      <path d="M786,420 C796,410 810,408 818,412"/>
+    </g>
+    <g fill="#6F8451">
+      <path d="M132,388 C124,368 134,352 152,350 C152,368 144,382 132,388 Z"/>
+      <path d="M778,388 C786,372 800,368 812,372 C808,388 794,396 778,388 Z" opacity=".9"/>
+    </g>
+    <path d="M96,180 C96,164 116,158 122,170 C126,158 148,160 148,176 C148,190 122,200 122,200 C122,200 96,192 96,180 Z" fill="none" stroke="#B0453B" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M612,120 l6,14 14,6 -14,6 -6,14 -6,-14 -14,-6 14,-6 Z" fill="#F6CD5A"/>
+  </g>
+</svg>

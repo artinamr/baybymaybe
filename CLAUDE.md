@@ -32,8 +32,8 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
 - **Home = the film's five scenes with the page's plain sections between
   them** (`lib/chapters.ts`): potential (hero) · statement · build ("What we
   build" — what each discipline delivers, and a quiet "Explore … →" to its
-  service page) · **work** (page: selected work, three working studio
-  demonstrations) · why (+ "How we're set up →" to /studio/) · **process**
+  service page) · **work** (page: selected work, the three concept
+  websites, round 21) · why (+ "How we're set up →" to /studio/) · **process**
   (page: how we work — the methodology's five stages on one line, one sheet)
   · audit ("Let's talk." + the audit FORM) · then the **site footer** (the
   page's last sheet: a closing line, the address, every link, the name signed
@@ -352,6 +352,69 @@ and on the blogs and make sure the blog md also stays super images").**
   search each, the bar (modern, premium, obviously related, clean at 100%,
   no clichés, once, together), checking and recording, the files and grade.
 
+**ROUND 21 (2026-10-06 — "three test [sites] … put them in the website …
+complete the works pages, services pages … a page for each explaining it
+fully … make the home page and methodology page much better … smoother,
+nicer, better performance … the transitions … the thing moves from the
+bottom of the stack to the top, like a DNA strand … make them a bit nicer").**
+- **THE CONCEPT WEBSITES.** Three complete static sites the client made for
+  fictional businesses (Butter Days, a Kelburn bakery; Blackridge, an
+  architecture studio; Outbound, an adventure company) are SERVED as they are
+  from `public/sites/<slug>/` (import: `tools/showcase/import.py` from the
+  client's Downloads folders; it drops tools/work/backups/raw photos, unused
+  images, recompresses oversized photos, marks every page `noindex`, drops
+  canonical/robots/sitemap, and rewrites the few visible em dashes and spaced
+  en dashes so copy-guard passes; never hand-edit public/sites, re-run the
+  import). ESLint ignores public/sites. ~70 MB in the repo.
+- **Work registry**: `kind: "site" | "demo" | "client"` with `KIND_LABEL`
+  ("Concept website", "Studio demonstration"); the sites' copy, pages,
+  features, phones, palette, type, measured facts and checked craft live in
+  `content/sites.ts` (`SiteBuild`). `WORK_ITEMS` = the three sites, then the
+  demos; `HOME_WORK` = the three sites (home sheet); `FEATURED` = one per
+  discipline (services index).
+- **The concept website's case study** (`components/work/SiteStudy.tsx`,
+  styles in the route sheet `app/work/work.css` via `app/work/layout.tsx`):
+  the site LIVE in a browser frame (`LiveSite`: a poster until "Try the live
+  site here" swaps in an iframe; the phone view on small screens; "Open in a
+  new tab" always), the brief and the site's three jobs, every page (first
+  screens linking into the live site), the decisions, "the parts that do a
+  job" (features in use, alternating), phones, the look (palette chips,
+  typefaces), "Measured, not claimed" (figures measured on the hosted copy on
+  2026-10-06; Blackridge: 0 axe failures on all 13 pages, 0 third-party
+  requests), scope, what's real and what isn't (fictional; Unsplash-licensed
+  stock photos; Outbound's few low-contrast labels admitted).
+- **Pictures**: `tools/showcase/shots.mjs` (real interactions: a filled
+  pastry box, the planner at 45 guests, the study's three states, the
+  matcher answered, the map on a route, a print-stylesheet capture) →
+  `tools/showcase/webp.py` (covers in the same browser frame as the demos',
+  a phone-frame tall cover, page thumbnails, phone views, feature images
+  with half-size copies) → `public/work/<slug>/` and `public/work/<slug>.webp`.
+- **Services, explained fully**: each service page adds "Everything that's
+  included" (`includes`, five groups + a dark "Yours, all of it" card), "How
+  it runs" (`runs`, five steps on a line; days for websites), "How it's
+  built" (`built`), the work as a grid (websites: the three sites + Tarn &
+  Wick), "After launch" (`care`), six questions each.
+- **Methodology**: the stage strip became THE PLAN (`app/methodology/Plan.tsx`):
+  a typical website's fourteen days as bars (Discover 1–2, Define 3, Design
+  3–6, Build 7–11, Launch 12–14) with the decisions pinned beneath (sign the
+  scope day 3, approve the prototype day 6, try it day 11, live day 14);
+  each stage now shows what you receive, drawn as the thing itself
+  (`Artefact.tsx`: the audit, the scope with a signature line, the
+  prototype, the review checklist, the keys "in your name").
+- **The film, framed and faster** (recorded in motion before and after):
+  the AI's camera now looks down the well from ABOVE the whole stair (its
+  aim following the core halfway, dist 29–35) instead of riding just over
+  the core, where the steps above filled the lens; the stone climbs into a
+  slightly wider frame (exploded view and first steps no longer touch the
+  frame's edges); the gather is drawn back (dist 58–66) so the stair is seen
+  winding into the open colossus; the camera LEAVES the colossus before it
+  closes (`CLOSE` 8.68–9.26, keys 8.86/9.08/9.3 at 32/47/49), so it is seen
+  whole as it seals; the lens fades to nothing for the finale (the hero's
+  crisp look, and its cost); the core is 1.2× in the well. GPU per frame at
+  1.5× (median): AI 6.2 → 3.8 ms, inside the colossus 9.5 → 7.1, the close
+  13.3 → 6.9, the finale 6.0 → 1.6. 4× → 2× MSAA on the lens target was
+  tried: no reliable gain, dropped.
+
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
 One polished obsidian stone, shaped from the Nerodyn mark, fractured into 40
@@ -374,9 +437,9 @@ nothing too visible". No cuts, no white-outs:
 | 2.85–3.9 | WEBSITES: F4 EXPLODED VIEW — loose, then snapping EXACT per piece from the heart out, a white glint as each locks; held, it sways on its own (a turntable, never a still) |
 | 3.9–4.84 | PLATFORMS: F2 THE STAIR — the exploded stone lifts off its heart (the core drops to the floor) and CLIMBS, turning like a drill, laying a splinter as each step as it passes that step's height (`plan.front`): 39 treads (every shard but the girdle plate), all the same length, rise and turn, round an open well, ordered by where each will seat in the colossus; the camera rises with it; each tread glints as it seats, and a glint runs up the stair when the last is laid ("builds up into a bigger one") |
 | 4.84–5.0 | the camera cranes up over the top and looks DOWN the whole spiral to the light at its foot (a far side view read as a line of chips) |
-| 4.97–5.92 | AI AUTOMATION: F2 at `plan.ai` — the core climbs the well; every step it passes turns a quarter on its own length (tread → blade, `easeLock`, a glint) and swings 30° on — the stair becomes a turbine and keeps running (the Director's time-integrated `turbine`). The camera climbs OVER it and looks DOWN (el 44–66°): a vortex of blades, the light rising through it |
+| 4.97–5.92 | AI AUTOMATION: F2 at `plan.ai` — the core climbs the well; every step it passes turns a quarter on its own length (tread → blade, `easeLock`, a glint) and swings 30° on — the stair becomes a turbine and keeps running (the Director's time-integrated `turbine`). The camera looks DOWN the well from above the whole stair (el 56–63°, round 21), its aim following the core halfway: a vortex of blades, the light rising toward the lens |
 | 5.98–7.34 | THE GATHER: F2 → F7 — the core drops back down the well and the stair winds itself (`plan.swirl` 1.5) into the OPEN colossus, point first, growing ×3; the camera draws right back at once so the whole stair is seen winding in, then circles down |
-| 7.05–9.3 | WHY: F7 — the open colossus (a wide hollow round the core, the glass toward the camera standing aside); the camera flies in and round the core, and out as it closes, the crown seating last |
+| 7.05–9.3 | WHY: F7 — the open colossus (a wide hollow round the core, the glass toward the camera standing aside); the camera flies in and round the core, and out BEFORE it closes (round 21), so the closing is seen whole, the crown seating last |
 | 9.3– | LET'S TALK: down at the floor's own level, the colossus and its reflection; "Let's talk." stands on the horizon |
 
 Rest frames (auto-framing, `lib/scroll.ts`, FILM time): 0 · 1.62 · 3.72 · 4.9 · 5.45 · 5.94 · 7.62 · 8.2 · 9.3 · 10.75 · 11.5 — the film holds at 5.94 under Work and at 9.3 under How we work.
@@ -792,9 +855,12 @@ way relative to each other.
 
 ## Still owed by the client
 
-Three real projects for Selected work (the current projects are labelled studio
-demonstrations — name, permission, what changed, real screenshots and measured
-results if available; `content/work.ts`), a
+Real client projects for Selected work (the work today is three concept
+websites and three studio demonstrations, all fictional businesses and
+labelled so — a client project needs its name, permission, what changed, real
+screenshots and measured results if available; `content/work.ts`), a decision
+on Outbound's and Butter Days' few low-contrast labels (flagged by axe; their
+own sites, so not changed here), a
 testimonial or two if they have them, ONE activation of the form (the first
 submission makes FormSubmit email an "Activate Form" link to
 artin@nerodyn.com — until it is clicked, submissions wait), the social links

@@ -1,17 +1,56 @@
 /**
- * THE WORK — one record per project, rendered by /work, /work/[slug] and the
- * home page's work section. For now all three are STUDIO DEMONSTRATIONS:
- * fictional businesses, built to show how we would present and build real
- * work — no invented clients, testimonials or results (CLAUDE.md). A real
- * client project takes the same shape with `kind: "client"` and `results`.
+ * THE WORK — one record per project, rendered by /work, /work/[slug], the
+ * home page's work section and the service pages. Two kinds so far, both
+ * fictional businesses and labelled so (no invented clients, testimonials or
+ * results, CLAUDE.md):
+ *   - CONCEPT WEBSITES (`kind: "site"`, content/sites.ts): complete websites
+ *     the studio designed and built, served as they are from public/sites/
+ *     (tools/showcase/import.py) and pictured by tools/showcase/;
+ *   - STUDIO DEMONSTRATIONS (`kind: "demo"`, below): working pieces of a
+ *     platform, an automation and a website, running inside their case study.
+ * A real client project takes the same shape with `kind: "client"`, its
+ * measured results in `limits`' place.
  */
 import type { Item, Service } from "./services";
+import { SITE_PROJECTS } from "./sites";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
+/** A picture of a site: its file, its half-size copy for small screens, its size and what it shows. */
+export type Shot = { src: string; half?: string; w: number; h: number; alt: string; label?: string };
+
+/** A concept website: the site itself (hosted with this one) and how it was built. */
+export type SiteBuild = {
+  /** Where the site is served (public/sites/<slug>/), ending in a slash. */
+  live: string;
+  /** What the business is, and where (both fictional). */
+  sector: string;
+  place: string;
+  /** The first screen: the poster before the live site loads. */
+  home: Shot;
+  /** What the website had to do for the business. */
+  jobs: string[];
+  /** Every main page: its name, its file under `live`, what it is for, its first screen. */
+  pages: { name: string; path: string; what: string; shot: string }[];
+  /** How many pages in all (the grid may show fewer). */
+  pageCount: number;
+  /** The features, in use: one or more pictures each, what to notice, and the page to try it on. */
+  features: { title: string; body: string; shots: Shot[]; notes: string[]; path: string; tall?: boolean }[];
+  /** Phone views, captioned. */
+  phones: (Shot & { caption: string })[];
+  palette: { name: string; hex: string; role: string }[];
+  type: { name: string; role: string }[];
+  /** Measured (tools/showcase, 2026-10-06): a figure and what it counts. */
+  facts: { value: string; label: string }[];
+  /** The details that make it work for everyone, each checked in the site's code. */
+  craft: string[];
+  /** Where its photographs come from. */
+  photos: string;
+};
+
 export type Project = {
   slug: string;
-  kind: "demo" | "client";
+  kind: "demo" | "site" | "client";
   /** The (here fictional) business. */
   client: string;
   title: string;
@@ -25,14 +64,24 @@ export type Project = {
   coverTall?: string;
   coverAlt: string;
   context: { lede: string; audience: string };
+  /** A demonstration: the proposed scope for a live version. A concept website: what was built. */
   scope: string[];
   approach: Item[];
   /** What a demonstration shows (a client project would carry measured results instead). */
   demonstrates: string[];
   limits: string[];
+  /** A concept website's own material. */
+  site?: SiteBuild;
 };
 
-export const WORK_ITEMS: Project[] = [
+/** How a project is labelled wherever it appears. */
+export const KIND_LABEL: Record<Project["kind"], string> = {
+  site: "Concept website",
+  demo: "Studio demonstration",
+  client: "Client project",
+};
+
+const DEMOS: Project[] = [
   {
     slug: "practice-website",
     kind: "demo",
@@ -200,4 +249,17 @@ export const WORK_ITEMS: Project[] = [
   },
 ];
 
+/** Every project, in the order the work page shows them: the concept websites first. */
+export const WORK_ITEMS: Project[] = [...SITE_PROJECTS, DEMOS[1], DEMOS[2], DEMOS[0]];
+
 export const project = (slug: string) => WORK_ITEMS.find((p) => p.slug === slug);
+
+/** The home page's selected work: the three concept websites (the middle one tall, its phone view). */
+export const HOME_WORK = ["butter-days", "blackridge", "outbound"].map((s) => project(s)!);
+
+/** One project per discipline, for the services page. */
+export const FEATURED: Record<Service["slug"], string> = {
+  websites: "butter-days",
+  platforms: "operations-portal",
+  "ai-automation": "enquiry-desk",
+};

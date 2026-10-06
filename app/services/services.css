@@ -379,3 +379,221 @@
     font-size: 19px;
   }
 }
+
+/* ==========================================================================
+   A SERVICE IN FULL (round 21): the specification, how it runs, the work.
+   ========================================================================== */
+
+/* A section's head across the page. */
+.svc-sec-head {
+  display: grid;
+  gap: 22px;
+  max-width: 780px;
+  margin-bottom: calc(var(--vh) * 7);
+}
+.svc-sec-head .sp-kicker {
+  margin: 0;
+}
+
+/* Everything that's included: one card per group, and one for what is yours. */
+.svc-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.svc-spec-card {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 26px 26px 22px;
+  border: 1px solid var(--hair);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--paper) 70%, #fff);
+}
+.svc-spec-n {
+  margin: 0 0 12px;
+  font-size: 11px;
+  color: var(--indigo);
+}
+.svc-spec-t {
+  margin: 0 0 14px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+.svc-spec-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.svc-spec-card li {
+  position: relative;
+  padding: 10px 0 10px 26px;
+  border-top: 1px solid var(--hair-soft);
+  font-size: 15px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 80%, transparent);
+}
+.svc-spec-card li::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 15px;
+  width: 11px;
+  height: 6px;
+  border-left: 1.6px solid var(--indigo);
+  border-bottom: 1.6px solid var(--indigo);
+  transform: rotate(-45deg);
+}
+.svc-spec-own {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.svc-spec-own .svc-spec-n {
+  color: color-mix(in oklab, var(--paper) 70%, transparent);
+}
+.svc-spec-own .svc-spec-t {
+  font-size: min(3vw, 38px);
+  letter-spacing: -0.03em;
+}
+.svc-spec-own-line {
+  margin: 0 0 22px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: color-mix(in oklab, var(--paper) 78%, transparent);
+}
+.svc-spec-own .text-link {
+  justify-self: start;
+  color: var(--paper);
+}
+
+/* How it runs: five steps on one line. */
+.svc-run-line {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 28px;
+}
+.svc-run-line::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 0;
+  top: 6px;
+  height: 1px;
+  background: linear-gradient(to right, var(--indigo), color-mix(in oklab, var(--indigo) 18%, transparent));
+}
+.svc-run-line li {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding-top: 34px;
+}
+.svc-run-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--indigo);
+}
+.svc-run-line li:first-child .svc-run-dot {
+  background: var(--indigo);
+}
+.svc-run-when {
+  margin: 0;
+  font-size: 11px;
+  color: var(--indigo);
+}
+.svc-run-t {
+  margin: 4px 0 4px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.015em;
+}
+.svc-run-b {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.svc-runs-more {
+  margin: calc(var(--vh) * 6) 0 0;
+}
+
+/* See it working: the first large, the rest three to a row. */
+.svc-work-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 56px 26px;
+  margin-top: 36px;
+}
+.svc-work-card {
+  color: inherit;
+}
+.svc-work-card:first-child {
+  grid-column: 1 / -1;
+}
+.svc-work-card:first-child .wk-img {
+  aspect-ratio: 21 / 9;
+}
+.svc-work-card .wk-title {
+  font-size: min(2.1vw, 28px);
+}
+.svc-work-card:first-child .wk-title {
+  font-size: min(3.2vw, 44px);
+}
+.svc-work-card .svc-go {
+  justify-self: start;
+}
+
+@media (max-width: 1000px) {
+  .svc-spec-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .svc-run-line {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .svc-run-line::before {
+    left: 6px;
+    right: auto;
+    top: 6px;
+    bottom: 0;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(to bottom, var(--indigo), color-mix(in oklab, var(--indigo) 18%, transparent));
+  }
+  .svc-run-line li {
+    padding: 0 0 30px 36px;
+  }
+  .svc-work-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+  .svc-work-card .wk-title,
+  .svc-work-card:first-child .wk-title {
+    font-size: 7vw;
+  }
+  .svc-work-card:first-child .wk-img {
+    aspect-ratio: 16 / 10;
+  }
+}
+@media (max-width: 640px) {
+  .svc-spec-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .svc-spec-own .svc-spec-t {
+    font-size: 30px;
+  }
+}

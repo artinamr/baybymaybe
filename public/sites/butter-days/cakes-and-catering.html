@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+  <!-- chrome:head:start -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cakes and Catering | Butter Days Bakery, Wellington</title>
+  <meta name="description" content="Celebration cakes, dessert tables and catering boxes from Butter Days Wellington. Example styles, serving-size guidance and an enquiry form. Demo website.">
+
+  <meta name="theme-color" content="#FBF3E7">
+  <meta name="color-scheme" content="light">
+  <meta name="author" content="NERODYN">
+  <meta name="robots" content="noindex, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Butter Days">
+  <meta property="og:locale" content="en_NZ">
+  <meta property="og:title" content="Cakes and Catering | Butter Days Bakery, Wellington">
+  <meta property="og:description" content="Celebration cakes, dessert tables and catering boxes from Butter Days Wellington. Example styles, serving-size guidance and an enquiry form. Demo website.">
+  <meta property="og:url" content="https://butterdays.example/cakes-and-catering.html">
+  <meta property="og:image" content="assets/img/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Butter Days, an independent bakery and cafe in Kelburn, Wellington">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cakes and Catering | Butter Days Bakery, Wellington">
+  <meta name="twitter:description" content="Celebration cakes, dessert tables and catering boxes from Butter Days Wellington. Example styles, serving-size guidance and an enquiry form. Demo website.">
+  <meta name="twitter:image" content="assets/img/og-card.png">
+
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,600;1,9..144,900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,600;1,9..144,900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&display=swap">
+  <link rel="stylesheet" href="css/styles.css?v=54d9274a">
+  <script src="js/main.js?v=9862b1be" defer></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Bakery",
+    "@id": "https://butterdays.example/#bakery",
+    "name": "Butter Days",
+    "description": "An independent bakery and cafe in Kelburn, Wellington, making hand-laminated pastries, naturally leavened bread, seasonal cakes and carefully made coffee.",
+    "url": "https://butterdays.example/",
+    "telephone": "+64-4-555-0119",
+    "email": "hello@butterdays.nz",
+    "priceRange": "$$",
+    "currenciesAccepted": "NZD",
+    "image": "https://butterdays.example/assets/img/og-card.png",
+    "logo": "https://butterdays.example/assets/img/favicon.svg",
+    "slogan": "Made with care. Shared with pleasure.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "14 Marion Lane",
+      "addressLocality": "Kelburn",
+      "addressRegion": "Wellington",
+      "postalCode": "6012",
+      "addressCountry": "NZ"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -41.2915,
+      "longitude": 174.7779
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opens": "07:00",
+        "closes": "15:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Saturday",
+          "Sunday"
+        ],
+        "opens": "08:00",
+        "closes": "13:00"
+      }
+    ],
+    "servesCuisine": [
+      "Bakery",
+      "Cafe",
+      "Patisserie"
+    ],
+    "hasMenu": "https://butterdays.example/menu.html"
+  }
+  </script>
+  <!-- chrome:head:end -->
+  <script src="js/motion.js?v=2b44b445" defer></script>
+  <script src="js/cake-planner.js?v=f08d069b" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+  <!-- chrome:header:start -->
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" focusable="false" aria-hidden="true">
+          <circle cx="32" cy="32" r="30" fill="var(--butter)"/>
+          <path d="M13,39 C12,34 15.5,31 19.5,32 C21.5,26.5 27.5,24.5 30.5,27.5 C33,24.5 39,24.5 41.5,27.5 C44.5,24.5 50.5,26.5 52.5,32 C56.5,31 60,34 59,39 C57.8,45 48,49.5 36,49.5 C24,49.5 14.2,45 13,39 Z" fill="var(--ink)"/>
+          <path d="M30.5,28.5 C29,32 29,38 30.5,42" stroke="var(--butter)" stroke-width="1.6" fill="none" opacity=".7"/>
+          <circle cx="22" cy="37" r="1.7" fill="var(--butter)" opacity=".55"/>
+          <circle cx="46" cy="37" r="1.7" fill="var(--butter)" opacity=".55"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-word">Butter Days</span>
+        <span class="brand-sub">Kelburn &middot; Wellington</span>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+      <span class="nav-toggle-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="nav-toggle-label">Menu</span>
+    </button>
+
+    <nav class="main-nav" id="primary-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html" data-nav="index.html">Home</a></li>
+        <li><a href="menu.html" data-nav="menu.html">Menu</a></li>
+        <li><a href="cakes-and-catering.html" data-nav="cakes-and-catering.html" aria-current="page">Cakes &amp; catering</a></li>
+        <li><a href="our-bakery.html" data-nav="our-bakery.html">Our bakery</a></li>
+        <li><a href="visit.html" data-nav="visit.html">Visit</a></li>
+        <li class="nav-cta"><a href="visit.html#contact-form">Say hello</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar"></span></div>
+  <!-- chrome:header:end -->
+  </header>
+
+  <main id="main">
+
+    <section class="page-hero cherry">
+      <div class="wrap">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <a href="index.html">Home</a> <span aria-hidden="true">&rarr;</span> <span aria-current="page">Cakes &amp; catering</span>
+        </nav>
+        <h1>The big-day <em>bakery</em></h1>
+        <p class="lede">Seasonal celebration cakes and thoughtfully prepared catering for weddings, birthdays and gatherings of every size. Each order is made with care in our Kelburn bakery.</p>
+      </div>
+    </section>
+
+    <svg class="scallop scallop-cream" viewBox="0 0 1440 26" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0,26 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 a60,26 0 0,1 120,0 Z" fill="currentColor"/></svg>
+
+    <!-- ===== STYLES ===== -->
+    <section class="section" aria-labelledby="styles-h">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Example cake styles</p>
+          <h2 id="styles-h">Celebration cake styles</h2>
+          <p class="lede">Every cake is planned with you. Explore a few of our favourite styles below. Sample prices are a guide, with final quotes based on size and design.</p>
+        </div>
+
+        <div class="style-cards">
+          <article class="style-card reveal" style="--reveal-delay:0ms">
+                        <img
+              src="assets/img/hero-cake.svg"
+              width="1200"
+              height="860"
+              loading="lazy"
+              decoding="async"
+              alt="A three-layer celebration cake with cherry-red buttercream, white drip and fresh cherries">
+            <div class="sc-body">
+              <h3>The Statement</h3>
+              <p>Tall layers of buttercream in seasonal colours, finished with fresh fruit or flowers.</p>
+              <span class="sc-from">From $185 &middot; serves 20&ndash;30</span>
+            </div>
+          </article>
+
+          <article class="style-card reveal" style="--reveal-delay:90ms">
+                        <img
+              src="assets/img/scene-cakes.svg"
+              width="900"
+              height="760"
+              loading="lazy"
+              decoding="async"
+              alt="A tall celebration cake with blush frosting and dried flowers on a pedestal stand, with a smaller lemon cake beside it">
+            <div class="sc-body">
+              <h3>The Wedding Quiet</h3>
+              <p>Two or three tiers with a soft buttercream finish and carefully arranged seasonal flowers.</p>
+              <span class="sc-from">From $320 &middot; serves 40&ndash;60</span>
+            </div>
+          </article>
+
+          <article class="style-card reveal" style="--reveal-delay:180ms">
+                        <img
+              src="assets/img/scene-seasonal.svg"
+              width="900"
+              height="700"
+              loading="lazy"
+              decoding="async"
+              alt="An almond slice tart on a plate with a pear and scattered leaves">
+            <div class="sc-body">
+              <h3>The Dessert Table</h3>
+              <p>A considered selection of tartlets, pastries and cakes, arranged for guests to enjoy throughout the event.</p>
+              <span class="sc-from">From $9 pp &middot; 20+ guests</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cake-planner-section" aria-labelledby="planner-h" data-cake-planner>
+      <div class="wrap cake-planner-grid">
+        <div class="cake-planner-copy">
+          <p class="eyebrow">A little celebration planning</p>
+          <h2 id="planner-h">Good cake.<br><em>Enough for everyone.</em></h2>
+          <p class="lede">Slide to your guest count and see how the celebration could take shape.</p>
+          <div class="cake-planner-controls">
+            <div class="planner-count-row"><label for="planner-guests">How many at the table?</label><output for="planner-guests" data-guest-count>25 guests</output></div>
+            <input type="range" id="planner-guests" min="10" max="120" step="1" value="25" aria-describedby="planner-range-hint">
+            <p class="hint" id="planner-range-hint">10 to 120 guests. Use the arrow keys to fine-tune.</p>
+            <label for="planner-portion">A slice for...</label>
+            <select id="planner-portion"><option value="finger">A little sweet bite</option><option value="dessert">Dessert after a meal</option></select>
+          </div>
+          <button class="btn btn-primary" type="button" data-cake-handoff>Use this in my enquiry <span aria-hidden="true">↗</span></button>
+          <p class="planner-note">Illustrative serving guidance. The final size and quote depend on the design and how you slice it.</p>
+        </div>
+        <div class="cake-planner-result">
+          <span class="planner-stamp" aria-hidden="true">Made for<br>your people</span>
+          <div class="planner-cake" data-cake-scale data-size="medium"><img src="assets/img/hero-cake.svg" width="1200" height="860" alt="" aria-hidden="true" loading="lazy"></div>
+          <div class="planner-caption" role="status" aria-live="polite" aria-atomic="true"><p class="eyebrow">Your suggested bake</p><h3 data-cake-title>The Statement</h3><p data-cake-detail>A tall 15cm celebration cake, cut into finger portions.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SERVING GUIDANCE ===== -->
+    <section class="section section-blush" aria-labelledby="serving-h">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">How much cake</p>
+          <h2 id="serving-h">Serving-size guidance</h2>
+          <p class="lede">Choose a serving size that suits your event. Finger portions suit standing occasions; dessert portions are designed to follow a meal.</p>
+        </div>
+
+        <div class="reveal" style="max-width:56rem">
+          <div class="table-scroll" tabindex="0" role="region" aria-labelledby="serving-h">
+            <table class="serving-table">
+              <caption>Suggested cake sizes by guest count. Scroll the table sideways on small screens to see every column.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Guests</th>
+                  <th scope="col">Suggested bake</th>
+                  <th scope="col">Finger portion</th>
+                  <th scope="col">Dessert portion</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>10 to 15</td><td>Single-tier celebration cake</td><td>15cm round</td><td>20cm round</td></tr>
+                <tr><td>20 to 30</td><td>Tall single tier (the Statement)</td><td>15cm round</td><td>20cm round + 12 cupcakes</td></tr>
+                <tr><td>30 to 45</td><td>Two-tier cake</td><td>20cm + 15cm</td><td>20cm + 15cm + tartlets</td></tr>
+                <tr><td>40 to 60</td><td>Two or three-tier (Wedding Quiet)</td><td>20cm + 15cm</td><td>Three tiers + dessert table</td></tr>
+                <tr><td>60 and over</td><td>Cake + full dessert table</td><td>Two tiers</td><td>Contact us to plan a larger celebration</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p style="margin-top:1rem;color:var(--ink-soft);font-size:var(--step--1)">Catering options include pastry boxes of six or twelve, sandwich platters on our bread and coffee urns. Please allow two days for most orders and a week for dessert tables.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ENQUIRY FORM ===== -->
+    <section class="section" id="enquiry" aria-labelledby="enquiry-h">
+      <div class="wrap contact-grid">
+        <div class="contact-info reveal-l">
+          <p class="eyebrow">The form</p>
+          <h2 id="enquiry-h">Tell us about the occasion</h2>
+          <p style="color:var(--ink-soft)">Share your occasion, guest count and flavour preferences. We would review your request and discuss design options with you.</p>
+
+          <div class="contact-block">
+            <h3>Where we bake</h3>
+            <p>14 Marion Lane, Kelburn, Wellington</p>
+          </div>
+          <div class="contact-block">
+            <h3>Prefer email?</h3>
+            <p><a href="mailto:hello@butterdays.nz">hello@butterdays.nz</a><br>Replies within two working days.</p>
+          </div>
+          <div class="contact-block">
+            <h3>Notice we need</h3>
+            <p>Cakes: two days or more. Dessert tables and catering: about a week.</p>
+          </div>
+        </div>
+
+        <form class="demo-form form-card reveal-r" id="cake-enquiry" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="ce-name">Name <span class="req" aria-hidden="true">*</span></label>
+              <input id="ce-name" name="name" type="text" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="ce-email">Email <span class="req" aria-hidden="true">*</span></label>
+              <input id="ce-email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label for="ce-occasion">Occasion <span class="req" aria-hidden="true">*</span></label>
+              <select id="ce-occasion" name="occasion" required>
+                <option value="">Choose one…</option>
+                <option>Birthday</option>
+                <option>Wedding or civil union</option>
+                <option>Work do or launch</option>
+                <option>Baby shower or naming day</option>
+                <option>Just Tuesday</option>
+                <option>Something else wonderful</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ce-date">Date <span class="req" aria-hidden="true">*</span></label>
+              <input id="ce-date" name="date" type="date" required>
+              <p class="hint">Two or more days&rsquo; notice for cakes, a week for catering.</p>
+            </div>
+            <div class="field">
+              <label for="ce-guests">Approximate guest count <span class="req" aria-hidden="true">*</span></label>
+              <input id="ce-guests" name="guests" type="number" min="1" max="500" step="1" inputmode="numeric" placeholder="e.g. 24" required>
+            </div>
+            <div class="field">
+              <label for="ce-budget">Budget guide (NZD)</label>
+              <select id="ce-budget" name="budget">
+                <option value="">No idea yet</option>
+                <option>Under $100</option>
+                <option>$100 to $250</option>
+                <option>$250 to $500</option>
+                <option>$500 and over</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="ce-notes">Flavour preferences and dietary requirements</label>
+              <textarea id="ce-notes" name="notes" rows="4" placeholder="The birthday person loves pear and hates raisins…"></textarea>
+            </div>
+          </div>
+
+          <div class="form-foot">
+            <button class="btn btn-primary" type="submit">Send enquiry</button>
+            <p class="form-demo-note">Demonstration form. Nothing is sent or stored, and no date is reserved.</p>
+          </div>
+
+          <img class="rolling-loader" src="assets/img/rolling-pin.svg" width="96" height="64" alt="" aria-hidden="true">
+          <div class="form-status" role="status" tabindex="-1"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section section-paper" aria-labelledby="faq-h">
+      <div class="wrap">
+        <div class="section-head center reveal">
+          <p class="eyebrow">Small print, softly</p>
+          <h2 id="faq-h">Frequently asked questions</h2>
+        </div>
+
+        <div class="faq reveal">
+          <details>
+            <summary>How far ahead should I book a wedding cake?</summary>
+            <p class="faq-body">For peak season, November to March, we recommend enquiring four to six weeks ahead. Winter dates may have more flexibility, so please get in touch if your date is approaching.</p>
+          </details>
+          <details>
+            <summary>Can you do gluten-free or dairy-free?</summary>
+            <p class="faq-body">Some recipes can be adapted, including our flourless orange and almond cake. Our kitchen also handles wheat and other allergens, so we will discuss ingredients and preparation with you before confirming an order.</p>
+          </details>
+          <details>
+            <summary>Do you deliver?</summary>
+            <p class="faq-body">Delivery may be available in Wellington&rsquo;s inner suburbs for an additional fee. Collection from our Kelburn bakery is complimentary.</p>
+          </details>
+          <details>
+            <summary>Can we taste before committing?</summary>
+            <p class="faq-body">For weddings and larger events we offer a tasting box for $25. The tasting fee is deducted from your final order.</p>
+          </details>
+          <details>
+            <summary>Is this real?</summary>
+            <p class="faq-body">Butter Days is a fictional bakery featured in a portfolio demonstration. Enquiry details are not stored or sent.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+  <!-- chrome:footer:start -->
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-blurb">
+        <h2 class="footer-mark">Butter Days</h2>
+        <p class="footer-tagline">An independent bakery and caf&eacute; in Kelburn, Wellington. Hand-laminated pastries, naturally leavened bread, seasonal cakes and carefully made coffee.</p>
+        <p class="footer-address">
+          14 Marion Lane, Kelburn, Wellington 6012<br>
+          <span class="footer-fictional">Butter Days is a fictional bakery made for a design demonstration.</span>
+        </p>
+        <p class="footer-status" data-open-status>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="footer-status-text">Checking today&rsquo;s hours&hellip;</span>
+        </p>
+      </div>
+
+      <nav class="footer-col" aria-labelledby="footer-wander">
+        <h3 id="footer-wander">Wander</h3>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Bakery menu</a></li>
+          <li><a href="menu.html#tab-pastries">Pastries</a></li>
+          <li><a href="menu.html#tab-bread">Bread</a></li>
+          <li><a href="cakes-and-catering.html">Cakes &amp; catering</a></li>
+          <li><a href="our-bakery.html">Our bakery</a></li>
+          <li><a href="visit.html">Visit &amp; contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="footer-col">
+        <h3>Opening hours</h3>
+        <ul class="footer-hours" data-hours-list>
+          <li><span>Tue&ndash;Fri</span><span>7am&ndash;3pm</span></li>
+          <li><span>Sat&ndash;Sun</span><span>8am&ndash;1pm</span></li>
+          <li><span class="closed">Monday</span><span class="closed">Closed</span></li>
+        </ul>
+        <a class="footer-cta" href="visit.html#map">Directions &amp; parking</a>
+      </div>
+
+      <div class="footer-col">
+        <h3>Say hello</h3>
+        <ul class="footer-contact">
+          <li><a href="mailto:hello@butterdays.nz">hello@butterdays.nz</a></li>
+          <li><a href="tel:+6445550119">(04) 555 0119</a></li>
+        </ul>
+        <p class="footer-small">Replies within two working days, Tuesday to Saturday.</p>
+        <a class="footer-cta" href="visit.html#contact-form">Send a message &rarr;</a>
+      </div>
+    </div>
+
+    <p class="giant-word" aria-hidden="true"><span>Butter</span> <span>Days</span></p>
+
+    <div class="footer-bottom">
+      <span class="footer-legal">&copy; <span class="js-year">2026</span> Butter Days &middot; A fictional bakery. Sample content and prices.</span>
+      <span class="footer-credit">Made with too much butter by <b>NERODYN</b></span>
+      <button class="to-top" type="button" data-to-top>
+        <svg viewBox="0 0 14 20" aria-hidden="true" focusable="false"><path d="M7 19V3M1.5 8.5 7 3l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Back to top</span>
+      </button>
+    </div>
+  </div>
+  <!-- chrome:footer:end -->
+  </footer>
+  <noscript><style>form button[type="submit"], .nav-toggle { display: none !important; } nav.main-nav, nav.site-nav { display: block !important; position: static !important; background: transparent !important; } .header-inner, .site-head > .wrap { flex-wrap: wrap; height: auto; padding-top: 16px; padding-bottom: 16px; } nav.site-nav ul { flex-direction: row; flex-wrap: wrap; gap: 16px; } nav.site-nav a { font-size: 12px; } .no-js-note { padding: 1rem var(--gutter, 2rem); margin: 0; font: inherit; font-size: .85rem; }</style><p class="no-js-note">You can browse every page without JavaScript. Interactive planners and enquiry previews need JavaScript; these demonstration forms do not send messages or take bookings.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,117 @@
+/* ============================================================
+   BLACKRIDGE · printable project sheets (A4)
+   Restyles project pages into a title-block sheet: masthead,
+   facts, narrative, palette, two key images, sheet footer.
+   ============================================================ */
+
+@media print {
+  @page { size: A4; margin: 14mm 13mm 16mm; }
+
+  html { scroll-behavior: auto; }
+  html, body {
+    background: #fff !important;
+    color: #171512 !important;
+    font-size: 10.5pt;
+  }
+  body::after { display: none !important; }
+
+  /* masthead from body[data-print-title] */
+  body::before {
+    content: "BLACKRIDGE · Project sheet · " attr(data-print-title);
+    display: block;
+    font-family: var(--mono);
+    font-size: 7.5pt;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #171512;
+    border-bottom: 1.5pt solid #171512;
+    padding-bottom: 4pt;
+    margin-bottom: 6mm;
+  }
+
+  .site-head, .site-foot, .scroll-cue, .lightbox, .curtain, .skip,
+  .print-link, .proj-nav, .crumbs, .section-head .mono-note { display: none !important; }
+  .print-foot { display: flex !important; }
+
+  a { text-decoration: none; color: inherit; }
+
+  /* hero becomes a compact title block */
+  .proj-hero, .hero {
+    height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
+    overflow: visible;
+  }
+  .hero-media { display: none !important; }
+  .hero-inner { position: static !important; padding: 0 0 5mm !important; }
+  .hero-title { font-size: 26pt !important; line-height: 1.02; color: #171512 !important; }
+  .hero-title .row span { transform: none !important; animation: none !important; }
+  .hero-sub {
+    border-top: 1pt solid #171512 !important;
+    border-bottom: 0;
+    padding-top: 8pt !important;
+    margin-top: 4pt !important;
+    display: block;
+  }
+  .hero-sub .serif { color: #171512 !important; font-size: 12pt; max-width: none; }
+  .hero-coords { display: none; }
+  .eyebrow { color: #555 !important; }
+  .eyebrow::before { background: #171512 !important; }
+
+  /* section rhythm */
+  .section { padding: 6mm 0 !important; }
+  .wrap { max-width: none; padding: 0 !important; }
+
+  /* facts grid as ruled table */
+  .proj-facts {
+    border: 1pt solid #171512 !important;
+    background: #fff !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .proj-facts div { background: #fff !important; padding: 8pt 10pt; border: 0.4pt solid #999; }
+  .proj-facts .k, .proj-facts .v { color: #171512 !important; }
+  .proj-facts .k { font-size: 7.5pt; }
+
+  /* narrative */
+  .narrative { display: block !important; }
+  .lede { color: #171512 !important; font-size: 15pt !important; max-width: none !important; margin-bottom: 5mm; }
+  .body-copy, .body-copy p { color: #171512 !important; font-size: 10.5pt; line-height: 1.55; }
+  .body-copy p { orphans: 2; widows: 2; }
+  h2, h3 { color: #171512 !important; }
+
+  /* palette: keep swatches, exact colors */
+  .pallete { border: 1pt solid #171512 !important; }
+  .pallete figure { background: #fff !important; }
+  .pallete .chip {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .pallete .sw { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pallete .sw-name, .pallete .sw-note { color: #171512 !important; }
+  .pallete .sw-note { color: #555 !important; }
+
+  /* gallery: first two views only */
+  .gallery { display: block !important; }
+  .gallery figure { break-inside: avoid; margin: 0 0 4mm !important; }
+  .gallery figure:nth-child(n+3) { display: none !important; }
+  .gallery .ph { aspect-ratio: 21 / 10 !important; }
+  .gallery .ph img { max-height: 95mm; }
+  .caption { color: #555 !important; }
+  .caption .l::before { background: #171512 !important; }
+
+  /* sheet footer */
+  .print-foot {
+    position: running(sheetfoot);
+    display: flex !important;
+    justify-content: space-between;
+    gap: 12pt;
+    border-top: 1.5pt solid #171512;
+    padding-top: 5pt;
+    margin-top: 8mm;
+    font-family: var(--mono);
+    font-size: 7.5pt;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #171512;
+  }
+}

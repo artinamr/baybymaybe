@@ -4,6 +4,8 @@ import { QaList } from "@/components/site/QaList";
 import { HowToLd, PageLd, QaLd } from "@/components/site/JsonLd";
 import { Photo, BANNER_SIZES } from "@/components/site/Photo";
 import { StageSpy } from "@/components/site/StageSpy";
+import { Plan } from "./Plan";
+import { Artefact } from "./Artefact";
 import { FAQ_ALL, PAGES, PRINCIPLES, STAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { PHOTOS } from "@/content/images";
@@ -58,7 +60,7 @@ const GOOD = [
   },
   {
     title: "Platforms and automation",
-    body: "The same five stages. A platform is released in stages, the smallest useful version first; an automation is tried on your own past examples before it goes live. Each has its dates in the quote.",
+    body: "The same five stages. A platform is released in stages, the smallest useful version first; an automation is tried on your own past examples before it goes live. Each has its dates in the quote, and each service page shows how its stages run.",
   },
   {
     title: "After launch",
@@ -108,20 +110,8 @@ export default function Methodology() {
         </p>
       </section>
 
-      {/* The five stages at a glance; each opens its own section below. */}
-      <nav className="ms-map" aria-label="The five stages" data-rv>
-        <ol>
-          {STAGES.map((s) => (
-            <li key={s.n}>
-              <a href={`#stage-${s.n}`}>
-                <span className="ms-map-n mono">{s.n}</span>
-                <span className="ms-map-t">{s.title}</span>
-                <span className="ms-map-w">{s.whenShort}</span>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </nav>
+      {/* The fourteen days as a plan; each stage opens its own section below. */}
+      <Plan />
 
       <figure className="sp-banner" data-rv>
         <Photo p={PHOTOS["method-hero"]} sizes={BANNER_SIZES} eager />
@@ -198,6 +188,7 @@ export default function Methodology() {
                     </ul>
                   </div>
                 </div>
+                <Artefact i={i} />
               </article>
             ))}
           </div>

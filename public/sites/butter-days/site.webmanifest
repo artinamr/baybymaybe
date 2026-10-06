@@ -1,0 +1,55 @@
+{
+  "name": "Butter Days: Bakery & Café, Kelburn",
+  "short_name": "Butter Days",
+  "description": "An independent bakery and café in Kelburn, Wellington. Hand-laminated pastries, naturally leavened bread, seasonal cakes and carefully made coffee.",
+  "id": "/",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FBF3E7",
+  "theme_color": "#FBF3E7",
+  "lang": "en-NZ",
+  "dir": "ltr",
+  "categories": ["food", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "assets/img/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Bakery menu",
+      "url": "menu.html"
+    },
+    {
+      "name": "Cakes & catering",
+      "url": "cakes-and-catering.html"
+    },
+    {
+      "name": "Visit & contact",
+      "url": "visit.html"
+    }
+  ]
+}

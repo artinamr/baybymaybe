@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, follow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171513">
+  <title>Contact · BLACKRIDGE</title>
+  <meta name="description" content="Begin an enquiry with BLACKRIDGE: homes, boutique accommodation and small commercial projects across Aotearoa New Zealand.">
+  <meta property="og:title" content="Contact · BLACKRIDGE">
+  <meta property="og:image" content="../assets/img/photo/pj-cliff.jpg">
+  <link rel="icon" href="../assets/img/br-mark.svg">
+  <link rel="preload" href="../assets/fonts/archivo-normal-100-900.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../assets/fonts/fraunces-normal-300-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../assets/css/fonts.css?v=45f8f04b">
+  <link rel="stylesheet" href="../assets/css/main.css?v=a47a4b08">
+  <script src="../assets/js/motion.js?v=2b44b445" defer></script>
+  <meta name="author" content="NERODYN">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../index.html">BLACKRIDGE</a>
+      <nav class="site-nav" id="site-nav" aria-label="Primary">
+        <ul>
+          <li><a href="../projects/index.html">Projects</a></li>
+          <li><a href="../studio/index.html">Studio</a></li>
+          <li><a href="../approach/index.html">Approach</a></li>
+          <li><a href="../journal/index.html">Journal</a></li>
+          <li><a href="index.html" aria-current="page">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Menu"><span></span></button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="wrap">
+        <p class="eyebrow reveal">Contact</p>
+        <h1 class="display" aria-label="Contact"><span class="row"><span>Contact</span></span></h1>
+        <div class="hero-sub">
+          <p class="serif">Every building begins with a conversation on site. The second-best way to start one is below.</p>
+          <div class="hero-coords">
+            <span class="mono-note">Replies within two working days</span>
+            <span class="mono-note">Tāmaki Makaurau, NZ</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap contact-grid">
+        <div>
+          <div class="ph reveal">
+            <picture class="responsive-photo"><source type="image/webp" srcset="../assets/img/photo/contact-tall-640.webp 640w, ../assets/img/photo/contact-tall-1280.webp 1280w, ../assets/img/photo/contact-tall-1600.webp 1600w" sizes="(min-width: 1080px) 66vw, 100vw"><img src="../assets/img/photo/contact-tall.jpg" alt="A white vase holding red-orange fruit branches against a blue wall." loading="lazy" width="1600" height="2325"></picture>
+          </div>
+          <ul class="contact-list reveal">
+            <li><span class="k">Email</span><a class="v" href="mailto:studio@blackridge.nz">studio@blackridge.nz</a></li>
+            <li><span class="k">Telephone</span><a class="v" href="tel:+6495550139">+64 9 555 0139</a></li>
+            <li><span class="k">Studio</span><span class="v">Nº 12 Edmund Street, Eden Terrace, Tāmaki Makaurau Auckland 1010</span></li>
+            <li><span class="k">Hours</span><span class="v">Monday to Friday, 8.30–5.30 (visits by arrangement)</span></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="serif reveal" style="font-size:clamp(26px,3vw,42px);">Begin an enquiry</h2>
+          <p class="body-copy reveal" style="margin-top:16px;">A few lines are enough: the place, the intention, and roughly when you hope to begin. If we are the right studio for it, we will suggest a site walk.</p>
+
+          <form id="enquiry" class="reveal reveal-d1" style="margin-top:34px;" novalidate>
+            <div class="field-row">
+              <div class="field">
+                <label for="f-name">Name</label>
+                <input id="f-name" name="name" type="text" autocomplete="name" required>
+                <p class="err" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="f-email">Email</label>
+                <input id="f-email" name="email" type="email" autocomplete="email" required>
+                <p class="err" role="alert"></p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="f-type">Project type</label>
+              <select id="f-type" name="ptype" required>
+                <option value="" selected>Select a project type…</option>
+                <option>New home</option>
+                <option>Alteration or addition</option>
+                <option>Boutique accommodation</option>
+                <option>Workplace / small commercial</option>
+                <option>Interiors only</option>
+                <option>Something else</option>
+              </select>
+              <p class="err" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="f-location">Location</label>
+              <input id="f-location" name="location" type="text" placeholder="Region, town, or address if known" required>
+              <p class="err" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="f-brief">A short brief</label>
+              <textarea id="f-brief" name="brief" rows="5" placeholder="The place, the people, the rooms you care most about…" required></textarea>
+              <p class="err" role="alert"></p>
+            </div>
+
+            <button class="btn" type="submit">Send enquiry</button>
+            <p class="form-note mono-note">Demonstration form, nothing is sent or stored.</p>
+          </form>
+
+          <div id="form-success" class="form-success" role="status">
+            <p class="serif">Thank you. Your enquiry is noted.</p>
+            <p class="body-copy">This is a demonstration website, so nothing was actually sent. In a live build this message would have arrived in the studio inbox at <strong>studio@blackridge.nz</strong>, and you would hear from us within two working days.</p>
+            <p class="mono-note" style="margin-top:18px;">Maraea, Jonas &amp; the studio</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <p class="foot-mark">BLACKRIDGE<small class="mono-note">Architecture &amp; interiors · Aotearoa New Zealand</small></p>
+        </div>
+        <div class="foot-col">
+          <h4>Studio</h4>
+          <ul>
+            <li><a href="../studio/index.html">About</a></li>
+            <li><a href="../approach/index.html">Approach</a></li>
+            <li><a href="../projects/index.html">Projects</a></li>
+            <li><a href="index.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h4>Projects</h4>
+          <ul>
+            <li><a href="../projects/cliff-house/index.html">Cliff House</a></li>
+            <li><a href="../projects/folded-earth/index.html">Folded Earth</a></li>
+            <li><a href="../projects/courtyard-office/index.html">Courtyard Office</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h4>Elsewhere</h4>
+          <ul>
+            <li><a href="../credits.html">Photography credits</a></li>
+            <li><a href="../journal/index.html">Journal</a></li>
+            <li><a href="../approach/index.html">Design philosophy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot-base">
+        <span class="mono-note">© <span data-year>2025</span> BLACKRIDGE Studio, a fictional concept by NERODYN</span>
+        <span class="mono-note">No cookies, no tracking</span>
+        <span class="mono-note"><a href="#main" style="color:inherit;text-decoration:none;">Back to top ↑</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js?v=51ba97c3" defer></script>
+  <noscript><style>form button[type="submit"], .nav-toggle { display: none !important; } nav.main-nav, nav.site-nav { display: block !important; position: static !important; background: transparent !important; } .header-inner, .site-head > .wrap { flex-wrap: wrap; height: auto; padding-top: 16px; padding-bottom: 16px; } nav.site-nav ul { flex-direction: row; flex-wrap: wrap; gap: 16px; } nav.site-nav a { font-size: 12px; } .no-js-note { padding: 1rem var(--gutter, 2rem); margin: 0; font: inherit; font-size: .85rem; }</style><p class="no-js-note">You can browse every page without JavaScript. Interactive planners and enquiry previews need JavaScript; these demonstration forms do not send messages or take bookings.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,386 @@
+{
+  "photo-almond": {
+    "alt_source": "assets/img/photo-almond.jpg",
+    "height": 1067,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 25635,
+        "bytes_webp": 15554,
+        "h": 320,
+        "jpg": "photo-almond-480.jpg",
+        "w": 480,
+        "webp": "photo-almond-480.webp"
+      },
+      {
+        "bytes_jpg": 58948,
+        "bytes_webp": 34154,
+        "h": 533,
+        "jpg": "photo-almond-800.jpg",
+        "w": 800,
+        "webp": "photo-almond-800.webp"
+      },
+      {
+        "bytes_jpg": 114190,
+        "bytes_webp": 62662,
+        "h": 800,
+        "jpg": "photo-almond-1200.jpg",
+        "w": 1200,
+        "webp": "photo-almond-1200.webp"
+      },
+      {
+        "bytes_jpg": 206620,
+        "bytes_webp": 97744,
+        "h": 1067,
+        "jpg": "photo-almond-1600.jpg",
+        "w": 1600,
+        "webp": "photo-almond-1600.webp"
+      }
+    ],
+    "width": 1600
+  },
+  "photo-bakery": {
+    "alt_source": "assets/img/photo-bakery.jpg",
+    "height": 1067,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 24768,
+        "bytes_webp": 16950,
+        "h": 320,
+        "jpg": "photo-bakery-480.jpg",
+        "w": 480,
+        "webp": "photo-bakery-480.webp"
+      },
+      {
+        "bytes_jpg": 66442,
+        "bytes_webp": 44768,
+        "h": 533,
+        "jpg": "photo-bakery-800.jpg",
+        "w": 800,
+        "webp": "photo-bakery-800.webp"
+      },
+      {
+        "bytes_jpg": 146474,
+        "bytes_webp": 92488,
+        "h": 800,
+        "jpg": "photo-bakery-1200.jpg",
+        "w": 1200,
+        "webp": "photo-bakery-1200.webp"
+      },
+      {
+        "bytes_jpg": 308626,
+        "bytes_webp": 159100,
+        "h": 1067,
+        "jpg": "photo-bakery-1600.jpg",
+        "w": 1600,
+        "webp": "photo-bakery-1600.webp"
+      }
+    ],
+    "width": 1600
+  },
+  "photo-bread": {
+    "alt_source": "assets/img/photo-bread.jpg",
+    "height": 1064,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 46622,
+        "bytes_webp": 39736,
+        "h": 320,
+        "jpg": "photo-bread-480.jpg",
+        "w": 480,
+        "webp": "photo-bread-480.webp"
+      },
+      {
+        "bytes_jpg": 122534,
+        "bytes_webp": 101290,
+        "h": 533,
+        "jpg": "photo-bread-800.jpg",
+        "w": 800,
+        "webp": "photo-bread-800.webp"
+      },
+      {
+        "bytes_jpg": 256861,
+        "bytes_webp": 204976,
+        "h": 800,
+        "jpg": "photo-bread-1200.jpg",
+        "w": 1200,
+        "webp": "photo-bread-1200.webp"
+      }
+    ],
+    "width": 1596
+  },
+  "photo-cake": {
+    "alt_source": "assets/img/photo-cake.jpg",
+    "height": 1067,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 21512,
+        "bytes_webp": 11552,
+        "h": 320,
+        "jpg": "photo-cake-480.jpg",
+        "w": 480,
+        "webp": "photo-cake-480.webp"
+      },
+      {
+        "bytes_jpg": 47411,
+        "bytes_webp": 23386,
+        "h": 533,
+        "jpg": "photo-cake-800.jpg",
+        "w": 800,
+        "webp": "photo-cake-800.webp"
+      },
+      {
+        "bytes_jpg": 85892,
+        "bytes_webp": 38232,
+        "h": 800,
+        "jpg": "photo-cake-1200.jpg",
+        "w": 1200,
+        "webp": "photo-cake-1200.webp"
+      },
+      {
+        "bytes_jpg": 134617,
+        "bytes_webp": 55810,
+        "h": 1067,
+        "jpg": "photo-cake-1600.jpg",
+        "w": 1600,
+        "webp": "photo-cake-1600.webp"
+      }
+    ],
+    "width": 1600
+  },
+  "photo-cinnamon": {
+    "alt_source": "assets/img/photo-cinnamon.jpg",
+    "height": 800,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 45117,
+        "bytes_webp": 35262,
+        "h": 320,
+        "jpg": "photo-cinnamon-480.jpg",
+        "w": 480,
+        "webp": "photo-cinnamon-480.webp"
+      },
+      {
+        "bytes_jpg": 101723,
+        "bytes_webp": 69238,
+        "h": 533,
+        "jpg": "photo-cinnamon-800.jpg",
+        "w": 800,
+        "webp": "photo-cinnamon-800.webp"
+      },
+      {
+        "bytes_jpg": 187824,
+        "bytes_webp": 112856,
+        "h": 800,
+        "jpg": "photo-cinnamon-1200.jpg",
+        "w": 1200,
+        "webp": "photo-cinnamon-1200.webp"
+      }
+    ],
+    "width": 1200
+  },
+  "photo-croissant": {
+    "alt_source": "assets/img/photo-croissant.jpg",
+    "height": 1067,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 39402,
+        "bytes_webp": 31032,
+        "h": 320,
+        "jpg": "photo-croissant-480.jpg",
+        "w": 480,
+        "webp": "photo-croissant-480.webp"
+      },
+      {
+        "bytes_jpg": 98641,
+        "bytes_webp": 73140,
+        "h": 533,
+        "jpg": "photo-croissant-800.jpg",
+        "w": 800,
+        "webp": "photo-croissant-800.webp"
+      },
+      {
+        "bytes_jpg": 196934,
+        "bytes_webp": 136522,
+        "h": 800,
+        "jpg": "photo-croissant-1200.jpg",
+        "w": 1200,
+        "webp": "photo-croissant-1200.webp"
+      },
+      {
+        "bytes_jpg": 357503,
+        "bytes_webp": 213150,
+        "h": 1067,
+        "jpg": "photo-croissant-1600.jpg",
+        "w": 1600,
+        "webp": "photo-croissant-1600.webp"
+      }
+    ],
+    "width": 1600
+  },
+  "photo-croissants": {
+    "alt_source": "assets/img/photo-croissants.jpg",
+    "height": 1067,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 27868,
+        "bytes_webp": 19740,
+        "h": 320,
+        "jpg": "photo-croissants-480.jpg",
+        "w": 480,
+        "webp": "photo-croissants-480.webp"
+      },
+      {
+        "bytes_jpg": 68979,
+        "bytes_webp": 46002,
+        "h": 533,
+        "jpg": "photo-croissants-800.jpg",
+        "w": 800,
+        "webp": "photo-croissants-800.webp"
+      },
+      {
+        "bytes_jpg": 133965,
+        "bytes_webp": 83326,
+        "h": 800,
+        "jpg": "photo-croissants-1200.jpg",
+        "w": 1200,
+        "webp": "photo-croissants-1200.webp"
+      },
+      {
+        "bytes_jpg": 214352,
+        "bytes_webp": 122984,
+        "h": 1067,
+        "jpg": "photo-croissants-1600.jpg",
+        "w": 1600,
+        "webp": "photo-croissants-1600.webp"
+      }
+    ],
+    "width": 1600
+  },
+  "photo-display": {
+    "alt_source": "assets/img/photo-display.jpg",
+    "height": 1067,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 29286,
+        "bytes_webp": 17520,
+        "h": 320,
+        "jpg": "photo-display-480.jpg",
+        "w": 480,
+        "webp": "photo-display-480.webp"
+      },
+      {
+        "bytes_jpg": 65757,
+        "bytes_webp": 34768,
+        "h": 533,
+        "jpg": "photo-display-800.jpg",
+        "w": 800,
+        "webp": "photo-display-800.webp"
+      },
+      {
+        "bytes_jpg": 121574,
+        "bytes_webp": 57920,
+        "h": 800,
+        "jpg": "photo-display-1200.jpg",
+        "w": 1200,
+        "webp": "photo-display-1200.webp"
+      },
+      {
+        "bytes_jpg": 187280,
+        "bytes_webp": 82518,
+        "h": 1067,
+        "jpg": "photo-display-1600.jpg",
+        "w": 1600,
+        "webp": "photo-display-1600.webp"
+      }
+    ],
+    "width": 1600
+  },
+  "photo-pear": {
+    "alt_source": "assets/img/photo-pear.jpg",
+    "height": 1067,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 5909,
+        "bytes_webp": 2088,
+        "h": 320,
+        "jpg": "photo-pear-480.jpg",
+        "w": 480,
+        "webp": "photo-pear-480.webp"
+      },
+      {
+        "bytes_jpg": 13978,
+        "bytes_webp": 5052,
+        "h": 533,
+        "jpg": "photo-pear-800.jpg",
+        "w": 800,
+        "webp": "photo-pear-800.webp"
+      },
+      {
+        "bytes_jpg": 30834,
+        "bytes_webp": 10404,
+        "h": 800,
+        "jpg": "photo-pear-1200.jpg",
+        "w": 1200,
+        "webp": "photo-pear-1200.webp"
+      },
+      {
+        "bytes_jpg": 61578,
+        "bytes_webp": 20098,
+        "h": 1067,
+        "jpg": "photo-pear-1600.jpg",
+        "w": 1600,
+        "webp": "photo-pear-1600.webp"
+      }
+    ],
+    "width": 1600
+  },
+  "photo-tart": {
+    "alt_source": "assets/img/photo-tart.jpg",
+    "height": 1067,
+    "ratio": 1.5,
+    "sources": [
+      {
+        "bytes_jpg": 26458,
+        "bytes_webp": 16982,
+        "h": 320,
+        "jpg": "photo-tart-480.jpg",
+        "w": 480,
+        "webp": "photo-tart-480.webp"
+      },
+      {
+        "bytes_jpg": 58293,
+        "bytes_webp": 34138,
+        "h": 533,
+        "jpg": "photo-tart-800.jpg",
+        "w": 800,
+        "webp": "photo-tart-800.webp"
+      },
+      {
+        "bytes_jpg": 108207,
+        "bytes_webp": 58638,
+        "h": 800,
+        "jpg": "photo-tart-1200.jpg",
+        "w": 1200,
+        "webp": "photo-tart-1200.webp"
+      },
+      {
+        "bytes_jpg": 185512,
+        "bytes_webp": 86566,
+        "h": 1067,
+        "jpg": "photo-tart-1600.jpg",
+        "w": 1600,
+        "webp": "photo-tart-1600.webp"
+      }
+    ],
+    "width": 1600
+  }
+}

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Almond croissant dusted with icing sugar and flaked almonds">
+  <defs>
+    <radialGradient id="dough" cx="36%" cy="26%" r="90%">
+      <stop offset="0" stop-color="#FFDD9C"/>
+      <stop offset=".5" stop-color="#F0AC4B"/>
+      <stop offset="1" stop-color="#B76F1E"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <ellipse cx="200" cy="328" rx="142" ry="24" fill="#5A3315" opacity=".16" filter="url(#soft)"/>
+  <path d="M58,238 C48,202 68,178 96,184 C106,148 142,130 172,142 C186,110 226,110 240,142 C270,130 306,148 316,184 C344,178 364,202 354,238 C346,281 284,309 206,309 C128,309 66,281 58,238 Z" fill="url(#dough)"/>
+  <path d="M148,152 C136,192 134,240 150,284" stroke="#A2611C" stroke-width="6" fill="none" stroke-linecap="round" opacity=".4"/>
+  <path d="M206,118 C201,170 201,242 206,298" stroke="#A2611C" stroke-width="6" fill="none" stroke-linecap="round" opacity=".4"/>
+  <path d="M264,152 C276,192 278,240 262,284" stroke="#A2611C" stroke-width="6" fill="none" stroke-linecap="round" opacity=".4"/>
+  <path d="M96,190 C86,210 80,230 84,250" stroke="#8A4A12" stroke-width="5" fill="none" stroke-linecap="round" opacity=".3"/>
+  <path d="M316,190 C326,210 332,230 328,250" stroke="#8A4A12" stroke-width="5" fill="none" stroke-linecap="round" opacity=".3"/>
+  <path d="M112,198 C154,162 258,162 300,198" stroke="#FFE9B8" stroke-width="16" fill="none" stroke-linecap="round" opacity=".5" filter="url(#soft)"/>
+  <ellipse cx="204" cy="216" rx="64" ry="44" fill="#EFC27E" opacity=".92"/>
+  <ellipse cx="204" cy="212" rx="52" ry="34" fill="#F6D9A4"/>
+  <g fill="#DCA263" stroke="#B07A3A" stroke-width="1.5">
+    <rect x="150" y="196" width="26" height="9" rx="4.5" transform="rotate(-18 163 200)"/>
+    <rect x="188" y="188" width="26" height="9" rx="4.5" transform="rotate(8 201 192)"/>
+    <rect x="226" y="198" width="26" height="9" rx="4.5" transform="rotate(-10 239 202)"/>
+    <rect x="166" y="226" width="26" height="9" rx="4.5" transform="rotate(14 179 230)"/>
+    <rect x="212" y="232" width="26" height="9" rx="4.5" transform="rotate(-6 225 236)"/>
+    <rect x="196" y="246" width="24" height="8" rx="4" transform="rotate(22 208 250)"/>
+  </g>
+  <g fill="#F9E9C8" opacity=".95">
+    <rect x="176" y="206" width="18" height="6" rx="3" transform="rotate(-24 185 209)"/>
+    <rect x="228" y="216" width="18" height="6" rx="3" transform="rotate(12 237 219)"/>
+    <rect x="200" y="222" width="16" height="5" rx="2.5" transform="rotate(-4 208 224)"/>
+  </g>
+  <g fill="#FFFDF4" opacity=".65">
+    <circle cx="120" cy="176" r="3"/><circle cx="152" cy="150" r="2.4"/><circle cx="238" cy="142" r="2.6"/>
+    <circle cx="292" cy="170" r="3"/><circle cx="310" cy="226" r="2.4"/><circle cx="98" cy="238" r="2.6"/>
+    <circle cx="170" cy="288" r="2.8"/><circle cx="246" cy="284" r="2.4"/><circle cx="200" cy="132" r="2.6"/>
+  </g>
+</svg>

@@ -4,7 +4,8 @@ import { Stage, Story } from "@/components/work/Stories";
 import { WorkTitle } from "@/components/work/WorkTitle";
 import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
-import { WORK_ITEMS, project } from "@/content/work";
+import { SiteStudy } from "@/components/work/SiteStudy";
+import { KIND_LABEL, WORK_ITEMS, project } from "@/content/work";
 import { service } from "@/content/services";
 
 // Only the projects in the registry exist; anything else under /work/ is a 404.
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const p = project((await params).slug);
   if (!p) return {};
   return pageMeta({
-    title: `${p.client}: ${p.kind === "demo" ? "studio demonstration" : "case study"}`,
+    title: `${p.client}: ${KIND_LABEL[p.kind].toLowerCase()}`,
     description: p.summary,
     path: `work/${p.slug}/`,
     image: { url: `work/${p.slug}.webp`, width: 2400, height: 1500, alt: p.coverAlt },
@@ -40,6 +41,12 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
     { name: "Work", href: PAGES.work },
     { name: p.client, href: PAGES.project(p.slug) },
   ];
+  if (p.kind === "site")
+    return (
+      <Page here="work" crumbs={crumbs}>
+        <SiteStudy p={p} crumbs={crumbs} />
+      </Page>
+    );
   return (
     <Page here="work" crumbs={crumbs}>
       <section className="sp-hero cs-hero">

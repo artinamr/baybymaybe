@@ -4,7 +4,7 @@ import { ArticleLd, QaLd } from "@/components/site/JsonLd";
 import { Photo, BANNER_SIZES } from "@/components/site/Photo";
 import { CONTACT, PAGES, abs } from "@/lib/content";
 import { service } from "@/content/services";
-import { project } from "@/content/work";
+import { KIND_LABEL, project } from "@/content/work";
 import { LICENCE_URL } from "@/content/images";
 import { article as findArticle, checkedOn, longDate, topicLabel, type ArticleMeta } from "@/content/blog";
 import type { TocItem } from "@/content/blog/bodies";
@@ -195,7 +195,7 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
           ))}
           {work.map((p) => (
             <a key={p.slug} className="svc-other" href={PAGES.project(p.slug)} data-rv>
-              <span className="svc-n mono">{p.kind === "demo" ? "Studio demonstration" : "Client project"}</span>
+              <span className="svc-n mono">{KIND_LABEL[p.kind]}</span>
               <span className="svc-other-name">{p.client}</span>
               <span className="svc-line">{p.title}</span>
               <span className="svc-go" aria-hidden>

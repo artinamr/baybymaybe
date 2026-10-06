@@ -1,0 +1,601 @@
+/* ==========================================================================
+   THE WORK PAGES' OWN STYLES (CLAUDE.md gotcha 15: page-specific rules stay
+   out of the global sheet). A concept website's case study (SiteStudy): the
+   site live in its frame, every page, the parts in use, the phone, the look,
+   what was measured. The work index's grid by kind. Shared parts (the frames,
+   the case study's head, the index cards) stay global: the home page and the
+   service pages show them too.
+   ========================================================================== */
+
+/* The work index: the concept websites large (the first across the page),
+   the demonstrations three to a row. */
+.wk-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.wk-card {
+  grid-column: span 3;
+}
+.wk-card:first-child {
+  grid-column: 1 / -1;
+}
+.wk-card[data-kind="demo"] {
+  grid-column: span 2;
+}
+.wk-card[data-kind="demo"] .wk-title {
+  font-size: min(2.1vw, 28px);
+}
+.wk-card[data-kind="demo"] .wk-sum {
+  font-size: 15px;
+}
+.wk-group {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 40px;
+  padding-top: calc(var(--vh) * 4);
+  border-top: 1px solid var(--hair);
+}
+.wk-group h2 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: min(3vw, 36px);
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+.wk-group p {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.wk-group[hidden] {
+  display: none;
+}
+
+/* ---- a concept website's case study ---------------------------------- */
+
+.ss-hero .sp-h1 {
+  font-size: min(5.2vw, 80px);
+  max-width: 21ch;
+}
+.ss-hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px 64px;
+  align-items: end;
+}
+.ss-hero-actions {
+  margin: 0;
+}
+
+/* The site, live: a picture of its first screen until asked. */
+.ss-stage {
+  margin-bottom: calc(var(--vh) * 6);
+}
+.ss-screen {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #fff;
+}
+.ss-screen picture {
+  display: contents;
+}
+.ss-poster {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 1600ms var(--ease-expo);
+}
+.ss-screen:hover .ss-poster {
+  transform: scale(1.012);
+}
+.ss-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(10 11 16 / 0.42), rgb(10 11 16 / 0) 34%);
+  pointer-events: none;
+}
+/* One frosted bar over the picture: it reads the same over any site. */
+.ss-try {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(18px, 5%, 44px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  width: max-content;
+  max-width: calc(100% - 28px);
+  padding: 7px 7px 7px 22px;
+  border-radius: 999px;
+  background: rgb(14 15 20 / 0.58);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    0 24px 50px -24px rgb(10 11 16 / 0.7);
+}
+.ss-try .pill {
+  flex: none;
+}
+.ss-open {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: rgb(255 255 255 / 0.45);
+  transition: text-decoration-color 200ms ease;
+}
+.ss-open:hover {
+  text-decoration-color: #fff;
+}
+.cs-note a {
+  color: var(--indigo);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.ss-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+/* The brief: who it's for, and the site's three jobs. */
+.ss-who {
+  margin-top: 22px;
+}
+.ss-jobs {
+  margin-top: 40px;
+}
+.ss-jobs-h {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.ss-jobs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ss-jobs li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: baseline;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: min(2vw, 24px);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+.ss-jobs li .mono {
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--indigo);
+}
+
+/* A section's head across the page. */
+.ss-head {
+  display: grid;
+  gap: 22px;
+  max-width: 780px;
+  margin-bottom: calc(var(--vh) * 8);
+}
+.ss-head .sp-kicker {
+  margin: 0;
+}
+
+/* Every page, as a grid of first screens. */
+.ss-page-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 48px 28px;
+}
+.ss-page {
+  display: grid;
+  gap: 10px;
+  color: inherit;
+}
+.ss-page-img {
+  display: block;
+  overflow: hidden;
+  margin-bottom: 8px;
+  border: 1px solid var(--hair-soft);
+  border-radius: 14px;
+  aspect-ratio: 16 / 10;
+  background: #eeede9;
+  box-shadow: 0 30px 60px -44px color-mix(in oklab, var(--ink) 40%, transparent);
+  transition:
+    box-shadow 600ms var(--ease-expo),
+    transform 900ms var(--ease-expo);
+}
+.ss-page-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 1400ms var(--ease-expo);
+}
+.ss-page:hover .ss-page-img {
+  transform: translateY(-4px);
+  box-shadow: 0 40px 70px -40px color-mix(in oklab, var(--ink) 50%, transparent);
+}
+.ss-page:hover .ss-page-img img {
+  transform: scale(1.03);
+}
+.ss-page-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 21px;
+  letter-spacing: -0.015em;
+}
+.ss-page-name [aria-hidden] {
+  display: inline-block;
+  font-size: 15px;
+  color: var(--indigo);
+  transition: transform 300ms var(--ease-expo);
+}
+.ss-page:hover .ss-page-name [aria-hidden] {
+  transform: translate(2px, -2px);
+}
+.ss-page-what {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: 40ch;
+}
+.ss-more-pages {
+  margin: 36px 0 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* The parts that do a job: a picture and its story, alternating sides. */
+.ss-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  gap: 40px 6vw;
+  align-items: center;
+  padding: calc(var(--vh) * 9) 0;
+  border-top: 1px solid var(--hair-soft);
+}
+.ss-feature[data-flip] {
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+}
+.ss-feature[data-flip] > :first-child {
+  order: 2;
+}
+.ss-feature[data-tall] {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+}
+.ss-feature[data-tall][data-flip] {
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+}
+.ss-feature[data-tall] .ss-shot-one {
+  max-width: 560px;
+  justify-self: center;
+  width: 100%;
+}
+.ss-feature[data-multi] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ss-feature[data-multi] > :first-child {
+  order: 0;
+}
+.ss-feature[data-multi] .ss-feature-text {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: 6vw;
+  align-items: start;
+}
+.ss-feature[data-multi] .ss-feature-text > * {
+  grid-column: 2;
+}
+.ss-feature[data-multi] .ss-feature-n,
+.ss-feature[data-multi] .ss-feature-t {
+  grid-column: 1;
+}
+.ss-feature[data-multi] .ss-feature-t {
+  grid-row: 2 / span 4;
+}
+.ss-shots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.ss-shot {
+  margin: 0;
+}
+.ss-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--hair-soft);
+  border-radius: 16px;
+  background: #eeede9;
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ink) 5%, transparent),
+    0 40px 80px -52px color-mix(in oklab, var(--ink) 45%, transparent);
+}
+.ss-shot figcaption {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--indigo);
+}
+.ss-feature-n {
+  margin: 0 0 14px;
+  font-size: 11px;
+  color: var(--indigo);
+}
+.ss-feature-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: min(3.4vw, 44px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  margin: 0 0 18px;
+}
+.ss-notes {
+  list-style: none;
+  margin: 22px 0 26px;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.ss-notes li {
+  position: relative;
+  padding: 11px 0 11px 22px;
+  border-bottom: 1px solid var(--hair);
+  font-size: 15px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--ink) 78%, transparent);
+}
+.ss-notes li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 19px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--indigo);
+}
+
+/* On a phone: three phones side by side (a row to swipe on a small screen). */
+.ss-phone-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 48px;
+  justify-items: center;
+}
+.ss-phone-fig {
+  margin: 0;
+  width: 100%;
+  max-width: 320px;
+}
+.ss-phone {
+  display: block;
+  padding: 10px;
+  border-radius: 46px;
+  background: var(--ink);
+  box-shadow: 0 50px 90px -50px color-mix(in oklab, var(--ink) 65%, transparent);
+}
+.ss-phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 36px;
+}
+.ss-phone-fig .cs-cap {
+  margin-top: 22px;
+}
+
+/* The look: the palette as chips, the typefaces as a list. */
+.ss-swatches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 28px 18px;
+}
+.ss-swatches li {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+.ss-chip {
+  display: block;
+  aspect-ratio: 1;
+  margin-bottom: 12px;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ink) 9%, transparent);
+}
+.ss-sw-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.ss-sw-hex {
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+.ss-sw-role {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.ss-type {
+  list-style: none;
+  margin: calc(var(--vh) * 8) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+.ss-type li {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: 6vw;
+  align-items: baseline;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.ss-type-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: min(3vw, 38px);
+  letter-spacing: -0.03em;
+}
+.ss-type-role {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* Built properly: four measured figures, then the details. */
+.ss-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+  margin: 0;
+}
+.ss-facts > div {
+  padding-top: 20px;
+  border-top: 1px solid var(--ink);
+}
+.ss-fact-v {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: min(5.6vw, 76px);
+  line-height: 1;
+  letter-spacing: -0.045em;
+  margin: 0 0 14px;
+}
+.ss-fact-l {
+  margin: 0;
+  max-width: 24ch;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.ss-craft {
+  margin-top: calc(var(--vh) * 9);
+}
+
+@media (max-width: 900px) {
+  .wk-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wk-card,
+  .wk-card:first-child,
+  .wk-card[data-kind="demo"],
+  .wk-group {
+    grid-column: auto;
+  }
+  .wk-card[data-kind="demo"] .wk-title {
+    font-size: 7vw;
+  }
+  .wk-group h2 {
+    font-size: 7vw;
+  }
+  .ss-hero-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ss-screen {
+    aspect-ratio: 9 / 16;
+    max-height: 78svh;
+  }
+  .ss-try {
+    padding: 6px;
+  }
+  .ss-open {
+    display: none;
+  }
+  .ss-jobs li {
+    font-size: 19px;
+  }
+  .ss-page-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 36px 18px;
+  }
+  .ss-feature,
+  .ss-feature[data-flip],
+  .ss-feature[data-tall],
+  .ss-feature[data-tall][data-flip] {
+    grid-template-columns: minmax(0, 1fr);
+    padding: calc(var(--vh) * 7) 0;
+  }
+  .ss-feature[data-flip] > :first-child {
+    order: 0;
+  }
+  .ss-feature[data-multi] .ss-feature-text {
+    display: block;
+  }
+  .ss-shots {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ss-feature-t {
+    font-size: 8vw;
+  }
+  .ss-phone-row {
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin: 0 calc(var(--g) * -1);
+    padding: 0 var(--g) 18px;
+    scrollbar-width: none;
+  }
+  .ss-phone-fig {
+    flex: none;
+    width: 72vw;
+    max-width: 300px;
+    scroll-snap-align: center;
+  }
+  .ss-type li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .ss-type-name {
+    font-size: 8vw;
+  }
+  .ss-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ss-fact-v {
+    font-size: 12vw;
+  }
+}
+@media (max-width: 560px) {
+  .ss-page-grid {
+    gap: 28px 14px;
+  }
+  .ss-page-name {
+    font-size: 17px;
+  }
+  .ss-page-what {
+    font-size: 13.5px;
+  }
+  .ss-swatches {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

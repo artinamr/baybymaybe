@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+  <!-- chrome:head:start -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Butter Days | Artisan bakery and café in Wellington</title>
+  <meta name="description" content="Butter Days is an independent bakery and café in Wellington making laminated pastries, excellent bread, seasonal cakes and good coffee. Demo website.">
+
+  <meta name="theme-color" content="#FBF3E7">
+  <meta name="color-scheme" content="light">
+  <meta name="author" content="NERODYN">
+  <meta name="robots" content="noindex, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Butter Days">
+  <meta property="og:locale" content="en_NZ">
+  <meta property="og:title" content="Butter Days | Artisan bakery and café in Wellington">
+  <meta property="og:description" content="Butter Days is an independent bakery and café in Wellington making laminated pastries, excellent bread, seasonal cakes and good coffee. Demo website.">
+  <meta property="og:url" content="https://butterdays.example/index.html">
+  <meta property="og:image" content="assets/img/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Butter Days, an independent bakery and cafe in Kelburn, Wellington">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Butter Days | Artisan bakery and café in Wellington">
+  <meta name="twitter:description" content="Butter Days is an independent bakery and café in Wellington making laminated pastries, excellent bread, seasonal cakes and good coffee. Demo website.">
+  <meta name="twitter:image" content="assets/img/og-card.png">
+
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,600;1,9..144,900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,600;1,9..144,900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&display=swap">
+  <link rel="stylesheet" href="css/styles.css?v=54d9274a">
+  <script src="js/main.js?v=9862b1be" defer></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Bakery",
+    "@id": "https://butterdays.example/#bakery",
+    "name": "Butter Days",
+    "description": "An independent bakery and cafe in Kelburn, Wellington, making hand-laminated pastries, naturally leavened bread, seasonal cakes and carefully made coffee.",
+    "url": "https://butterdays.example/",
+    "telephone": "+64-4-555-0119",
+    "email": "hello@butterdays.nz",
+    "priceRange": "$$",
+    "currenciesAccepted": "NZD",
+    "image": "https://butterdays.example/assets/img/og-card.png",
+    "logo": "https://butterdays.example/assets/img/favicon.svg",
+    "slogan": "Made with care. Shared with pleasure.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "14 Marion Lane",
+      "addressLocality": "Kelburn",
+      "addressRegion": "Wellington",
+      "postalCode": "6012",
+      "addressCountry": "NZ"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -41.2915,
+      "longitude": 174.7779
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opens": "07:00",
+        "closes": "15:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Saturday",
+          "Sunday"
+        ],
+        "opens": "08:00",
+        "closes": "13:00"
+      }
+    ],
+    "servesCuisine": [
+      "Bakery",
+      "Cafe",
+      "Patisserie"
+    ],
+    "hasMenu": "https://butterdays.example/menu.html"
+  }
+  </script>
+  <!-- chrome:head:end -->
+  <script src="js/motion.js?v=2b44b445" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+  <!-- chrome:header:start -->
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" focusable="false" aria-hidden="true">
+          <circle cx="32" cy="32" r="30" fill="var(--butter)"/>
+          <path d="M13,39 C12,34 15.5,31 19.5,32 C21.5,26.5 27.5,24.5 30.5,27.5 C33,24.5 39,24.5 41.5,27.5 C44.5,24.5 50.5,26.5 52.5,32 C56.5,31 60,34 59,39 C57.8,45 48,49.5 36,49.5 C24,49.5 14.2,45 13,39 Z" fill="var(--ink)"/>
+          <path d="M30.5,28.5 C29,32 29,38 30.5,42" stroke="var(--butter)" stroke-width="1.6" fill="none" opacity=".7"/>
+          <circle cx="22" cy="37" r="1.7" fill="var(--butter)" opacity=".55"/>
+          <circle cx="46" cy="37" r="1.7" fill="var(--butter)" opacity=".55"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-word">Butter Days</span>
+        <span class="brand-sub">Kelburn &middot; Wellington</span>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+      <span class="nav-toggle-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="nav-toggle-label">Menu</span>
+    </button>
+
+    <nav class="main-nav" id="primary-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html" data-nav="index.html" aria-current="page">Home</a></li>
+        <li><a href="menu.html" data-nav="menu.html">Menu</a></li>
+        <li><a href="cakes-and-catering.html" data-nav="cakes-and-catering.html">Cakes &amp; catering</a></li>
+        <li><a href="our-bakery.html" data-nav="our-bakery.html">Our bakery</a></li>
+        <li><a href="visit.html" data-nav="visit.html">Visit</a></li>
+        <li class="nav-cta"><a href="visit.html#contact-form">Say hello</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress-bar"></span></div>
+  <!-- chrome:header:end -->
+  </header>
+
+  <main id="main">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="hero-kicker">Independent bakery &amp; café &middot; Kelburn, Wellington</p>
+          <h1 class="hero-title">
+            <span class="block">Butter</span>
+            <span class="block"><em>Days<span class="dot">.</span></em></span>
+          </h1>
+          <p class="hero-lede">Small-batch pastries, naturally leavened bread and thoughtful coffee, made fresh each morning in the heart of Kelburn.</p>
+
+          <div class="btn-row">
+            <a class="btn btn-primary" href="menu.html">
+              Explore the menu
+              <svg viewBox="0 0 24 14" aria-hidden="true" focusable="false"><path d="M1,7 H21 M15,1 l7,6 -7,6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="visit.html">Plan your visit</a>
+          </div>
+
+          <a class="hero-box-link" href="#saturday-box">Make a little box of happiness <span aria-hidden="true">↘</span></a>
+
+          <dl class="hero-facts">
+            <div class="hero-fact">
+              <dt class="visually-hidden">Established</dt>
+              <dd><b>2019</b><span>On Marion Lane</span></dd>
+            </div>
+            <div class="hero-fact">
+              <dt class="visually-hidden">Sourdough fermentation</dt>
+              <dd><b>36 hrs</b><span>Slow ferment</span></dd>
+            </div>
+            <div class="hero-fact">
+              <dt class="visually-hidden">Opening time on weekdays</dt>
+              <dd><b>7am</b><span>Doors open</span></dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="hero-art">
+          <div class="hero-scene">
+            <picture><source type="image/webp" srcset="assets/img/photo-croissants-480.webp 480w, assets/img/photo-croissants-800.webp 800w, assets/img/photo-croissants-1200.webp 1200w, assets/img/photo-croissants-1600.webp 1600w" sizes="(min-width:900px) 46vw, 90vw"><img src="assets/img/photo-croissants-1200.jpg" width="1200" height="800" alt="Golden croissants dusted with falling sugar on a dark stone counter." fetchpriority="high" decoding="async"></picture>
+          </div>
+          <a class="hero-cake-card" href="cakes-and-catering.html"><picture><source type="image/webp" srcset="assets/img/photo-cake-480.webp 480w, assets/img/photo-cake-800.webp 800w" sizes="200px"><img src="assets/img/photo-cake-480.jpg" width="480" height="320" alt="A flower-topped celebration cake." decoding="async"></picture><span>For the big days. <b aria-hidden="true">↗</b></span></a>
+          <span class="hero-photo-note">Real butter.<br><em>Big feelings.</em></span>
+          <img class="hero-badge" src="assets/img/badge-spin.svg" width="170" height="170" alt="" aria-hidden="true">
+        </div>
+      </div>
+    </section>
+
+    <div class="hero-marquee">
+      <p class="visually-hidden">Made fresh daily: laminated by hand, baked before sunrise, free-range eggs, real butter, good coffee.</p>
+      <div class="marquee-track" aria-hidden="true">
+        <span>Laminated by hand</span><span>Baked before sunrise</span><span>Free-range eggs</span><span>Real butter, always</span><span>Good coffee</span>
+        <span>Laminated by hand</span><span>Baked before sunrise</span><span>Free-range eggs</span><span>Real butter, always</span><span>Good coffee</span>
+      </div>
+    </div>
+
+    <!-- ============ FRESH FROM THE OVEN ============ -->
+    <section class="fresh" aria-labelledby="fresh-heading">
+      <div class="wrap fresh-inner">
+        <div class="fresh-head">
+          <div>
+            <p class="eyebrow">Baked fresh daily</p>
+            <h2 id="fresh-heading">Made fresh, <em style="color:var(--cherry)">every morning</em></h2>
+          </div>
+          <a class="btn btn-ghost" href="menu.html">Full menu</a>
+        </div>
+
+        <div class="fresh-grid">
+          <article class="fresh-card">
+            <div class="fc-media">
+              <picture>
+                <source type="image/webp"
+                        srcset="assets/img/photo-almond-480.webp 480w, assets/img/photo-almond-800.webp 800w, assets/img/photo-almond-1200.webp 1200w"
+                        sizes="(min-width: 68rem) 22vw, (min-width: 48rem) 45vw, 92vw">
+                <img src="assets/img/photo-almond-800.jpg"
+                     srcset="assets/img/photo-almond-480.jpg 480w, assets/img/photo-almond-800.jpg 800w, assets/img/photo-almond-1200.jpg 1200w"
+                     sizes="(min-width: 68rem) 22vw, (min-width: 48rem) 45vw, 92vw"
+                     width="800" height="533" loading="lazy" decoding="async"
+                     alt="Almond croissant finished with toasted flakes and icing sugar">
+              </picture>
+            </div>
+            <div class="fc-body">
+              <h3>Almond croissant</h3>
+              <p>Filled with almond frangipane and finished with toasted flakes.</p>
+              <div class="fc-meta">
+                <span class="price-tag">$7.50</span>
+                <span class="stock-note">From 7am</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="fresh-card">
+            <div class="fc-media">
+              <picture>
+                <source type="image/webp"
+                        srcset="assets/img/photo-bread-480.webp 480w, assets/img/photo-bread-800.webp 800w"
+                        sizes="(min-width: 68rem) 22vw, (min-width: 48rem) 45vw, 92vw">
+                <img src="assets/img/photo-bread-800.jpg"
+                     srcset="assets/img/photo-bread-480.jpg 480w, assets/img/photo-bread-800.jpg 800w"
+                     sizes="(min-width: 68rem) 22vw, (min-width: 48rem) 45vw, 92vw"
+                     width="800" height="533" loading="lazy" decoding="async"
+                     alt="Country sourdough sliced to show its open crumb">
+              </picture>
+            </div>
+            <div class="fc-body">
+              <h3>Country sourdough</h3>
+              <p>Deep bronze crust, open crumb, 36-hour ferment.</p>
+              <div class="fc-meta">
+                <span class="price-tag">$9.00</span>
+                <span class="stock-note">From 8am</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="fresh-card">
+            <div class="fc-media">
+              <picture>
+                <source type="image/webp"
+                        srcset="assets/img/photo-tart-480.webp 480w, assets/img/photo-tart-800.webp 800w, assets/img/photo-tart-1200.webp 1200w"
+                        sizes="(min-width: 68rem) 22vw, (min-width: 48rem) 45vw, 92vw">
+                <img src="assets/img/photo-tart-800.jpg"
+                     srcset="assets/img/photo-tart-480.jpg 480w, assets/img/photo-tart-800.jpg 800w, assets/img/photo-tart-1200.jpg 1200w"
+                     sizes="(min-width: 68rem) 22vw, (min-width: 48rem) 45vw, 92vw"
+                     width="800" height="533" loading="lazy" decoding="async"
+                     alt="A freshly baked seasonal fruit tart">
+              </picture>
+            </div>
+            <div class="fc-body">
+              <h3>Pear &amp; almond Danish</h3>
+              <p>Poached Nashi pear with vanilla custard and toasted almonds.</p>
+              <div class="fc-meta">
+                <span class="price-tag">$6.50</span>
+                <span class="stock-note">From 8am</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="fresh-card">
+            <div class="fc-media">
+              <picture>
+                <source type="image/webp"
+                        srcset="assets/img/photo-cinnamon-480.webp 480w, assets/img/photo-cinnamon-800.webp 800w"
+                        sizes="(min-width: 68rem) 22vw, (min-width: 48rem) 45vw, 92vw">
+                <img src="assets/img/photo-cinnamon-800.jpg"
+                     srcset="assets/img/photo-cinnamon-480.jpg 480w, assets/img/photo-cinnamon-800.jpg 800w"
+                     sizes="(min-width: 68rem) 22vw, (min-width: 48rem) 45vw, 92vw"
+                     width="800" height="533" loading="lazy" decoding="async"
+                     alt="Cinnamon rolls fresh from the oven, finished with icing">
+              </picture>
+            </div>
+            <div class="fc-body">
+              <h3>Cinnamon knot</h3>
+              <p>Knotted by hand and brushed with brown butter.</p>
+              <div class="fc-meta">
+                <span class="price-tag">$6.50</span>
+                <span class="stock-note">From 7am</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TRIO ============ -->
+    <section class="section" aria-labelledby="trio-heading">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">What we make</p>
+          <h2 id="trio-heading">Thoughtfully made, from scratch</h2>
+        </div>
+
+        <div class="trio">
+          <article class="trio-item reveal" style="--reveal-delay:0ms">
+            <span class="trio-label">The pastry case</span>
+            <a class="frame" href="menu.html#tab-pastries">
+              <img src="assets/img/hero-croissant.svg" width="1200" height="860" loading="lazy" decoding="async" alt="">
+              <span class="visually-hidden">See pastries on the menu</span>
+            </a>
+            <h3>Pastries worth the walk</h3>
+            <p>Hand-laminated with cultured butter, rested slowly and baked to a deep golden finish. Our pastry case changes with the season.</p>
+            <p><a class="more-link" href="menu.html#tab-pastries">Browse pastries</a></p>
+          </article>
+
+          <article class="trio-item reveal" style="--reveal-delay:90ms">
+            <span class="trio-label">From the oven floor</span>
+            <a class="frame" href="product-country-sourdough.html">
+              <img src="assets/img/scene-bread.svg" width="900" height="760" loading="lazy" decoding="async" alt="">
+              <span class="visually-hidden">Read the country sourdough story</span>
+            </a>
+            <h3>Bread with a backbone</h3>
+            <p>Our long-kept starter and a slow, 36-hour fermentation give every loaf a delicate tang, crisp crust and open crumb.</p>
+            <p><a class="more-link" href="product-country-sourdough.html">Meet the sourdough</a></p>
+          </article>
+
+          <article class="trio-item reveal" style="--reveal-delay:180ms">
+            <span class="trio-label">By appointment</span>
+            <a class="frame" href="product-seasonal-celebration-cake.html">
+              <img src="assets/img/scene-cakes.svg" width="900" height="760" loading="lazy" decoding="async" alt="">
+              <span class="visually-hidden">Read the celebration cake story</span>
+            </a>
+            <h3>Cakes for the big days</h3>
+            <p>Seasonal flavours, balanced buttercream and considered details, made to order for celebrations both intimate and grand.</p>
+            <p><a class="more-link" href="cakes-and-catering.html">Cakes &amp; catering</a></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SEASONAL FEATURE ============ -->
+    <section class="seasonal" aria-labelledby="seasonal-heading">
+      <div class="wrap">
+        <div>
+          <p class="eyebrow on-dark">Seasonal selection &middot; September to November</p>
+          <h2 id="seasonal-heading">Pear, almond &amp; <em>brown butter</em></h2>
+          <p>Wellington spring brings crisp Nashi pears. We poach them gently with vanilla and pair them with toasted almond and warm brown butter in a collection of seasonal bakes.</p>
+
+          <ul class="seasonal-list">
+            <li><span>Pear &amp; frangipane tartlet</span> <span class="sl-dots" aria-hidden="true"></span> <span class="sl-price">$7.50</span></li>
+            <li><span>Brown-butter pear Danishes</span> <span class="sl-dots" aria-hidden="true"></span> <span class="sl-price">$6.50</span></li>
+            <li><span>Pear, almond &amp; brown-butter loaf</span> <span class="sl-dots" aria-hidden="true"></span> <span class="sl-price">$12.00</span></li>
+          </ul>
+
+          <div class="btn-row">
+            <a class="btn btn-butter" href="menu.html#tab-cakes">See the seasonal menu</a>
+            <a class="btn btn-ghost" style="border-color:var(--paper);color:var(--paper)" href="visit.html#contact-form">Ask about this week&rsquo;s bake</a>
+          </div>
+        </div>
+
+        <img class="scene reveal-r" src="assets/img/scene-seasonal.svg" width="900" height="700" loading="lazy" decoding="async"
+             alt="A pear, an almond slice tart on a plate and a brown-butter pastry, styled with scattered leaves">
+      </div>
+    </section>
+
+    <!-- ============ STORY ============ -->
+    <section class="section" aria-labelledby="story-heading">
+      <div class="wrap story-split">
+        <img class="scene reveal-l" src="assets/img/scene-story.svg" width="900" height="680" loading="lazy" decoding="async"
+             alt="Inside the bakery: a wooden counter with bread, a menu board, pendant lights and a window with a striped awning outside">
+        <div class="reveal-r">
+          <p class="eyebrow">Our bakery</p>
+          <h2 id="story-heading">A neighbourhood bakery, <em style="color:var(--cherry)">built on craft</em></h2>
+          <p class="lede">Since opening in 2019, Butter Days has grown from a single-oven bakery into a neighbourhood favourite, supported by a dedicated team and our long-kept sourdough starter.</p>
+          <p>We laminate by hand, ferment our bread slowly and bake in small batches throughout the morning. Every choice is guided by care for our ingredients, our craft and the people we serve.</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="our-bakery.html">Meet the bakers</a>
+            <a class="btn btn-ghost" href="visit.html">Plan your visit</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ VISIT STRIP ============ -->
+    <section class="visit section-tight" aria-labelledby="visit-heading">
+      <div class="wrap visit-grid">
+        <div class="visit-card reveal-l">
+          <p class="eyebrow">Visit</p>
+          <h2 id="visit-heading">Find the yellow awning</h2>
+          <p class="addr">14 Marion Lane, Kelburn, Wellington</p>
+          <p style="color:var(--ink-soft)">Two minutes off Karo Drive, right by the Marion Park gates.</p>
+
+          <p class="open-badge" data-open-status data-open="false" style="margin-top:1rem">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="open-badge-text">Checking today&rsquo;s hours&hellip;</span>
+          </p>
+          <p class="visually-hidden" data-hours-live role="status"></p>
+
+          <ul class="hours-list">
+            <li><span>Tue&ndash;Fri</span><span>7am&ndash;3pm</span></li>
+            <li><span>Sat&ndash;Sun</span><span>8am&ndash;1pm</span></li>
+            <li><span class="closed">Monday</span><span class="closed">Closed</span></li>
+          </ul>
+
+          <p style="margin-top:1.25rem"><a class="more-link" href="visit.html">Directions, parking &amp; contact</a></p>
+        </div>
+
+        <a class="map-frame reveal-r" href="visit.html#map">
+          <img src="assets/img/map-neighbourhood.svg" width="800" height="560" loading="lazy" decoding="async" alt="">
+          <span class="visually-hidden">Open the neighbourhood map on the Visit page</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============ PASTRY BOX ============ -->
+    <section class="box-section section" id="saturday-box" aria-labelledby="box-heading">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">A selection to share</p>
+          <h2 id="box-heading">Create a <em style="color:var(--cherry)">pastry box</em></h2>
+          <p class="lede">Choose up to six pastries to create a box for sharing. This interactive preview is for demonstration only; it does not reserve stock or submit an order.</p>
+        </div>
+
+        <div class="box-layout">
+          <div id="box-tiles" class="pastry-grid reveal-l" role="group" aria-label="Choose up to six pastries">
+            <button type="button" class="pastry-tile" data-pastry="almond-croissant" aria-pressed="false">
+              <img src="assets/img/pastry-almond-croissant.svg" width="400" height="400" alt="" loading="lazy" decoding="async">
+              <span class="pt-name">Almond croissant</span>
+              <span class="pt-price">$7.50 each</span>
+              <span class="pt-count" aria-hidden="true">&times;0</span>
+            </button>
+            <button type="button" class="pastry-tile" data-pastry="cinnamon-knot" aria-pressed="false">
+              <img src="assets/img/pastry-cinnamon-knot.svg" width="400" height="400" alt="" loading="lazy" decoding="async">
+              <span class="pt-name">Cinnamon knot</span>
+              <span class="pt-price">$6.50 each</span>
+              <span class="pt-count" aria-hidden="true">&times;0</span>
+            </button>
+            <button type="button" class="pastry-tile" data-pastry="pain-au-chocolat" aria-pressed="false">
+              <img src="assets/img/pastry-pain-au-chocolat.svg" width="400" height="400" alt="" loading="lazy" decoding="async">
+              <span class="pt-name">Pain au chocolat</span>
+              <span class="pt-price">$6.00 each</span>
+              <span class="pt-count" aria-hidden="true">&times;0</span>
+            </button>
+            <button type="button" class="pastry-tile" data-pastry="lemon-morning-bun" aria-pressed="false">
+              <img src="assets/img/pastry-lemon-morning-bun.svg" width="400" height="400" alt="" loading="lazy" decoding="async">
+              <span class="pt-name">Lemon morning bun</span>
+              <span class="pt-price">$6.50 each</span>
+              <span class="pt-count" aria-hidden="true">&times;0</span>
+            </button>
+            <button type="button" class="pastry-tile" data-pastry="fruit-danish" aria-pressed="false">
+              <img src="assets/img/pastry-fruit-danish.svg" width="400" height="400" alt="" loading="lazy" decoding="async">
+              <span class="pt-name">Pear and almond Danish</span>
+              <span class="pt-price">$6.50 each</span>
+              <span class="pt-count" aria-hidden="true">&times;0</span>
+            </button>
+            <button type="button" class="pastry-tile" data-pastry="cheddar-scroll" aria-pressed="false">
+              <img src="assets/img/pastry-cheddar-scroll.svg" width="400" height="400" alt="" loading="lazy" decoding="async">
+              <span class="pt-name">Cheddar and chive scroll</span>
+              <span class="pt-price">$7.00 each</span>
+              <span class="pt-count" aria-hidden="true">&times;0</span>
+            </button>
+          </div>
+
+          <div class="box-panel reveal-r">
+            <div class="box-visual">
+              <svg class="box-svg" viewBox="0 0 400 300" role="img" aria-label="A paper box that fills with your chosen pastries">
+                <defs>
+                  <clipPath id="box-inner-clip"><rect x="34" y="118" width="332" height="152" rx="16"/></clipPath>
+                </defs>
+                <path d="M28,118 h344 v150 a18,18 0 0 1 -18,18 H46 a18,18 0 0 1 -18,-18 Z" fill="#E9B44C"/>
+                <path d="M28,118 h344 v150 a18,18 0 0 1 -18,18 H46 a18,18 0 0 1 -18,-18 Z" fill="none" stroke="#46281A" stroke-width="4"/>
+                <path d="M34,118 L12,58 a10,10 0 0 1 10,-14 H378 a10,10 0 0 1 10,14 L366,118" fill="#F5C043" stroke="#46281A" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M52,118 L36,70 h328 l-16,48" fill="none" stroke="#46281A" stroke-width="2.5" opacity=".5"/>
+                <path d="M200,64 l7,16 16,7 -16,7 -7,16 -7,-16 -16,-7 16,-7 Z" fill="#B0453B" opacity=".85"/>
+                <g clip-path="url(#box-inner-clip)">
+                  <g id="box-slots"></g>
+                </g>
+              </svg>
+
+              <div class="box-totals">
+                <p class="bt-count" id="box-count" role="status">0 <small>/ 6 selected</small></p>
+                <p class="bt-price" id="box-price" aria-live="polite">$0.00</p>
+              </div>
+
+              <p class="box-note" id="box-limit-note" aria-live="polite">Choose a pastry to add it to your box. Select it again to add another.</p>
+              <div class="box-chips" id="box-chips" role="group" aria-label="Your current selection"></div>
+
+              <div class="box-actions">
+                <button type="button" class="btn btn-primary" id="box-enquire" disabled>Enquire about this box</button>
+                <button type="button" class="btn btn-ghost" id="box-reset" disabled>Start over</button>
+              </div>
+
+              <p class="box-note">Sample prices only. This demonstration does not take orders or reserve stock.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BOX ENQUIRY ============ -->
+    <section class="section-tight section-blush" aria-labelledby="enquiry-heading">
+      <div class="narrow">
+        <form class="demo-form form-card" id="box-enquiry-form" novalidate>
+          <p class="eyebrow">Pastry box enquiry</p>
+          <h2 id="enquiry-heading">Enquire about your box</h2>
+          <p style="color:var(--ink-soft)">Share your name and email, with your preferred collection time in the notes. Your pastry selection is included in the enquiry preview.</p>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="be-name">Name <span class="req" aria-hidden="true">*</span></label>
+              <input id="be-name" name="name" type="text" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="be-email">Email <span class="req" aria-hidden="true">*</span></label>
+              <input id="be-email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="field full">
+              <label for="be-notes">Notes or dietary requirements</label>
+              <textarea id="be-notes" name="notes" rows="4"></textarea>
+            </div>
+            <div class="field full">
+              <label for="box-summary-field">Your box <span class="hint" style="display:inline">(filled automatically)</span></label>
+              <input id="box-summary-field" name="box" type="text" readonly
+                     placeholder="Choose pastries above and they appear here">
+            </div>
+          </div>
+
+          <div class="form-foot">
+            <button class="btn btn-primary" type="submit">Send enquiry</button>
+            <p class="form-demo-note">Demonstration form. Nothing is sent or stored.</p>
+          </div>
+
+          <img class="rolling-loader" src="assets/img/rolling-pin.svg" width="96" height="64" alt="" aria-hidden="true">
+          <div class="form-status" role="status" tabindex="-1"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+  <!-- chrome:footer:start -->
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-blurb">
+        <h2 class="footer-mark">Butter Days</h2>
+        <p class="footer-tagline">An independent bakery and caf&eacute; in Kelburn, Wellington. Hand-laminated pastries, naturally leavened bread, seasonal cakes and carefully made coffee.</p>
+        <p class="footer-address">
+          14 Marion Lane, Kelburn, Wellington 6012<br>
+          <span class="footer-fictional">Butter Days is a fictional bakery made for a design demonstration.</span>
+        </p>
+        <p class="footer-status" data-open-status>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="footer-status-text">Checking today&rsquo;s hours&hellip;</span>
+        </p>
+      </div>
+
+      <nav class="footer-col" aria-labelledby="footer-wander">
+        <h3 id="footer-wander">Wander</h3>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Bakery menu</a></li>
+          <li><a href="menu.html#tab-pastries">Pastries</a></li>
+          <li><a href="menu.html#tab-bread">Bread</a></li>
+          <li><a href="cakes-and-catering.html">Cakes &amp; catering</a></li>
+          <li><a href="our-bakery.html">Our bakery</a></li>
+          <li><a href="visit.html">Visit &amp; contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="footer-col">
+        <h3>Opening hours</h3>
+        <ul class="footer-hours" data-hours-list>
+          <li><span>Tue&ndash;Fri</span><span>7am&ndash;3pm</span></li>
+          <li><span>Sat&ndash;Sun</span><span>8am&ndash;1pm</span></li>
+          <li><span class="closed">Monday</span><span class="closed">Closed</span></li>
+        </ul>
+        <a class="footer-cta" href="visit.html#map">Directions &amp; parking</a>
+      </div>
+
+      <div class="footer-col">
+        <h3>Say hello</h3>
+        <ul class="footer-contact">
+          <li><a href="mailto:hello@butterdays.nz">hello@butterdays.nz</a></li>
+          <li><a href="tel:+6445550119">(04) 555 0119</a></li>
+        </ul>
+        <p class="footer-small">Replies within two working days, Tuesday to Saturday.</p>
+        <a class="footer-cta" href="visit.html#contact-form">Send a message &rarr;</a>
+      </div>
+    </div>
+
+    <p class="giant-word" aria-hidden="true"><span>Butter</span> <span>Days</span></p>
+
+    <div class="footer-bottom">
+      <span class="footer-legal">&copy; <span class="js-year">2026</span> Butter Days &middot; A fictional bakery. Sample content and prices.</span>
+      <span class="footer-credit">Made with too much butter by <b>NERODYN</b></span>
+      <button class="to-top" type="button" data-to-top>
+        <svg viewBox="0 0 14 20" aria-hidden="true" focusable="false"><path d="M7 19V3M1.5 8.5 7 3l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Back to top</span>
+      </button>
+    </div>
+  </div>
+  <!-- chrome:footer:end -->
+  </footer>
+  <noscript><style>form button[type="submit"], .nav-toggle { display: none !important; } nav.main-nav, nav.site-nav { display: block !important; position: static !important; background: transparent !important; } .header-inner, .site-head > .wrap { flex-wrap: wrap; height: auto; padding-top: 16px; padding-bottom: 16px; } nav.site-nav ul { flex-direction: row; flex-wrap: wrap; gap: 16px; } nav.site-nav a { font-size: 12px; } .no-js-note { padding: 1rem var(--gutter, 2rem); margin: 0; font: inherit; font-size: .85rem; }</style><p class="no-js-note">You can browse every page without JavaScript. Interactive planners and enquiry previews need JavaScript; these demonstration forms do not send messages or take bookings.</p></noscript>
+</body>
+</html>

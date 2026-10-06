@@ -102,7 +102,7 @@ const STEP_T = 0.21;
 const STAIR_TOP = STEP_Y0 + (STEPS - 1) * STEP_RISE;
 const CLIMB_TOP = STAIR_TOP + 0.5;
 /** The core, a little over four steps tall, as it climbs the well. */
-const CORE_IN_TOWER = 1;
+const CORE_IN_TOWER = 1.2;
 /** The AI: each step it passes turns a quarter on its own length, and swings on round the well. */
 const FLIP = Math.PI / 2;
 const SWING = (30 * Math.PI) / 180;

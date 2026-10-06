@@ -73,7 +73,7 @@ const SECTIONS: { id: string; title: string; body: ReactNode }[] = [
     body: (
       <ul>
         <li>Publish sponsored articles, use affiliate links, or take payment to mention a product.</li>
-        <li>Invent numbers, clients, quotes, results or case studies. Our work examples are labelled as demonstrations.</li>
+        <li>Invent numbers, clients, quotes, results or case studies. Our work examples are concept websites and demonstrations for fictional businesses, and say so.</li>
         <li>Use generated images or our own marketing imagery as illustrations.</li>
         <li>Give legal advice. We say what the law and the regulators say, and link to them; for your own contract or situation, talk to a lawyer.</li>
       </ul>

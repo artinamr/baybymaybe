@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Cinnamon knot with icing drizzle">
+  <defs>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <ellipse cx="200" cy="320" rx="132" ry="24" fill="#5A3315" opacity=".16" filter="url(#soft)"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M206,128 C292,124 322,210 272,258 C232,296 148,294 120,244 C96,198 130,150 178,156 C230,162 248,222 204,246 C170,264 128,248 128,212" stroke="#A96615" stroke-width="52"/>
+    <path d="M206,128 C292,124 322,210 272,258 C232,296 148,294 120,244 C96,198 130,150 178,156 C230,162 248,222 204,246 C170,264 128,248 128,212" stroke="#EFB254" stroke-width="38"/>
+    <path d="M202,122 C284,118 314,206 266,252 C228,288 150,286 124,240 C102,198 134,154 178,160 C226,166 242,218 202,240 C170,256 134,242 134,210" stroke="#FFD98F" stroke-width="10" opacity=".55"/>
+    <path d="M148,178 C196,158 246,166 274,196" stroke="#8A4A12" stroke-width="7" opacity=".35"/>
+    <path d="M150,236 C196,258 252,250 276,216" stroke="#8A4A12" stroke-width="7" opacity=".3"/>
+  </g>
+  <g fill="none" stroke="#FBF1DC" stroke-width="8" stroke-linecap="round" opacity=".92">
+    <path d="M136,196 C176,178 236,180 272,204"/>
+    <path d="M142,238 C186,260 240,252 268,224"/>
+    <path d="M188,146 C196,180 190,242 178,272"/>
+  </g>
+  <g fill="#FFFDF4" opacity=".8">
+    <circle cx="160" cy="160" r="3.2"/><circle cx="238" cy="152" r="2.8"/><circle cx="286" cy="216" r="3"/>
+    <circle cx="252" cy="270" r="2.8"/><circle cx="148" cy="270" r="3"/><circle cx="118" cy="212" r="2.6"/>
+    <circle cx="204" cy="212" r="2.4"/><circle cx="222" cy="186" r="2.6"/>
+  </g>
+  <path d="M150,150 C190,124 250,128 278,160" stroke="#FFE9B8" stroke-width="14" fill="none" stroke-linecap="round" opacity=".45" filter="url(#soft)"/>
+</svg>

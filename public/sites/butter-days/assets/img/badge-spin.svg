@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 170" role="img" aria-label="Butter Days circular stamp badge">
+  <defs>
+    <path id="arcTop" d="M85,85 m-62,0 a62,62 0 1,1 124,0"/>
+    <path id="arcBottom" d="M85,85 m-62,0 a62,62 0 1,0 124,0"/>
+  </defs>
+  <circle cx="85" cy="85" r="82" fill="#B0453B"/>
+  <circle cx="85" cy="85" r="66" fill="none" stroke="#F6CD5A" stroke-width="2.5" stroke-dasharray="4 6"/>
+  <text font-family="Georgia, 'Times New Roman', serif" font-size="17.5" font-weight="bold" fill="#FBF3E7" letter-spacing="4.5">
+    <textPath href="#arcTop" startOffset="50%" text-anchor="middle">BUTTER DAYS</textPath>
+  </text>
+  <text font-family="Georgia, 'Times New Roman', serif" font-size="14" font-style="italic" fill="#F6CD5A" letter-spacing="2.5">
+    <textPath href="#arcBottom" startOffset="50%" text-anchor="middle">Wellington · est. 2019</textPath>
+  </text>
+  <g transform="translate(85,86)">
+    <path d="M-34,-6 C-37,-16 -30,-23 -21,-21 C-19,-29 -9,-33 -2,-28 C6,-33 16,-29 18,-21 C27,-23 34,-16 31,-6 C28,6 16,13 0,13 C-16,13 -31,6 -34,-6 Z" fill="#F6CD5A"/>
+    <path d="M-14,-22 C-17,-12 -18,0 -15,9" stroke="#B0453B" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+    <path d="M0,-26 C-1,-14 -1,2 0,11" stroke="#B0453B" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+    <path d="M14,-22 C17,-12 18,0 15,9" stroke="#B0453B" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+    <circle cx="-22" cy="-2" r="1.6" fill="#B0453B" opacity=".55"/>
+    <circle cx="22" cy="-2" r="1.6" fill="#B0453B" opacity=".55"/>
+  </g>
+</svg>

@@ -2927,19 +2927,6 @@ html[data-nowebgl] .pot-fill {
   transform: translateX(70%);
   transition: transform 1300ms var(--ease-expo);
 }
-.work-ph {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #f6f5f2;
-  background: rgba(10, 11, 16, 0.5);
-  backdrop-filter: blur(8px);
-}
 .work-body {
   display: grid;
   gap: 8px;

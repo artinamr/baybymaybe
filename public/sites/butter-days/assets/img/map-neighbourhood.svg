@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" role="img" aria-label="Hand-drawn map of the bakery's neighbourhood: Karo Drive running across, Marion Street with the bakery, a small park, the bus stop and the waterfront walkway to the south">
+  <defs>
+    <clipPath id="mapClip"><path d="M0,0 H800 V560 H0 Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#mapClip)">
+    <rect width="800" height="560" fill="#FCF6EA"/>
+    <path d="M0,430 C140,410 320,418 460,404 C600,390 700,394 800,378 V560 H0 Z" fill="#D8E6E2"/>
+    <path d="M0,444 C140,424 320,432 460,418 C600,404 700,408 800,392" stroke="#9FBFBB" stroke-width="4" fill="none" stroke-dasharray="16 12"/>
+    <g stroke="#8CA89F" stroke-width="3" fill="none" opacity=".8">
+      <path d="M60,486 C180,470 300,476 420,464"/><path d="M420,502 C540,490 660,494 770,480"/>
+    </g>
+    <path d="M-20,150 C180,138 420,158 820,128" stroke="#46281A" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <path d="M-20,150 C180,138 420,158 820,128" stroke="#FBF3E7" stroke-width="4" fill="none" stroke-dasharray="22 20"/>
+    <path d="M-20,292 C200,278 480,300 820,272" stroke="#E3D3B6" stroke-width="18" fill="none" stroke-linecap="round"/>
+    <path d="M-20,292 C200,278 480,300 820,272" stroke="#FFFDF6" stroke-width="3" fill="none" stroke-dasharray="18 16"/>
+    <path d="M236,-10 C240,140 232,300 250,430 C258,500 250,540 252,570" stroke="#E3D3B6" stroke-width="16" fill="none"/>
+    <path d="M560,-10 C556,120 566,220 556,300 C550,352 560,400 556,440" stroke="#E3D3B6" stroke-width="16" fill="none"/>
+    <path d="M560,300 C640,292 700,300 790,292" stroke="#E3D3B6" stroke-width="12" fill="none"/>
+    <rect x="96" y="322" width="112" height="76" rx="8" fill="#EFE3CD" stroke="#D3C2A2" stroke-width="3"/>
+    <g fill="#6F8451">
+      <circle cx="128" cy="316" r="16"/><circle cx="166" cy="306" r="20"/><circle cx="196" cy="320" r="14"/>
+    </g>
+    <g fill="#596B3E"><circle cx="128" cy="316" r="6"/><circle cx="166" cy="306" r="7"/><circle cx="196" cy="320" r="5"/></g>
+    <text x="152" y="416" text-anchor="middle" font-family="Georgia, serif" font-size="19" fill="#6B5B45" font-style="italic">Marion Park</text>
+    <rect x="600" y="330" width="130" height="88" rx="8" fill="#EFE3CD" stroke="#D3C2A2" stroke-width="3"/>
+    <g stroke="#C9B58F" stroke-width="3"><path d="M600,352 H730 M600,374 H730 M600,396 H730"/></g>
+    <text x="665" y="438" text-anchor="middle" font-family="Georgia, serif" font-size="19" fill="#6B5B45" font-style="italic">Saturday market</text>
+    <g transform="translate(560,206) rotate(-3)">
+      <circle cx="0" cy="0" r="13" fill="#B0453B"/>
+      <circle cx="0" cy="0" r="5.5" fill="#FBF3E7"/>
+      <text x="24" y="6" font-family="Georgia, serif" font-size="24" font-weight="bold" fill="#46281A">BUTTER DAYS</text>
+      <text x="24" y="28" font-family="Georgia, serif" font-size="16" font-style="italic" fill="#8A4A12">14 Marion Lane — look for the yellow awning</text>
+    </g>
+    <g transform="translate(300,236)">
+      <rect x="-9" y="-26" width="18" height="34" rx="4" fill="#4E7D8C"/>
+      <path d="M-9,-26 h18 v-8 h-18 Z" fill="#3E6875"/>
+      <text x="16" y="-8" font-family="Georgia, serif" font-size="17" fill="#4E6875" font-style="italic">Bus 34 · 6 min walk</text>
+    </g>
+    <g fill="#46281A" font-family="Georgia, serif">
+      <text x="120" y="140" font-size="22" font-style="italic" transform="rotate(-3 120 140)">Karo Drive</text>
+      <text x="592" y="478" font-size="20" font-style="italic" fill="#4E6875">Waterfront walk · 12 min</text>
+      <text x="246" y="96" font-size="18" font-style="italic" fill="#6B5B45" transform="rotate(87 246 96)">Marion Lane</text>
+    </g>
+    <g transform="translate(700,84) rotate(8)">
+      <path d="M0,0 l7,16 16,7 -16,7 -7,16 -7,-16 -16,-7 16,-7 Z" fill="#F6CD5A"/>
+    </g>
+    <path d="M96,84 C96,68 114,62 120,74 C124,62 144,64 144,80 C144,94 120,104 120,104 C120,104 96,96 96,84 Z" fill="none" stroke="#B0453B" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <g stroke="#46281A" stroke-width="4" stroke-linecap="round" fill="none" opacity=".75">
+      <path d="M62,200 c10,-8 22,-8 30,0"/><path d="M700,180 c10,-8 22,-8 30,0"/>
+    </g>
+    <g fill="#4E6875"><path d="M712,520 c6,-14 26,-14 32,0 c6,14 -8,26 -16,26 c-8,0 -22,-12 -16,-26 Z" opacity=".85"/></g>
+  </g>
+</svg>
