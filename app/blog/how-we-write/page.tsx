@@ -84,7 +84,7 @@ const SECTIONS: { id: string; title: string; body: ReactNode }[] = [
     title: "Photographs",
     body: (
       <p>
-        Every photograph is from outside the studio and free of copyright restrictions (public domain, under CC0). We
+        Every photograph is from outside the studio and free of copyright restrictions (CC0 or public domain). We
         check each one’s licence page before using it, reject anything with a watermark, a logo or a recognisable person
         as its subject, and credit the photographer at the end of the article even though the licence doesn’t require it.
       </p>

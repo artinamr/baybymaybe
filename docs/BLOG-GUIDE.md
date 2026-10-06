@@ -187,58 +187,103 @@ Patterns that make writing sound machine-made. Don't use them:
 
 ## 6. Images (strict)
 
-**Never use Nerodyn's own site imagery in a blog post.** No film stills, no
-renders of the stone, no screenshots of our pages, nothing from the shaders.
-Diagrams built with `components/blog/Diagrams.tsx` are figures, not photos,
-and are welcome.
+The client's verdict on the first set of photos was that they weren't
+premium, weren't really related and looked old. Every photograph on the site
+is held to the bar below, the blog's included. If a slot can't meet it,
+search longer; never settle for "it'll do".
 
-**Photographs come from outside and must be free of copyright
-restrictions: public domain or CC0 only.**
+**Never use Nerodyn's own site imagery.** No film stills, no renders of the
+stone, no screenshots of our pages, nothing from the shaders. Diagrams built
+with `components/blog/Diagrams.tsx` are figures, not photos, and are welcome.
 
-- **Use:** StockSnap.io (every photo is CC0), found through the Openverse
-  search API (`https://api.openverse.org/v1/images/?q=…&license=cc0,pdm&source=stocksnap`).
-  Wikimedia Commons files marked CC0 or Public Domain. NASA and other United
-  States government works (public domain).
-- **Don't use:** Unsplash (its licence is not CC0, and its site blocks
-  automated access), Unsplash+, Pexels or Pixabay (their own licences),
-  anything CC BY, BY-SA, NC or ND, Getty, iStock, Shutterstock, Adobe Stock,
-  Google Images results, anything "free" without a clear licence page, and
-  AI-generated images.
+### Where photos may come from
 
-**Before you use a photo:**
+Only photographs free of copyright restrictions: **CC0** or **public domain**
+(the Public Domain Mark), each with a live page that says so.
 
-1. Open its page. Confirm the licence (StockSnap says "CC0 license. No
-   attribution required.") and that the page is live. A removed StockSnap
-   photo redirects to the home page; don't use it.
-2. Look at it at full size. Reject it if it has a watermark, a visible logo or
-   brand name, legible third-party product screens, text, or a recognisable
-   person as the subject.
-3. Record it in `content/images.ts`: the photo's title, photographer,
-   photographer's page, the photo page, the licence and the date checked. The
-   article's credit line is generated from this record.
+| Source | What it is | How to search | Notes |
+|---|---|---|---|
+| **ISO Republic** (isorepublic.com) | Curated, every photo CC0, many from 2019 on | `tools/qa/photos/isosearch.py` | Its page says "CC0. No attribution." and names the photographer. Negative Space is the same library. |
+| **Wikimedia Commons**, photographs first published on **Unsplash before 5 June 2017** | Many of the best-known editorial photographs on the web, CC0 when published | `tools/qa/photos/cmsearch.py` (searches that set by default; `all` for the rest of Commons) | Commons accepts only the ones published before Unsplash changed its licence on 5 June 2017. Prove the date: the Unsplash image address on the Commons page holds the upload time (`photo-1496517463163-…` is milliseconds since 1970: 3 June 2017). No proven date, don't use it. |
+| **Wikimedia Commons**, other files | Anything whose licence record is CC0 or public domain | `cmsearch.py … all` | Read the licence on the file page, not the category. |
+| **Flickr**, Public Domain Mark only | Mostly institutions: national labs, NASA, museums | `ovsearch.py … flickr` | The photo page's licence must be the Public Domain Mark. Download the original from its "sizes" page. |
+| **StockSnap** | CC0, but mostly 2014–2018 | `ovsearch.py … stocksnap` | Usable, but its devices and styling now look dated. Prefer the sources above. |
+| **WordPress Photo Directory** | CC0, moderated, no faces or logos | `wpsearch.py` | Modern but mostly amateur snapshots. Rarely premium enough. |
 
-**Relevance and quality.** The photo must clearly be about the article's
-subject, or an apt and obvious metaphor (keys for ownership, a calendar for
-bookings). It must look premium: well lit, calm, uncluttered, sharp at
-2400 px wide. No posed "business people", no clichés (handshakes, light bulbs,
-robots, glowing brains, padlocks on keyboards, people pointing at screens). No
-photo appears twice anywhere on the site. Look at the blog's home after
-adding one: the photo also appears in the "What are you deciding?" panel and
-on the article's card, beside the others, so it has to sit well with them.
+**Never:** Unsplash itself (its licence since June 2017 isn't CC0; the
+pre-2017 photos are used from their Commons copies, with the date proved),
+Unsplash+, Pexels, Pixabay and Burst (their own licences), anything CC BY,
+BY-SA, NC or ND, Getty, iStock, Shutterstock, Adobe Stock, Rawpixel (its
+public-domain files need an account), Google Images results, anything "free"
+without a clear licence page, and AI-generated images.
 
-**Preparing the files.** Crop to 24:11 and save two sizes, 2400×1100 as
-`public/blog/<slug>.webp` and 1200×550 as `public/blog/<slug>-1200.webp`,
-WebP at about quality 78, with no metadata, ideally under 150 KB. Grade every
-photo the same way so they sit together on the page: colour muted to about 60%
-saturation, whites taken to the paper (#F6F5F2) and blacks to the ink, with a
-gentle contrast curve. (The grade used for the current set: reduce
-saturation to 0.62, apply a mild S-curve of strength 0.12, then map black to
-RGB 14,15,21 and white to RGB 246,245,242, channel by channel.) The tools that
-search, download, record, grade and crop are in `tools/qa/photos/` (see its
-README).
+### The bar (all of it, every photo)
 
-**Alt text.** Describe what is in the picture, plainly: "A set of keys hanging
-from the lock of an open door." Not "image of", not keywords.
+- **Modern.** Nothing that dates the site: old laptops and phones, iPads with
+  a home button, beige plastic, dated interiors, 2010s filters. Timeless
+  subjects (architecture, light, materials, tools, nature) age best; a
+  device, if shown at all, must be current.
+- **Premium.** Shot by someone who knows what they are doing: deliberate
+  light, a clear subject, space around it, sharp where it matters, at least
+  3000 px wide in the original. Calm and editorial, like a good magazine, not
+  a stock library.
+- **Related.** The subject is the article's subject, or an apt and obvious
+  metaphor a reader gets without being told: a bridge for connecting
+  systems, letterboxes for a client portal (a box for each client), keys for
+  ownership, a building in its scaffolding for a rebuild, a checklist for a
+  quote, a robotic arm for automation. If you have to explain it, it isn't
+  related.
+- **Clean.** No watermark, no logo, no brand name, no product name, no
+  web address, no legible third-party screen, no legible personal
+  handwriting, no recognisable person as the subject. Check at 100% zoom,
+  including small print on objects: a maker's stamp on a key, a brand on a
+  paint swatch, a firm's name on a crane or a scaffold banner, a pen's nib.
+  If cropping can't remove it, reject the photo.
+- **No clichés.** No posed business people, handshakes, light bulbs, glowing
+  brains, padlocks on keyboards, people pointing at screens, cartoon robots.
+- **Once.** No photo appears twice anywhere on the site (a banner and its
+  own service card count as one use).
+- **Together.** Look at the page after adding it, and at the blog's home: the
+  photo appears beside the others in the cards and the "What are you
+  deciding?" panel, so it has to sit well with them.
+
+### Checking and recording it
+
+1. **Open its page.** Confirm the licence wording and that the page is live
+   (a removed StockSnap photo redirects to the home page; a removed Commons
+   file says so). For an Unsplash photo on Commons, prove the date (above).
+2. **Look at the original at full size**, then at the crop at 100%, against
+   every line of the bar.
+3. **Record it in `content/images.ts`**: the photo's title, photographer and
+   their page, the photo page, the source, the licence (`CC0 1.0` or `Public
+   Domain Mark 1.0`), `via` for an Unsplash photo ("first published on
+   Unsplash on 3 June 2017 under CC0"), `org` if the author is an
+   organisation, and the date checked. The article's credit line, the
+   structured data's licence and the image sitemap all come from this record.
+4. **Set `position`** (CSS object-position, such as `"72% 50%"`) when the
+   subject isn't central: a phone shows a 4:3 slice of a banner, and a card a
+   3:2 slice.
+
+### Preparing the files
+
+Use `tools/qa/photos/mkimages.py` (add a line to its `SPECS`): it crops to
+the aspect (24:11 for covers and banners, 4:5 for stages and cards) around a
+focal point, grades, sharpens lightly after resizing and encodes two sizes as
+WebP with no metadata, stepping the quality down until the large size is
+under about 220 KB and the half size under about 90 KB. Blog covers are
+`public/blog/<slug>.webp` (2400×1100) and `<slug>-1200.webp`.
+
+**The grade (v2):** a little colour taken out (saturation 0.86 by default,
+lower for a loud photo), the full tonal range kept, a gentle contrast curve,
+and only the brightest tones leaning toward the paper (#F6F5F2) so whites sit
+on the page. It replaced v1 (saturation 0.62, every tone squeezed between the
+ink and the paper), which made photos look faded and old. Preview with
+`python grade.py in.jpg out.jpg`.
+
+**Alt text.** Describe what is in the picture, plainly: "An open hand holding
+out a set of house keys, new homes out of focus behind it." Not "image of",
+not keywords. Name the place when it helps a New Zealand reader ("at Muriwai,
+west of Auckland").
 
 ---
 
@@ -396,7 +441,7 @@ For each article:
 - [ ] `faq`: three questions, answered as a person would.
 - [ ] `tools` listed, each pointing at a real section.
 - [ ] Terms an owner might not know linked to the glossary (first use only).
-- [ ] Cover photo with alt text and a credit record.
+- [ ] Cover photo that meets every line of "The bar" (section 6), with alt text, a credit record and, if needed, a `position`.
 - [ ] Related service and articles set, and linked in the text.
 - [ ] New Zealand context wherever it matters: the law, the agencies, the
       spelling, the currency.
@@ -511,7 +556,7 @@ or more; if one isn't, fix that before anything else.
 | **Evidence** | Claims without sources | Every fact cited to a primary source, checked today |
 | **Honest** | Every road leads to us | Says when it isn't worth it, when off the shelf is better, who can skip it |
 | **Readable** | Long paragraphs, vague headings | Short paragraphs, headings that work as a contents list, read aloud without stumbling |
-| **Looks right** | A cliché photo, a table that breaks on a phone | A calm, relevant photo that sits with the others; every figure works at 390 px |
+| **Looks right** | A dated, cliché or loosely related photo; a table that breaks on a phone | A modern, premium photo whose link to the subject is obvious, clean at 100% zoom, sitting well with the others; every figure works at 390 px |
 
 ---
 
@@ -553,8 +598,10 @@ When one is published, delete its row here.
 - [ ] At least one practical tool, listed in `tools`, and an honest "when it
       isn't worth it".
 - [ ] Glossary terms linked on first use; new terms added.
-- [ ] Cover photo: CC0 or public domain, live licence page, no watermark, no
-      logo, relevant, premium, recorded in `content/images.ts`, alt text written.
+- [ ] Cover photo: CC0 or public domain with a live licence page (an Unsplash
+      photo's date proved), modern, premium, obviously related, no watermark,
+      logo, brand, web address or legible screen at 100% zoom, used nowhere
+      else, recorded in `content/images.ts`, alt text written.
 - [ ] Title ≤ 60, description ≤ 155, keywords and three questions filled in.
 - [ ] Internal links to the service page and related articles; older articles
       link back.

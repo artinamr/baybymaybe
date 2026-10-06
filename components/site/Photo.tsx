@@ -38,6 +38,7 @@ export function Photo({
       fetchPriority={priority ? "high" : undefined}
       decoding="async"
       className={className}
+      style={p.position ? { objectPosition: p.position } : undefined}
     />
   );
 }

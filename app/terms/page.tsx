@@ -25,7 +25,8 @@ const SECTIONS: LegalSection[] = [
     body: (
       <p>
         Everything on this website (the words, the design, the 3D work and the code) belongs to Nerodyn unless we say
-        otherwise. The photographs are public-domain images (CC0 1.0) from StockSnap. You are
+        otherwise. The photographs are public-domain images (CC0 1.0 or the Public Domain Mark) from ISO Republic,
+        Wikimedia Commons and Flickr, each credited where we list our sources. You are
         welcome to view the site and to share links to it; please do not copy, reproduce or reuse our work without our
         written permission.
       </p>

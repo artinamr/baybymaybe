@@ -5,7 +5,7 @@ import { Photo, BANNER_SIZES } from "@/components/site/Photo";
 import { CONTACT, PAGES, abs } from "@/lib/content";
 import { service } from "@/content/services";
 import { project } from "@/content/work";
-import { CC0_URL } from "@/content/images";
+import { LICENCE_URL } from "@/content/images";
 import { article as findArticle, checkedOn, longDate, topicLabel, type ArticleMeta } from "@/content/blog";
 import type { TocItem } from "@/content/blog/bodies";
 import { ArticleCard } from "./ArticleCard";
@@ -144,13 +144,13 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
                 </a>
                 , from{" "}
                 <a href={c.page} rel="noopener noreferrer" target="_blank">
-                  StockSnap
+                  {c.source}
                 </a>
-                . Public domain under{" "}
-                <a href={CC0_URL} rel="noopener noreferrer" target="_blank">
-                  CC0 1.0
+                {c.via ? ` (${c.via})` : ""}. Public domain (
+                <a href={LICENCE_URL[c.licence]} rel="noopener noreferrer" target="_blank">
+                  {c.licence}
                 </a>
-                ; cropped and colour-graded by us.
+                ); cropped and colour-graded by us.
               </p>
             </section>
 

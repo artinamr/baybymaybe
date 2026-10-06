@@ -1,6 +1,6 @@
 import { CONTACT, FAQ_ALL, PAGES, SITE_URL, STAGES, abs } from "@/lib/content";
 import { SERVICES } from "@/content/services";
-import { CC0_URL, type Photo } from "@/content/images";
+import { LICENCE_URL, type Photo } from "@/content/images";
 import { topicLabel, type ArticleMeta } from "@/content/blog";
 
 /**
@@ -168,7 +168,7 @@ export function CrumbsLd({ crumbs }: { crumbs: { name: string; href: string }[] 
   );
 }
 
-/** A photograph, with its licence (CC0) and who took it. */
+/** A photograph, with its licence (CC0 or the Public Domain Mark) and who took it. */
 function imageNode(p: Photo) {
   return {
     "@type": "ImageObject",
@@ -178,8 +178,8 @@ function imageNode(p: Photo) {
     height: p.height,
     caption: p.alt,
     creditText: `${p.credit.author} (${p.credit.source})`,
-    creator: { "@type": "Person", name: p.credit.author, url: p.credit.authorUrl },
-    license: CC0_URL,
+    creator: { "@type": p.credit.org ? "Organization" : "Person", name: p.credit.author, url: p.credit.authorUrl },
+    license: LICENCE_URL[p.credit.licence],
     acquireLicensePage: p.credit.page,
   };
 }

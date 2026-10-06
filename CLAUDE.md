@@ -318,6 +318,40 @@ important … above and beyond perfection … genuinely useful and attracting").
   `tools/qa/qa2.mjs` is stale since round 17 (it looks for the old home nav
   labels); the home page itself was not touched this round.
 
+**ROUND 20 (2026-10-06 — "the images aren't really premium neither are they
+really related … kind of old … make the images better on the whole website
+and on the blogs and make sure the blog md also stays super images").**
+- **All 15 photographs replaced** (blog covers, methodology banner and
+  stages, service banners and cards). StockSnap's library is mostly
+  2014–2018 (old MacBooks, iPads): out. New set from ISO Republic (CC0),
+  Wikimedia Commons (CC0, incl. photographs first published on Unsplash
+  BEFORE 5 June 2017, each date proved from the Unsplash image address
+  `photo-<ms since 1970>`) and Flickr (Public Domain Mark: Jefferson Lab).
+  Each chosen for an obvious link to its subject: scaffolding and cranes
+  (rebuild or improve), a hand ticking a checklist (quotes), letterboxes at
+  Muriwai, Auckland (a box for each client: portals), a suspension bridge
+  (connecting systems), a robotic arm (AI automation), house keys handed
+  over (ownership); white stairs, a telescope, a compass, wireframes, a
+  spiral stair and a lighthouse for the five stages; a laptop, a transport
+  hall and a clean-room robot for the services.
+- **Clean at 100% zoom**: rejected on the way for small print a reader could
+  read: a crane's maker and a firm's web address (cropped out), a maker's
+  stamp on a key, a paint brand on a swatch, a pen nib's brand, a 3M logo,
+  personal handwriting. Check every crop at full size.
+- **Grade v2** (`tools/qa/photos/grade.py`): saturation 0.86, full tonal
+  range, gentle curve, only the top tones lean to the paper; plus a light
+  sharpen after resizing and a size budget (~220 KB large, ~90 KB half) in
+  `mkimages.py`. v1 (0.62, squeezed between ink and paper) read as faded.
+- `content/images.ts`: `source`, `licence` (CC0 1.0 | Public Domain Mark
+  1.0), `via` (Unsplash first publication), `org`, `position` (object-
+  position for narrower crops, applied by `Photo`; replaced the blanket
+  `.svc-banner img { object-position: 64% }`). The article's credit line and
+  the ImageObject licence follow the record. New search tools:
+  `isosearch.py`, `cmsearch.py`, `wpsearch.py`; `ovsearch.py` widened.
+- docs/BLOG-GUIDE.md section 6 rewritten: the allowed sources and how to
+  search each, the bar (modern, premium, obviously related, clean at 100%,
+  no clichés, once, together), checking and recording, the files and grade.
+
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
 One polished obsidian stone, shaped from the Nerodyn mark, fractured into 40
@@ -598,9 +632,11 @@ way relative to each other.
 
 - Warm paper `#F6F5F2`, ink `#0A0B10`, Electric Indigo `#5B3DF0` (never
   periwinkle; nothing indigo lighter than `#6B4BFF`).
-- Photographs on the site's own pages are outside CC0 photos in the site's
-  grade, recorded in `content/images.ts` (docs/BLOG-GUIDE.md, "Images"). Never
-  film stills or renders there; never stock clichés, watermarks or logos.
+- Photographs on the site's own pages are outside CC0 / public-domain photos
+  in the site's grade (v2), recorded in `content/images.ts` (docs/BLOG-GUIDE.md,
+  section 6: modern, premium, obviously related, clean at 100% zoom). Never
+  film stills or renders there; never stock clichés, watermarks, logos or
+  brand names; never dated devices.
 - No em dashes in any copy (the build checks: `scripts/copy-guard.mjs`).
 - The canvas is TRANSPARENT and there is no bloom (it greys a light page); the
   only post pass is the Lens (depth of field), which keeps the page white.
@@ -715,12 +751,15 @@ way relative to each other.
    (each agent re-reads the ~100KB of spec). Build sequentially in the main
    session when usage is tight; if agents are used, make them write files early.
 11. **Unsplash blocks scripted access** (an Anubis proof-of-work page) and its
-   licence isn't CC0: don't use it. Openverse
-   (`api.openverse.org/v1/images/?license=cc0,pdm&source=stocksnap`) finds
-   CC0 photos; StockSnap's own download form (GET the page for the `_csrf`
-   and `photoId`, POST `/photo/download`) gives the original. A removed
-   StockSnap photo redirects to the home page: never use one without a live
-   licence page.
+   licence since 5 June 2017 isn't CC0: never take a photo from Unsplash
+   itself. Its earlier photos are on Wikimedia Commons as CC0
+   (`tools/qa/photos/cmsearch.py`), but Commons' bot uploaded them in
+   August–September 2017, so the upload date proves nothing: prove each one
+   from the Unsplash image address on its Commons page (`photo-<13 digits>`
+   is milliseconds since 1970). Openverse's Flickr and WordPress records
+   carry preview sizes (1024/2048 px), not the original's; Openverse's own
+   thumbnails fail for Commons (use `Special:FilePath?width=`). A removed
+   StockSnap photo redirects to the home page.
 12. **`background-clip: text` paints only inside the element's box.** With a
    tight line-height a glyph's ascender or descender sticks out of its box
    and vanishes when the text is transparent (the footer signature's y lost

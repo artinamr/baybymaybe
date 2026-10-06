@@ -4071,10 +4071,7 @@ html[data-story] .stone-cursor-dot {
   position: sticky;
   top: calc(var(--nav-h) + 24px);
 }
-/* A service banner holds its subject, right of centre, when a phone crops it. */
-.svc-banner img {
-  object-position: 64% 50%;
-}
+
 
 /* The form's two asks (contact page). */
 .af-kind {

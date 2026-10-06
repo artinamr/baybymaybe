@@ -1,34 +1,36 @@
-"""Crop, grade and encode the site's photographs (CC0 originals in orig/).
+"""Crop, grade and encode the site's photographs (CC0 / public-domain originals in orig/).
 usage: python mkimages.py <outRoot> [only-name,...]
 Each spec: output path (under outRoot), source, aspect, sizes (widths), focal point (fx, fy in 0..1),
-zoom (>= 1) and saturation. Writes <path>.webp at the first width and <path>-<w>.webp for the others."""
+zoom (>= 1) and saturation. Writes <path>.webp at the first width and <path>-<w>.webp for the others.
+The set below is round 20's (the sources and licences are in content/images.ts)."""
 import os, sys
-from PIL import Image
+from PIL import Image, ImageFilter
 from grade import grade
 
-S = 0.62  # the site's grade: muted colour
+S = 0.86  # the site's grade (v2): a little colour taken out, full tonal range
 SPECS = [
     # blog covers, 24:11 (2400 and 1200 wide)
-    ("blog/redesign-or-improve", "laptop-notebook-white", (24, 11), (2400, 1200), (0.5, 0.36), 1.0, S),
-    ("blog/website-quote-checklist", "notepad-glass", (24, 11), (2400, 1200), (0.5, 0.38), 1.0, S),
-    ("blog/when-you-need-a-client-portal", "analytics-dark", (24, 11), (2400, 1200), (0.5, 1.0), 1.0, S),
-    ("blog/connect-website-crm-booking", "ipad-calendar", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, S),
-    ("blog/ai-automation-workflows", "desk-lamp-dark", (24, 11), (2400, 1200), (0.42, 0.55), 1.0, S),
-    ("blog/after-launch-ownership", "key-door", (24, 11), (2400, 1200), (0.5, 0.64), 1.0, S),
+    # cropped left of the second crane's jib (a company's web address) and above the scaffold banners (its name)
+    ("blog/redesign-or-improve", "cranes-building", (24, 11), (2400, 1200), (0.48, 0.406), 1.667, 0.72),
+    ("blog/website-quote-checklist", "checklist", (24, 11), (2400, 1200), (0.55, 0.5), 1.0, S),
+    ("blog/when-you-need-a-client-portal", "muriwai-mailboxes", (24, 11), (2400, 1200), (0.5, 0.56), 1.0, S),
+    ("blog/connect-website-crm-booking", "bridge-mist", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, S),
+    ("blog/ai-automation-workflows", "robot-arm", (24, 11), (2400, 1200), (0.5, 0.3), 1.0, S),
+    ("blog/after-launch-ownership", "keys-hand", (24, 11), (2400, 1200), (0.45, 0.58), 1.0, 0.72),
     # methodology: the banner (24:11) and five stages (4:5)
-    ("method/hero", "laptop-notes", (24, 11), (2400, 1200), (0.5, 0.42), 1.0, S),
-    ("method/discover", "writing-planner", (4, 5), (1296, 648), (0.5, 0.5), 1.0, S),
-    ("method/define", "chair-notebook", (4, 5), (1296, 648), (0.5, 0.5), 1.0, S),
-    ("method/design", "whiteboard-webdesign", (4, 5), (1296, 648), (0.62, 0.5), 1.0, 0.42),
-    ("method/build", "laptop-white-code", (4, 5), (1296, 648), (0.6, 0.5), 1.0, S),
-    ("method/live", "phone-hands-white", (4, 5), (1296, 648), (0.33, 0.5), 1.0, S),
+    ("method/hero", "stairs-white", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, S),
+    ("method/discover", "telescope", (4, 5), (1296, 648), (0.6, 0.5), 1.0, S),
+    ("method/define", "compass-hand", (4, 5), (1296, 648), (0.48, 0.5), 1.0, S),
+    ("method/design", "wireframe-notebook", (4, 5), (1296, 648), (0.62, 0.5), 1.0, 0.7),
+    ("method/build", "spiral-stairs", (4, 5), (1296, 648), (0.53, 0.5), 1.0, S),
+    ("method/live", "lighthouse-ca", (4, 5), (1296, 648), (0.8, 0.5), 1.0, S),
     # services: banners (24:11) and cards (4:5)
-    ("services/websites-wide", "wireframe-mockups", (24, 11), (2400, 1200), (0.5, 0.45), 1.0, S),
-    ("services/websites", "wireframe-mockups", (4, 5), (1200, 600), (0.45, 0.5), 1.0, S),
-    ("services/platforms-wide", "charts-laptop-bright", (24, 11), (2400, 1200), (0.5, 0.45), 1.0, S),
-    ("services/platforms", "charts-laptop-bright", (4, 5), (1200, 600), (0.32, 0.5), 1.0, S),
-    ("services/ai-automation-wide", "laptop-shadow", (24, 11), (2400, 1200), (0.55, 0.37), 1.12, S),
-    ("services/ai-automation", "laptop-shadow", (4, 5), (1200, 600), (0.74, 0.34), 1.45, S),
+    ("services/websites-wide", "laptop-open", (24, 11), (2400, 1200), (0.5, 0.45), 1.0, S),
+    ("services/websites", "laptop-open", (4, 5), (1200, 600), (0.55, 0.5), 1.0, S),
+    ("services/platforms-wide", "oculus", (24, 11), (2400, 1200), (0.5, 0.55), 1.0, S),
+    ("services/platforms", "oculus", (4, 5), (1200, 600), (0.5, 0.5), 1.0, S),
+    ("services/ai-automation-wide", "robot-cleanroom", (24, 11), (2400, 1200), (0.5, 0.45), 1.0, S),
+    ("services/ai-automation", "robot-cleanroom", (4, 5), (1200, 600), (0.74, 0.5), 1.0, S),
 ]
 
 
@@ -57,11 +59,18 @@ def main():
         c = crop(im, aspect, focal, zoom)
         for i, w in enumerate(widths):
             h = round(w * aspect[1] / aspect[0])
-            out = grade(c.resize((w, h), Image.LANCZOS), sat)
+            # Downscaled photos go a little soft: a fine sharpen at the size it is shown.
+            out = grade(c.resize((w, h), Image.LANCZOS), sat).filter(ImageFilter.UnsharpMask(radius=0.7, percent=45, threshold=3))
             name = f"{root}/{path}.webp" if i == 0 else f"{root}/{path}-{w}.webp"
             os.makedirs(os.path.dirname(name), exist_ok=True)
             # Pillow writes no EXIF/XMP unless asked: the files carry no camera or location data.
-            out.save(name, "WEBP", quality=78 if w >= 2000 else 80, method=6)
+            # Detailed photos (foliage, scaffolding, surf) come out large: step the quality down until
+            # the large size is under about 220 KB and the half size under about 90 KB.
+            limit = 225_000 if w >= 2000 else 92_000
+            for q in (78, 74, 70, 66):
+                out.save(name, "WEBP", quality=q if w >= 2000 else q + 2, method=6)
+                if os.path.getsize(name) <= limit:
+                    break
             print(f"{name}  {w}x{h}  {os.path.getsize(name)//1024} KB")
 
 
