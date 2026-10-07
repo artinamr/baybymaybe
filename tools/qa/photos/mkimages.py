@@ -17,6 +17,10 @@ SPECS = [
     ("blog/connect-website-crm-booking", "bridge-mist", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, S),
     ("blog/ai-automation-workflows", "robot-arm", (24, 11), (2400, 1200), (0.5, 0.3), 1.0, S),
     ("blog/after-launch-ownership", "keys-hand", (24, 11), (2400, 1200), (0.45, 0.58), 1.0, 0.72),
+    # October 2026: what-is-seo (signpost), google-business-profile (wayfinding), diy-website-or-hire (workshop)
+    ("blog/what-is-seo", "signpost-peaks", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, S),
+    ("blog/google-business-profile", "map-pins", (24, 11), (2400, 1200), (0.5, 0.45), 1.0, S),
+    ("blog/diy-website-or-hire", "woodworker", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, 0.8),
     # methodology: the banner (24:11) and five stages (4:5)
     ("method/hero", "stairs-white", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, S),
     ("method/discover", "telescope", (4, 5), (1296, 648), (0.6, 0.5), 1.0, S),

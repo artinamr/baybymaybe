@@ -109,6 +109,18 @@ export const GLOSSARY_SOURCES = {
     url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-with-2fa/",
     accessed: CHECKED,
   },
+  starter: {
+    title: "Search Engine Optimization (SEO) Starter Guide",
+    publisher: "Google Search Central",
+    url: "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+    accessed: "2026-10-07",
+  },
+  gbp: {
+    title: "Get started with Google Business Profile",
+    publisher: "Google Business Profile Help",
+    url: "https://support.google.com/business/answer/7039811",
+    accessed: "2026-10-07",
+  },
 } satisfies Record<string, Source>;
 
 type SourceKey = keyof typeof GLOSSARY_SOURCES;
@@ -211,6 +223,23 @@ export const GLOSSARY = [
 
   // ---- Search and speed ----
   {
+    id: "seo",
+    term: "SEO",
+    also: "Search engine optimisation",
+    group: "search",
+    def: "The work of making a website easy for search engines to find, understand and recommend when someone searches for what the business does. It is mostly plain work on the site itself: clear pages, useful words, descriptive titles and a fast load.",
+    see: { slug: "what-is-seo", id: "what-it-is" },
+  },
+  {
+    id: "google-business-profile",
+    term: "Google Business Profile",
+    also: "formerly Google My Business",
+    group: "search",
+    def: "The free listing a business keeps with Google, shown on Search and Maps with its hours, services, photos and reviews. Only businesses that meet customers face to face are eligible for one.",
+    cite: ["gbp"],
+    see: { slug: "google-business-profile", id: "what-it-is" },
+  },
+  {
     id: "core-web-vitals",
     term: "Core Web Vitals",
     group: "search",
@@ -250,6 +279,14 @@ export const GLOSSARY = [
     def: "An instruction that sends people and search engines from an old address to its new one, for good. When pages move, Google recommends permanent redirects (301 or 308), kept for as long as possible and generally at least a year.",
     cite: ["moves"],
     see: { slug: "redesign-or-improve", id: "protect" },
+  },
+  {
+    id: "sitemap",
+    term: "Sitemap",
+    group: "search",
+    def: "A file that lists the pages of a website so search engines can find them all. Google’s starter guide says submitting one can help a site be discovered, but is not required.",
+    cite: ["starter"],
+    see: { slug: "what-is-seo", id: "five-jobs" },
   },
   {
     id: "structured-data",
@@ -298,6 +335,13 @@ export const GLOSSARY = [
     group: "platforms",
     def: "Software you subscribe to rather than have built, usually paid per user per month. It is often the right first step, and stops fitting when your work has steps the product doesn’t allow for.",
     see: { slug: "when-you-need-a-client-portal", id: "off-the-shelf" },
+  },
+  {
+    id: "website-builder",
+    term: "Website builder",
+    group: "platforms",
+    def: "A subscription product for building a website from ready-made templates in a browser editor, with the hosting handled for you. It suits simple sites, and moving a site out of one later takes planning.",
+    see: { slug: "diy-website-or-hire", id: "diy" },
   },
   {
     id: "integration",

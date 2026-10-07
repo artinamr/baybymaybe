@@ -5,6 +5,9 @@ import * as portal from "./when-you-need-a-client-portal";
 import * as connect from "./connect-website-crm-booking";
 import * as ai from "./ai-automation-workflows";
 import * as ownership from "./after-launch-ownership";
+import * as seo from "./what-is-seo";
+import * as gbp from "./google-business-profile";
+import * as diy from "./diy-website-or-hire";
 
 export type TocItem = { id: string; title: string };
 
@@ -16,4 +19,7 @@ export const BODIES: Record<string, { toc: TocItem[]; Body: ComponentType }> = {
   "connect-website-crm-booking": { toc: connect.toc, Body: connect.default },
   "ai-automation-workflows": { toc: ai.toc, Body: ai.default },
   "after-launch-ownership": { toc: ownership.toc, Body: ownership.default },
+  "what-is-seo": { toc: seo.toc, Body: seo.default },
+  "google-business-profile": { toc: gbp.toc, Body: gbp.default },
+  "diy-website-or-hire": { toc: diy.toc, Body: diy.default },
 };

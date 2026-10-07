@@ -17,6 +17,9 @@ const CARDS = [
   ["blog-connect-website-crm-booking", "Blog · Platforms", "Connecting your website to your CRM and booking tools", "", "/blog/connect-website-crm-booking.webp"],
   ["blog-ai-automation-workflows", "Blog · Automation", "Five practical AI automation workflows for NZ businesses", "", "/blog/ai-automation-workflows.webp"],
   ["blog-after-launch-ownership", "Blog · Websites", "After launch: website ownership, hosting and support", "", "/blog/after-launch-ownership.webp"],
+  ["blog-what-is-seo", "Blog · Websites", "What is SEO, and what should a small business do first?", "", "/blog/what-is-seo.webp", "78% 45%"],
+  ["blog-google-business-profile", "Blog · Websites", "How to get your business on Google Search and Maps", "", "/blog/google-business-profile.webp"],
+  ["blog-diy-website-or-hire", "Blog · Websites", "Build your own website or hire someone: how to decide", "", "/blog/diy-website-or-hire.webp"],
   ["services-websites", "Services · Websites", "Websites that turn visits", "into enquiries.", "/services/websites-wide.webp"],
   ["services-platforms", "Services · Platforms", "Platforms your team", "and your clients run on.", "/services/platforms-wide.webp"],
   ["services-ai-automation", "Services · AI automation", "AI that does the work,", "and knows when to ask.", "/services/ai-automation-wide.webp"],
@@ -41,7 +44,7 @@ const size = (ink, indigo) => {
   return L <= 18 ? 62 : L <= 23 ? 54 : 48;
 };
 
-const card = ([, kicker, ink, indigo, photo]) => `
+const card = ([, kicker, ink, indigo, photo, pos]) => `
 <div id="card" style="position:fixed;inset:0;width:1200px;height:630px;background:#F6F5F2;color:#0A0B10;font-family:var(--font-inter),Inter,sans-serif;display:grid;grid-template-columns:${photo ? "1fr 430px" : "1fr 280px"};gap:48px;padding:56px 56px 52px 64px;box-sizing:border-box;z-index:99999;letter-spacing:-0.011em">
   <div style="display:flex;flex-direction:column;min-width:0">
     <p style="margin:0 0 28px;font-size:20px;font-weight:500;color:#5B3DF0;display:flex;gap:14px;align-items:center"><span style="display:inline-block;width:34px;height:1px;background:#5B3DF0"></span>${kicker}</p>
@@ -53,7 +56,7 @@ const card = ([, kicker, ink, indigo, photo]) => `
   </div>
   ${
     photo
-      ? `<div style="border-radius:26px;overflow:hidden;border:1px solid rgba(10,11,16,.07);background:#eeede9"><img src="${base}${photo}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`
+      ? `<div style="border-radius:26px;overflow:hidden;border:1px solid rgba(10,11,16,.07);background:#eeede9"><img src="${base}${photo}" style="width:100%;height:100%;object-fit:cover;display:block${pos ? `;object-position:${pos}` : ""}"></div>`
       : `<div style="display:grid;place-items:center;color:#0A0B10"><span style="width:230px;height:318px;display:block">${MARK.replace("<svg ", '<svg style="width:100%;height:100%" ')}</span></div>`
   }
 </div>`;

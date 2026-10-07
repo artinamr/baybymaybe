@@ -63,7 +63,7 @@ export type Photo = {
 
 const CHECKED = "2026-10-06";
 
-type CreditIn = Omit<Credit, "checked" | "licence"> & { licence?: Licence };
+type CreditIn = Omit<Credit, "checked" | "licence"> & { licence?: Licence; checked?: string };
 
 /** A photo in public/<path>.webp (w × h) with its half size beside it. */
 function photo(path: string, w: number, h: number, alt: string, credit: CreditIn, position?: string): Photo {
@@ -74,7 +74,7 @@ function photo(path: string, w: number, h: number, alt: string, credit: CreditIn
     width: w,
     height: h,
     alt,
-    credit: { licence: "CC0 1.0", ...credit, checked: CHECKED },
+    credit: { licence: "CC0 1.0", ...credit, checked: credit.checked ?? CHECKED },
     ...(position ? { position } : {}),
   };
 }
@@ -149,6 +149,32 @@ export const PHOTOS = {
     "after-launch-ownership",
     "An open hand holding out a set of house keys, new homes out of focus behind it.",
     iso("House Keys", "Master Senaiper", "master-senaiper", "house-keys")
+  ),
+  "cover-seo": cover(
+    "what-is-seo",
+    "A weathered wooden trail sign burned with the words Humphreys Peak, lit by the setting sun.",
+    {
+      ...unsplash("Humphreys Peak signpost", "Todd Diemer", "todd_diemer", "Humphreys_Peak_signpost_(Unsplash).jpg", "30 December 2016"),
+      checked: "2026-10-07",
+    },
+    "50% 45%"
+  ),
+  "cover-gbp": cover(
+    "google-business-profile",
+    "A pale world map studded with coloured pins, each one a place somebody chose.",
+    {
+      ...unsplash("Map with colorful pins", "delfi de la Rua", "delfidelarua7", "Map_with_colorful_pins_(Unsplash).jpg", "20 October 2016"),
+      checked: "2026-10-07",
+    }
+  ),
+  "cover-diy": cover(
+    "diy-website-or-hire",
+    "Hands sanding a new wooden board on a sawdust-covered workshop floor.",
+    {
+      ...unsplash("Woodworker in a workshop", "Ian Schneider", "goian", "Woodworker_in_a_workshop_(Unsplash).jpg", "12 May 2016"),
+      checked: "2026-10-07",
+    },
+    "55% 50%"
   ),
 
   // The methodology: its banner (24:11) and the five stages (4:5).

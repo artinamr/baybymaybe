@@ -71,6 +71,8 @@ export type ArticleMeta = {
 };
 
 const ACCESSED = "2026-10-04";
+/** The three October articles: their sources were fetched and checked on this day. */
+const CHECKED_1007 = "2026-10-07";
 
 export const ARTICLES: ArticleMeta[] = [
   {
@@ -108,7 +110,7 @@ export const ARTICLES: ArticleMeta[] = [
         a: "The first screen of the home page and each service page, one clear page per service, the route an enquiry takes, page speed (usually oversized images and unused scripts), and each page’s title and description. Change one thing at a time and note the date, so you can see what worked.",
       },
     ],
-    related: { services: ["websites"], work: ["practice-website"], articles: ["website-quote-checklist", "after-launch-ownership"] },
+    related: { services: ["websites"], work: ["practice-website"], articles: ["website-quote-checklist", "after-launch-ownership", "what-is-seo"] },
     sources: [
       { title: "About PageSpeed Insights", publisher: "Google for Developers", url: "https://developers.google.com/speed/docs/insights/v5/about", accessed: ACCESSED },
       { title: "Web Vitals", publisher: "web.dev (Google)", url: "https://web.dev/articles/vitals", accessed: ACCESSED },
@@ -164,7 +166,7 @@ export const ARTICLES: ArticleMeta[] = [
         a: "Yes, when the scope is written precisely, the quote says what you provide and by when, and every change is priced and approved before any work on it starts. Then the price only moves when you agree to change the scope.",
       },
     ],
-    related: { services: ["websites"], work: ["practice-website"], articles: ["redesign-or-improve", "after-launch-ownership"] },
+    related: { services: ["websites"], work: ["practice-website"], articles: ["redesign-or-improve", "after-launch-ownership", "diy-website-or-hire"] },
     sources: [
       { title: "WCAG 2 Overview", publisher: "W3C Web Accessibility Initiative", url: "https://www.w3.org/WAI/standards-guidelines/wcag/", accessed: ACCESSED },
       { title: "Web Vitals", publisher: "web.dev (Google)", url: "https://web.dev/articles/vitals", accessed: ACCESSED },
@@ -409,6 +411,227 @@ export const ARTICLES: ArticleMeta[] = [
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/secure-your-domain-name/",
         accessed: ACCESSED,
+      },
+    ],
+    status: "published",
+  },
+  {
+    slug: "what-is-seo",
+    title: "What is SEO, and what should a small business do first?",
+    description:
+      "Search engine optimisation in plain words: how Google decides what to show, five jobs worth doing first, how long it takes, and when it pays to hire help.",
+    short:
+      "SEO (search engine optimisation) is the work of making your website easy for search engines to find, understand and recommend. Most of it is plain work you can do yourself: one clear page per service, the words customers actually type, honest titles and descriptions, a fast site, and being known. Google never charges to appear, results take weeks to months, and no one can guarantee a number-one ranking.",
+    situation: "We want more people to find us on Google.",
+    audience: {
+      for: "Business owners who keep hearing about SEO and want to know what it actually involves before they pay anyone for it.",
+      skip: "You need enquiries this week. Search work pays off over months; advertising is the faster tool for that.",
+    },
+    tools: [
+      { title: "Five SEO jobs worth doing first", kind: "Steps", id: "five-jobs" },
+      { title: "A page, checked before it goes live", kind: "Checklist", id: "page-check" },
+    ],
+    topic: "websites",
+    keywords: ["what is seo", "search engine optimisation", "seo for small business", "seo new zealand", "how to rank on google", "google search results"],
+    published: "2026-10-07",
+    minutes: 7,
+    cover: PHOTOS["cover-seo"],
+    faq: [
+      {
+        q: "What does SEO stand for?",
+        a: "Search engine optimisation: the work of making a website easy for search engines to find, understand and recommend when someone searches for what the business does. It is mostly plain work on the site itself, not a paid placement.",
+      },
+      {
+        q: "How long does SEO take to work?",
+        a: "Google’s own guide says some changes take effect in a few hours and others could take several months. Judge a change over weeks rather than days, and give a fair test a month or two before deciding whether it worked.",
+      },
+      {
+        q: "Can I do SEO myself?",
+        a: "Yes. One clear page per service, the words customers use, a written title and description for each page, a fast site and Search Console set up are all within reach of any owner. Hiring someone buys speed and technical depth, not a secret method.",
+      },
+    ],
+    related: { services: ["websites"], work: ["practice-website"], articles: ["google-business-profile", "redesign-or-improve"] },
+    sources: [
+      {
+        title: "Doing business online",
+        publisher: "Business.govt.nz",
+        url: "https://www.business.govt.nz/strategy-and-performance/doing-business-online",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Do you need an SEO?",
+        publisher: "Google Search Central",
+        url: "https://developers.google.com/search/docs/fundamentals/do-i-need-seo",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Search Engine Optimization (SEO) Starter Guide",
+        publisher: "Google Search Central",
+        url: "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Google Search Essentials",
+        publisher: "Google Search Central",
+        url: "https://developers.google.com/search/docs/essentials",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Creating helpful, reliable, people-first content",
+        publisher: "Google Search Central",
+        url: "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "About Search Console",
+        publisher: "Search Console Help (Google)",
+        url: "https://support.google.com/webmasters/answer/9128668",
+        accessed: CHECKED_1007,
+      },
+    ],
+    status: "published",
+  },
+  {
+    slug: "google-business-profile",
+    title: "How to get your business on Google Search and Maps",
+    description:
+      "Add or claim a Google Business Profile, pass verification, fill in what matters, earn reviews the right way, and keep it working: all of it free.",
+    short:
+      "A Google Business Profile is the free listing that controls how your business appears on Google Search and Maps. Add or claim it, verify it, keep its hours, services and photos complete and accurate, and reply to every review. Google ranks local results on relevance, distance and prominence, and there is no way to pay for a better place.",
+    audience: {
+      for: "Any New Zealand business with premises customers can visit, or that travels to its customers.",
+      skip: "You sell only online, with no face-to-face contact. Google’s rules leave profiles to businesses customers can visit, or that visit them.",
+    },
+    tools: [
+      { title: "Setting up a Business Profile", kind: "Steps", id: "add-or-claim" },
+      { title: "A profile, checked over", kind: "Checklist", id: "keep-it-working" },
+    ],
+    topic: "websites",
+    keywords: ["google business profile", "google my business", "add business to google maps", "get on google maps", "local search new zealand"],
+    published: "2026-10-07",
+    minutes: 7,
+    cover: PHOTOS["cover-gbp"],
+    faq: [
+      {
+        q: "Is a Google Business Profile free?",
+        a: "Yes. Google says a profile lets you manage how your business shows up on Maps and Search at no charge, and local ranking can’t be bought either. What agencies charge for is the work of setting it up well and keeping it that way.",
+      },
+      {
+        q: "How long does verification take?",
+        a: "It depends on the method Google chooses. A postcard’s code usually arrives within 14 days and expires after 30, and after you apply, review takes up to five business days. Don’t change the business name, address or category while you wait, or the code stops working.",
+      },
+      {
+        q: "Can I pay to rank higher on Google Maps?",
+        a: "No. Google states plainly that there is no way to request or pay for a better local ranking. Relevance, distance and popularity decide it, and the parts you can influence are complete details, real reviews and helpful replies.",
+      },
+    ],
+    related: { services: ["websites"], work: ["practice-website"], articles: ["what-is-seo", "after-launch-ownership"] },
+    sources: [
+      {
+        title: "Get started with Google Business Profile",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/7039811",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Add or claim your Business Profile",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/2911778",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Tips to improve your local ranking on Google",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/7091",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Business Profile guidelines",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/3038177",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Verify your business on Google",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/7107242",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Tips to get more reviews",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/3474122",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Protect your business with two-factor authentication (2FA)",
+        publisher: "Own Your Online (NCSC)",
+        url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-with-2fa/",
+        accessed: CHECKED_1007,
+      },
+    ],
+    status: "published",
+  },
+  {
+    slug: "diy-website-or-hire",
+    title: "Build your own website or hire someone: how to decide",
+    description:
+      "When a site builder is the right answer and when a professional earns their fee, what each path really costs, and what to protect either way.",
+    short:
+      "Build it yourself when the site’s job is to show what you do and take enquiries, the words and photos exist, and someone enjoys the work: a site builder is then a good answer. Hire when the site must book, take payments or connect to your systems, or when nobody has the hours. Either way, keep the domain and every account in your business’s name.",
+    situation: "We need a website and haven’t decided how to build it.",
+    audience: {
+      for: "Anyone at the very start, weighing a site builder against engaging a professional.",
+      skip: "You already have a website and are wondering whether to rebuild it. Start with redesign or improve instead.",
+    },
+    tools: [
+      { title: "DIY or hire: the decision path", kind: "Decision path", id: "deciding" },
+      { title: "What each path asks of you", kind: "Comparison", id: "costs" },
+    ],
+    topic: "websites",
+    keywords: ["build your own website", "diy website vs professional", "website builder", "how much to build a website", "hire a web designer", "new zealand"],
+    published: "2026-10-07",
+    minutes: 6,
+    cover: PHOTOS["cover-diy"],
+    faq: [
+      {
+        q: "Is it cheaper to build your own website?",
+        a: "In money, usually; in hours, never. A builder’s subscription is small and a professional build is a real invoice, but the hours you spend building and then tending the site are the hidden cost, and they repeat every month the site lives.",
+      },
+      {
+        q: "What does a site builder include?",
+        a: "Ready-made templates, a browser editor and the hosting, for one subscription; on Squarespace, trying multiple templates is included with the subscription. The trade is that the tool’s limits are yours, and moving a site out of one takes planning.",
+      },
+      {
+        q: "When should we hire a professional?",
+        a: "When the site must take bookings or payments, or connect to your CRM, calendar or accounting; when the words and design have to carry the brand; or when nobody in the business has the hours. Then pay for the build and keep the ownership in writing.",
+      },
+    ],
+    related: { services: ["websites"], work: ["practice-website"], articles: ["website-quote-checklist", "after-launch-ownership"] },
+    sources: [
+      {
+        title: "Doing business online",
+        publisher: "Business.govt.nz",
+        url: "https://www.business.govt.nz/strategy-and-performance/doing-business-online",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Switching templates in version 7.0 FAQ",
+        publisher: "Squarespace Help",
+        url: "https://support.squarespace.com/hc/en-us/articles/206545367",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "Search Engine Optimization (SEO) Starter Guide",
+        publisher: "Google Search Central",
+        url: "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+        accessed: CHECKED_1007,
+      },
+      {
+        title: "A ready reference for registrants",
+        publisher: "Domain Name Commission",
+        url: "https://dnc.org.nz/assets/DocumentLibrary/a_ready_reference_for_registrants.pdf",
+        accessed: CHECKED_1007,
       },
     ],
     status: "published",
