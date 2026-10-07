@@ -217,6 +217,13 @@ export default function Body() {
         person. The message that mentions chest symptoms is handed straight to a person, with no draft at all. The
         clinic and its emails are invented, and nothing is sent.
       </p>
+      <H2 id="yours">How we’d look at yours</H2>
+      <p>
+        Choosing the task, building it with a person in the loop, and proving it on your own numbers before it touches
+        a customer: that is our <a href={PAGES.service("ai-automation")}>AI automation service</a> in a sentence. The
+        free audit scores your repeated work against the good-fit test and names the one workflow worth piloting
+        first, or tells you that none of them is yet.
+      </p>
     </>
   );
 }

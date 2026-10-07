@@ -73,6 +73,8 @@ export type ArticleMeta = {
 const ACCESSED = "2026-10-04";
 /** The three October articles: their sources were fetched and checked on this day. */
 const CHECKED_1007 = "2026-10-07";
+/** The two October articles on being hacked and on chat assistants. */
+const CHECKED_1008 = "2026-10-08";
 
 export const ARTICLES: ArticleMeta[] = [
   {
@@ -196,7 +198,7 @@ export const ARTICLES: ArticleMeta[] = [
       { title: "What a portal’s first version should do", kind: "Steps", id: "first-version" },
     ],
     topic: "platforms",
-    keywords: ["client portal", "customer portal", "custom portal vs off-the-shelf", "multi-factor authentication", "Privacy Act 2020", "New Zealand business software"],
+    keywords: ["client portal", "customer portal", "client portal for small business", "multi-factor authentication", "Privacy Act 2020", "custom portal vs off-the-shelf"],
     published: "2026-10-04",
     minutes: 7,
     cover: PHOTOS["cover-portal"],
@@ -308,7 +310,7 @@ export const ARTICLES: ArticleMeta[] = [
       { title: "A privacy check before you start", kind: "Steps", id: "privacy" },
     ],
     topic: "automation",
-    keywords: ["AI automation", "AI for small business", "workflow automation", "human in the loop", "Privacy Act 2020 and AI", "New Zealand"],
+    keywords: ["AI automation", "AI for small business", "workflow automation", "ai tools for business", "human in the loop", "Privacy Act 2020 and AI"],
     published: "2026-10-04",
     minutes: 7,
     cover: PHOTOS["cover-ai"],
@@ -326,7 +328,7 @@ export const ARTICLES: ArticleMeta[] = [
         a: "There are two costs: building it (the workflow, rules, approved answers, connections, testing and training) and running it. Most AI services charge by how much they process, so running costs rise and fall with your volume. A good build estimates them from your real numbers and sets limits and alerts.",
       },
     ],
-    related: { services: ["ai-automation"], work: ["enquiry-desk"], articles: ["connect-website-crm-booking", "when-you-need-a-client-portal"] },
+    related: { services: ["ai-automation"], work: ["enquiry-desk"], articles: ["connect-website-crm-booking", "when-you-need-a-client-portal", "website-chat-assistant"] },
     sources: [
       {
         title: "Generative Artificial Intelligence",
@@ -351,7 +353,7 @@ export const ARTICLES: ArticleMeta[] = [
   },
   {
     slug: "after-launch-ownership",
-    title: "After launch: website ownership, hosting and support",
+    title: "Who owns your website? Domain, hosting, code and support",
     description:
       "What owning your website means (domain, code, content and accounts in your name), plus a handover checklist, backups, security and support options.",
     short:
@@ -367,7 +369,7 @@ export const ARTICLES: ArticleMeta[] = [
       { title: "Find out what you own today", kind: "Steps", id: "today" },
     ],
     topic: "websites",
-    keywords: ["website ownership", "web hosting", "website support", ".nz domain", "website backups", "website security"],
+    keywords: ["website ownership", "who owns my website", "website hosting", ".nz domain", "website handover", "website support"],
     published: "2026-10-04",
     minutes: 7,
     cover: PHOTOS["cover-ownership"],
@@ -385,7 +387,7 @@ export const ARTICLES: ArticleMeta[] = [
         a: "Ask your current registrar for the domain’s UDAI, a code that confirms the transfer. They must give it to you promptly and at no cost. Moving registrar doesn’t automatically end other contracts with the old provider, such as hosting.",
       },
     ],
-    related: { services: ["websites", "platforms"], work: ["practice-website"], articles: ["website-quote-checklist", "redesign-or-improve"] },
+    related: { services: ["websites", "platforms"], work: ["practice-website"], articles: ["website-quote-checklist", "redesign-or-improve", "website-hacked"] },
     sources: [
       {
         title: "A ready reference for registrants",
@@ -432,7 +434,7 @@ export const ARTICLES: ArticleMeta[] = [
       { title: "A page, checked before it goes live", kind: "Checklist", id: "page-check" },
     ],
     topic: "websites",
-    keywords: ["what is seo", "search engine optimisation", "seo for small business", "seo new zealand", "how to rank on google", "google search results"],
+    keywords: ["what is seo", "search engine optimisation", "seo for small business", "seo new zealand", "how to rank on google", "how does google search work"],
     published: "2026-10-07",
     minutes: 7,
     cover: PHOTOS["cover-seo"],
@@ -507,7 +509,7 @@ export const ARTICLES: ArticleMeta[] = [
       { title: "A profile, checked over", kind: "Checklist", id: "keep-it-working" },
     ],
     topic: "websites",
-    keywords: ["google business profile", "google my business", "add business to google maps", "get on google maps", "local search new zealand"],
+    keywords: ["google business profile", "google my business", "add business to google maps", "get on google maps", "google maps listing", "local search new zealand"],
     published: "2026-10-07",
     minutes: 7,
     cover: PHOTOS["cover-gbp"],
@@ -589,7 +591,7 @@ export const ARTICLES: ArticleMeta[] = [
       { title: "What each path asks of you", kind: "Comparison", id: "costs" },
     ],
     topic: "websites",
-    keywords: ["build your own website", "diy website vs professional", "website builder", "how much to build a website", "hire a web designer", "new zealand"],
+    keywords: ["build your own website", "diy website vs professional", "website builder", "how much to build a website", "hire a web designer", "website builder vs web designer"],
     published: "2026-10-07",
     minutes: 6,
     cover: PHOTOS["cover-diy"],
@@ -632,6 +634,126 @@ export const ARTICLES: ArticleMeta[] = [
         publisher: "Domain Name Commission",
         url: "https://dnc.org.nz/assets/DocumentLibrary/a_ready_reference_for_registrants.pdf",
         accessed: CHECKED_1007,
+      },
+    ],
+    status: "published",
+  },
+  {
+    slug: "website-hacked",
+    title: "What to do if your website is hacked",
+    description:
+      "Hacked website? The first hour, reporting it to the NCSC, restoring from a clean backup, telling affected people under the Privacy Act, and stopping the next one.",
+    short:
+      "Contain it first: write down what you are seeing, call your hosting provider, change the important passwords from another device, and take the site offline if it puts visitors at risk. Report it to the National Cyber Security Centre, restore from a backup that is older than the break-in, notify affected people if personal information was reached, then close the way in and test your backups.",
+    audience: {
+      for: "Any business whose website has been broken into, or that wants to know what the bad day looks like before it arrives.",
+      skip: "You are in the middle of an active incident right now. Call your hosting provider first; read this on the other side.",
+    },
+    tools: [
+      { title: "If your website is hacked today", kind: "Steps", id: "first" },
+      { title: "After the clean-up", kind: "Checklist", id: "next" },
+    ],
+    topic: "websites",
+    keywords: ["website hacked", "what to do if website is hacked", "hacked website fix", "report cyber attack nz", "malware on website", "website security new zealand"],
+    published: "2026-10-08",
+    minutes: 7,
+    cover: PHOTOS["cover-hacked"],
+    faq: [
+      {
+        q: "How do I know if my website has been hacked?",
+        a: "Browser warnings for your visitors, an alert in Google Search Console, pages or admin users you didn’t create, sudden slowness, or email from your domain landing in spam. Your hosting provider’s notice counts too; check it is really from them before clicking anything.",
+      },
+      {
+        q: "Should we pay a ransom to get our website back?",
+        a: "Own Your Online says do not: “Do not pay the ransom, even if the amount seems small. There is no guarantee that you’ll get your data back.” Paying funds the next attack and may breach sanctions. Restoring from a clean backup is the way back.",
+      },
+      {
+        q: "Do we have to tell customers if our website was hacked?",
+        a: "If the breach reached personal information and has caused or might cause serious harm, notifying is “a legal obligation under the Privacy Act”. The Privacy Commissioner says to notify ideally within 72 hours of becoming aware, and to tell affected people as soon as you can, in plain language.",
+      },
+    ],
+    related: { services: ["websites"], work: ["practice-website"], articles: ["after-launch-ownership", "diy-website-or-hire"] },
+    sources: [
+      {
+        title: "IT risks and scams",
+        publisher: "Business.govt.nz",
+        url: "https://www.business.govt.nz/operations/it-risks-and-scams",
+        accessed: CHECKED_1008,
+      },
+      {
+        title: "Report an incident: individuals and small business",
+        publisher: "National Cyber Security Centre",
+        url: "https://www.ncsc.govt.nz/report/business-and-individuals/",
+        accessed: CHECKED_1008,
+      },
+      {
+        title: "Protect your business against ransomware",
+        publisher: "Own Your Online (NCSC)",
+        url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-against-ransomware/",
+        accessed: CHECKED_1008,
+      },
+      {
+        title: "Privacy breaches: notify us",
+        publisher: "Office of the Privacy Commissioner",
+        url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
+        accessed: CHECKED_1008,
+      },
+      {
+        title: "Protect your business with two-factor authentication (2FA)",
+        publisher: "Own Your Online (NCSC)",
+        url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-with-2fa/",
+        accessed: CHECKED_1008,
+      },
+    ],
+    status: "published",
+  },
+  {
+    slug: "website-chat-assistant",
+    title: "Should our website have a chat assistant?",
+    description:
+      "When a website chat assistant earns its place, where they disappoint, what the Privacy Commissioner expects, and a four-question test to run before you build one.",
+    short:
+      "Yes, when the same ten questions arrive every week, the answers are written down, and someone will own it after launch. No, when the questions are varied or the pages are thin: then a good contact page and better pages beat an assistant that improvises. If you build one, it should answer only from words you approved, tell visitors what it is, keep personal information out, and hand over to a person the moment it is unsure.",
+    audience: {
+      for: "Owners hearing “you need a chatbot” and wanting an honest test before spending on one.",
+      skip: "You want an assistant that takes bookings or changes orders. That is automation with higher stakes, and needs more than this article covers.",
+    },
+    tools: [
+      { title: "Should you build one: the test", kind: "Decision path", id: "test" },
+      { title: "Before it goes live", kind: "Checklist", id: "live" },
+    ],
+    topic: "automation",
+    keywords: ["chatbot for website", "should i add a chatbot", "ai chat assistant for business", "website live chat", "ai assistant small business nz", "chatbot privacy"],
+    published: "2026-10-08",
+    minutes: 7,
+    cover: PHOTOS["cover-chat"],
+    faq: [
+      {
+        q: "Does a chat assistant replace our contact page?",
+        a: "No. It sits beside it. Some visitors want a person immediately, and the Privacy Commissioner’s guidance expects people to be told how and why the tool is being used. Keep the human path one tap away everywhere the assistant appears.",
+      },
+      {
+        q: "What should a chat assistant answer?",
+        a: "The ten questions that arrive every week, answered only from words you have approved, with a link to the page behind each answer. Anything outside the sheet gets a handover to a person rather than an improvisation.",
+      },
+      {
+        q: "Is a chatbot bad for privacy?",
+        a: "It depends on the design. Keep personal information out of the prompts, use a tool you have confirmed doesn’t retain or disclose what it is given, tell visitors plainly, and have a person review what it says before anyone acts on it. The Privacy Commissioner also expects a privacy impact assessment first.",
+      },
+    ],
+    related: { services: ["ai-automation"], work: ["enquiry-desk"], articles: ["ai-automation-workflows", "what-is-seo"] },
+    sources: [
+      {
+        title: "Generative Artificial Intelligence",
+        publisher: "Office of the Privacy Commissioner",
+        url: "https://www.privacy.org.nz/resources-and-learning/a-z-topics/ai/generative-artificial-intelligence/",
+        accessed: CHECKED_1008,
+      },
+      {
+        title: "Privacy Act 2020: the privacy principles",
+        publisher: "Office of the Privacy Commissioner",
+        url: "https://www.privacy.org.nz/privacy-principles/",
+        accessed: CHECKED_1008,
       },
     ],
     status: "published",

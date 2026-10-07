@@ -25,7 +25,7 @@ const visible = (page) =>
   page.on("pageerror", (e) => errs.push(e.message));
   await page.setViewport({ width: 1440, height: 900 });
   await page.goto(`${B}/blog/`, { waitUntil: "networkidle0" });
-  ok((await visible(page)).length === 9, "all nine cards at first");
+  ok((await visible(page)).length === 11, "all eleven cards at first");
   await page.keyboard.press("/");
   await sleep(400);
   ok(await page.evaluate(() => document.activeElement?.id === "bl-q"), '"/" focuses the search');
@@ -34,7 +34,7 @@ const visible = (page) =>
   const v1 = await visible(page);
   ok(v1.length === 1 && v1[0] === "after-launch-ownership", `search "udai" → ${v1.join(",")}`);
   ok(await page.evaluate(() => [...document.querySelectorAll(".bl-hits a")].map((a) => a.textContent).includes("UDAI")), "glossary hit offered for udai");
-  ok((await page.$eval(".bl-count", (e) => e.textContent)).includes("1 of 9"), "count says 1 of 9");
+  ok((await page.$eval(".bl-count", (e) => e.textContent)).includes("1 of 11"), "count says 1 of 11");
   await clear(page);
   await page.keyboard.type("privacy");
   await sleep(200);
@@ -46,7 +46,7 @@ const visible = (page) =>
   await clear(page);
   await page.keyboard.press("Backspace");
   await sleep(200);
-  ok((await visible(page)).length === 9, "cleared → nine again");
+  ok((await visible(page)).length === 11, "cleared → eleven again");
   const btns = await page.$$(".bl-filter button");
   await btns[2].click();
   await sleep(200);

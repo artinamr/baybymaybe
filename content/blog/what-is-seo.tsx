@@ -254,7 +254,8 @@ export default function Body() {
         When we audit a site we start where this article does: can Google read it, does each page answer one thing in
         the customer’s words, and does the page give a searcher a reason to stop. The free audit covers that in plain
         language, with the five jobs above marked done, half-done or missing. Send us your web address and we’ll walk
-        you through it, whether or not you ever hire us.
+        you through it, whether or not you ever hire us. Where the work is bigger than an afternoon, it becomes a page
+        or a rebuild in our <a href="/services/websites/">websites service</a>, priced from the audit’s list.
       </p>
     </>
   );

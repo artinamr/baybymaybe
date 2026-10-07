@@ -21,6 +21,9 @@ SPECS = [
     ("blog/what-is-seo", "signpost-peaks", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, S),
     ("blog/google-business-profile", "map-pins", (24, 11), (2400, 1200), (0.5, 0.45), 1.0, S),
     ("blog/diy-website-or-hire", "woodworker", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, 0.8),
+    # October 2026, second pair: hacked (extinguisher), chat assistant (rotary phone)
+    ("blog/website-hacked", "extinguisher", (24, 11), (2400, 1200), (0.5, 0.45), 1.0, 0.72),
+    ("blog/website-chat-assistant", "phone", (24, 11), (2400, 1200), (0.5, 0.45), 1.0, S),
     # methodology: the banner (24:11) and five stages (4:5)
     ("method/hero", "stairs-white", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, S),
     ("method/discover", "telescope", (4, 5), (1296, 648), (0.6, 0.5), 1.0, S),

@@ -244,7 +244,8 @@ export default function Body() {
         quote includes design and a clickable prototype you approve, building and testing on real devices, launch with
         redirects and analytics, everything handed over in your name with plain notes, training, and the support set out
         in writing. It lists the running costs to plan for. The <a href={PAGES.pricing}>investment page</a> explains how a
-        quote comes together and what moves the price.
+        quote comes together and what moves the price. Not ready for a quote? The free audit is the smaller first
+        step: your site read by us, and the list of what we would change, at no cost.
       </p>
     </>
   );

@@ -77,7 +77,7 @@ export const GLOSSARY_SOURCES = {
     title: "Generative Artificial Intelligence",
     publisher: "Office of the Privacy Commissioner",
     url: "https://www.privacy.org.nz/resources-and-learning/a-z-topics/ai/generative-artificial-intelligence/",
-    accessed: CHECKED,
+    accessed: "2026-10-08",
   },
   ipps: {
     title: "Privacy Act 2020: the privacy principles",
@@ -107,7 +107,7 @@ export const GLOSSARY_SOURCES = {
     title: "Protect your business with two-factor authentication (2FA)",
     publisher: "Own Your Online (NCSC)",
     url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-with-2fa/",
-    accessed: CHECKED,
+    accessed: "2026-10-08",
   },
   starter: {
     title: "Search Engine Optimization (SEO) Starter Guide",
@@ -416,6 +416,15 @@ export const GLOSSARY = [
     cite: ["genai"],
     see: { slug: "ai-automation-workflows", id: "good-fit" },
   },
+  {
+    id: "chat-assistant",
+    term: "Chat assistant",
+    also: "Website chatbot",
+    group: "ai",
+    def: "Software on a website that answers visitors’ questions in conversation. The kind built on generative AI drafts its own answers, so the Privacy Commissioner’s guidance applies: it should answer from approved material, say what it is, and hand over to a person rather than improvise.",
+    cite: ["genai"],
+    see: { slug: "website-chat-assistant", id: "harm" },
+  },
 
   // ---- Privacy, consent and security ----
   {
@@ -451,6 +460,13 @@ export const GLOSSARY = [
     def: "Signing in with a password plus a second proof: something you have, such as a code on your phone, or something you are, such as a fingerprint. Someone who steals a password is unlikely to have your phone as well.",
     cite: ["tfa"],
     see: { slug: "when-you-need-a-client-portal", id: "security" },
+  },
+  {
+    id: "malware",
+    term: "Malware",
+    group: "privacy",
+    def: "Software put on a system without the owner’s consent to damage it, spy on it or use it. On a website it is usually the reason a host or a browser warns visitors away, and the clean-up is to remove it, restore a clean backup and close the way in.",
+    see: { slug: "website-hacked", id: "restore" },
   },
 ] as const satisfies readonly GlossaryTerm[];
 

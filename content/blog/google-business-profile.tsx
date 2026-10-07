@@ -238,6 +238,8 @@ export default function Body() {
         A profile is a small system, and it is at its best when it agrees with your website: the same hours, the same
         services, the same words. In the free audit we look at the pair together, the profile and the pages it points
         to, and tell you plainly what is helping and what is missing. Send us your web address and we’ll include it.
+        Where the website itself is the weaker half, fixing it is our{" "}
+        <a href="/services/websites/">websites service</a>.
       </p>
     </>
   );

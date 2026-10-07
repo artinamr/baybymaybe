@@ -214,7 +214,8 @@ export default function Body() {
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        We build websites, so you would expect us to say “hire someone”. The honest version: for a simple site and a
+        <a href="/services/websites/">We build websites</a>, so you would expect us to say “hire someone”. The honest
+        version: for a simple site and a
         willing owner, a builder is the better deal, and this article tells you how to start well. Where we earn our
         place is the rest: sites that must book, sell or connect, and businesses that would rather spend their hours
         on the work. The free audit is a good first step either way: send us your web address, or your plan for one,

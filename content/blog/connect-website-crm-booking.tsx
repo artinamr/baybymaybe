@@ -232,6 +232,14 @@ export default function Body() {
           "A weekly check that the numbers match.",
         ]}
       />
+
+      <H2 id="yours">How we’d look at yours</H2>
+      <p>
+        Joining a website to the systems behind it is the everyday work of our{" "}
+        <a href="/services/platforms/">platforms service</a>: one field map, one connection at a time, each one
+        watched. The free audit finds the places where the same details are typed twice, and prices the fix before you
+        commit to anything.
+      </p>
     </>
   );
 }

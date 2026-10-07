@@ -276,7 +276,9 @@ export default function Body() {
         This is what our free audit is for. We look at your site the way your customers do (on a phone, on a laptop, in
         search) and within two days you get a short, plain write-up: what is working, what is costing you enquiries, and
         what we would build instead. Sometimes the answer is “change three pages”. If it is, we’ll say
-        so.
+        so. If it says rebuild, that is our <a href="/services/websites/">websites service</a>: the plan, the pages and
+        the handover, everything in your name. If it says improve, you can hand the list to whoever looks after your
+        site, us included.
       </p>
     </>
   );

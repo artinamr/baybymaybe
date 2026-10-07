@@ -578,9 +578,7 @@ sources you fetch, never from this list.
 | Choosing an online booking system for a clinic or salon | Decision guide | Platforms | Appointment businesses | Each product's own documentation; privacy.org.nz for health information (Health Information Privacy Code) |
 | Taking deposits and payments online: what to set up | How to | Platforms | Businesses taking bookings | consumerprotection.govt.nz; the payment provider's own documentation |
 | When a business outgrows its spreadsheets | When you need it | Platforms | Teams running jobs in Excel | Our experience; ncsc.govt.nz on access control |
-| Should our website have a chat assistant? | Decision guide | Automation | Owners hearing about AI chat | privacy.org.nz (generative AI); the provider's documentation |
 | Using AI with customer data: a plain checklist | Checklist | Automation | Anyone trying AI tools at work | privacy.org.nz (generative AI, principles 5 and 12) |
-| What to do if your website is hacked | How to | Websites | Any owner, before it happens | ncsc.govt.nz and ownyouronline.govt.nz (reporting, recovery); privacy.org.nz (notifiable breaches) |
 
 When one is published, delete its row here.
 

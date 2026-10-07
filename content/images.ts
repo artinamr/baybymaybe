@@ -176,6 +176,31 @@ export const PHOTOS = {
     },
     "55% 50%"
   ),
+  "cover-hacked": cover(
+    "website-hacked",
+    "A red fire extinguisher on a teal wall, its shadow behind it.",
+    {
+      title: "Fire Extinguisher",
+      author: "Piotr Chrobot",
+      authorUrl: "https://isorepublic.com/media-author/piotr-chrobot/",
+      page: "https://isorepublic.com/photo/fire-extinguisher/",
+      source: "ISO Republic",
+      checked: "2026-10-08",
+    }
+  ),
+  "cover-chat": cover(
+    "website-chat-assistant",
+    "A cream rotary telephone on a plain white desk, its cord curled beside it.",
+    {
+      title: "Rotary dial telephone in Rio de Janeiro, Brazil",
+      author: "Wilfredor",
+      authorUrl: "https://commons.wikimedia.org/wiki/User:Wilfredor",
+      page: "https://commons.wikimedia.org/wiki/File:Rotary_dial_telephone_in_Rio_de_Janeiro,_Brazil.jpg",
+      source: "Wikimedia Commons",
+      checked: "2026-10-08",
+    },
+    "50% 42%"
+  ),
 
   // The methodology: its banner (24:11) and the five stages (4:5).
   "method-hero": photo(

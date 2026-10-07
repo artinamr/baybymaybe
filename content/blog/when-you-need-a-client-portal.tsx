@@ -220,6 +220,14 @@ export default function Body() {
         board. It is a demonstration (the business and its data are invented, and nothing is sent), but it shows the
         shape of a first version better than a description can.
       </p>
+
+      <H2 id="yours">How we’d look at yours</H2>
+      <p>
+        A portal like Kerrow is most of what our <a href={PAGES.service("platforms")}>platforms work</a> is: one place
+        your team and your clients both trust, built on the way you already run jobs. The free audit looks at where the
+        hours go today and tells you honestly whether an off-the-shelf tool would do the job before anyone builds
+        anything.
+      </p>
     </>
   );
 }

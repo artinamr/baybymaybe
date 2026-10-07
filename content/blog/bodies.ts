@@ -8,6 +8,8 @@ import * as ownership from "./after-launch-ownership";
 import * as seo from "./what-is-seo";
 import * as gbp from "./google-business-profile";
 import * as diy from "./diy-website-or-hire";
+import * as hacked from "./website-hacked";
+import * as chat from "./website-chat-assistant";
 
 export type TocItem = { id: string; title: string };
 
@@ -22,4 +24,6 @@ export const BODIES: Record<string, { toc: TocItem[]; Body: ComponentType }> = {
   "what-is-seo": { toc: seo.toc, Body: seo.default },
   "google-business-profile": { toc: gbp.toc, Body: gbp.default },
   "diy-website-or-hire": { toc: diy.toc, Body: diy.default },
+  "website-hacked": { toc: hacked.toc, Body: hacked.default },
+  "website-chat-assistant": { toc: chat.toc, Body: chat.default },
 };

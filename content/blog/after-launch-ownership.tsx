@@ -246,9 +246,12 @@ export default function Body() {
           working, and test the forms and email afterwards.
         </li>
       </ul>
+      <H2 id="yours">How we’d look at yours</H2>
       <p>
-        Every Nerodyn project ends with the domain, the code, the content and every account in your name, and plain notes
-        on how it all works. If you’re not sure what you own today, the free audit is a good place to find out.
+        Every Nerodyn project ends with the domain, the code, the content and every account in your name, and plain
+        notes on how it all works; keeping it that way afterwards is part of our{" "}
+        <a href="/services/websites/">website care</a>. If you’re not sure what you own today, the free audit is the
+        place to find out: one afternoon, a list of every account, and the fix for whatever is wrong first.
       </p>
     </>
   );
