@@ -493,7 +493,11 @@ the story, only then the craziness, and every effect has to MEAN something).**
   (Next blocks HMR from it and reloads in a loop). The hall's floor ring is
   centred on the pit (an offset once covered half the pit and hid the fall).
   Keep the camera a metre or more off any column (the new frame's front
-  columns carry no light seams for that reason).
+  columns carry no light seams for that reason). No light-shaft planes: on a
+  real GPU their edges made NaN pixels (`pow` of a hair-negative base) that
+  the bloom smeared into a white glare over the words; they are gone, every
+  `pow` base is clamped, and `post.ts` `fin()` turns any NaN/Inf to black
+  before the bloom and the composite. SwiftShader never showed it.
 - **Verified here on SwiftShader only** (no GPU in the cloud session): every
   rest frame, phone layout, reduced motion, no-WebGL, keys/drag/drop/hover,
   the offline score. **Owed on a real GPU**: frame time on an integrated and

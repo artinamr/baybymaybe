@@ -14,16 +14,14 @@ import { PIECE_GLSL } from "./kit";
  *   marble  a customer: a warm bead of light with a hot heart
  *   streak  a falling customer: a stretch of light along its fall
  *   dust    motes in the air, lit by the chapter's light
- *   shaft   light falling through the high windows
  *   window  the cathedral's windows and rose, tracery drawn in the shader
  *   halo    a soft glow (the pit, the sun, the moon, the lamp)
  */
 
 export const shared = {
   uTime: { value: 0 },
-  /** The chapter's key light colour (dust and shafts take it). */
+  /** The chapter's key light colour (the dust takes it). */
   uKey: { value: new THREE.Color(1, 0.6, 0.3) },
-  uShaft: { value: 1 },
   uDust: { value: 1 },
   /** The windows' light. */
   uWin: { value: new THREE.Color(1, 0.5, 0.2) },
@@ -184,7 +182,7 @@ export function glassMaterial(tex: THREE.Texture) {
       uniform float uTime; uniform float uK;
       varying vec3 vCol; varying float vPow; varying float vGl; varying float vFog; varying vec3 vN; varying vec3 vV;
       void main() {
-        float ndv = abs(dot(normalize(vN), normalize(vV)));
+        float ndv = min(abs(dot(normalize(vN), normalize(vV))), 1.0);
         // A thin bright edge where the glass turns away; almost nothing face-on.
         float rim = pow(1.0 - ndv, 4.5);
         float sheen = pow(1.0 - ndv, 1.5) * 0.06;
@@ -331,31 +329,6 @@ export function dustMaterial(px: number) {
 }
 
 /** Light through the high windows: a long soft beam with slow dust in it. */
-export function shaftMaterial() {
-  return new THREE.ShaderMaterial({
-    uniforms: { uTime: shared.uTime, uKey: shared.uKey, uShaft: shared.uShaft },
-    vertexShader: /* glsl */ `
-      varying vec2 vUv; varying vec3 vW;
-      void main() { vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
-    fragmentShader: /* glsl */ `
-      ${NOISE}
-      uniform float uTime; uniform vec3 uKey; uniform float uShaft;
-      varying vec2 vUv; varying vec3 vW;
-      void main() {
-        float across = 1.0 - abs(vUv.x * 2.0 - 1.0);
-        across = pow(across, 2.2);
-        float along = smoothstep(0.0, 0.18, vUv.y) * (1.0 - smoothstep(0.55, 1.0, vUv.y));
-        float n = vnoise(vec3(vW.x * 0.08, vW.y * 0.05 - uTime * 0.02, vW.z * 0.08));
-        float a = across * along * (0.55 + 0.45 * n) * 0.05 * uShaft;
-        gl_FragColor = vec4(uKey * a, 1.0);
-      }`,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    side: THREE.DoubleSide,
-  });
-}
-
 /**
  * The cathedral's glass: a lancet (pointed arch) or a rose, its tracery drawn
  * here. uv in [0,1]; `aKind` 0 lancet, 1 rose.

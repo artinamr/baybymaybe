@@ -73,7 +73,15 @@ uniform vec2 uTexel;
 uniform float uPrefilter;
 uniform float uThreshold;
 in vec2 vUv;
+// Any NaN or infinity a shader lets slip (a stray pixel) becomes black, and
+// nothing is brighter than 64: one bad pixel can never bloom across the frame.
+// (Bit test, not isnan(): D3D's compiler may optimise isnan away.)
+vec3 fin(vec3 c) {
+  bvec3 bad = equal(floatBitsToUint(c) & uvec3(0x7f800000u), uvec3(0x7f800000u));
+  return clamp(mix(c, vec3(0.0), bad), 0.0, 64.0);
+}
 float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+vec3 tap(vec2 uv) { return fin(texture(tSrc, uv).rgb); }
 vec3 pre(vec3 c) {
   // soft knee: everything above the threshold, eased in over a knee
   float l = luma(c);
@@ -92,19 +100,19 @@ vec3 karis(vec3 a, vec3 b, vec3 c, vec3 d) {
 }
 void main() {
   vec2 t = uTexel;
-  vec3 a = texture(tSrc, vUv + t * vec2(-2.0, 2.0)).rgb;
-  vec3 b = texture(tSrc, vUv + t * vec2(0.0, 2.0)).rgb;
-  vec3 c = texture(tSrc, vUv + t * vec2(2.0, 2.0)).rgb;
-  vec3 d = texture(tSrc, vUv + t * vec2(-2.0, 0.0)).rgb;
-  vec3 e = texture(tSrc, vUv).rgb;
-  vec3 f = texture(tSrc, vUv + t * vec2(2.0, 0.0)).rgb;
-  vec3 g = texture(tSrc, vUv + t * vec2(-2.0, -2.0)).rgb;
-  vec3 h = texture(tSrc, vUv + t * vec2(0.0, -2.0)).rgb;
-  vec3 i = texture(tSrc, vUv + t * vec2(2.0, -2.0)).rgb;
-  vec3 j = texture(tSrc, vUv + t * vec2(-1.0, 1.0)).rgb;
-  vec3 k = texture(tSrc, vUv + t * vec2(1.0, 1.0)).rgb;
-  vec3 l = texture(tSrc, vUv + t * vec2(-1.0, -1.0)).rgb;
-  vec3 m = texture(tSrc, vUv + t * vec2(1.0, -1.0)).rgb;
+  vec3 a = tap(vUv + t * vec2(-2.0, 2.0));
+  vec3 b = tap(vUv + t * vec2(0.0, 2.0));
+  vec3 c = tap(vUv + t * vec2(2.0, 2.0));
+  vec3 d = tap(vUv + t * vec2(-2.0, 0.0));
+  vec3 e = tap(vUv);
+  vec3 f = tap(vUv + t * vec2(2.0, 0.0));
+  vec3 g = tap(vUv + t * vec2(-2.0, -2.0));
+  vec3 h = tap(vUv + t * vec2(0.0, -2.0));
+  vec3 i = tap(vUv + t * vec2(2.0, -2.0));
+  vec3 j = tap(vUv + t * vec2(-1.0, 1.0));
+  vec3 k = tap(vUv + t * vec2(1.0, 1.0));
+  vec3 l = tap(vUv + t * vec2(-1.0, -1.0));
+  vec3 m = tap(vUv + t * vec2(1.0, -1.0));
   vec3 o;
   if (uPrefilter > 0.5) {
     o = karis(j, k, l, m) * 0.5 + karis(a, b, d, e) * 0.125 + karis(b, c, e, f) * 0.125 + karis(d, e, g, h) * 0.125 + karis(e, f, h, i) * 0.125;
@@ -165,6 +173,13 @@ vec3 aces(vec3 color) {
   color = RRTAndODTFit(color);
   return clamp(ACESOutputMat * color, 0.0, 1.0);
 }
+// Any NaN or infinity a shader lets slip (a stray pixel) becomes black, and
+// nothing is brighter than 64: one bad pixel can never bloom across the frame.
+// (Bit test, not isnan(): D3D's compiler may optimise isnan away.)
+vec3 fin(vec3 c) {
+  bvec3 bad = equal(floatBitsToUint(c) & uvec3(0x7f800000u), uvec3(0x7f800000u));
+  return clamp(mix(c, vec3(0.0), bad), 0.0, 64.0);
+}
 float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 vec3 toSRGB(vec3 c) {
   c = clamp(c, 0.0, 1.0);
@@ -186,6 +201,8 @@ void main() {
   hdr.r = texture(tScene, uv - off).r;
   hdr.g = texture(tScene, uv).g;
   hdr.b = texture(tScene, uv + off).b;
+  hdr = fin(hdr);
+  hdr = fin(hdr);
   vec3 bloom = texture(tBloom, uv).rgb;
   vec3 col = (hdr + bloom * uBloom) * uExposure;
   col = aces(col);

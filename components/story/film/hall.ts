@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { between, gothicArch, place, unitBox } from "./geo";
+import { gothicArch, place, unitBox } from "./geo";
 import { FLOOR_Y, PIT_R, PIT_Y } from "./layout";
-import { dustMaterial, haloMaterial, shaftMaterial, stoneMaterial, windowMaterial } from "./materials";
+import { dustMaterial, haloMaterial, stoneMaterial, windowMaterial } from "./materials";
 
 /**
  * THE HALL: the business's machine stands in a cathedral, so its scale reads
@@ -144,31 +144,6 @@ export function buildHall(phone: boolean) {
   winMesh.frustumCulled = false;
   group.add(winMesh);
 
-  // Light through the high windows on the left, falling toward the tower.
-  const shafts: THREE.BufferGeometry[] = [];
-  const shaftSpec: [number, number, number][] = [
-    [-41, 63, 4],
-    [-41, 63, -11],
-    [-41, 63, -26],
-    [41, 62, -18],
-  ];
-  for (const [x, y, z] of shaftSpec) {
-    const from = new THREE.Vector3(x, y, z);
-    const to = new THREE.Vector3(x < 0 ? 4 : -6, 8, z + 6);
-    for (const roll of [0, Math.PI / 2]) {
-      const g = new THREE.PlaneGeometry(1, 1);
-      g.translate(0, 0.5, 0);
-      const m = between(from, to, [7.5, 1], roll);
-      // between() centres the unit along Y; the plane was shifted up by half: undo.
-      m.multiply(new THREE.Matrix4().makeTranslation(0, -0.5, 0));
-      g.applyMatrix4(m);
-      shafts.push(g);
-    }
-  }
-  const shaftMesh = new THREE.Mesh(mergeGeometries(shafts, false)!, shaftMaterial());
-  shaftMesh.frustumCulled = false;
-  shaftMesh.renderOrder = 2;
-  if (!phone) group.add(shaftMesh);
 
   // Dust.
   const n = phone ? 900 : 2600;
@@ -208,7 +183,7 @@ export function buildHall(phone: boolean) {
         void main() {
           float h = clamp((vY - ${PIT_Y.toFixed(1)}) / ${(FLOOR_Y - PIT_Y + 8).toFixed(1)}, 0.0, 1.0);
           float a = pow(1.0 - h, 2.2) * 0.22 + smoothstep(0.62, 0.8, h) * (1.0 - smoothstep(0.8, 1.0, h)) * 0.05;
-          float edge = 0.35 + 0.65 * pow(1.0 - abs(dot(vN, vV)), 1.5);
+          float edge = 0.35 + 0.65 * pow(max(1.0 - abs(dot(vN, vV)), 0.0), 1.5);
           gl_FragColor = vec4(vec3(1.0, 0.12, 0.04) * a * edge * uK, 1.0);
         }`,
       transparent: true,
@@ -229,5 +204,5 @@ export function buildHall(phone: boolean) {
   pitGlow.renderOrder = 1;
   group.add(pitGlow);
 
-  return { group, stoneMesh, winMesh, shaftMesh, dust, pitGlow, haze };
+  return { group, stoneMesh, winMesh, dust, pitGlow, haze };
 }

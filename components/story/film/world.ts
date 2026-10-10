@@ -419,7 +419,6 @@ export class World {
     L.hemi.intensity = look.hemiK * 0.55;
     this.scene.environmentIntensity = look.env;
     shared.uKey.value.copy(look.key);
-    shared.uShaft.value = look.shaft;
     shared.uDust.value = look.dust;
     shared.uWin.value.copy(look.win);
     shared.uWinK.value = look.winK * 0.42;

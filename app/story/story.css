@@ -406,6 +406,15 @@ html[data-st="nofilm"] .st-count {
   pointer-events: none;
   color: var(--st-fg);
 }
+/* Every word over the film keeps a close dark halo, so it reads over any frame,
+   even a white glare (not on the paper ending, where the words are ink). */
+html:not([data-st-paper]) .st-cards,
+html:not([data-st-paper]) .st-count,
+html:not([data-st-paper]) .st-time,
+html:not([data-st-paper]) .st-hud,
+html:not([data-st-paper]) .st-bar {
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5), 0 1px 6px rgba(0, 0, 0, 0.45);
+}
 /* A soft shade under the words, so they read over any frame. */
 .st-cards::before {
   content: "";
@@ -495,18 +504,18 @@ html[data-st="nofilm"] .st-count {
 .st-t {
   font-family: var(--display);
   font-weight: 500;
-  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.4), 0 1px 6px rgba(0, 0, 0, 0.45), 0 2px 28px rgba(0, 0, 0, 0.5);
   font-size: clamp(38px, 4.7vw, 86px);
   line-height: 0.99;
   letter-spacing: -0.038em;
   text-wrap: balance;
 }
 .st-l {
-  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5), 0 1px 5px rgba(0, 0, 0, 0.55), 0 1px 18px rgba(0, 0, 0, 0.6);
   margin-top: 24px;
   font-size: clamp(17px, 1.35vw, 20px);
   line-height: 1.45;
-  color: var(--st-dim);
+  color: color-mix(in oklab, var(--st-fg) 84%, transparent);
   max-width: 36ch;
 }
 .st-l .w {

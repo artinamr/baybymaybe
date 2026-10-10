@@ -7,7 +7,7 @@ import { range, smooth } from "./ease";
  * fluorescent green for the admin, blood red at the edge and in the pit;
  * black at the turn, a white flash, then indigo, teal and gold for the new
  * machine, and warm paper at the end. A look is the fog, the lights, the
- * windows, the dust and shafts, and the grade; between stops it blends.
+ * windows, the dust, and the grade; between stops it blends.
  */
 
 export type Look = {
@@ -23,7 +23,6 @@ export type Look = {
   hemiK: number;
   win: THREE.Color;
   winK: number;
-  shaft: number;
   dust: number;
   env: number;
   exposure: number;
@@ -59,7 +58,6 @@ function base(): Look {
     hemiK: 0.35,
     win: C(1.2, 0.6, 0.25),
     winK: 1,
-    shaft: 1,
     dust: 1,
     env: 0.9,
     exposure: 1,
@@ -92,7 +90,6 @@ export const LOOKS = {
     hemiK: 0.28,
     win: C(2.4, 1.05, 0.38),
     winK: 1,
-    shaft: 1.1,
     gain: V3(1.06, 0.96, 0.86),
     lift: V3(0.012, 0.006, 0.0),
     shadow: V3(0.0, 0.05, 0.08),
@@ -113,7 +110,6 @@ export const LOOKS = {
     hemiK: 0.4,
     win: C(3.4, 1.5, 0.45),
     winK: 1.2,
-    shaft: 1.35,
     dust: 1.3,
     gain: V3(1.1, 0.97, 0.8),
     lift: V3(0.018, 0.008, 0.0),
@@ -138,7 +134,6 @@ export const LOOKS = {
     hemiK: 0.4,
     win: C(0.35, 0.6, 1.7),
     winK: 0.8,
-    shaft: 0.55,
     dust: 0.8,
     gain: V3(0.88, 0.97, 1.12),
     lift: V3(0.0, 0.006, 0.022),
@@ -163,7 +158,6 @@ export const LOOKS = {
     hemiK: 0.45,
     win: C(0.5, 0.9, 0.3),
     winK: 0.35,
-    shaft: 0.0,
     dust: 0.6,
     gain: V3(0.94, 1.06, 0.84),
     lift: V3(0.008, 0.018, 0.0),
@@ -189,7 +183,6 @@ export const LOOKS = {
     hemiK: 0.3,
     win: C(1.4, 0.18, 0.08),
     winK: 0.55,
-    shaft: 0.25,
     dust: 0.9,
     gain: V3(1.12, 0.9, 0.86),
     lift: V3(0.0015, 0.0, 0.0),
@@ -213,7 +206,6 @@ export const LOOKS = {
     hemiK: 0.3,
     win: C(1.2, 0.35, 0.2),
     winK: 0.6,
-    shaft: 0.6,
     dust: 0.8,
     gain: V3(1.04, 0.95, 0.92),
     shadow: V3(0.0, 0.02, 0.05),
@@ -230,7 +222,6 @@ export const LOOKS = {
     keyK: 0.5,
     hemiK: 0.05,
     winK: 0.05,
-    shaft: 0,
     dust: 0.2,
     exposure: 0.85,
     sat: 0.6,
@@ -249,7 +240,6 @@ export const LOOKS = {
     sky: C(0.04, 0.04, 0.06),
     hemiK: 0.2,
     winK: 0.15,
-    shaft: 0.35,
     dust: 1.4,
     exposure: 1.0,
     sat: 0.75,
@@ -270,7 +260,6 @@ export const LOOKS = {
     hemiK: 0.45,
     win: C(0.6, 0.45, 2.6),
     winK: 1.1,
-    shaft: 0.9,
     dust: 1.0,
     env: 1.2,
     gain: V3(0.98, 0.98, 1.06),
@@ -298,7 +287,6 @@ export const LOOKS = {
     hemiK: 0.45,
     win: C(0.3, 1.2, 1.6),
     winK: 1.0,
-    shaft: 0.7,
     env: 1.2,
     gain: V3(0.92, 1.02, 1.06),
     lift: V3(0.0, 0.008, 0.014),
@@ -325,7 +313,6 @@ export const LOOKS = {
     hemiK: 0.45,
     win: C(2.6, 1.7, 0.6),
     winK: 1.2,
-    shaft: 1.3,
     dust: 1.3,
     env: 1.2,
     gain: V3(1.05, 1.0, 0.9),
