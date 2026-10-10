@@ -1,0 +1,1235 @@
+/* ==========================================================================
+   THE STORY (/story/, docs/STORY.md): the door, the film's words and
+   controls over its canvas, the offer it ends on, and the transcript.
+   Loaded only by this route (app/story/layout.tsx).
+   ========================================================================== */
+
+.st {
+  --st-bg: #050507;
+  --st-fg: #f4f1ea;
+  --st-dim: color-mix(in oklab, var(--st-fg) 66%, transparent);
+  --st-faint: color-mix(in oklab, var(--st-fg) 40%, transparent);
+  --st-hair: color-mix(in oklab, var(--st-fg) 16%, transparent);
+  --st-glass: color-mix(in oklab, #14141c 62%, transparent);
+  --st-vh: 100lvh;
+  --st-land: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+html[data-st] {
+  background: var(--st-bg, #050507);
+}
+html[data-st="door"],
+html[data-st="wait"] {
+  overflow: hidden;
+}
+html[data-st] body {
+  background: transparent;
+}
+
+/* ---- the top bar: always there (the sound, the way back) ----------------- */
+.st-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  height: 68px;
+  padding: 0 var(--g);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--st-fg);
+  pointer-events: none;
+  transition: color 500ms ease;
+}
+.st-bar > * {
+  pointer-events: auto;
+}
+html[data-st-paper] .st-bar {
+  color: var(--ink);
+}
+.st-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.st-mark {
+  height: 20px;
+  width: auto;
+}
+.st-bar-title {
+  font-size: 13px;
+  color: currentColor;
+  opacity: 0.6;
+  padding-left: 18px;
+  border-left: 1px solid color-mix(in oklab, currentColor 25%, transparent);
+  line-height: 1;
+}
+.st-bar-r {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* chips: the controls' one shape */
+.st-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: inherit;
+  background: color-mix(in oklab, currentColor 7%, transparent);
+  border: 1px solid color-mix(in oklab, currentColor 16%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  transition:
+    background 250ms ease,
+    border-color 250ms ease,
+    transform 250ms var(--ease-expo);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.st-chip:hover {
+  background: color-mix(in oklab, currentColor 14%, transparent);
+  border-color: color-mix(in oklab, currentColor 30%, transparent);
+}
+.st-chip:active {
+  transform: scale(0.97);
+}
+.st-ico {
+  flex: none;
+}
+.st-wave {
+  transform-origin: 12px 12px;
+  animation: st-wave 1.6s ease-in-out infinite;
+}
+.st-wave-2 {
+  animation-delay: 0.2s;
+}
+@keyframes st-wave {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.st-x {
+  position: relative;
+  width: 12px;
+  height: 12px;
+}
+.st-x::before,
+.st-x::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 1.5px;
+  background: currentColor;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.st-x::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* ---- THE DOOR ----------------------------------------------------------- */
+.st-door {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  align-items: center;
+  padding: 90px var(--g) 70px;
+  color: var(--st-fg);
+  background:
+    radial-gradient(60% 55% at 72% 38%, rgba(255, 168, 92, 0.1), transparent 70%),
+    radial-gradient(70% 60% at 20% 110%, rgba(91, 61, 240, 0.12), transparent 70%),
+    var(--st-bg);
+  overflow: hidden;
+  transition:
+    opacity 1100ms var(--ease-expo),
+    transform 1400ms var(--ease-expo),
+    filter 900ms ease,
+    visibility 0s linear 1400ms;
+}
+.st-door[data-phase="film"] {
+  opacity: 0;
+  transform: scale(1.04);
+  filter: blur(10px);
+  visibility: hidden;
+  pointer-events: none;
+}
+.st-door[data-phase="read"] {
+  display: none;
+}
+.st-door[data-phase="nofilm"] {
+  position: relative;
+  min-height: 86vh;
+}
+.st-door-in {
+  position: relative;
+  max-width: 820px;
+  display: grid;
+  justify-items: start;
+}
+.st-door-k {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--st-dim);
+  margin-bottom: 26px;
+}
+.st-door-k::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+}
+.st-door-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(58px, 10vw, 168px);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  margin-left: -0.05em;
+}
+.st-door-l {
+  margin-top: 30px;
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.45;
+  color: var(--st-dim);
+  max-width: 34ch;
+}
+.st-door-go {
+  margin-top: 44px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.st-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 54px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--st-fg);
+  border: 1px solid var(--st-hair);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 300ms ease,
+    border-color 300ms ease,
+    transform 300ms var(--ease-expo),
+    box-shadow 400ms ease;
+}
+.st-btn:hover {
+  border-color: color-mix(in oklab, var(--st-fg) 45%, transparent);
+  background: color-mix(in oklab, var(--st-fg) 6%, transparent);
+}
+.st-btn:active {
+  transform: scale(0.98);
+}
+.st-btn-pri {
+  color: var(--st-bg);
+  background: var(--st-fg);
+  border-color: var(--st-fg);
+  box-shadow: 0 0 0 0 rgba(255, 200, 140, 0);
+}
+.st-btn-pri:hover {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 40px -6px rgba(255, 196, 130, 0.55);
+}
+.st-door-how {
+  margin-top: 22px;
+  font-size: 13.5px;
+  color: var(--st-faint);
+}
+.st-door-sorry {
+  font-size: 16px;
+  color: var(--st-dim);
+  max-width: 40ch;
+}
+.st-door-read {
+  margin-top: 14px;
+  font-size: 13.5px;
+  color: var(--st-dim);
+  text-decoration: underline;
+  text-decoration-color: var(--st-hair);
+  text-underline-offset: 4px;
+  transition: color 250ms ease;
+}
+.st-door-read:hover {
+  color: var(--st-fg);
+}
+.st-door-load {
+  position: absolute;
+  left: 0;
+  bottom: -46px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--st-faint);
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.st-door[data-phase="wait"] .st-door-load {
+  opacity: 1;
+}
+.st-door[data-phase="wait"] .st-door-go {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.st-door-bar {
+  position: relative;
+  width: 140px;
+  height: 1px;
+  background: var(--st-hair);
+  overflow: hidden;
+}
+.st-door-bar i {
+  position: absolute;
+  inset: 0;
+  background: var(--st-fg);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p, 0));
+  transition: transform 300ms ease;
+}
+
+/* The door's own few lights: customers, falling past in the dark. */
+.st-door-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.st-door-bg i {
+  position: absolute;
+  top: -4vh;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffd9a8;
+  box-shadow:
+    0 0 10px 2px rgba(255, 170, 90, 0.75),
+    0 0 34px 8px rgba(255, 140, 60, 0.25);
+  opacity: 0;
+  animation: st-fall 6s cubic-bezier(0.55, 0, 0.9, 0.4) infinite;
+}
+.st-door-bg i::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 1px;
+  height: 46px;
+  transform: translateX(-50%);
+  background: linear-gradient(to top, rgba(255, 190, 120, 0.5), transparent);
+}
+@keyframes st-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+
+/* ---- the film's layers --------------------------------------------------- */
+#st-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: var(--st-bg);
+}
+#st-stage canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: pan-y;
+}
+html[data-st="read"] #st-stage,
+html[data-st="nofilm"] #st-stage,
+html[data-st="read"] .st-track,
+html[data-st="nofilm"] .st-track,
+html[data-st="read"] .st-hud,
+html[data-st="nofilm"] .st-hud,
+html[data-st="read"] .st-cards,
+html[data-st="nofilm"] .st-cards,
+html[data-st="read"] .st-count,
+html[data-st="nofilm"] .st-count {
+  display: none;
+}
+.st-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+.st-track {
+  position: relative;
+  height: calc(var(--len) * var(--st-vh));
+  pointer-events: none;
+}
+
+/* ---- the film's words ----------------------------------------------------- */
+.st-cards {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  color: var(--st-fg);
+}
+/* A soft shade under the words, so they read over any frame. */
+.st-cards::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 62vw;
+  height: 80vh;
+  background: radial-gradient(75% 75% at 16% 78%, rgba(3, 3, 6, 0.8), rgba(3, 3, 6, 0.35) 52%, transparent 78%);
+  opacity: var(--shade, 0);
+  transition: opacity 600ms ease;
+}
+.st-card {
+  position: absolute;
+  left: var(--g);
+  bottom: calc(18vh + 40px);
+  width: min(600px, 44vw);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-14px);
+  transition:
+    opacity 380ms ease,
+    transform 520ms var(--ease-expo),
+    visibility 0s linear 520ms;
+}
+.st-card[data-on] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: none;
+}
+.st-card .w {
+  display: inline-block;
+}
+.st-card[data-on] .w {
+  animation: st-land 1150ms var(--st-land) both;
+  animation-delay: calc(var(--i) * 58ms + 60ms);
+}
+@keyframes st-land {
+  0% {
+    opacity: 0;
+    transform: translateY(-0.5em);
+    filter: blur(10px);
+  }
+  52% {
+    opacity: 1;
+    transform: translateY(0.04em);
+    filter: blur(0);
+  }
+  76% {
+    transform: translateY(-0.012em);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.st-k {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--st-dim);
+}
+.st-card[data-on] .st-k {
+  animation: st-fade 700ms ease both;
+}
+.st-k-n {
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--st-fg);
+}
+.st-k-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--indigo-hi);
+  box-shadow: 0 0 12px 2px rgba(107, 75, 255, 0.7);
+}
+.st-k-rule {
+  width: 28px;
+  height: 1px;
+  background: var(--st-hair);
+}
+.st-t {
+  font-family: var(--display);
+  font-weight: 500;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45);
+  font-size: clamp(38px, 4.7vw, 86px);
+  line-height: 0.99;
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+}
+.st-l {
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.6);
+  margin-top: 24px;
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 1.45;
+  color: var(--st-dim);
+  max-width: 36ch;
+}
+.st-l .w {
+  animation-duration: 900ms !important;
+}
+.st-fact {
+  margin-top: 30px;
+  padding-left: 18px;
+  border-left: 1px solid color-mix(in oklab, var(--st-fg) 30%, transparent);
+  max-width: 44ch;
+  opacity: 0;
+  transform: translateY(12px);
+  filter: blur(6px);
+  transition:
+    opacity 700ms ease,
+    transform 900ms var(--ease-expo),
+    filter 700ms ease;
+}
+.st-card[data-fact] .st-fact {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+.st-fact-t {
+  font-size: 16.5px;
+  line-height: 1.5;
+  color: var(--st-fg);
+}
+.st-fact-s {
+  margin-top: 8px;
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  color: var(--st-faint);
+}
+.st-card-beat .st-t {
+  font-size: clamp(32px, 3.6vw, 64px);
+  max-width: 16ch;
+}
+/* The opening and the turn are said in the middle of the frame. */
+.st-card[data-ch="open"],
+.st-card[data-ch="turn"] {
+  left: 50%;
+  bottom: auto;
+  top: 50%;
+  width: min(880px, 84vw);
+  text-align: center;
+  translate: -50% -50%;
+}
+.st-card[data-ch="open"] .st-l,
+.st-card[data-ch="open"] .st-t {
+  margin-left: auto;
+  margin-right: auto;
+}
+.st-card[data-ch="open"].st-card-beat .st-t {
+  max-width: 22ch;
+  margin: 0 auto;
+}
+.st-card[data-ch="turn"] .st-t {
+  font-size: clamp(44px, 6.4vw, 118px);
+  letter-spacing: -0.045em;
+}
+.st-card[data-ch="turn"].st-card-beat .st-t {
+  max-width: none;
+}
+.st-card[data-ch="turn"][data-on] .w {
+  animation-duration: 1600ms;
+  animation-delay: calc(var(--i) * 140ms + 120ms);
+}
+@keyframes st-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---- the counter: the film's own customers -------------------------------- */
+.st-count {
+  position: fixed;
+  top: 86px;
+  right: var(--g);
+  z-index: 4;
+  text-align: right;
+  color: var(--st-fg);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 600ms ease,
+    transform 700ms var(--ease-expo);
+}
+.st-count[data-show] {
+  opacity: 1;
+  transform: none;
+}
+.st-count-l {
+  font-size: 12px;
+  color: var(--st-dim);
+}
+.st-count[data-mode="lost"] .st-count-kept,
+.st-count[data-mode="kept"] .st-count-lost {
+  display: none;
+}
+.st-count-n {
+  margin-top: 4px;
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.st-count[data-mode="lost"] .st-count-n {
+  color: #ffb08a;
+  text-shadow: 0 0 22px rgba(255, 90, 50, 0.45);
+}
+.st-count[data-mode="kept"] .st-count-n {
+  color: #ffe2a6;
+  text-shadow: 0 0 22px rgba(255, 200, 90, 0.45);
+}
+.st-count-by {
+  margin-top: 14px;
+  display: grid;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--st-dim);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 700ms var(--ease-expo),
+    opacity 500ms ease;
+}
+.st-count[data-full] .st-count-by {
+  max-height: 140px;
+  opacity: 1;
+}
+.st-count-by li {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+}
+.st-count-by b {
+  min-width: 3.2ch;
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-weight: 400;
+  color: var(--st-fg);
+  font-variant-numeric: tabular-nums;
+}
+.st-count-yours {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--st-faint);
+}
+.st-count-yours:empty {
+  display: none;
+}
+
+/* ---- the clock, when the time matters ------------------------------------- */
+.st-time {
+  position: fixed;
+  top: 86px;
+  left: 50%;
+  z-index: 4;
+  translate: -50% 0;
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--st-fg);
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--st-hair);
+  background: color-mix(in oklab, #0c0c12 50%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms ease;
+  font-variant-numeric: tabular-nums;
+}
+.st-time[data-on] {
+  opacity: 1;
+}
+
+/* Look-dev ?hud=0: the picture alone. */
+html[data-st-clean] .st-cards,
+html[data-st-clean] .st-hud,
+html[data-st-clean] .st-count,
+html[data-st-clean] .st-time,
+html[data-st-clean] .st-bar,
+html[data-st-clean] .st-tip {
+  display: none !important;
+}
+
+/* ---- hover a part: what it is in your business ---------------------------- */
+.st-tip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  max-width: 270px;
+  padding: 12px 15px 13px;
+  border-radius: 14px;
+  color: var(--st-fg);
+  background: var(--st-glass);
+  border: 1px solid var(--st-hair);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  opacity: 0;
+  scale: 0.94;
+  transition:
+    opacity 220ms ease,
+    scale 320ms var(--ease-expo);
+}
+.st-tip[data-on] {
+  opacity: 1;
+  scale: 1;
+}
+.st-tip-n {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.st-tip-l {
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--st-dim);
+}
+html[data-st-hover] #st-stage {
+  cursor: pointer;
+}
+
+/* ---- the controls ---------------------------------------------------------- */
+.st-hud {
+  position: fixed;
+  left: var(--g);
+  right: var(--g);
+  bottom: 22px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) minmax(200px, 2.2fr) minmax(170px, 1fr);
+  align-items: center;
+  gap: 28px;
+  color: var(--st-fg);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition:
+    opacity 700ms ease 300ms,
+    transform 900ms var(--ease-expo) 300ms,
+    color 500ms ease;
+}
+html[data-st="film"] .st-hud {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+html[data-st-paper] .st-hud {
+  opacity: 0;
+  pointer-events: none;
+  transition-delay: 0ms;
+}
+.st-now {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 13px;
+  min-width: 0;
+}
+.st-now-n {
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 11.5px;
+  color: var(--st-dim);
+}
+.st-now-t {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.st-prog {
+  position: relative;
+  height: 28px;
+}
+.st-prog-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--st-hair);
+}
+.st-prog-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--st-fg);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+.st-ticks li {
+  position: absolute;
+  top: 50%;
+  translate: -50% -50%;
+}
+.st-ticks li:first-child {
+  translate: 0 -50%;
+}
+.st-ticks button {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+}
+.st-ticks button::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  translate: -50% -50%;
+  background: var(--st-bg);
+  border: 1px solid color-mix(in oklab, var(--st-fg) 55%, transparent);
+  transition:
+    background 250ms ease,
+    scale 300ms var(--ease-expo);
+}
+.st-ticks li[data-past] button::before {
+  background: var(--st-fg);
+}
+.st-ticks button:hover::before,
+.st-ticks button:focus-visible::before {
+  scale: 1.6;
+}
+.st-tick-l {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  translate: -50% 4px;
+  font-size: 11.5px;
+  white-space: nowrap;
+  color: var(--st-fg);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms ease,
+    translate 300ms var(--ease-expo);
+}
+.st-ticks button:hover .st-tick-l,
+.st-ticks button:focus-visible .st-tick-l {
+  opacity: 1;
+  translate: -50% 0;
+}
+.st-hud-r {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.st-drop-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffd9a8;
+  box-shadow: 0 0 10px 2px rgba(255, 170, 90, 0.8);
+}
+.st-drop-short,
+.st-sound-m {
+  display: none;
+}
+.st-play-ico {
+  position: relative;
+  width: 10px;
+  height: 12px;
+}
+.st-play-ico::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.st-play-ico[data-on]::before {
+  clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
+}
+.st-hud .st-drop[data-hidden] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ---- THE OFFER ------------------------------------------------------------- */
+.st-end {
+  position: relative;
+  z-index: 5;
+  min-height: 100lvh;
+  display: grid;
+  place-items: center;
+  padding: 120px var(--g) 100px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+}
+.st-end-in {
+  display: grid;
+  justify-items: center;
+}
+.st-end-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(56px, 10.5vw, 190px);
+  line-height: 0.92;
+  letter-spacing: -0.052em;
+}
+.st-end-l {
+  margin-top: 18px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(26px, 3.3vw, 54px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--indigo);
+}
+.st-end-b {
+  margin-top: 30px;
+  font-size: clamp(17px, 1.3vw, 19px);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 44ch;
+}
+.st-end-ctas {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+}
+.st-again {
+  font-size: 15px;
+  font-weight: 500;
+}
+.st-end-sum {
+  margin-top: 46px;
+  font-family: var(--font-gmono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+.st-end-sum:empty {
+  display: none;
+}
+
+/* ---- THE TRANSCRIPT ---------------------------------------------------------- */
+.st-tr {
+  position: relative;
+  z-index: 5;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 40px var(--g) calc(var(--vh) * 14);
+}
+.st-tr-in {
+  max-width: 1240px;
+  margin: 0 auto;
+  border-top: 1px solid var(--hair);
+  padding-top: calc(var(--vh) * 10);
+}
+.st-tr-head {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 6vw;
+  align-items: end;
+  margin-bottom: 64px;
+}
+.st-tr-title {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(36px, 4.4vw, 68px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.st-tr-intro {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: 46ch;
+}
+.st-tr-list {
+  display: grid;
+}
+.st-tr-ch {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 10px 6vw;
+  padding: 30px 0 32px;
+  border-top: 1px solid var(--hair);
+}
+.st-tr-name {
+  display: grid;
+  gap: 8px;
+  grid-row: span 4;
+  align-content: start;
+}
+.st-tr-k {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+.st-tr-t {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(22px, 2vw, 30px);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+.st-tr-scene {
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  font-style: italic;
+}
+.st-tr-line {
+  font-size: 17px;
+  line-height: 1.55;
+}
+.st-tr-fact {
+  font-size: 17px;
+  line-height: 1.55;
+  padding-left: 14px;
+  border-left: 2px solid var(--indigo);
+}
+.st-tr-cite {
+  color: var(--indigo);
+  font-weight: 500;
+}
+.st-tr-note {
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 1px solid var(--hair);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 70ch;
+}
+.st-tr-sources {
+  margin-top: 40px;
+}
+.st-tr-sh {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.st-tr-sources ol {
+  display: grid;
+  gap: 10px;
+  list-style: decimal;
+  padding-left: 22px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: 90ch;
+}
+.st-tr-sources a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--hair);
+  text-underline-offset: 3px;
+  word-break: break-word;
+}
+
+/* ---- phones: the words become a sheet at the bottom ----------------------- */
+@media (max-width: 760px), (max-aspect-ratio: 4/5) {
+  .st-bar {
+    height: 58px;
+  }
+  .st-bar-title,
+  .st-bar .st-chip-l {
+    display: none;
+  }
+  .st-bar .st-chip {
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .st-door {
+    align-items: end;
+    padding-bottom: 110px;
+  }
+  .st-door-t {
+    font-size: clamp(54px, 17vw, 96px);
+  }
+  .st-door-go {
+    margin-top: 34px;
+    width: 100%;
+  }
+  .st-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    height: 52px;
+  }
+  .st-cards::before {
+    width: 100vw;
+    height: 62vh;
+    background: linear-gradient(to top, rgba(3, 3, 6, 0.86) 0%, rgba(3, 3, 6, 0.6) 45%, transparent 100%);
+  }
+  .st-card {
+    left: var(--g);
+    right: var(--g);
+    width: auto;
+    bottom: 104px;
+  }
+  .st-card[data-ch="open"],
+  .st-card[data-ch="turn"] {
+    width: auto;
+    left: var(--g);
+    right: var(--g);
+    top: auto;
+    bottom: 104px;
+    translate: none;
+    text-align: left;
+  }
+  .st-card[data-ch="open"] .st-l,
+  .st-card[data-ch="open"] .st-t,
+  .st-card[data-ch="open"].st-card-beat .st-t {
+    margin-left: 0;
+  }
+  .st-card[data-ch="turn"] .st-t {
+    font-size: clamp(40px, 12vw, 60px);
+  }
+  .st-t {
+    font-size: clamp(30px, 8.8vw, 46px);
+  }
+  .st-card-beat .st-t {
+    font-size: clamp(28px, 8vw, 40px);
+  }
+  .st-k {
+    margin-bottom: 14px;
+  }
+  .st-l {
+    margin-top: 14px;
+    font-size: 16px;
+  }
+  .st-fact {
+    margin-top: 18px;
+  }
+  .st-fact-t {
+    font-size: 14.5px;
+  }
+  .st-count {
+    top: 66px;
+  }
+  .st-count-n {
+    font-size: 28px;
+  }
+  .st-hud {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+  }
+  .st-now {
+    display: none;
+  }
+  .st-prog {
+    height: 22px;
+  }
+  .st-tick-l {
+    display: none;
+  }
+  .st-drop-long,
+  .st-play .st-chip-l {
+    display: none;
+  }
+  .st-drop-short {
+    display: inline;
+  }
+  .st-sound-m {
+    display: inline-flex;
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .st-bar .st-sound {
+    display: none;
+  }
+  .st-play {
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .st-tip {
+    display: none;
+  }
+  .st-tr-head,
+  .st-tr-ch {
+    grid-template-columns: 1fr;
+  }
+  .st-tr-name {
+    grid-row: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-card[data-on] .w,
+  .st-card[data-on] .st-k {
+    animation: st-fade 500ms ease both;
+  }
+  .st-door-bg i {
+    animation: none;
+    opacity: 0.6;
+    top: 50%;
+  }
+  .st-wave {
+    animation: none;
+  }
+  .st-door {
+    transition: opacity 600ms ease, visibility 0s linear 600ms;
+  }
+  .st-door[data-phase="film"] {
+    transform: none;
+    filter: none;
+  }
+}

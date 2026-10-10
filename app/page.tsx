@@ -9,7 +9,6 @@ import { Process } from "@/components/chapters/Process";
 import { Audit } from "@/components/chapters/Audit";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PageReveal } from "@/components/chapters/PageReveal";
-import { StoryMode } from "@/components/story/StoryMode";
 import { OrgLd } from "@/components/site/JsonLd";
 
 // The home page's own canonical address (the layout's title and card are its).
@@ -35,7 +34,6 @@ export default function Home() {
       </main>
       <SiteFooter home />
       <PageReveal />
-      <StoryMode />
       <OrgLd />
     </Experience>
   );

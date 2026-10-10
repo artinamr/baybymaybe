@@ -6,11 +6,10 @@ import { advance } from "@react-three/fiber";
 import { getLenis, initScroll, updateScroll } from "@/lib/scroll";
 import { bus, intro, ready, scroll } from "@/lib/stores";
 import { atToS, dev } from "@/lib/dev";
-import { openStory, story, updateStory } from "@/lib/story";
-import { devNum } from "@/lib/dev";
 import { LogoMark, MARK_MASK } from "@/components/chrome/LogoMark";
 import { CHAPTERS, type ChapterId } from "@/lib/chapters";
 import { jumpToAudit, scrollToChapter } from "@/lib/scroll";
+import { PAGES } from "@/lib/content";
 
 const StageCanvas = dynamic(() => import("@/components/stage/StageCanvas"), { ssr: false });
 // Without WebGL the stage stays empty — through a client-only component all
@@ -51,6 +50,11 @@ export function Experience({ children }: { children: ReactNode }) {
   const [gl] = useState(() => (typeof window === "undefined" ? true : hasWebGL2()));
 
   useEffect(() => {
+    // The story has its own page now (/story/); an old link to `/#story` goes there.
+    if (window.location.hash === "#story") {
+      window.location.replace(PAGES.story);
+      return;
+    }
     const root = document.documentElement;
     const webgl = gl;
     if (!webgl) root.setAttribute("data-nowebgl", "");
@@ -76,22 +80,6 @@ export function Experience({ children }: { children: ReactNode }) {
         off();
         requestAnimationFrame(land);
       });
-    }
-
-    // A link to `/#story` (the methodology page's nav) opens the story once the intro has played.
-    if (window.location.hash === "#story") {
-      const off = bus.on("intro:done", () => {
-        off();
-        window.setTimeout(openStory, 300);
-      });
-    }
-    // Look-dev: `?story=<P>` opens the story at that point of its film.
-    const storyAt = devNum("story");
-    if (storyAt !== null) {
-      window.setTimeout(() => {
-        openStory();
-        story.P = story.target = storyAt;
-      }, 400);
     }
 
     const t0 = performance.now();
@@ -149,7 +137,6 @@ export function Experience({ children }: { children: ReactNode }) {
       const dt = lastT < 0 ? 1 / 60 : Math.min(0.05, (t - lastT) / 1000);
       lastT = t;
       updateScroll(t);
-      updateStory(dt);
 
       if (intro.state === "wait") {
         const all = ready.fonts && ready.stone && ready.env && ready.compiled;

@@ -95,10 +95,6 @@ export type BusEvents = {
   "mark:lock": void;
   /** Pointer entered / left the stone (raycast). */
   "stone:hover": { on: boolean };
-  /** Story mode opened / began closing; its chapter changed (−1 entering, STORY.length = the closing card); it closed. */
-  story: { open: boolean };
-  "story:chapter": { k: number };
-  "story:closed": Record<string, never>;
 };
 
 type Handler<T> = (payload: T) => void;

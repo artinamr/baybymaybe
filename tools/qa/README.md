@@ -34,6 +34,7 @@ They drive the machine's real Chrome on the real GPU
 | `kbd.mjs` | Keyboard walk: Tabs through a page, flags focus stops that are invisible, off-screen or covered | `node kbd.mjs <url> [tabs] [w] [h] [shotDir]` |
 | `overflow.mjs` | Can any page be dragged sideways at 320 / 375 / 414 / 768? Exits nonzero on overflow | `node overflow.mjs <base> [comma-separated paths]` |
 | `work.mjs` | Work filters; all three demo flows on desktop/phone; real touch swipes; reduced motion. Blocks network mutations | `node work.mjs <base> <scratch-output-directory>` |
+| `story.mjs` | `/story/`: the door, starting in silence, wheel, settling on a composed frame, arrow keys, "Drop one in", a part's label on hover, play/K, the end on paper; no WebGL; "Rather read it?"; reduced motion; the transcript and both sources in the HTML. Exits nonzero on a FAIL. Imports `puppeteer-core` by name and picks the browser by platform (`CHROME=` overrides; SwiftShader off Windows, so allow minutes) | `node tools/qa/story.mjs <base>` |
 | `heroclash.mjs` | Hero on phones: description × actions × counter collisions at 8 phone sizes | `node heroclash.mjs <base> [WxH,WxH]` |
 | `ctafit.mjs` | Hero actions fit on narrow phones; document width equals viewport | `node ctafit.mjs <base>` |
 | `menu.mjs` | Home phone menu: inert when closed, focus in, Tab wrap, Escape, focus back | `node menu.mjs <base>/` |

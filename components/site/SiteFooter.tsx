@@ -11,10 +11,9 @@ import { SERVICES } from "@/content/services";
 
 const EMAIL = CONTACT.email;
 
-// The home page's scroll and story code is already loaded there; these load it
-// on demand, so the other pages never download it for a footer they only link from.
+// The home page's scroll code is already loaded there; this loads it on demand,
+// so the other pages never download it for a footer they only link from.
 const jumpToTop = () => import("@/lib/scroll").then((m) => m.jumpToS(0));
-const openStory = () => import("@/lib/story").then((m) => m.openStory());
 
 /**
  * THE FOOTER: every page ends on it. It opens with the audit form (every
@@ -109,13 +108,7 @@ export function SiteFooter({ home = false, form = true }: { home?: boolean; form
             <a href={PAGES.methodology}>Methodology</a>
             <a href={PAGES.studio}>Studio</a>
             <a href={PAGES.blog}>Blog</a>
-            {home ? (
-              <button type="button" onClick={openStory}>
-                The story
-              </button>
-            ) : (
-              <a href={`${PAGES.home}#story`}>The story</a>
-            )}
+            <a href={PAGES.story}>The story</a>
           </div>
           <div className="f-col">
             <p className="f-h">Help</p>

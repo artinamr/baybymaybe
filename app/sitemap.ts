@@ -26,6 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "work/", priority: 0.8 },
     ...WORK_ITEMS.map((p) => ({ path: `work/${p.slug}/`, priority: 0.7, images: [abs(p.cover)] })),
     { path: "methodology/", priority: 0.8, images: [abs(PHOTOS["method-hero"].src), ...STAGES.map((s) => abs(s.photo.src))] },
+    { path: "story/", priority: 0.6, modified: "2026-10-10", images: [`${SITE_URL}/og/story.jpg`] },
     { path: "blog/", priority: 0.8, modified: PUBLISHED[0]?.updated ?? PUBLISHED[0]?.published },
     ...PUBLISHED.map((a) => ({ path: `blog/${a.slug}/`, priority: 0.7, modified: a.updated ?? a.published, images: [abs(a.cover.src)] })),
     { path: "blog/glossary/", priority: 0.6 },

@@ -5,7 +5,6 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { ready } from "@/lib/stores";
-import { story } from "@/lib/story";
 import { compileFor } from "./compile";
 
 /**
@@ -271,18 +270,15 @@ export function PlaceEnv() {
       b.cubeVersion = t.cube.pmremVersion;
     }
     const S = sceneState.S;
-    const inFilm = story.phase === "closed";
     // At the end the stone is whole again, and sees the hero's own room again
     // (swapped while the camera sinks to the floor): the film ends on the
     // look it began with.
-    const hero = !inFilm || S <= 2.36 || S >= FINALE_S;
+    const hero = S <= 2.36 || S >= FINALE_S;
     const want = !hero && t.open ? t.open : t.studio;
     if (scene.environment !== want) scene.environment = want;
-    let turn = inFilm
-      ? 0.32 * Math.max(0, S - 2.2) + 1.1 * sweep(S, 4.7, 5.0) + 1.3 * sweep(S, 8.9, 9.4) + 0.9 * sweep(S, 9.7, 10.6)
-      : 0;
+    let turn = 0.32 * Math.max(0, S - 2.2) + 1.1 * sweep(S, 4.7, 5.0) + 1.3 * sweep(S, 8.9, 9.4) + 0.9 * sweep(S, 9.7, 10.6);
     // …held round with the camera, so its strips fall on the glass as they do in the hero.
-    if (inFilm && S >= FINALE_S) turn = FIN_SIGN * sceneState.cam.az;
+    if (S >= FINALE_S) turn = FIN_SIGN * sceneState.cam.az;
     scene.environmentRotation.set(0, turn, 0);
   }, PRIORITY.scene);
 

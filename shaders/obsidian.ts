@@ -107,7 +107,7 @@ export const obsidianUniforms: {
   uNight: U<number>;
   /** Floors of light at the level cuts (the stack, the build). */
   uFloors: U<number>;
-  /** 0..1 the light inside wakes and fills the whole stone (the story's "light inside"). */
+  /** 0..1 the light inside wakes and fills the whole stone (a breath before the break; the finale). */
   uWake: U<number>;
   /** A band of light rising through the glass: its height (object space) and strength. */
   uRiseY: U<number>;

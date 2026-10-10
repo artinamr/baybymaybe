@@ -85,20 +85,19 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
   (`FORM_ENDPOINT`; `NEXT_PUBLIC_FORM_ENDPOINT` overrides); if the post fails
   it offers the same message as a pre-written email (mailto).
 - The hero's primary action is the free audit; "Enter the story" is the
-  ghost button. Shared page nav: Services · Work · Methodology · Blog ·
+  ghost button (it opens `/story/`). Shared page nav: Services · Work · Methodology · Blog ·
   Contact + Free audit (Studio lives in the footer — six links and the pill
   don't fit at 1100–1280 px). The home menu also lists the chapters on this page.
 - **Copy is ours, not nerodyn.com's** (the client: "nerodyn.com isn't a good
   website to copy"). Plain, specific, no invented numbers. Awaiting sign-off.
 - **The hero's door to the story** is the stone itself: over it the pointer
   carries a frosted "The story" lens (`StoneCursor` in Hero.tsx), and at rest
-  a thread of light runs down a ridge every ~7.5 s. The rotating ring of words
-  was rejected ("should be removed … a nicer more elegant premium thing").
-- **Story mode** (`lib/story.ts`, `lib/storyFilm.ts`,
-  `components/story/StoryMode.tsx`) — the client called it "bad for now; worry
-  about that later", and in round 12 "forget about the story mode and other
-  pages". Untouched; it still works (click the stone) — it uses only F0/F1, so
-  keep those two formations' behaviour stable.
+  a thread of light runs down a ridge every ~7.5 s; a click opens `/story/`.
+  The rotating ring of words was rejected ("should be removed … a nicer more
+  elegant premium thing").
+- **The story is its own page, `/story/`** (round 22, below). The old story
+  mode (`lib/story.ts`, `lib/storyFilm.ts`, the old `components/story/`,
+  played over the home stone) is deleted; `/#story` forwards to `/story/`.
 - **Methodology** is its own page (`app/methodology/`).
 
 **ROUND 16 (2026-09-29/30 — "other pages … fix the let's talk … the form
@@ -431,6 +430,75 @@ bottom of the stack to the top, like a DNA strand … make them a bit nicer").**
   1.5× (median): AI 6.2 → 3.8 ms, inside the colossus 9.5 → 7.1, the close
   13.3 → 6.9, the finale 6.0 → 1.6. 4× → 2× MSAA on the lens target was
   tried: no reliable gain, dropped.
+
+**ROUND 22 (2026-10-10 — "rebuild STORY MODE from nothing … UXBERT Labs and
+igloo.inc, then go past them … someone should finish it, sit back and say
+'what did I just watch', then book an audit"; ORDER: the problem, the flow,
+the story, only then the craziness, and every effect has to MEAN something).**
+- **`/story/`, "The quiet leak"**: its own route and its own R3F canvas, a
+  film of 27.4 screens (about four minutes played). The full design, in the
+  order it was made (problem → flow → words → effects, each effect with its
+  meaning), is **`docs/STORY.md`**. Read it before changing anything there.
+- **Words**: ALL in `content/story.ts` (chapters, door, ending, counters,
+  hover labels, transcript, the two sources). Only two facts, cited on screen
+  and in the transcript: Google 2016 (53% / 3 s) and HBR 2011 (nearly seven
+  times within an hour; paywalled, the line was checked by the client).
+  Invent nothing else: the counters count the film's own customers ("lost
+  while you watched").
+- **The film**: a cathedral-sized iron marble machine (the business) in the
+  dark; one customer we follow (`film/hero.ts`, a pure function of P) among a
+  simulated crowd (`film/sim.ts`: exactly 53 of 100 leave at the gate, the
+  inbox dims to a seventh after an hour, claws drop some, the last track ends
+  over a pit). The turn (P 14–17): total silence (a duck gain, verified
+  digital silence offline), black, "Stop patching it.", the tower torn down in
+  slow motion, a new one in glass and indigo assembling round the camera.
+  Then each leak answered in the same place (ring, turbine at 3am, one channel
+  through three nodes, the edge curving up into a gold spiral back to the
+  door, a flywheel where the crank was). Ends on paper: "Find your leaks." +
+  the free audit.
+- **Files**: `app/story/` (page, layout, route sheet `story.css`);
+  `components/story/` (StoryFilm: door/phases/overlay/HUD; StoryBar; Transcript
+  (server, the whole story in HTML); `timeline.ts` FILM_LEN, SPANS, CARDS,
+  RESTS; `store.ts`); `components/story/film/` (Film.tsx entry, lazy via
+  next/dynamic; world, layout, hall, old, next, sim, hero, camera, look,
+  post, kit, track, materials, geo, marbles, clock, dom, audio).
+- **Engine**: P = scroll / vh through a critically damped spring (ω 4.2) on
+  Lenis; rests (composed frames) for auto-settle (as on the home page: past
+  a fifth of the gap it goes on, never pulls a deliberate scroll back), the
+  arrow keys and autoplay;
+  every machine part is a "piece" (merged draws per material, transforms in a
+  float texture: teardown and assembly are piece transforms); HDR post: MSAA
+  half-float target, bloom mip chain, ACES, a grade per chapter, grain,
+  vignette, chromatic aberration (`film/post.ts`, `film/look.ts`). The camera
+  is a Hermite spline through keys (fixed, hero-relative, or a chase along
+  `hero.dir`, a look-ahead secant); the fall is an explicit dive override
+  (mixing moving and fixed keys in one spline overshot).
+- **Sound** (`film/audio.ts`): Web Audio generated live, no files: a pad per
+  chapter, the roll, a falling tone per loss, ticking, typewriter, clangs, a
+  riser and sub hit, a click per locked piece, bells per customer kept. The
+  door offers sound or silence; the mute chip is always there.
+- **Weight**: the film chunk is ~145 KB (49 KB gz), loaded only on /story/
+  behind the door (which hides compiling). The home page's scripts went DOWN
+  (2,146,023 → 2,112,096 bytes; the old story left the home bundle); no film
+  code reaches the home page. The home film was pixel-diffed before/after
+  (same at F 5.45 and 9.3; edge-only time-phase noise at 0 and 2.6, as in a
+  baseline-vs-itself run).
+- **Look-dev**: `/story/?at=<P>&freeze=1&hud=0` (P in screens; `hud=0` hides
+  the words and controls; `q=low|high` forces the quality tier);
+  `window.__story` = { jump, frames, state, bench, world, Score }. A still at
+  P ≥ FILM_LEN − 0.04 never comes: the canvas stops drawing under the paper.
+- **Gotchas**: never set `glslVersion: THREE.GLSL3` on the film's
+  ShaderMaterials (three's WebGL2 prefix already maps gl_FragColor; GLSL3
+  breaks it). The dev server must be opened on `localhost`, not `127.0.0.1`
+  (Next blocks HMR from it and reloads in a loop). The hall's floor ring is
+  centred on the pit (an offset once covered half the pit and hid the fall).
+  Keep the camera a metre or more off any column (the new frame's front
+  columns carry no light seams for that reason).
+- **Verified here on SwiftShader only** (no GPU in the cloud session): every
+  rest frame, phone layout, reduced motion, no-WebGL, keys/drag/drop/hover,
+  the offline score. **Owed on a real GPU**: frame time on an integrated and
+  a discrete GPU and on phones, first-visit compile time on Windows/ANGLE,
+  the bloom/MSAA look, and the whole thing in motion with sound.
 
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
@@ -780,7 +848,8 @@ way relative to each other.
   (lib/dev.ts) to land on a point of the film with time frozen — F is FILM
   time: it lands where the film shows that frame (`?at=why:0.5` is page
   S0(why) + 0.5 instead); drop `freeze` to see time-based life, e.g. the flow.
-  `?story=<P>&freeze=1` lands on a point of the story film; `?render=1` hides
+  `/story/?at=<P>&freeze=1&hud=0` lands on a point of the story film (P in
+  screens, round 22; `hud=0` hides its words and controls); `?render=1` hides
   the DOM for stills of the film alone (the work covers). SwiftShader is no
   longer the only headless option — don't fall back to it for material
   judgements. For pixel diffs between builds let a frozen still SETTLE ~10 s
@@ -885,7 +954,9 @@ artin@nerodyn.com — until it is clicked, submissions wait), the social links
 /privacy and /terms (written for New Zealand), sign-off on the copy
 (including the FAQ answers and the "about fourteen days" promise), the brand
 font if different, and the real domain (`NEXT_PUBLIC_SITE_URL`). From round
-18: confirm "Auckland" (`PLACE`, taken from nerodyn.com's "Engineered in
-Auckland"), sign off the /audit/ page's copy and the three questions under
-each article, and name an author (a person with a short bio would help search
-and AI answers more than "the Nerodyn studio").
+22: sign-off on the story's words (`content/story.ts`), and a look at it on
+their own machine, with sound. From round 18: confirm "Auckland" (`PLACE`,
+taken from nerodyn.com's "Engineered in Auckland"), sign off the /audit/
+page's copy and the three questions under each article, and name an author
+(a person with a short bio would help search and AI answers more than "the
+Nerodyn studio").

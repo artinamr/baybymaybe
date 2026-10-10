@@ -5,14 +5,15 @@ import { Section } from "./Section";
 import { Pill, GhostPill } from "@/components/chrome/Pills";
 import { bus, intro } from "@/lib/stores";
 import { jumpToAudit } from "@/lib/scroll";
-import { openStory } from "@/lib/story";
+import { PAGES } from "@/lib/content";
 
 const d = (ms: number, extra?: Record<string, string>) => ({ "--d": `${ms}ms`, ...extra }) as CSSProperties;
 
 /**
  * Over the stone (hero only), the pointer carries a small lens of frosted
- * glass that reads "The story": the stone itself is the door. It follows the
- * pointer on a soft spring and scales in; it never shows anywhere else.
+ * glass that reads "The story": the stone itself is the door to /story/. It
+ * follows the pointer on a soft spring and scales in; it never shows anywhere
+ * else.
  */
 function StoneCursor() {
   const ref = useRef<HTMLDivElement>(null);
@@ -131,7 +132,7 @@ export function Hero() {
           <Pill onClick={jumpToAudit}>Get a free audit</Pill>
         </span>
         <span className="intro intro-rise" style={d(1260)}>
-          <GhostPill onClick={openStory}>
+          <GhostPill href={PAGES.story}>
             <span className="cta-long">Enter the story</span>
             <span className="cta-short">The story</span>
           </GhostPill>

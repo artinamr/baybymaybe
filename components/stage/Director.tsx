@@ -4,8 +4,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { evaluate, M0, plan } from "@/lib/choreo";
-import { evaluateStory } from "@/lib/storyFilm";
-import { story } from "@/lib/story";
 import { blendPose, COL_C, fragTarget, fx, pose, poseMatrix, prepareFormations, prepared, STEPS, TOWER_BASE, type FormationCtx } from "@/lib/formations";
 import { CORE } from "@/lib/geo/types";
 import { getStone } from "@/lib/geo/crystal";
@@ -182,20 +180,17 @@ export function Director() {
     sceneState.S = S;
     sceneState.covered = covered(scroll.S);
 
-    // Story mode replaces the scroll's film with the story's (same stone, same camera rig).
-    const inStory = story.phase !== "closed";
-    if (inStory) evaluateStory(story.P, time, L, sceneState);
-    else evaluate(S, time, L, sceneState);
+    evaluate(S, time, L, sceneState);
     const cam = sceneState.cam;
 
     /* ---- intro + hero life (fades out as the hero scrolls away) ------- */
-    const heroK = inStory ? 0 : 1 - range(S, 0.2, 0.8);
+    const heroK = 1 - range(S, 0.2, 0.8);
     let introK = 1;
     if (intro.state === "wait") introK = 0;
     else if (intro.state === "run" && !intro.skipped && !dev.freeze) introK = easeIntro(clamp01(intro.ms / INTRO_MS));
     if (reduced) introK = 1;
     let yaw = plan.yaw;
-    if (S < 1.0 && !cam.path && !inStory) {
+    if (S < 1.0 && !cam.path) {
       // Intro: the product shot becomes a monument — pull back, recentre, turn.
       const dollyIn = lerp(1.28, 1, introK);
       const introMs = intro.state === "wait" ? 0 : intro.ms;
@@ -224,7 +219,7 @@ export function Director() {
     springTo(s.pitchSpring, (pitchIdle + pPitch) * heroK + (pPitch * 0.3 + pitchIdle) * finaleK, 4.5, dt);
     yaw += s.yawSpring.x;
     // Held, the exploded view turns slowly on its own — a turntable, never a still.
-    const holdK = inStory ? 0 : range(S, 2.95, 3.3) * (1 - range(S, 3.85, 3.95));
+    const holdK = range(S, 2.95, 3.3) * (1 - range(S, 3.85, 3.95));
     if (!still) yaw += holdK * 14 * DEG * Math.sin((2 * Math.PI * time) / 26);
     if (devYaw !== null) yaw = devYaw * DEG;
     // At the end, pointer tilt ≤ ±1.5° so the stone breathes but never swings.
@@ -254,13 +249,13 @@ export function Director() {
       s.thread = { ridge: frontLeftRidge(yaw), t0: time, dur: THREAD_MS, live: true };
     }
     // At rest in the hero the stone keeps inviting: a thread of light every few seconds.
-    if (S < 0.15 && !inStory && intro.state === "done" && time - s.lastIdleThread > 7.5 && !s.thread.live && !reduced) {
+    if (S < 0.15 && intro.state === "done" && time - s.lastIdleThread > 7.5 && !s.thread.live && !reduced) {
       s.lastIdleThread = time;
       s.thread = { ridge: frontLeftRidge(yaw), t0: time, dur: THREAD_MS * 1.25, live: true };
     }
     // …and at the end the colossus answers it: the same thread of light down
     // its ridge, where the film began — slower, as befits its size.
-    if (S > M0 + 0.3 && !inStory && time - s.lastIdleThread > 7.5 && !s.thread.live && !reduced) {
+    if (S > M0 + 0.3 && time - s.lastIdleThread > 7.5 && !s.thread.live && !reduced) {
       s.lastIdleThread = time;
       s.thread = { ridge: frontLeftRidge(yaw - cam.az), t0: time, dur: THREAD_MS * 1.8, live: true };
     }
@@ -323,8 +318,8 @@ export function Director() {
 
     // The shatter hits the camera, lightly. The roof being laid sends a glint
     // up the stair.
-    if (!inStory && s.lastS < 2.3 && S >= 2.3 && !quiet) s.breakT0 = time;
-    if (!inStory && s.lastS < 4.84 && S >= 4.84 && !quiet) s.roofT0 = time;
+    if (s.lastS < 2.3 && S >= 2.3 && !quiet) s.breakT0 = time;
+    if (s.lastS < 4.84 && S >= 4.84 && !quiet) s.roofT0 = time;
     if (S < 4.6) s.roofT0 = -1;
     sceneState.cam.shake = s.breakT0 >= 0 ? 0.45 * Math.exp(-(time - s.breakT0) / 0.22) : 0;
     s.lastS = S;
@@ -336,7 +331,7 @@ export function Director() {
     ctx.K = plan.K;
     ctx.explode = plan.explode + (still ? 0 : 0.02 * Math.sin(time * 0.9));
     ctx.exact = plan.exact;
-    ctx.burstT = inStory ? 0 : plan.burstT;
+    ctx.burstT = plan.burstT;
     ctx.ai = plan.ai;
     ctx.open = plan.open;
     ctx.camPos.copy(cam.pos);
@@ -347,7 +342,7 @@ export function Director() {
 
     // The core turns on its own clock; a quick sweep of the cursor hurries it;
     // the whole sculpture leans toward the pointer.
-    const inSculpt = !inStory && S > 2.85 && S < 6.0;
+    const inSculpt = S > 2.85 && S < 6.0;
     if (pointer.has) {
       const speed = Math.hypot(pointer.x - s.px, pointer.y - s.py) / Math.max(dt, 1e-3);
       s.px = pointer.x;
@@ -394,8 +389,8 @@ export function Director() {
     // So is the tower: a building does not float.
     const whole = plan.a === plan.b && (plan.a === "F0" || plan.a === "F7" || plan.a === "F2");
     s.rigid += ((whole ? 1 : 0) - s.rigid) * (1 - Math.exp(-dt * (whole ? 2.2 : 9)));
-    if (plan.cut || scroll.cut) s.rigid = whole ? 1 : 0;
-    const snap = !s.springsLive || still || plan.cut || scroll.cut;
+    if (scroll.cut) s.rigid = whole ? 1 : 0;
+    const snap = !s.springsLive || still || scroll.cut;
     const loose = 1 - s.rigid;
     sceneState.cam.frameDelta.set(0, 0, 0);
 
@@ -403,7 +398,7 @@ export function Director() {
     const holdForm = plan.a === plan.b && (plan.a === "F2" || plan.a === "F4");
     // The cursor catches the light on any glass it passes over, past the hero —
     // but only while it is moving: a hand sweeping over polished stone.
-    const sweeping = pointer.has && !reduced && !still && !inStory && S > 2.4 && performance.now() - pointer.lastMove < 120;
+    const sweeping = pointer.has && !reduced && !still && S > 2.4 && performance.now() - pointer.lastMove < 120;
     const tanHalf = Math.tan(((camera as THREE.PerspectiveCamera).fov * DEG) / 2);
     // The colossus: a wave of light running out from the core through the open stone.
     const wavePeriod = 2.6;

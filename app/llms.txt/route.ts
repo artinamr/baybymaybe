@@ -36,6 +36,7 @@ export function GET() {
     `- [Methodology](${abs(PAGES.methodology)}): five stages, from first call to launch.`,
     ...STAGES.map((s) => `  - ${s.title} (${s.when}): ${s.line} ${s.happens}`),
     `- [Investment](${abs(PAGES.pricing)}): how projects are priced, what moves the price, and the running costs to plan for.`,
+    `- [The quiet leak](${abs(PAGES.story)}): a four-minute film (with a full transcript) about where a business loses customers without seeing it: a slow website (Google: 53% of mobile visits are likely to be abandoned if a page takes longer than 3 seconds to load), an inbox answered tomorrow (Harvard Business Review: firms that answered within an hour were nearly seven times as likely to qualify the lead), retyping between systems, and no follow-up; then the same business rebuilt as one system.`,
     "",
     "## Articles",
     ...PUBLISHED.map((a) => `- [${a.title}](${abs(PAGES.article(a.slug))}): ${a.short}`),

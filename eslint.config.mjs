@@ -9,7 +9,7 @@ const eslintConfig = defineConfig([
   // allocation-free per-frame updates are the whole point. The React Compiler
   // rules below assume render-time purity and don't apply to that pattern.
   {
-    files: ["components/stage/**/*.tsx"],
+    files: ["components/stage/**/*.tsx", "components/story/film/**/*.tsx"],
     rules: {
       "react-hooks/immutability": "off",
       "react-hooks/globals": "off",

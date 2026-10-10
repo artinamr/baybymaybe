@@ -75,8 +75,6 @@ export const plan = {
   front: -2,
   /** F7: how open the colossus is (0..1). */
   open: 0,
-  /** Retired (no cuts any more); kept for the story film. */
-  cut: false,
   /** Stone rotation (radians). */
   yaw: 20 * DEG,
   /** The tower's own slow turn (radians). */
@@ -92,12 +90,6 @@ export const plan = {
   discipline: -1,
   /** The landing's impact (0..1, decays after touch-down). */
   impact: 0,
-  /* Story-film fields (lib/storyFilm.ts writes them; the home film leaves them at rest). */
-  buildYaw: 0,
-  crownLift: 0,
-  bandLift: 0,
-  split: 0,
-  step: -1,
 };
 
 /** Top of the last section. */
@@ -368,7 +360,6 @@ export function evaluate(S: number, _time: number, L: Layout, out: SceneState): 
 
   /* ---- the stone: where it stands, how big, how turned ----------------- */
   plan.lift = 0.22 * Math.sin(Math.PI * easeInOutSine(range(S, 0.05, 0.7)));
-  plan.cut = false;
   // From the gather on, the stone's frame is the colossus's.
   const landed = S >= GATHER[0];
   plan.front = frontAt(S);

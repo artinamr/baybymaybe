@@ -52,14 +52,34 @@ export function Pill({
   );
 }
 
-/** Ghost pill: an ink circle grows from the pointer's entry point and retracts toward its exit. */
-export function GhostPill({ children, onClick, small = false }: { children: ReactNode; onClick?: () => void; small?: boolean }) {
-  return (
-    <button type="button" className={`ghost ${small ? "ghost-sm" : ""}`} onClick={onClick} onPointerEnter={track} onPointerLeave={track}>
+/** Ghost pill: an ink circle grows from the pointer's entry point and retracts toward its exit. A link when it has an href. */
+export function GhostPill({
+  children,
+  onClick,
+  href,
+  small = false,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  href?: string;
+  small?: boolean;
+}) {
+  const cls = `ghost ${small ? "ghost-sm" : ""}`;
+  const inner = (
+    <>
       <span className="ghost-fill" aria-hidden />
       <span className="ghost-label">
         {children} <span aria-hidden>↗</span>
       </span>
+    </>
+  );
+  return href ? (
+    <a className={cls} href={href} onPointerEnter={track} onPointerLeave={track}>
+      {inner}
+    </a>
+  ) : (
+    <button type="button" className={cls} onClick={onClick} onPointerEnter={track} onPointerLeave={track}>
+      {inner}
     </button>
   );
 }

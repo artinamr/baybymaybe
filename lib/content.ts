@@ -251,6 +251,7 @@ export const PAGES = {
   work: `${BASE}/work/`,
   project: (slug: string) => `${BASE}/work/${slug}/`,
   methodology: `${BASE}/methodology/`,
+  story: `${BASE}/story/`,
   audit: `${BASE}/audit/`,
   studio: `${BASE}/studio/`,
   pricing: `${BASE}/pricing/`,

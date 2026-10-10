@@ -9,10 +9,12 @@ import { dev, perfFlags } from "@/lib/dev";
 import { compileFor } from "./compile";
 import { PRIORITY, sceneState } from "@/lib/sceneState";
 import { M0 } from "@/lib/choreo";
-import { openStory, story } from "@/lib/story";
+
+import { bus, pointer, ready, ui } from "@/lib/stores";
 
 let clickBound = false;
-import { bus, pointer, ready, ui } from "@/lib/stores";
+/** The story's page (PAGES.story, written out so the stage chunk doesn't import the site's registries). */
+const STORY_HREF = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/story/`;
 
 /**
  * THE STONE — one merged geometry of its eight pieces, three draws:
@@ -181,12 +183,12 @@ export function Stone() {
         bus.emit("stone:hover", { on });
         document.documentElement.toggleAttribute("data-stone-hover", on);
         if (!clickBound) {
-          // The stone is the door to the story: a click on it (in the hero) opens it.
+          // The stone is the door to the story: a click on it (in the hero) opens /story/.
           clickBound = true;
           window.addEventListener("click", (e) => {
-            if (!ui.hoverStone || story.phase !== "closed" || sceneState.S > 0.4) return;
+            if (!ui.hoverStone || sceneState.S > 0.4) return;
             if ((e.target as HTMLElement | null)?.closest("a, button, input, textarea")) return;
-            openStory();
+            window.location.assign(STORY_HREF);
           });
         }
       }
