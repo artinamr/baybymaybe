@@ -36,7 +36,7 @@ function Director() {
   const dpr = useThree((s) => s.viewport.dpr);
   const setDpr = useThree((s) => s.setDpr);
   const rig = useRef<Rig | null>(null);
-  const pointer = useRef({ x: 0, y: 0, cx: 0, cy: 0, has: false });
+  const pointer = useRef({ x: 0, y: 0, cx: 0, cy: 0, has: false, moved: 0 });
   const perf = useRef({ avg: 16, n: 0, last: 0, dpr: 0 });
   const frames = useRef(0);
 
@@ -151,6 +151,7 @@ function Director() {
       p.x = (e.clientX / window.innerWidth) * 2 - 1;
       p.y = -((e.clientY / window.innerHeight) * 2 - 1);
       p.has = e.pointerType === "mouse" || e.pointerType === "pen";
+      p.moved = performance.now();
     };
     const leave = () => (pointer.current.has = false);
     window.addEventListener("pointermove", move, { passive: true });

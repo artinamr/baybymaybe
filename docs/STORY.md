@@ -114,8 +114,11 @@ or silence; a mute toggle is always on screen.
 
 **Interaction, with a purpose.** Drop your own customers in (the button or a
 click on the machine): the old machine loses them, the new one keeps them,
-and you hear both. Hover a part to see what it is in your business. Scroll,
-drag, use the arrow keys, or press play and watch it as a film.
+and you hear both. Hover a part to see what it is in your business (only
+the part you move onto: parts the film slides under a resting pointer stay
+quiet, so nothing pops up over the words while you read). Scroll, drag, use
+the arrow keys, or press play and watch it as a film. Let go and it settles
+on the nearest composed frame, onward once you are a fifth of the way there.
 
 ## 5. Engineering notes
 

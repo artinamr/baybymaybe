@@ -65,6 +65,13 @@ const watch = (page, errs) => {
   const s3 = await st();
   ok(s3.P > s2.P + 0.2, `the down arrow goes on to the next frame (P ${s3.P.toFixed(3)})`);
 
+  // A resting pointer: the film slides a part under it, and no label pops up over the words.
+  await page.evaluate(() => window.__story.jump(10.3));
+  await sleep(3000);
+  const rest = await st();
+  const restTip = await page.$eval(".st-tip", (e) => e.hasAttribute("data-on"));
+  ok(!restTip, `a part sliding under a resting pointer shows no label (under it: ${rest.hover ?? "nothing"})`);
+
   await page.evaluate(() => window.__story.jump(3.0));
   await sleep(2500);
   const before = (await st()).yours;

@@ -47,6 +47,9 @@ export class Dom {
   private drop: HTMLElement | null;
   private endSum: HTMLElement | null;
   private last: Record<string, string | number | boolean> = {};
+  /** The part the tip is about (chosen when the pointer last moved). */
+  private tipFor: PartId | null = null;
+  private tipMove = 0;
   private tipX = 0;
   private tipY = 0;
 
@@ -83,7 +86,7 @@ export class Dom {
   }
 
   /** Returns true when a title has just landed (the score gives it a thump). */
-  update(P: number, w: World, pointer: { cx: number; cy: number; has: boolean }): boolean {
+  update(P: number, w: World, pointer: { cx: number; cy: number; has: boolean; moved: number }): boolean {
     // The words.
     let left = false;
     let landed = false;
@@ -172,8 +175,15 @@ export class Dom {
     const paper = P > FILM_LEN - 0.8;
     this.set("paper", paper, () => document.documentElement.toggleAttribute("data-st-paper", paper));
 
-    // Hover a part: what it is in your business.
-    const id = pointer.has && P < 25.6 && !(P > 13.95 && P < 16.9) ? (w.hover as PartId | null) : null;
+    // Hover a part: what it is in your business. Only the part you moved
+    // onto, kept while you stay on it: parts the film slides under a resting
+    // pointer (while you read, or scroll) don't pop up over the words.
+    const under = pointer.has && P < 25.6 && !(P > 13.95 && P < 16.9) ? (w.hover as PartId | null) : null;
+    if (pointer.moved !== this.tipMove) {
+      this.tipMove = pointer.moved;
+      this.tipFor = under;
+    } else if (under !== this.tipFor) this.tipFor = null;
+    const id = this.tipFor;
     this.set("tip", id ?? "", () => {
       if (!this.tip) return;
       if (id && PARTS[id]) {
