@@ -1,5 +1,22 @@
 @AGENTS.md
 
+# FIRST, EVERY SESSION: make sure you have the latest version
+
+Several sessions work on this repo (local and cloud). Before you change ANY
+file, run `git fetch origin` and `git status -sb` and compare with
+`origin/master`:
+
+- Up to date: carry on.
+- Behind (or diverged from) `origin/master`: STOP. Tell the user how many
+  commits behind you are and what they are (`git log --oneline HEAD..origin/master`),
+  and ASK whether to pull first or to continue on the older version. Do not
+  pull, merge, reset or edit anything until they answer.
+- Fetch fails (offline): say so and ask before continuing.
+
+Check again before you commit and push; if `origin/master` moved while you
+worked, ask before merging or pushing.
+
+
 # Nerodyn — Project Brief & Working Context
 
 > Read this before touching the site. It is the accumulated, hard-won context
