@@ -83,7 +83,23 @@ export const RESTS: number[] = [
 export function dwellAt(P: number): number {
   if (P >= FILM_LEN - 0.01) return 0;
   if (P < 0.01) return 1.2;
+  // Close-ups inside an already-read card hold briefly. The fall is allowed
+  // to land, and the owner's reveal and the break get a longer silence.
+  if ([3.42, 5.98, 8.4, 12.7, 23.3].some((rest) => Math.abs(rest - P) < 0.03)) return 1.7;
+  if (Math.abs(P - 11.5) < 0.03) return 2.2;
+  if ([13.5, 14.66, 24.7].some((rest) => Math.abs(rest - P) < 0.03)) return 4.5;
   return 3.4;
+}
+
+/** The film's pace follows the action: wait, chase, fall, break, return. */
+export function travelDuration(from: number, to: number): number {
+  const distance = to - from;
+  const middle = (from + to) * 0.5;
+  const seconds = middle > 10.2 && middle < 11.6 ? 3.8
+    : middle > 14.9 && middle < 17 ? 4.1
+    : middle > 22.3 && middle < 23.8 ? 4.3
+    : middle > 5.2 && middle < 7.2 ? 5.7 : 5.2;
+  return Math.max(1200, distance * seconds * 1000 - Math.max(0, distance - 1) * 900);
 }
 
 /** Look-dev (`?at=`): which window is open at P (for the overlay's initial state). */

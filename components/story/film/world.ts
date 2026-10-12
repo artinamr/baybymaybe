@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { buildHall } from "./hall";
-import { buildLayout, CRANK, DESK, DISH, EDGE, FLOOR_Y, GANTRY_Y, GANTRY_Z, GATE_X, GATE_Y, PIPE_Z, TRAYS, WHEEL, type Layout } from "./layout";
+import { buildLayout, CRANK, DESK, DISH, EDGE, FLOOR_Y, GANTRY_Y, GANTRY_Z, GATE_X, GATE_Y, PIPE_Z, PIT_R, PIT_Y, TRAYS, WHEEL, type Layout } from "./layout";
 import { buildOld, HANDLE_R, pieceMatrix, type OldRig } from "./old";
 import { buildNew, type NewRig } from "./next";
 import { chromeMaterial, clothMaterial, coreMaterial, glassMaterial, ironMaterial, lightMaterial, shared } from "./materials";
@@ -71,7 +71,7 @@ export class World {
   private fog: THREE.FogExp2;
   private old: { kit: Kit; rig: OldRig; mats: THREE.Material[] };
   private nw: { kit: Kit; rig: NewRig; mats: THREE.Material[] };
-  private lights: { hemi: THREE.HemisphereLight; key: THREE.DirectionalLight; fill: THREE.DirectionalLight; hero: THREE.PointLight; zone: THREE.PointLight };
+  private lights: { hemi: THREE.HemisphereLight; key: THREE.DirectionalLight; fill: THREE.DirectionalLight; rim: THREE.DirectionalLight; hero: THREE.PointLight; zone: THREE.PointLight; stages: THREE.PointLight[] };
   private hall: ReturnType<typeof buildHall>;
   private cables: THREE.InstancedMesh;
   private flakes: THREE.InstancedMesh;
@@ -79,6 +79,8 @@ export class World {
   private sparks: THREE.InstancedMesh;
   private sparkData: Float32Array;
   private tear: Float32Array;
+  private pieceBounds: Float32Array;
+  private contact: Float32Array;
   private keep: Uint8Array;
   private cam: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 35, ppx: 0.5, ppy: 0.5, roll: 0 };
   private lean = { x: 0, y: 0 };
@@ -88,6 +90,11 @@ export class World {
   private nodePow = new Float32Array(3);
   private prevP = 0;
   private lampOff = false;
+  private turbinePow = 0;
+  private returnPow = 0;
+  private rotorA = 0;
+  private rotorV = 0;
+  private flywheelA = 0;
   readonly phone: boolean;
   private quality: Quality;
   /** Reduced motion: the camera holds each composed frame, and fades between them. */
@@ -125,10 +132,26 @@ export class World {
     key.position.set(-20, 40, -30);
     const fill = new THREE.DirectionalLight(0x8899cc, 0.3);
     fill.position.set(10, 10, 40);
+    const rim = new THREE.DirectionalLight(0x93c4ff, 1.2);
+    rim.position.set(18, 44, -35);
+    rim.target.position.set(0, 31, 0);
     const hero = new THREE.PointLight(0xffaa55, 0, 6, 2);
     const zone = new THREE.PointLight(0xffffff, 0, 16, 2);
-    this.scene.add(hemi, key, key.target, fill, fill.target, hero, zone);
-    this.lights = { hemi, key, fill, hero, zone };
+    // The pull-back can read all four systems at once, each with its own
+    // light. The stronger travelling zone light still chooses the subject.
+    const stages = [
+      [GATE_X + 1.5, GATE_Y + 1.8, -4, 0xffa044],
+      [DISH.x, DISH.y + 2.6, -6.5, 0x557eff],
+      [1, 31.1, -3.2, 0x7eb77c],
+      [EDGE.x - 2, 25.6, EDGE.z - 2, 0xf45525],
+      [DESK.x, FLOOR_Y + 2, DESK.z + 1, 0xffc27c],
+    ].map(([x, y, z, color]) => {
+      const l = new THREE.PointLight(color, 0, 19, 2);
+      l.position.set(x, y, z);
+      return l;
+    });
+    this.scene.add(hemi, key, key.target, fill, fill.target, rim, rim.target, hero, zone, ...stages);
+    this.lights = { hemi, key, fill, rim, hero, zone, stages };
 
     this.hall = buildHall(opts.phone);
     this.scene.add(this.hall.group);
@@ -137,10 +160,15 @@ export class World {
     const o = buildOld(this.L);
     const otex = o.kit.texture();
     const iron = ironMaterial(otex);
+    // Open formed-metal surfaces need their inside as well as their outside.
+    // Keep solid frame geometry one-sided; give only bowls/funnels this material.
+    const sheet = ironMaterial(otex);
+    sheet.side = THREE.DoubleSide;
     const olight = lightMaterial(otex);
     const cloth = clothMaterial(otex);
     for (const [bucket, mat] of [
       ["iron", iron],
+      ["sheet", sheet],
       ["light", olight],
       ["cloth", cloth],
     ] as const) {
@@ -151,44 +179,57 @@ export class World {
       this.scene.add(mesh);
     }
     for (const l of o.rig.labels) this.scene.add(l.mesh);
-    this.old = { kit: o.kit, rig: o.rig, mats: [iron, olight, cloth] };
+    this.old = { kit: o.kit, rig: o.rig, mats: [iron, sheet, olight, cloth] };
     // Which pieces stay (the owner's desk, chair and lamp), and each one's fall.
     this.keep = new Uint8Array(o.kit.pieces.length);
     this.tear = new Float32Array(o.kit.pieces.length * 8);
+    this.contact = new Float32Array(o.kit.pieces.length).fill(-1);
+    this.pieceBounds = new Float32Array(o.kit.pieces.length * 6);
+    const minima = new Float32Array(o.kit.pieces.length * 3).fill(Infinity);
+    const maxima = new Float32Array(o.kit.pieces.length * 3).fill(-Infinity);
+    const radii = new Float32Array(o.kit.pieces.length);
+    for (const bucket of o.kit.buckets.values()) for (let v = 0; v < bucket.piece.length; v++) {
+      const pieceId = bucket.piece[v];
+      const id = pieceId * 3;
+      const pivot = o.kit.pieces[pieceId].pivot;
+      radii[pieceId] = Math.max(radii[pieceId], Math.hypot(bucket.pos[v * 3] - pivot.x, bucket.pos[v * 3 + 1] - pivot.y, bucket.pos[v * 3 + 2] - pivot.z));
+      for (let axis = 0; axis < 3; axis++) {
+        minima[id + axis] = Math.min(minima[id + axis], bucket.pos[v * 3 + axis]);
+        maxima[id + axis] = Math.max(maxima[id + axis], bucket.pos[v * 3 + axis]);
+      }
+    }
+    for (const p of o.kit.pieces) for (let axis = 0; axis < 3; axis++) {
+      const id = p.id * 3 + axis;
+      const pivot = p.pivot.getComponent(axis);
+      this.pieceBounds[p.id * 6 + axis] = (minima[id] + maxima[id]) / 2 - pivot;
+      this.pieceBounds[p.id * 6 + 3 + axis] = (maxima[id] - minima[id]) / 2;
+    }
     let s = 99;
     const r = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
     for (const p of o.kit.pieces) {
       const k = p.id * 8;
-      if (["desk", "shade", "bulb", "chair", "laptop", "lid"].includes(p.tag)) this.keep[p.id] = 1;
+      if (["desk", "shade", "chair", "laptop", "lid"].includes(p.tag) || p === o.rig.bulb) this.keep[p.id] = 1;
       const out = V(p.pivot.x, 0, p.pivot.z + 1);
       if (out.lengthSq() < 0.01) out.set(r() - 0.5, 0, r() - 0.5);
-      out.normalize().multiplyScalar(0.8 + r() * 2.4);
+      // The broken system collapses into its well. Outward impulses made
+      // lower links and large decks pass through the intact floor.
+      const radial = Math.hypot(p.pivot.x, p.pivot.z);
+      const edge = Math.max(0, PIT_R - 0.8 - radii[p.id]);
+      const targetRadius = Math.min(radial, edge * (0.8 + r() * 0.1));
+      const captureScale = radial > 0.001 ? targetRadius / radial - 1 : 0;
+      out.set(p.pivot.x * captureScale, 0, p.pivot.z * captureScale);
       this.tear[k] = 14.98 + ((54 - p.pivot.y) / 64) * 0.42 + r() * 0.16;
-      this.tear[k + 1] = out.x + (r() - 0.5) * 1.2;
-      this.tear[k + 2] = r() * 1.6 - 0.2;
-      this.tear[k + 3] = out.z + (r() - 0.5) * 1.2;
+      this.tear[k + 1] = out.x;
+      this.tear[k + 2] = r() * 0.6 - 0.2;
+      this.tear[k + 3] = out.z;
       this.tear[k + 4] = r() - 0.5;
       this.tear[k + 5] = r() - 0.5;
       this.tear[k + 6] = r() - 0.5;
       this.tear[k + 7] = 0.4 + r() * 1.8;
     }
-    // A few gears are thrown past the lens (not with reduced motion).
-    const gears = o.rig.gears.map((g) => g.p);
-    for (const [gi, side] of this.reduced ? [] : [
-      [0, 1],
-      [2, -1],
-      [4, 1],
-    ] as const) {
-      const p = gears[gi];
-      if (!p) continue;
-      const k = p.id * 8;
-      const target = V(0.6 + side * 1.7, 37.2 + side * 0.6, 12.5);
-      const T = 2.0;
-      this.tear[k] = 15.18 + gi * 0.06;
-      this.tear[k + 1] = (target.x - p.pivot.x) / T;
-      this.tear[k + 2] = (target.y - p.pivot.y) / T + 0.5 * 2.6 * T;
-      this.tear[k + 3] = (target.z - p.pivot.z) / T;
-    }
+    // Gears follow the same contained collapse as the other solid pieces.
+    // The former lens-directed throws carried them outside the well before
+    // landing, so they crossed the intact nave floor.
 
     // THE NEW MACHINE.
     const n = buildNew(this.L);
@@ -338,12 +379,14 @@ export class World {
 
   update(f: Frame) {
     const { dt, time, P } = f;
-    shared.uTime.value = time;
+    shared.uTime.value = this.reduced ? 1 : time;
     const look = lookAt(P, this.look);
+    shared.uRebuild.value = smooth(range(P, 16.15, 16.85));
+    shared.uPit.value = look.pit * (1 - range(P, 15.7, 16.65));
     this.applyLook(look, P, time);
 
     // Which machine runs, and how fast time is: it all stops at the turn.
-    const want: "old" | "none" | "new" = P < 14.02 ? "old" : P < 16.55 ? "none" : "new";
+    const want: "old" | "none" | "new" = P < 14.02 ? "old" : P < 17.02 ? "none" : "new";
     if (want !== this.machine) {
       if (want === "new") {
         this.sim.clear();
@@ -362,8 +405,13 @@ export class World {
     this.sim.ageLake(dt * ts);
     this.events = this.sim.events;
     this.sim.events = [];
+    // Clear the frozen old customers inside the deliberate white cut. The
+    // rebuilt crowd starts only after its complete route is ready to use.
+    if (this.machine === "none" && this.prevP < 16.12 && P >= 16.12) this.sim.clear();
 
     heroAt(P, this.L, this.hero, time);
+    shared.uHeroPos.value.copy(this.hero.pos);
+    shared.uHeroK.value = this.hero.visible && this.hero.machine === "new" ? 1 : 0;
     this.info.hours = clockAt(P);
     this.info.machine = this.machine;
     this.info.at = this.hero.at;
@@ -414,10 +462,21 @@ export class World {
     L.key.target.position.set(0, 30, 0);
     L.fill.color.copy(look.fill);
     L.fill.intensity = look.fillK;
+    L.rim.color.copy(look.fill).lerp(new THREE.Color(0.45, 0.68, 1), 0.42);
+    L.rim.intensity = (0.9 + look.fillK * 0.8) * (1 - range(P, 25.5, 26.7));
     L.hemi.color.copy(look.sky);
     L.hemi.groundColor.copy(look.ground);
     L.hemi.intensity = look.hemiK * 0.55;
     this.scene.environmentIntensity = look.env;
+    const rebuilt = shared.uRebuild.value;
+    const lit = (1 - range(P, 14.08, 14.32)) + range(P, 15.1, 15.65);
+    const oldColors = [0xffa044, 0x557eff, 0x7eb77c, 0xf45525, 0xffc27c];
+    const newColors = [0xa28aff, 0x60dfff, 0x74ddd1, 0xffc85f, 0xffd39b];
+    L.stages.forEach((light, i) => {
+      light.color.set(oldColors[i]).lerp(new THREE.Color(newColors[i]), rebuilt);
+      light.intensity = [7, 9, 11, 5, 5][i] * lit;
+      if (i === 4 && P >= 24.62) light.intensity = 0;
+    });
     shared.uKey.value.copy(look.key);
     shared.uDust.value = look.dust;
     shared.uWin.value.copy(look.win);
@@ -509,10 +568,17 @@ export class World {
     const h = this.hero;
     const q = new THREE.Quaternion();
     const ax = new THREE.Vector3();
+    if (P < 14.0) this.contact.fill(-1);
     // Gates: lane 0 is ours.
     R.gates.forEach((g, l) => {
       const open = l === 0 ? h.gate : sim.gateH[l] ?? 0;
       g.t.set(0, 0.46 * open, 0);
+    });
+    R.gateDrives.forEach((drive, i) => {
+      const lane = i === 0 ? R.gates.length - 1 : 0;
+      const lift = R.gates[lane].t.y;
+      drive.q.setFromAxisAngle(ax.set(1, 0, 0), -lift / 0.62);
+      R.gateRacks[i].t.y = lift;
     });
     // The gauge: our wait, creeping past three seconds; elsewhere, the crowd's.
     const wait = P < 3.98 ? 4.6 * smooth(range(P, 2.72, 3.86)) : 4.6 * (1 - range(P, 3.98, 4.15));
@@ -520,7 +586,7 @@ export class World {
     const sec = P > 2.6 && P < 4.4 ? wait : idle;
     R.needle.q.setFromAxisAngle(ax.set(1, 0, 0), (Math.PI * Math.min(5, sec)) / 5 - Math.PI / 2);
     // The wheel of hours: noon has the sun at the top.
-    const hours = clockAt(P);
+    const hours = clockAt(Math.min(P, 14.0));
     const wa = ((hours - 12) / 24) * Math.PI * 2;
     q.setFromAxisAngle(ax.set(0, 0, 1), wa);
     for (const w of R.wheel) w.q.copy(q);
@@ -567,6 +633,28 @@ export class World {
     if (P < 14.1) this.crankA += dt * Math.max(0.08, want);
     R.crank.q.setFromAxisAngle(ax.set(0, 0, 1), this.crankA * 1.6);
     for (const g of R.gears) g.p.q.setFromAxisAngle(ax.set(0, 0, 1), this.crankA * 0.22 * g.ratio);
+    R.pumps.forEach(({ piston, cam, rod, rodDir, phase }) => {
+      const angle = this.crankA * 1.6 + phase;
+      const dx = Math.cos(angle) * 0.29;
+      const pin = cam.pivot.clone().add(V(dx, Math.sin(angle) * 0.29, 0.3));
+      const head = V(piston.pivot.x, pin.y - Math.sqrt(0.68 * 0.68 - dx * dx), pin.z);
+      piston.t.y = head.y - (piston.pivot.y + 0.6);
+      cam.q.setFromAxisAngle(ax.set(0, 0, 1), angle);
+      rod.t.copy(head).sub(rod.pivot);
+      rod.q.setFromUnitVectors(rodDir, pin.sub(head).normalize());
+    });
+    R.counterweights.forEach((weight, i) => {
+      weight.t.y = this.reduced ? 0 : Math.sin(this.crankA * 1.6 + i * 0.8) * 0.1;
+      weight.q.setFromAxisAngle(ax.set(0, 0, 1), this.reduced ? 0 : Math.sin(this.crankA * 0.8 + i) * 0.008);
+    });
+    const stageTimes = [[2.3, 4.7], [4.6, 7.3], [7.2, 9.7], [9.6, 13.9]];
+    R.faults.forEach(({ p, stage }) => {
+      const [a, b] = stageTimes[stage];
+      const active = bump(P, a, b, 0.3);
+      // A slow warning breath, never a flashing alarm. Each one reveals
+      // where the leak currently lives in the larger machine.
+      p.power = 0.28 + active * (this.reduced ? 0.9 : 0.72 + 0.22 * Math.sin(time * 1.5));
+    });
     this.figureAt(this.crankA * 1.6);
     // Six o'clock in the new world: the laptop's lid comes down.
     const shut = smooth(range(P, 24.6, 24.95));
@@ -598,18 +686,61 @@ export class World {
         continue;
       }
       // Slow motion: a P of film is about three seconds of falling.
-      const tau = (P - t0) * 3.1;
+      const release = (P - t0) * 3.1;
+      // First draw the broken part into a safe envelope while holding its
+      // height and orientation. Then let it fall. Horizontal motion stops
+      // at its damped target instead of overshooting the opposite wall.
+      const captureTime = Math.min(0.5, release);
+      const capture = (1 - (1 + captureTime * 18) * Math.exp(-captureTime * 18)) / (1 - 10 * Math.exp(-9));
+      const tau = Math.max(0, release - 0.5);
       const vx = T[k + 1];
       const vy = T[k + 2];
       const vz = T[k + 3];
-      const g = 2.6;
-      p.t.set(p.t.x + vx * tau, p.t.y + vy * tau - 0.5 * g * tau * tau, p.t.z + vz * tau);
+      const g = 9.81;
       ax.set(T[k + 4], T[k + 5], T[k + 6]);
       if (ax.lengthSq() < 1e-6) ax.set(0, 1, 0);
       ax.normalize();
-      const spin = new THREE.Quaternion().setFromAxisAngle(ax, T[k + 7] * tau);
-      p.q.premultiply(spin);
-      p.s = Math.max(0, p.s * (1 - range(tau, 2.6, 3.4)));
+      const restQ = p.q.clone();
+      const restT = p.t.clone();
+      const spinRate = T[k + 7];
+      const rotationAt = (t: number, out: THREE.Quaternion) => out.setFromAxisAngle(ax, spinRate * t).multiply(restQ);
+      // Use the complete rotated bounding box, including a pivot that is
+      // off-centre. A centre-only collision lets long beams cross the floor.
+      const low = (rotation: THREE.Quaternion) => {
+        const x = rotation.x, y = rotation.y, z = rotation.z, w = rotation.w;
+        const r0 = 2 * (x * y + z * w);
+        const r1 = 1 - 2 * (x * x + z * z);
+        const r2 = 2 * (y * z - x * w);
+        const b = p.id * 6;
+        return r0 * this.pieceBounds[b] + r1 * this.pieceBounds[b + 1] + r2 * this.pieceBounds[b + 2]
+          - Math.abs(r0) * this.pieceBounds[b + 3] - Math.abs(r1) * this.pieceBounds[b + 4] - Math.abs(r2) * this.pieceBounds[b + 5];
+      };
+      const testQ = new THREE.Quaternion();
+      if (this.contact[p.id] < 0) {
+        const bottomAt = (t: number) => p.pivot.y + restT.y + vy * t - 0.5 * g * t * t + low(rotationAt(t, testQ));
+        let hi = 0.1;
+        while (hi < 10 && bottomAt(hi) > PIT_Y + 0.12) hi += 0.1;
+        let lo = Math.max(0, hi - 0.1);
+        for (let j = 0; j < 12; j++) {
+          const mid = (lo + hi) / 2;
+          if (bottomAt(mid) > PIT_Y + 0.12) lo = mid;
+          else hi = mid;
+        }
+        this.contact[p.id] = hi;
+      }
+      const impact = this.contact[p.id];
+      if (tau < impact) {
+        p.t.set(restT.x + vx * capture, restT.y + vy * tau - 0.5 * g * tau * tau, restT.z + vz * capture);
+        rotationAt(tau, p.q);
+      } else {
+        const after = tau - impact;
+        const settle = (1 - Math.exp(-after * 3.6)) / 3.6;
+        rotationAt(impact + settle * 0.14, p.q);
+        const bounce = Math.min(0.28, Math.abs(vy - g * impact) * 0.008)
+          * Math.exp(-after * 5) * Math.pow(Math.sin(after * 7), 2);
+        p.t.set(restT.x + vx, PIT_Y + 0.12 + bounce - p.pivot.y - low(p.q), restT.z + vz);
+      }
+      p.s = 1;
       p.glow = 0.0;
     }
     // Moving parts were set above from rest; pieces that broke this frame have added their fall.
@@ -654,6 +785,8 @@ export class World {
     for (const e of this.events) {
       if (e.type === "ring") this.ringPow[e.lane] = 1;
       if (e.type === "node") this.nodePow[e.k] = 1;
+      if (e.type === "catch") this.turbinePow = 1;
+      if (e.type === "kept") this.returnPow = 1;
     }
     // Ours, too.
     const h = this.hero;
@@ -667,6 +800,8 @@ export class World {
     this.prevP = P;
     for (let i = 0; i < this.ringPow.length; i++) this.ringPow[i] *= Math.exp(-dt * 3.2);
     for (let i = 0; i < 3; i++) this.nodePow[i] *= Math.exp(-dt * 2.6);
+    this.turbinePow *= Math.exp(-dt * 3.1);
+    this.returnPow *= Math.exp(-dt * 1.8);
 
     const ax = new THREE.Vector3();
     // Assembly: each piece flies in from the dark and locks; a flash as it does.
@@ -686,6 +821,7 @@ export class World {
       const e = 1 + (c1 + 1) * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2);
       p.s = 1;
       p.t.copy(f.t).multiplyScalar(1 - e);
+      if (!this.reduced) p.t.addScaledVector(f.bend, Math.sin(Math.PI * k) * (1 - k));
       p.q.copy(f.q).slerp(new THREE.Quaternion(), clamp01(e));
       const lock = Math.exp(-Math.pow((P - (f.at + 0.34)) / 0.05, 2));
       p.glow = lock * 1.2;
@@ -693,12 +829,41 @@ export class World {
     }
     // Then its life: the turbine spins, rings and nodes pulse, the flywheel turns.
     const run = range(P, 16.4, 17.0);
-    const spin = new THREE.Quaternion().setFromAxisAngle(ax.set(0, 0, 1), -time * 3.2 * run);
+    const inertia = 1 - Math.exp(-dt * 2.6);
+    this.rotorV += ((3.2 + this.turbinePow * 0.35) * run - this.rotorV) * inertia;
+    if (!this.reduced) {
+      this.rotorA += dt * this.rotorV;
+      this.flywheelA += dt * 1.4 * run;
+    }
+    const spin = new THREE.Quaternion().setFromAxisAngle(ax.set(0, 0, 1), -this.rotorA);
     N.rotor.q.multiply(spin);
-    N.rings.forEach((r, i) => (r.power = 1 + 2.6 * (this.ringPow[i] ?? 0)));
-    N.portal.power = 1 + 0.6 * Math.max(...Array.from(this.ringPow));
-    N.nodes.forEach((n, i) => (n.power = 1 + 2.2 * this.nodePow[i]));
-    N.flywheel.q.multiply(new THREE.Quaternion().setFromAxisAngle(ax.set(0, 0, 1), time * 1.4 * run));
+    N.rotor.power = 1 + this.turbinePow * 0.85;
+    N.counterRotor.q.multiply(new THREE.Quaternion().setFromAxisAngle(ax.set(0, 0, 1), this.rotorA * 0.59));
+    N.counterRotor.power = 1 + this.turbinePow;
+    N.rings.forEach((r, i) => {
+      r.power = 1 + 2.1 * (this.ringPow[i] ?? 0);
+      if (!this.reduced && r.s > 0) r.s *= 1 + 0.075 * (this.ringPow[i] ?? 0);
+    });
+    const portalPulse = Math.max(...Array.from(this.ringPow));
+    N.portal.power = 1 + 0.6 * portalPulse;
+    N.vanes.forEach((v) => {
+      const radial = v.pivot.clone().sub(N.portal.pivot).normalize();
+      if (!this.reduced) {
+        v.t.addScaledVector(radial, portalPulse * 0.11);
+        v.q.multiply(new THREE.Quaternion().setFromAxisAngle(ax.set(1, 0, 0), portalPulse * 0.26));
+      }
+      v.power = 0.9 + portalPulse * 0.8;
+    });
+    N.nodes.forEach((n, i) => {
+      n.power = 1 + 2.2 * this.nodePow[i];
+      if (!this.reduced && n.s > 0) n.s *= 1 + 0.08 * this.nodePow[i];
+    });
+    N.ribs.forEach((rib) => {
+      const front = rib.pivot.z > 0;
+      rib.power = front ? 0.75 : 0.78 + 0.22 * range(P, 16.55, 17.3);
+    });
+    N.flywheel.q.multiply(new THREE.Quaternion().setFromAxisAngle(ax.set(0, 0, 1), this.flywheelA));
+    N.flywheel.power = 1 + this.returnPow * 0.5;
     const hours = clockAt(P);
     const wa = ((hours - 12) / 24) * Math.PI * 2;
     const wq = new THREE.Quaternion().setFromAxisAngle(ax.set(0, 0, 1), wa);

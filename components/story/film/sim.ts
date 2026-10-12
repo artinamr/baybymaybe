@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { DISH, EDGE, GANTRY_Y, GANTRY_Z, PIPE_Z, PIT_Y, R, TRAYS, TRAY_W, dishY, type Layout } from "./layout";
 import type { OldRig } from "./old";
+import { turbinePoint } from "./hero";
 
 /**
  * THE CROWD: every customer but the one we follow, simulated in real time
@@ -9,10 +10,8 @@ import type { OldRig } from "./old";
  *
  *   the gate      exactly 53 of every 100 give up waiting and leave (Google:
  *                 53% of mobile visits are likely to be abandoned past 3 s)
- *   the inbox     they wait in the dish; after the first hour their light
- *                 falls to a seventh (HBR: nearly seven times as likely to
- *                 qualify within the hour); the ones who wait too long roll
- *                 over the rim
+ *   the inbox     they wait in the dish and dim as an expressive metaphor;
+ *                 the ones who wait too long roll over the rim
  *   the admin     claws carry them tray to tray; one in five slips
  *   the follow-up every one who reaches the edge goes over it
  *
@@ -406,14 +405,27 @@ export class Sim {
       const i = q[k];
       let lim = stop(i, k);
       if (k > 0) lim = Math.min(lim, this.s[q[k - 1]] - SPACING);
+      const fromTray = this.mode[i] === M.FINAL && this.t[i] < 0.55;
+      const fromLoop = this.mode[i] === M.N_LANE && this.laps[i] > 0 && this.t[i] < 0.55;
       this.v[i] += (vt - this.v[i]) * (1 - Math.exp(-dt * 1.6));
-      let s = this.s[i] + this.v[i] * dt;
+      let s = this.s[i] + (fromTray ? 0 : this.v[i] * dt);
       if (s > lim) {
         s = Math.max(this.s[i], lim);
         this.v[i] *= 0.4;
       }
       this.s[i] = s;
       track.at(Math.min(s, track.length), _p);
+      if (fromTray || fromLoop) {
+        this.t[i] += dt;
+        const u = Math.min(1, this.t[i] / 0.55);
+        const e = u * u * (3 - 2 * u);
+        const o = i * 3;
+        _p.set(this.from[o] + (_p.x - this.from[o]) * e, this.from[o + 1] + (_p.y - this.from[o + 1]) * e, this.from[o + 2] + (_p.z - this.from[o + 2]) * e);
+      }
+      const o = i * 3;
+      this.vel[o] = (_p.x - this.pos[o]) / dt;
+      this.vel[o + 1] = (_p.y - this.pos[o + 1]) / dt;
+      this.vel[o + 2] = (_p.z - this.pos[o + 2]) / dt;
       this.setPos(i, _p);
     }
   }
@@ -499,7 +511,9 @@ export class Sim {
         const my = dishY(0.4) + R;
         const x = k < 0.35 ? fx + (mx - fx) * k1 : mx + (slot.x - mx) * e2;
         const z = k < 0.35 ? fz + (mz - fz) * k1 : mz + (slot.z - mz) * e2;
-        const y = k < 0.35 ? fy + (my - fy) * k1 * k1 : my + (slot.y - my) * e2;
+        const radius = Math.hypot(x - DISH.x, z - DISH.z);
+        const bounce = 0.12 * Math.abs(Math.sin(k2 * Math.PI * 3)) * Math.exp(-k2 * 9);
+        const y = k < 0.35 ? fy + (my - fy) * k1 * k1 : dishY(radius) + R + bounce;
         _p.set(x, y, z);
         this.setPos(i, _p);
         if (k >= 1) this.enter(i, M.DISH);
@@ -524,7 +538,8 @@ export class Sim {
         const d = Math.hypot(dx, dz) || 1;
         const k = Math.min(1, this.t[i] / 0.9);
         const r = d + (DISH.r + 0.25 - d) * k * k;
-        _p.set(DISH.x + (dx / d) * r, dishY(Math.min(r, DISH.r)) + R + (r > DISH.r ? 0.2 : 0), DISH.z + (dz / d) * r);
+        const overRim = Math.max(0, Math.min(1, (r - DISH.r) / 0.25));
+        _p.set(DISH.x + (dx / d) * r, dishY(Math.min(r, DISH.r)) + R + 0.2 * overRim, DISH.z + (dz / d) * r);
         this.setPos(i, _p);
         if (k >= 1) this.fall(i, (dx / d) * 1.1, 0.6, (dz / d) * 1.1, "inbox");
       } else if (m === M.VALVE) {
@@ -561,10 +576,11 @@ export class Sim {
       for (const i of this.trayQ[k]) {
         this.t[i] += dt;
         const to = L.traySlots[k][this.slot[i]];
-        const e = Math.min(1, this.t[i] / 0.35);
+        const progress = Math.min(1, this.t[i] / 0.35);
+        const e = progress * progress * (3 - 2 * progress);
         _p.set(
           this.from[i * 3] + (to.x - this.from[i * 3]) * e,
-          this.from[i * 3 + 1] + (to.y - this.from[i * 3 + 1]) * e,
+          this.from[i * 3 + 1] + (to.y - this.from[i * 3 + 1]) * e + 0.045 * Math.sin(progress * Math.PI) * Math.exp(-progress * 3),
           this.from[i * 3 + 2] + (to.z - this.from[i * 3 + 2]) * e
         );
         this.setPos(i, _p);
@@ -582,6 +598,7 @@ export class Sim {
         const i = q.shift()!;
         this.traySlotUsed[2][this.slot[i]] = 0;
         this.enter(i, M.FINAL);
+        this.setFrom(i);
         this.s[i] = 0;
         this.v[i] = 0.3;
         fq.push(i);
@@ -658,6 +675,11 @@ export class Sim {
       const i = this.clawHold[c];
       if (i >= 0) {
         _p.set(x, GANTRY_Y - drop - 0.38, GANTRY_Z.back);
+        this.t[i] += dt;
+        const u = Math.min(1, this.t[i] / (T * 0.08));
+        const e = u * u * (3 - 2 * u);
+        const o = i * 3;
+        _p.set(this.from[o] + (_p.x - this.from[o]) * e, this.from[o + 1] + (_p.y - this.from[o + 1]) * e, this.from[o + 2] + (_p.z - this.from[o + 2]) * e);
         this.setPos(i, _p);
       }
     }
@@ -668,6 +690,7 @@ export class Sim {
     if (!q.length) return;
     const i = q.shift()!;
     this.traySlotUsed[k][this.slot[i]] = 0;
+    this.setFrom(i);
     this.enter(i, M.CARRIED);
     this.clawHold[c] = i;
     this.clawSlip[c] = this.user[i] || this.rnd() < this.tune.slip ? 0.25 + this.rnd() * 0.5 : -1;
@@ -691,7 +714,6 @@ export class Sim {
 
   private stepNew(dt: number) {
     const L = this.L;
-    const T = L.TURB;
     for (let l = 1; l < L.lanes.length; l++) {
       const ln = L.lanes[l];
       const q = this.nLaneQ[l];
@@ -723,8 +745,11 @@ export class Sim {
       this.t[i] += dt;
       const k = Math.min(1, this.t[i] / 0.55);
       // Caught at the top right, swept round the turbine, let go at the bottom left.
-      const a = THREE.MathUtils.lerp(Math.PI * 0.32, Math.PI * 1.22, k);
-      _p.set(T.x + Math.cos(a) * T.r * 0.92, T.y + Math.sin(a) * T.r * 0.92, T.z);
+      turbinePoint(k, L, _p);
+      const o = i * 3;
+      this.vel[o] = (_p.x - this.pos[o]) / dt;
+      this.vel[o + 1] = (_p.y - this.pos[o + 1]) / dt;
+      this.vel[o + 2] = (_p.z - this.pos[o + 2]) / dt;
       this.setPos(i, _p);
       if (k >= 1) {
         this.enter(i, M.N_CHANNEL);
@@ -763,6 +788,7 @@ export class Sim {
         this.gold[h] = 1;
         this.events.push({ type: "kept", pos: this.getPos(h, new THREE.Vector3()), user: !!this.user[h] });
         this.enter(h, M.N_LANE);
+        this.setFrom(h);
         this.lane[h] = lane;
         this.s[h] = 0;
         this.v[h] = 0.6;
@@ -790,9 +816,9 @@ export class Sim {
       if (this.pos[o + 1] < PIT_Y + 0.15) {
         // At rest on the bottom of the pit, with all the others.
         const k = this.lakeHead;
-        // It rolls a little way across the bottom, and stays (inside the pit).
-        let lx = this.pos[o] + (this.rnd() - 0.5) * 5;
-        let lz = this.pos[o + 2] + (this.rnd() - 0.5) * 5;
+        // Keep the light at its contact point instead of teleporting it across the lake.
+        let lx = this.pos[o];
+        let lz = this.pos[o + 2];
         const lr = Math.hypot(lx, lz);
         if (lr > 19.6) {
           lx *= 19.6 / lr;
@@ -818,7 +844,8 @@ export class Sim {
       let k = 1;
       if (m === M.DISH || m === M.RIM) {
         const w = this.wait[i];
-        k = w < HOUR ? 1 : Math.max(1 / 7, 1 - ((w - HOUR) / (HOUR * 4)) * (6 / 7));
+        const fade = Math.max(0, Math.min(1, (w - HOUR) / (HOUR * 4)));
+        k = 1 - 0.8 * fade * fade * (3 - 2 * fade);
       }
       if (m === M.FALL) k = Math.max(0.75, this.glow[i]);
       this.glow[i] += (k - this.glow[i]) * (1 - Math.exp(-dt * 3));

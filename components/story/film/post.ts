@@ -159,6 +159,7 @@ uniform float uFlash;
 uniform vec3 uFlashColor;
 uniform float uBlack;
 uniform float uPaper;
+uniform float uFXAA;
 in vec2 vUv;
 
 vec3 RRTAndODTFit(vec3 v) {
@@ -181,6 +182,28 @@ vec3 fin(vec3 c) {
   return clamp(mix(c, vec3(0.0), bad), 0.0, 64.0);
 }
 float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+// Used only when this GPU cannot multisample the half-float scene target.
+// It follows the local edge direction; flat regions remain untouched.
+vec3 sceneSample(vec2 uv) {
+  vec3 centre = fin(texture(tScene, uv).rgb);
+  if (uFXAA < 0.5) return centre;
+  vec2 px = 1.0 / max(uRes, vec2(1.0));
+  vec3 nw = fin(texture(tScene, uv + px * vec2(-1.0, 1.0)).rgb);
+  vec3 ne = fin(texture(tScene, uv + px * vec2(1.0, 1.0)).rgb);
+  vec3 sw = fin(texture(tScene, uv + px * vec2(-1.0, -1.0)).rgb);
+  vec3 se = fin(texture(tScene, uv + px * vec2(1.0, -1.0)).rgb);
+  float m = luma(centre), a = luma(nw), b = luma(ne), c = luma(sw), d = luma(se);
+  float lo = min(m, min(min(a, b), min(c, d)));
+  float hi = max(m, max(max(a, b), max(c, d)));
+  if (hi - lo < max(0.035, hi * 0.125)) return centre;
+  vec2 dir = vec2(-((a + b) - (c + d)), (a + c) - (b + d));
+  float reduce = max((a + b + c + d) * 0.03125, 0.0078125);
+  dir = clamp(dir / (min(abs(dir.x), abs(dir.y)) + reduce), vec2(-8.0), vec2(8.0)) * px;
+  vec3 along = 0.5 * (fin(texture(tScene, uv - dir / 6.0).rgb) + fin(texture(tScene, uv + dir / 6.0).rgb));
+  vec3 wider = along * 0.5 + 0.25 * (fin(texture(tScene, uv - dir * 0.5).rgb) + fin(texture(tScene, uv + dir * 0.5).rgb));
+  float wl = luma(wider);
+  return wl < lo || wl > hi ? along : wider;
+}
 vec3 toSRGB(vec3 c) {
   c = clamp(c, 0.0, 1.0);
   return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c));
@@ -195,17 +218,36 @@ void main() {
   vec2 uv = vUv;
   vec2 c = uv - 0.5;
   float r2 = dot(c, c);
-  // A hair of lateral chromatic aberration, growing toward the edges.
-  vec2 off = c * r2 * uAberration * 0.02;
+  // A subtle lens dispersion at the periphery, measured in pixels. The
+  // previous UV-scaled offset smeared fine rails more on larger displays.
+  float periphery = smoothstep(0.08, 0.38, r2);
+  vec2 radial = c / max(length(c), 0.001);
+  vec2 off = radial * periphery * uAberration * 1.6 / max(uRes, vec2(1.0));
   vec3 hdr;
-  hdr.r = texture(tScene, uv - off).r;
-  hdr.g = texture(tScene, uv).g;
-  hdr.b = texture(tScene, uv + off).b;
+  hdr.r = sceneSample(uv - off).r;
+  hdr.g = sceneSample(uv).g;
+  hdr.b = sceneSample(uv + off).b;
   hdr = fin(hdr);
-  hdr = fin(hdr);
-  vec3 bloom = texture(tBloom, uv).rgb;
-  vec3 col = (hdr + bloom * uBloom) * uExposure;
-  col = aces(col);
+  vec3 bloom = fin(texture(tBloom, uv).rgb);
+  // Give luminous customers a short lens trail. It comes from the light
+  // itself, follows its colour, and never adds a white veil over the room.
+  vec3 trail = vec3(0.0);
+  for (int i = 1; i <= 3; i++) {
+    float d = float(i) * 0.0025;
+    float weight = 0.055 / float(i);
+    trail += (fin(texture(tBloom, uv + vec2(d, 0.0)).rgb) + fin(texture(tBloom, uv - vec2(d, 0.0)).rgb)) * weight;
+  }
+  bloom += trail;
+  bloom /= 1.0 + luma(bloom) * 0.12;
+  vec3 lit = (hdr + bloom * uBloom) * uExposure;
+  vec3 col = aces(lit);
+  // Keep amber, indigo and gold in bright lights instead of letting every
+  // chapter's brightest detail converge to the same flat white.
+  float peak = max(max(lit.r, lit.g), lit.b);
+  float low = min(min(lit.r, lit.g), lit.b);
+  float colourLight = smoothstep(1.5, 6.0, peak) * smoothstep(0.12, 0.6, (peak - low) / max(peak, 0.001));
+  vec3 hue = lit / max(peak, 0.001);
+  col = mix(col, col * mix(vec3(1.0), hue, 0.28), colourLight);
 
   // The grade: lift / gamma / gain, saturation, split toning.
   col = clamp(col * uGain + uLift * (1.0 - col), 0.0, 1.0);
@@ -217,7 +259,7 @@ void main() {
 
   vec3 o = toSRGB(col);
   // A slow vignette, deeper in the corners.
-  float v = smoothstep(0.85, 0.18, r2 * 2.2);
+  float v = 1.0 - smoothstep(0.18, 0.85, r2 * 2.2);
   o *= mix(1.0, v, uVignette);
   // The flash, then black, then paper.
   o = mix(o, uFlashColor, clamp(uFlash, 0.0, 1.0));
@@ -226,7 +268,8 @@ void main() {
   o = mix(o, paper, clamp(uPaper, 0.0, 1.0));
 
   // Grain, strongest in the mid-tones; a little dither under it.
-  float g = hash(uv * uRes + fract(uTime * 7.31) * 913.0) - 0.5;
+  float grainFrame = floor(uTime * 24.0);
+  float g = hash(uv * uRes + fract(grainFrame * 0.731) * 913.0) - 0.5;
   float gl = luma(o);
   o += g * uGrain * (0.45 + 1.4 * gl * (1.0 - gl)) * (1.0 - uPaper * 0.85);
   o += (hash(uv * uRes * 1.37 + 17.0) - 0.5) / 255.0;
@@ -262,9 +305,13 @@ export class Post {
   private levels: number;
   private w = 1;
   private h = 1;
+  private aaReady = false;
+  private requestedSamples: number;
 
   constructor(samples: number, levels: number) {
     this.levels = levels;
+    // Thin rails need real coverage samples on phones as well as desktops.
+    this.requestedSamples = Math.max(4, samples);
     this.scene = new THREE.WebGLRenderTarget(1, 1, {
       type: THREE.HalfFloatType,
       format: THREE.RGBAFormat,
@@ -322,6 +369,7 @@ export class Post {
       uFlashColor: { value: new THREE.Vector3(1, 1, 1) },
       uBlack: { value: 0 },
       uPaper: { value: 0 },
+      uFXAA: { value: 0 },
     });
     this.quad = new THREE.Mesh(fullscreenTriangle(), this.comp);
     this.quad.frustumCulled = false;
@@ -357,6 +405,19 @@ export class Post {
 
   /** Draw a frame: the scene into HDR, the bloom, the composite to the screen. */
   render(r: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, g: Grade, time: number) {
+    if (!this.aaReady) {
+      const gl = r.getContext() as WebGL2RenderingContext;
+      const colour = Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER, gl.RGBA16F, gl.SAMPLES) as Int32Array);
+      const depth = Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, gl.SAMPLES) as Int32Array);
+      const allowed = colour.filter((n) => n <= this.requestedSamples && n <= r.capabilities.maxSamples && depth.includes(n));
+      const samples = allowed.length ? Math.max(...allowed) : 0;
+      if (this.scene.samples !== samples) {
+        this.scene.dispose();
+        this.scene.samples = samples;
+      }
+      this.comp.uniforms.uFXAA.value = samples > 0 ? 0 : 1;
+      this.aaReady = true;
+    }
     const auto = r.autoClear;
     r.autoClear = true;
     r.setRenderTarget(this.scene);

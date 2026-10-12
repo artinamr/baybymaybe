@@ -2,13 +2,14 @@
  * THE STORY'S WORDS (/story/, docs/STORY.md): the film's type, the hover
  * labels, the counters and the transcript under the film all read this one
  * file. Plain New Zealand English, second person, no em dashes, nothing
- * invented: the only facts are the two below, cited on screen and in the
- * transcript (docs/BLOG-GUIDE.md applies).
+ * invented about a real business. This is an illustrative story, with its
+ * one research finding cited on screen and in the transcript.
+ * docs/BLOG-GUIDE.md applies.
  */
 
 export type SourceId = "google" | "hbr";
 
-/** The two facts the film uses, and where they come from. */
+/** Source records. The transcript lists only sources cited by a chapter. */
 export const SOURCES: Record<
   SourceId,
   { short: string; title: string; publisher: string; authors: string; date: string; url: string; checked: string }
@@ -20,7 +21,7 @@ export const SOURCES: Record<
     authors: "Alex Shellhammer and Juliette Neel",
     date: "8 September 2016",
     url: "https://blog.google/products/admanager/the-need-for-mobile-speed/",
-    checked: "10 October 2026",
+    checked: "12 October 2026",
   },
   hbr: {
     short: "Harvard Business Review, The Short Life of Online Sales Leads, 2011",
@@ -29,7 +30,7 @@ export const SOURCES: Record<
     authors: "James B. Oldroyd, Kristina McElheran and David Elkington",
     date: "March 2011",
     url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads",
-    checked: "10 October 2026",
+    checked: "12 October 2026",
   },
 };
 
@@ -39,7 +40,7 @@ export const STORY_TITLE = "The quiet leak";
 export const DOOR = {
   kicker: "A short film by Nerodyn",
   title: STORY_TITLE,
-  line: "Four minutes on the customers you lose without ever seeing them go.",
+  line: "One customer. One machine. The evening it takes from you.",
   sound: "Start with sound",
   silent: "Start in silence",
   how: "Scroll, drag or use the arrow keys. Or press play and sit back.",
@@ -85,124 +86,124 @@ export type StoryChapter = {
 export const CHAPTERS: StoryChapter[] = [
   {
     id: "open",
-    name: "Your business",
-    title: "This is your business.",
-    line: "Built up over years. A part here, a patch there. It works, mostly.",
-    beat: "Every light is a customer, someone who wants what you sell. Follow one.",
+    name: "One customer",
+    kicker: "Prologue",
+    title: "Someone chose you.",
+    line: "They need a job done. You have spent years building the business that can do it.",
+    beat: "Every light is a person. Stay with this one.",
     scene:
-      "A machine the size of a cathedral stands in the dark, an iron tower in a nave of pointed arches. Warm lights roll out of a door at the top and down its tracks.",
+      "An iron machine rises through a dark cathedral. Its tracks, trays and gears have accumulated around a central tower. Warm lights enter at the top. One burns brighter than the others. The camera moves close to it: this is the customer we will follow.",
     machine: "old",
   },
   {
     id: "website",
     name: "Your website",
     kicker: "01 Your website",
-    title: "They found you. Now they wait.",
-    line: "Your site is slow on their phone, and it isn’t clear what to do next.",
-    fact: { text: "53% of mobile visits are likely to be abandoned if a page takes longer than 3 seconds to load.", source: "google" },
-    beat: "More than half of them never get in.",
+    title: "They arrive. The door stays shut.",
+    line: "On their phone, a page loads slowly. They wait for a way to ask.",
+    fact: { text: "Google’s 2016 global data put likely abandonment at 53% when a mobile page took over three seconds.", source: "google" },
+    beat: "Our customer stays. Watch the others fall.",
     scene:
-      "Amber dusk. The lights queue at an iron gate that rises slowly while a gauge above it creeps past 3 seconds. More than half give up and drop into the dark. Ours waits, and gets through.",
+      "Amber light catches the teeth of a heavy iron gate. The customers queue while a loading gauge passes three seconds. Lights leave the track and fall through the machine. The one we follow waits until the gate opens, then slips underneath it.",
     machine: "old",
   },
   {
     id: "inbox",
     name: "Your inbox",
     kicker: "02 Your inbox",
-    title: "You’ll get back to them tomorrow.",
-    line: "They filled in your form at 7:40pm. It landed in an inbox nobody checks until morning.",
-    fact: { text: "Firms that answered within an hour were nearly seven times as likely to qualify the lead.", source: "hbr" },
-    beat: "By morning, they’ve asked someone else.",
+    title: "Their message arrives. You don’t.",
+    line: "7:40pm. The form says sent. Your inbox says nothing back.",
+    beat: "The night moves. They’re still waiting.",
     scene:
-      "Midnight blue. The lights pour into a wide dish and sit. Above it a great wheel turns from evening through the night to morning. The longer they wait, the dimmer they get, and some roll over the rim.",
+      "The track empties into a broad inbox tray. A clock reads 7:40pm. The great wheel above it carries the sun out of sight and the moon across the room. The waiting lights dim. Some drift over the rim. Our customer is still there when morning reaches the tray.",
     machine: "old",
   },
   {
     id: "admin",
     name: "Your admin",
     kicker: "03 Your admin",
-    title: "Then someone types it all again.",
-    line: "Into the spreadsheet, then the quote, then the invoice. Every copy is a chance to drop something.",
-    beat: "Some never make it across.",
+    title: "They told you once.",
+    line: "You copy their details into a spreadsheet, a quote, an invoice. The person becomes a stack of entries.",
+    beat: "Our customer makes it through. Others don’t.",
     scene:
-      "Flickering green light. Old claws lift the lights from tray to tray, stencilled spreadsheet, quote and invoice, to the clatter of typewriters. Some slip from the claws and fall. Ours is stamped gold in the invoice tray: a sale.",
+      "Green lights flicker over three disconnected trays: spreadsheet, quote and invoice. Metal claws carry each customer across the gaps while typewriters strike. Some lights slip through the claws. The one we follow reaches the invoice tray and is stamped gold. The job is paid.",
     machine: "old",
   },
   {
     id: "followup",
     name: "Your follow-up",
     kicker: "04 Your follow-up",
-    title: "They paid. Then nothing.",
-    line: "No thank-you. No check-in. No reminder when they’re due again.",
-    beat: "So they never come back.",
+    title: "The invoice is paid. The track ends.",
+    line: "The job is done. Nothing in this machine remembers to ask how it went.",
+    beat: "You watch them fall. You can’t reach them.",
     scene:
-      "Blood red. The last track runs out over a drop and simply ends. The customer we followed rolls off the edge and falls into the pit with all the others.",
+      "The camera follows our gold light along the last track. Red light rises from below. Ahead, the rail stops in open air. The customer rolls beyond it. For a moment the light hangs alone, then falls. The camera dives after it into the pit. The person we followed joins the lights lost from every floor.",
     machine: "old",
   },
   {
     id: "you",
     name: "You",
     kicker: "05 You",
-    title: "And it all runs on you.",
-    line: "It’s 11:47pm. You’re still answering emails and chasing invoices.",
-    beat: "You never see them go.",
+    title: "11:47pm. Still turning.",
+    line: "The last email. The unpaid invoice. Another night at the desk, making all these parts behave.",
+    beat: "Tomorrow asks you to do it again.",
     scene:
-      "The camera rises out of the pit and pulls back. Rivers of light fall from every level of the tower into a dim red lake far below. At its foot, under one desk lamp, a small figure turns a hand crank that keeps the whole machine going.",
+      "The camera rises from the lost lights and pulls back until the whole tower is visible. Each floor leaks into the same red pit. At the foot of the machine, one small figure sits under a desk lamp. A clock reads 11:47pm. The figure turns a hand crank. The weight of the whole tower depends on that motion.",
     machine: "old",
   },
   {
     id: "turn",
     name: "The turn",
-    title: "Stop patching it.",
-    beat: "Build it to keep them.",
+    title: "Take your hand off the crank.",
+    beat: "Rebuild the route. Give the evening back.",
     scene:
-      "Everything stops. Silence. Then the old machine tears itself apart: rust flakes off, gears tumble past in slow motion, and the tower falls away into the pit. A white flash, and a new machine assembles around us in glass and indigo light, each piece locking into place.",
+      "The crank stops. The lights and gears hold still. Silence gives us time to see the machine as a whole. Then its joints open. Rust and iron fall away; great gears tumble past the camera into the dark. A white flash clears the frame. Glass channels and indigo rings assemble around the same route, each connection locking into the next.",
     machine: "none",
   },
   {
     id: "new-website",
     name: "Website",
     kicker: "Website",
-    title: "They find you. They’re straight in.",
-    line: "A fast site, built for the phone in their hand, with one clear next step.",
-    scene: "Where the gate was, a ring of light. Every customer passes straight through it, and it pulses as they go.",
+    title: "This time, the door opens.",
+    line: "The same customer. A clear page on their phone. A visible way to ask for the job.",
+    scene: "We return to the top of the rebuilt machine and follow the same warm light. Where the iron gate stood, an open ring pulses as the customer passes through. There is no queue at the entrance.",
     machine: "new",
   },
   {
     id: "new-ai",
     name: "AI automation",
     kicker: "AI automation",
-    title: "Answered in seconds. Even at 3am.",
-    line: "An assistant replies straight away, books the job, and passes anything tricky to a person.",
+    title: "This time, someone answers.",
+    line: "The assistant handles the first questions. It gathers the job details and leaves the judgement with your team.",
     scene:
-      "Where the inbox was, a turbine of glass spins under the moon. Each light is caught and sent on the moment it arrives, still bright.",
+      "The moon crosses the same space where the inbox once waited. A glass turbine catches our customer and sends the light into the next channel. The light keeps its warmth. The route continues while the desk below is quiet.",
     machine: "new",
   },
   {
     id: "new-platform",
     name: "Platform",
     kicker: "Platform",
-    title: "Typed once. Used everywhere.",
-    line: "Their details flow from the enquiry to the quote, the booking and the invoice. Nobody retypes a thing.",
-    scene: "One glass channel carries each light through three glowing nodes, quote, booking and invoice, without a stop. Nothing falls.",
+    title: "The person stays in the picture.",
+    line: "Their details travel with the job. The quote becomes a booking, then an invoice, without another copy.",
+    scene: "One continuous glass channel replaces the disconnected trays. Our customer passes through the quote, booking and invoice nodes. Each node lights in turn. No claw has to lift the customer across an open gap.",
     machine: "new",
   },
   {
     id: "new-followup",
     name: "Follow-up",
     kicker: "Follow-up",
-    title: "They paid. Then they came back.",
-    line: "A thank-you, a check-in, a reminder when they’re due. The track loops back, and every lap brings more of them round.",
-    scene: "The end of the track no longer ends. It curves up into a gold spiral round the tower and carries customers back to the top.",
+    title: "The end becomes a way back.",
+    line: "The job closes with a thank-you. A check-in follows. When they need you again, the way back is clear.",
+    scene: "The camera chases the same gold light towards the place where the old rail ended. This time the track curves upward. The customer enters a gold spiral, climbs around the tower and returns to the first door. The fall has become a return.",
     machine: "new",
   },
   {
     id: "new-you",
     name: "You",
     kicker: "You",
-    title: "And you go home at six.",
-    line: "It runs without you holding it together.",
-    scene: "The whole tower glows. The hand crank is a flywheel now, turning on its own. At 6:00pm the desk lamp clicks off.",
+    title: "6pm. The light goes out.",
+    line: "The work has a route of its own. You finish for the day. The machine keeps turning.",
+    scene: "The camera pulls back to the desk again. A flywheel turns where the hand crank used to be. The rebuilt tower carries the lights above it. At 6pm, the owner switches off the lamp. The small pool of light at the desk disappears; the light in the machine continues.",
     machine: "new",
   },
   {
@@ -221,7 +222,7 @@ export const chapterById = (id: ChapterId) => CHAPTERS.find((c) => c.id === id)!
 export const ENDING = {
   title: "Find your leaks.",
   line: "Free audit in two days.",
-  body: "Send us your website. In two days you get a plain answer: where customers slip away, and what we would build instead.",
+  body: "Send us your website. In two days, get a plain answer about the way in, the handovers and the gaps worth fixing first.",
   cta: "Get your free audit",
   again: "Watch it again",
   watch: "Watch the film",
@@ -230,9 +231,9 @@ export const ENDING = {
 
 /** The counters: the film's own customers, and it says so. */
 export const COUNTER = {
-  lost: "Lost while you watched",
-  kept: "Kept while you watched",
-  note: "Customers in this film",
+  lost: "Lights lost in this run",
+  kept: "Lights carried through",
+  note: "Illustrative film counters",
   leaks: {
     website: "At the website",
     inbox: "In the inbox",
@@ -262,24 +263,25 @@ export type PartId =
 /** Hover a part of the machine: what it really is in your business. */
 export const PARTS: Record<PartId, { name: string; line: string }> = {
   door: { name: "The way in", line: "Search, ads and word of mouth: how people find you." },
-  gate: { name: "Your website", line: "Slow on a phone, and unclear about what to do next." },
+  gate: { name: "Your website", line: "The first door. In this story, it keeps people waiting." },
   dish: { name: "Your inbox", line: "Enquiries wait here until someone gets to them." },
   wheel: { name: "The hours", line: "Evening, night and morning go by while they wait." },
   admin: { name: "Your admin", line: "The same details copied into the spreadsheet, the quote and the invoice." },
-  cliff: { name: "No follow-up", line: "After the sale, nothing brings them back." },
-  crank: { name: "You", line: "Holding it all together, after hours." },
-  pit: { name: "The ones you lost", line: "Every customer the machine dropped, at every stage." },
+  cliff: { name: "No follow-up", line: "The job ends here. The relationship has no route back." },
+  crank: { name: "You", line: "The owner’s evening keeps the old machine turning." },
+  pit: { name: "The lost lights", line: "The people this film’s machine dropped along the way." },
   portal: { name: "Your new website", line: "Fast on a phone, with one clear next step." },
-  turbine: { name: "AI automation", line: "Every enquiry answered straight away, day or night, with a person for anything tricky." },
+  turbine: { name: "AI automation", line: "First questions answered, job details gathered, judgement left with your team." },
   channel: { name: "Your platform", line: "Details entered once and used everywhere: quote, booking, invoice." },
-  loop: { name: "Follow-up", line: "Thank-yous, check-ins and reminders that run themselves." },
-  flywheel: { name: "The system", line: "It keeps running without you holding it together." },
+  loop: { name: "Follow-up", line: "A thank-you and a check-in. A clear way to return when the customer needs you." },
+  flywheel: { name: "The system", line: "Connected parts carry the work after the desk lamp goes out." },
 };
 
 /** The transcript's opening, and the controls' words. */
 export const TRANSCRIPT = {
   title: "The story, in words",
-  intro: "Everything the film shows and says, for reading, for screen readers, and for anyone watching in silence.",
+  intro: "One customer enters a business built from separate parts. Follow the losses, the rebuild and the evening the owner gets back.",
+  note: "This is an illustrative story, not a real client or a forecast. Its lights and counters belong to the film. The research finding below comes from a global study published in 2016; it is not a measurement of your business.",
   sources: "Sources",
 };
 

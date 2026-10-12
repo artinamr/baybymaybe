@@ -21,10 +21,19 @@ export class Marbles {
   private lakePos: THREE.BufferAttribute;
   private lakeB: THREE.BufferAttribute;
   private m = new THREE.Matrix4();
+  private rotation = new THREE.Matrix4();
+  private turn: THREE.Quaternion[];
+  private turnStep = new THREE.Quaternion();
+  private axis = new THREE.Vector3();
+  private previous: Float32Array;
+  private active: Uint8Array;
   private max: number;
 
   constructor(n: number, lakeMax: number, detail: number) {
     this.max = n + 1;
+    this.turn = Array.from({ length: this.max }, () => new THREE.Quaternion());
+    this.previous = new Float32Array(this.max * 3);
+    this.active = new Uint8Array(this.max);
     const geo = new THREE.IcosahedronGeometry(R, detail);
     this.color = new THREE.InstancedBufferAttribute(new Float32Array(this.max * 3), 3);
     this.color.setUsage(THREE.DynamicDrawUsage);
@@ -85,6 +94,33 @@ export class Marbles {
     return [this.mesh, this.streaks, this.lake];
   }
 
+  /** Roll from actual displacement; grips hold orientation and falls tumble. */
+  private place(i: number, x: number, y: number, z: number, size: number, squash: number, falling: boolean, held: boolean) {
+    const o = i * 3;
+    const dx = x - this.previous[o];
+    const dy = y - this.previous[o + 1];
+    const dz = z - this.previous[o + 2];
+    const distance = Math.hypot(dx, dy, dz);
+    if (!this.active[i]) this.turn[i].identity();
+    else if (!held && distance > 1e-6 && distance < 2) {
+      if (falling) this.axis.set(0.4 + Math.sin(i * 2.4) * 0.3, 0.7, -0.3).normalize();
+      else this.axis.set(dz, 0, -dx).normalize();
+      if (this.axis.lengthSq() > 0.1) {
+        const angle = falling ? Math.min(0.5, distance / R * 0.12) : Math.hypot(dx, dz) / (R * size);
+        this.turnStep.setFromAxisAngle(this.axis, angle);
+        this.turn[i].premultiply(this.turnStep).normalize();
+      }
+    }
+    this.active[i] = 1;
+    this.previous[o] = x;
+    this.previous[o + 1] = y;
+    this.previous[o + 2] = z;
+    const compression = Math.min(0.018, Math.max(0, squash));
+    const width = size / Math.sqrt(1 - compression);
+    this.m.makeScale(width, size * (1 - compression), width).multiply(this.rotation.makeRotationFromQuaternion(this.turn[i]));
+    this.m.setPosition(x, y - R * size * compression, z);
+  }
+
   update(sim: Sim, hero: HeroState, heroK: number) {
     const m = this.m;
     const col = this.color.array as Float32Array;
@@ -95,11 +131,15 @@ export class Marbles {
     const sc = this.sCol.array as Float32Array;
     for (let i = 0; i < sim.n; i++) {
       const mode = sim.mode[i];
-      if (mode === M.FREE) continue;
+      if (mode === M.FREE) {
+        this.active[i] = 0;
+        continue;
+      }
       const o = i * 3;
       const s = sim.user[i] ? 1.12 : 1;
-      m.makeScale(s, s, s);
-      m.setPosition(sim.pos[o], sim.pos[o + 1], sim.pos[o + 2]);
+      const dishContact = mode === M.DROP && sim.t[i] > 0.85 * 0.35 ? 0.018 * Math.exp(-((sim.t[i] / 0.85 - 0.35) / 0.65) * 14) : 0;
+      const trayContact = mode === M.TRAY ? 0.016 * Math.exp(-sim.t[i] * 18) : 0;
+      this.place(i, sim.pos[o], sim.pos[o + 1], sim.pos[o + 2], s, Math.max(dishContact, trayContact), mode === M.FALL, mode === M.CARRIED);
       this.mesh.setMatrixAt(k, m);
       col[k * 3] = sim.col[o];
       col[k * 3 + 1] = sim.col[o + 1];
@@ -120,8 +160,7 @@ export class Marbles {
     }
     if (hero.visible && heroK > 0.001) {
       const s = 1.18;
-      m.makeScale(s, s, s);
-      m.setPosition(hero.pos.x, hero.pos.y, hero.pos.z);
+      this.place(sim.n, hero.pos.x, hero.pos.y, hero.pos.z, s, hero.squash, hero.falling, hero.claw.some((claw) => claw.open < 0.1));
       this.mesh.setMatrixAt(k, m);
       col[k * 3] = hero.col.r * 1.2 * heroK;
       col[k * 3 + 1] = hero.col.g * 1.2 * heroK;
@@ -133,7 +172,7 @@ export class Marbles {
         sc.set([hero.col.r, hero.col.g, hero.col.b], f * 3);
         f++;
       }
-    }
+    } else this.active[sim.n] = 0;
     this.mesh.count = k;
     this.mesh.instanceMatrix.needsUpdate = true;
     this.color.needsUpdate = true;

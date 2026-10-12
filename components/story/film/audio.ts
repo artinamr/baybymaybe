@@ -87,6 +87,9 @@ export class Score {
   private lostThisSec = 0;
   private secT = 0;
   private bellsThisSec = 0;
+  private pulseAcc = 0;
+  private pulseN = 0;
+  private loops: (OscillatorNode | AudioBufferSourceNode)[] = [];
   private clangs: number[] = [];
   private lockAt: number[] = [];
   private landed = new Set<string>();
@@ -147,6 +150,7 @@ export class Score {
     lfoG.gain.value = 220;
     lfo.connect(lfoG).connect(this.padF.frequency);
     lfo.start();
+    this.loops.push(lfo);
     for (let i = 0; i < 6; i++) {
       const a = c.createOscillator();
       const bo = c.createOscillator();
@@ -163,6 +167,7 @@ export class Score {
       bo.frequency.value = mtof(38 + i * 5);
       a.start();
       bo.start();
+      this.loops.push(a, bo);
       this.pad.push({ a, b: bo, g });
     }
     this.sub = c.createOscillator();
@@ -172,6 +177,7 @@ export class Score {
     this.subG.gain.value = 0;
     this.sub.connect(this.subG).connect(this.bus);
     this.sub.start();
+    this.loops.push(this.sub);
 
     // Rolling (our customer), and the machine's hum.
     this.roll = this.loopNoise(300, 1.1, 0);
@@ -194,6 +200,7 @@ export class Score {
     g.gain.value = v;
     src.connect(bp).connect(g).connect(this.bus);
     src.start();
+    this.loops.push(src);
     return { src, bp, g };
   }
 
@@ -234,6 +241,14 @@ export class Score {
 
   dispose() {
     if (!this.ctx) return;
+    for (const source of this.loops) {
+      try {
+        source.stop();
+      } catch {
+        /* already stopped */
+      }
+    }
+    this.loops = [];
     try {
       this.master.disconnect();
     } catch {
@@ -285,9 +300,9 @@ export class Score {
   }
 
   /** An FM bell: a customer kept. */
-  private bell(midi: number, pan: number, v = 0.08, dur = 2.6) {
+  private bell(midi: number, pan: number, v = 0.08, dur = 2.6, when = 0) {
     const c = this.ctx!;
-    const t = c.currentTime;
+    const t = c.currentTime + when;
     const f = mtof(midi);
     const car = c.createOscillator();
     car.frequency.value = f;
@@ -310,6 +325,31 @@ export class Score {
     mod.start(t);
     car.stop(t + dur + 0.05);
     mod.stop(t + dur + 0.05);
+  }
+
+  /** One customer's musical fingerprint: unresolved first, resolved later. */
+  private theme(resolved: boolean, quiet = false) {
+    const notes = resolved ? [74, 78, 81, 86] : [74, 77, 81, 76];
+    notes.forEach((note, i) => this.bell(note, (i - 1.5) * 0.13, quiet ? 0.024 : 0.045, 3.2, i * 0.48));
+  }
+
+  /** The old machine's rhythm feels like the owner's heartbeat. */
+  private heartbeat(v: number) {
+    const c = this.ctx!;
+    for (const [delay, strength] of [[0, 1], [0.19, 0.55]]) {
+      const t = c.currentTime + delay;
+      const o = c.createOscillator();
+      o.type = "sine";
+      o.frequency.setValueAtTime(76, t);
+      o.frequency.exponentialRampToValueAtTime(38, t + 0.23);
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(v * strength, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.36);
+      o.connect(g).connect(this.bus);
+      o.start(t);
+      o.stop(t + 0.4);
+    }
   }
 
   /** A short filtered noise burst (ticks, typewriter keys, clicks). */
@@ -487,6 +527,10 @@ export class Score {
       this.padG.gain.setTargetAtTime(mood.vol * 0.9, t, silent ? 0.03 : m === "indigo" ? 0.08 : 1.4);
       this.subG.gain.setTargetAtTime(mood.sub * 0.16, t, silent ? 0.03 : 1.5);
       this.mood = m;
+      this.pulseAcc = 0;
+      if (m === "open") this.theme(false, true);
+      if (m === "you") this.theme(false, true);
+      if (m === "home") this.theme(true, true);
     }
     const inOld = P < 14.0;
     const silent = P >= 14.0 && P < 16.08;
@@ -501,6 +545,23 @@ export class Score {
     const roll = !silent && w.hero.visible && !w.hero.falling ? w.info.speed : 0;
     this.roll.g.gain.setTargetAtTime(0.16 * roll, t, 0.08);
     this.roll.bp.frequency.setTargetAtTime(160 + 1100 * roll, t, 0.1);
+
+    // Tension has a physical pace, then the rebuilt machine finds a clear,
+    // repeating pattern. It continues at a held frame, like the customers.
+    const pulseRate = P > 7.2 && P < 9.6 ? 1.42 : P >= 9.6 && P < 11.6 ? 1.7 : P >= 11.6 && P < 14 ? 0.94 : P >= 17 && P < 25.8 ? 1.2 : 0;
+    if (!silent && pulseRate) {
+      this.pulseAcc += Math.min(dt, 0.1) * pulseRate;
+      if (this.pulseAcc >= 1) {
+        this.pulseAcc -= 1;
+        this.pulseN++;
+        if (inOld) this.heartbeat(P >= 11.6 ? 0.11 : 0.075);
+        else {
+          const root = MOODS[this.mood]?.notes[0] ?? 38;
+          const step = [24, 31, 36, 31][this.pulseN % 4];
+          this.bell(root + step, this.pulseN % 2 ? -0.24 : 0.24, 0.018, 1.3);
+        }
+      }
+    }
 
     // Events from the crowd.
     this.secT += dt;
@@ -578,6 +639,7 @@ export class Score {
     if (crossed(15.72)) this.riser(Math.max(0.8, (16.1 - 15.72) * 2.8));
     if (crossed(16.08)) {
       this.hit();
+      this.theme(true);
       this.bell(74, 0, 0.12, 4);
       this.bell(81, -0.3, 0.08, 4);
       this.bell(86, 0.3, 0.06, 4);
@@ -595,6 +657,7 @@ export class Score {
     if (crossed(24.62)) {
       this.click(3000, 3, 0.25, 0.02);
       this.click(1800, 3, 0.18, 0.03, 0, 0.05);
+      this.bell(86, 0, 0.055, 4.2, 0.2);
     }
     // The end: it all settles.
     this.master.gain.setTargetAtTime(this.on ? 0.9 * (1 - 0.6 * range(P, 26.0, 27.2)) : 0, t, 0.5);

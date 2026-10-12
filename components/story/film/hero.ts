@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { DISH, GANTRY_Y, GANTRY_Z, PIPE_Z, PIT_Y, R, TRAYS, type Layout } from "./layout";
+import { DISH, GANTRY_Y, GANTRY_Z, PIPE_Z, PIT_Y, R, TRAYS, dishY, type Layout } from "./layout";
 import { clamp01, ease, range, smooth } from "./ease";
 
 /**
@@ -38,6 +38,8 @@ export type HeroState = {
   /** The way it is heading on the last track and over the edge (the camera's chase). */
   dir: THREE.Vector3;
   falling: boolean;
+  /** Brief contact compression, with the volume preserved by the renderer. */
+  squash: number;
 };
 
 /** The fall: over the edge at 10.66, in the lake by FALL_END (FALL_T: its length in the fall's own time). */
@@ -51,6 +53,46 @@ const RED = new THREE.Color(2.4, 0.3, 0.12);
 const _a = new THREE.Vector3();
 const _b = new THREE.Vector3();
 const _t = new THREE.Vector3();
+const _p0 = new THREE.Vector3();
+const _p1 = new THREE.Vector3();
+const _d0 = new THREE.Vector3();
+const _d1 = new THREE.Vector3();
+
+/** One continuous catch and release, joining the real chute and channel endpoints. */
+export function turbinePoint(k: number, L: Layout, out: THREE.Vector3) {
+  const T = L.TURB;
+  const radius = T.r * 0.92;
+  const sweep = Math.PI * 0.9;
+  const circle = (u: number, p: THREE.Vector3, d: THREE.Vector3) => {
+    const a = Math.PI * 0.32 + sweep * u;
+    p.set(T.x + Math.cos(a) * radius, T.y + Math.sin(a) * radius, T.z);
+    d.set(-Math.sin(a), Math.cos(a), 0).multiplyScalar(radius * sweep);
+  };
+  let u: number;
+  const span = 0.22;
+  if (k < span) {
+    L.nchute.at(L.nchute.length, _p0);
+    L.nchute.tangent(L.nchute.length, _d0).multiplyScalar(radius * sweep * span);
+    circle(span, _p1, _d1);
+    _d1.multiplyScalar(span);
+    u = k / span;
+  } else if (k > 1 - span) {
+    circle(1 - span, _p0, _d0);
+    _d0.multiplyScalar(span);
+    L.channel.at(0, _p1);
+    L.channel.tangent(0, _d1).multiplyScalar(radius * sweep * span);
+    u = (k - 1 + span) / span;
+  } else {
+    circle(k, out, _d0);
+    return out;
+  }
+  const u2 = u * u;
+  const u3 = u2 * u;
+  return out.copy(_p0).multiplyScalar(2 * u3 - 3 * u2 + 1)
+    .addScaledVector(_d0, u3 - 2 * u2 + u)
+    .addScaledVector(_p1, -2 * u3 + 3 * u2)
+    .addScaledVector(_d1, u3 - u2);
+}
 
 export function heroInit(): HeroState {
   return {
@@ -71,6 +113,7 @@ export function heroInit(): HeroState {
     vel: new THREE.Vector3(),
     dir: new THREE.Vector3(1, 0, 0),
     falling: false,
+    squash: 0,
   };
 }
 
@@ -87,6 +130,7 @@ function heading(L: Layout, s: number, out: THREE.Vector3) {
 export function heroAt(P: number, L: Layout, h: HeroState, time: number) {
   h.visible = true;
   h.falling = false;
+  h.squash = 0;
   h.speed = 0;
   h.vel.set(0, 0, 0);
   L.final.tangent(0, h.dir);
@@ -145,22 +189,26 @@ export function heroAt(P: number, L: Layout, h: HeroState, time: number) {
       const slot = L.dishSlots[0];
       if (k < 0.35) {
         const e = k / 0.35;
-        h.pos.lerpVectors(L.spout, _a.set(DISH.x, DISH.y + R, DISH.z + 0.4), e * e);
+        h.pos.lerpVectors(L.spout, _a.set(DISH.x, dishY(0.4) + R, DISH.z + 0.4), e * e);
       } else {
-        h.pos.lerpVectors(_a.set(DISH.x, DISH.y + R, DISH.z + 0.4), slot, smooth((k - 0.35) / 0.65));
+        const settle = (k - 0.35) / 0.65;
+        h.pos.lerpVectors(_a.set(DISH.x, dishY(0.4) + R, DISH.z + 0.4), slot, smooth(settle));
+        const radius = Math.hypot(h.pos.x - DISH.x, h.pos.z - DISH.z);
+        h.pos.y = dishY(radius) + R + 0.12 * Math.abs(Math.sin(settle * Math.PI * 3)) * Math.exp(-settle * 9);
+        h.squash = 0.018 * Math.exp(-settle * 14);
       }
       h.speed = 0.4;
       h.at = "dish";
     } else if (P < 6.78) {
-      // A whole night in the dish. Its light falls to a seventh after the first hour.
+      // A whole night in the dish. The dimming is expressive, not a probability model.
       h.pos.copy(L.dishSlots[0]);
       h.at = "dish";
-      dim = h.hours < 1 ? 1 : Math.max(1 / 7, 1 - ((h.hours - 1) / 3.2) * (6 / 7));
+      dim = 1 - 0.8 * smooth(range(h.hours, 1, 5));
     } else if (P < 7.32) {
       // Someone gets to it, at last: the hatch, the pipe, the first tray.
       const k = range(P, 6.78, 7.32);
       h.hatch = range(P, 6.8, 6.9) * (1 - range(P, 7.1, 7.25));
-      dim = 1 / 7 + (6 / 7) * 0.3 * k;
+      dim = 0.2 + 0.25 * k;
       if (k < 0.3) h.pos.lerpVectors(L.dishSlots[0], _a.set(DISH.x, DISH.y + R, PIPE_Z), smooth(k / 0.3));
       else if (k < 0.75) {
         const e = (k - 0.3) / 0.45;
@@ -189,6 +237,7 @@ export function heroAt(P: number, L: Layout, h: HeroState, time: number) {
           c.x = fx;
           c.drop = 1;
           c.open = 1;
+          h.pos.copy(from);
           return false;
         }
         if (u < 0.14) {
@@ -206,6 +255,7 @@ export function heroAt(P: number, L: Layout, h: HeroState, time: number) {
           c.drop = dropAt - (dropAt - 1) * smooth((u - 0.22) / 0.12);
           c.open = 0;
           h.pos.copy(hold(fx, c.drop));
+          h.pos.z = from.z + (GANTRY_Z.front - from.z) * smooth((u - 0.22) / 0.12);
         } else if (u < 0.72) {
           const k = (u - 0.34) / 0.38;
           c.x = fx + (tx - fx) * smooth(k);
@@ -215,17 +265,22 @@ export function heroAt(P: number, L: Layout, h: HeroState, time: number) {
           c.open = 0.32 * jolt;
           h.pos.copy(hold(c.x, c.drop));
           h.pos.y -= 0.09 * jolt;
+          h.pos.z += Math.sin(k * Math.PI * 2) * 0.025 * Math.sin(k * Math.PI);
           h.speed = 0.3;
         } else if (u < 0.86) {
           c.x = tx;
           c.drop = 1 + (dropTo - 1) * smooth((u - 0.72) / 0.14);
           c.open = 0;
           h.pos.copy(hold(tx, c.drop));
+          h.pos.z += (to.z - GANTRY_Z.front) * smooth((u - 0.72) / 0.14);
         } else if (u < 0.92) {
           c.x = tx;
           c.drop = dropTo;
           c.open = (u - 0.86) / 0.06;
           h.pos.copy(to);
+          const settle = (u - 0.86) / 0.06;
+          h.pos.y += 0.035 * Math.sin(settle * Math.PI) * Math.exp(-settle * 3);
+          h.squash = 0.016 * Math.exp(-settle * 8);
         } else {
           c.x = tx;
           c.drop = dropTo - (dropTo - 1) * smooth((u - 0.92) / 0.08);
@@ -251,13 +306,16 @@ export function heroAt(P: number, L: Layout, h: HeroState, time: number) {
         if (P < 8.62) h.pos.copy(B);
       }
       // The stamp comes down on it in the invoice tray: a sale.
-      h.stamp = Math.max(0, Math.sin(Math.PI * range(P, 9.36, 9.5)));
-      gold = range(P, 9.42, 9.5);
+      h.stamp = Math.max(0, Math.sin(Math.PI * range(P, 9.6, 9.7)));
+      h.squash = Math.max(h.squash, h.stamp * 0.018);
+      gold = range(P, 9.63, 9.7);
     } else if (P < 10.66) {
       // Out of the invoice tray and along the last track, faster and faster.
       const k = range(P, 9.72, 10.66);
-      L.final.at(L.final.length * Math.pow(k, 1.7), h.pos);
-      L.final.tangent(L.final.length * Math.pow(k, 1.7), h.dir);
+      const s = L.final.length * Math.pow(range(k, 0.16, 1), 1.7);
+      L.final.at(s, h.pos);
+      if (k < 0.16) h.pos.lerpVectors(L.traySlots[2][0], h.pos, smooth(k / 0.16));
+      L.final.tangent(s, h.dir);
       gold = 1;
       h.speed = 0.4 + 0.6 * k;
       h.at = k < 0.5 ? "final" : "edge";
@@ -296,7 +354,6 @@ export function heroAt(P: number, L: Layout, h: HeroState, time: number) {
   } else {
     // THE NEW MACHINE: a new customer, straight through.
     h.machine = "new";
-    const T = L.TURB;
     if (P < 17.9) {
       const k = range(P, 17.02, 17.9);
       lane.track.at(lane.track.length * ease(k, 1.25), h.pos);
@@ -310,8 +367,7 @@ export function heroAt(P: number, L: Layout, h: HeroState, time: number) {
     } else if (P < 19.32) {
       // Caught by the turbine at 3am, swept round, sent on.
       const k = range(P, 18.95, 19.32);
-      const a = THREE.MathUtils.lerp(Math.PI * 0.32, Math.PI * 1.22, smooth(k));
-      h.pos.set(T.x + Math.cos(a) * T.r * 0.92, T.y + Math.sin(a) * T.r * 0.92, T.z);
+      turbinePoint(k, L, h.pos);
       h.speed = 1;
       h.at = "turbine";
     } else if (P < 21.82) {

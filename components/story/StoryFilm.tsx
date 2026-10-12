@@ -176,7 +176,7 @@ export function StoryFilm() {
 
   function begin(withSound: boolean) {
     wantRef.current = withSound;
-    if (withSound) setSound(true);
+    setSound(withSound);
     film.started = true;
     if (film.ready) {
       setPhase("film");
@@ -199,6 +199,11 @@ export function StoryFilm() {
   function read(e: React.MouseEvent) {
     if (phase === "nofilm") return;
     e.preventDefault();
+    wantRef.current = null;
+    cmd.pause();
+    setSound(false);
+    film.started = false;
+    events.emit("reading");
     setPhase("read");
     requestAnimationFrame(() => document.getElementById("transcript")?.scrollIntoView());
   }

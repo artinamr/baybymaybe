@@ -10,7 +10,7 @@ import { PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
 const DESCRIPTION =
-  "A four-minute film about the customers a business loses without seeing them go: a slow website, an unanswered inbox, retyping, no follow-up.";
+  "Follow one customer through a failing business machine, its rebuild and the evening the owner gets back. An interactive short film by Nerodyn.";
 
 export const metadata: Metadata = pageMeta({
   title: `${STORY_TITLE}: a short film`,

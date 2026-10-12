@@ -25,7 +25,7 @@ export function between(a: THREE.Vector3, b: THREE.Vector3, w: number | [number,
 }
 
 export const unitBox = new THREE.BoxGeometry(1, 1, 1);
-export const unitCyl = (seg = 8) => new THREE.CylinderGeometry(0.5, 0.5, 1, seg, 1, false);
+export const unitCyl = (seg = 8) => new THREE.CylinderGeometry(0.5, 0.5, 1, Math.max(20, seg), 1, false);
 
 /**
  * A tube along part of a track (s0 → s1), offset in the track's frame by
@@ -109,7 +109,7 @@ export function gearGeometry(r: number, teeth: number, thick: number, spokes = 5
     hole.closePath();
     shape.holes.push(hole);
   }
-  const g = new THREE.ExtrudeGeometry(shape, { depth: thick, bevelEnabled: true, bevelThickness: thick * 0.12, bevelSize: Math.min(0.03, r * 0.01), bevelSegments: 1, curveSegments: 4 });
+  const g = new THREE.ExtrudeGeometry(shape, { depth: thick, bevelEnabled: true, bevelThickness: thick * 0.12, bevelSize: Math.min(0.03, r * 0.01), bevelSegments: 3, curveSegments: 8 });
   g.translate(0, 0, -thick / 2);
   return g;
 }
@@ -124,15 +124,15 @@ export function lathe(profile: [number, number][], seg = 40): THREE.BufferGeomet
 
 /** A pointed (gothic) arch outline as a flat frame in the XY plane: span w, rise h, bar thickness t, depth d. */
 export function gothicArch(w: number, h: number, t: number, d: number, seg = 14): THREE.BufferGeometry {
-  // Two arcs from the springing line (y 0) meeting at the apex (y h).
+  // Two rising curves meet at one precise point. The former circular formula
+  // stopped short of the apex on wide vaults, leaving a flat bridge at the top.
   const half = w / 2;
-  const R = (half * half + h * h) / (2 * half);
   const outer = new THREE.Shape();
-  const pts: THREE.Vector2[] = [];
-  for (let i = 0; i <= seg; i++) {
-    const a = (i / seg) * Math.asin(h / R);
-    pts.push(new THREE.Vector2(-half + R - Math.cos(a) * R, Math.sin(a) * R));
-  }
+  const rising = (hw: number, hh: number) => new THREE.CubicBezierCurve(
+    new THREE.Vector2(-hw, 0), new THREE.Vector2(-hw, hh * 0.53),
+    new THREE.Vector2(-hw * 0.42, hh * 0.84), new THREE.Vector2(0, hh)
+  ).getPoints(seg);
+  const pts = rising(half, h);
   const right: THREE.Vector2[] = pts.map((p) => new THREE.Vector2(-p.x, p.y)).reverse();
   const outline = [...pts, ...right];
   outer.moveTo(outline[0].x, outline[0].y);
@@ -143,12 +143,7 @@ export function gothicArch(w: number, h: number, t: number, d: number, seg = 14)
   const hole = new THREE.Path();
   const ih = h - t * 1.2;
   const iw = half - t;
-  const IR = (iw * iw + ih * ih) / (2 * iw);
-  const ip: THREE.Vector2[] = [];
-  for (let i = 0; i <= seg; i++) {
-    const a = (i / seg) * Math.asin(Math.min(1, ih / IR));
-    ip.push(new THREE.Vector2(-iw + IR - Math.cos(a) * IR, Math.sin(a) * IR));
-  }
+  const ip = rising(iw, ih);
   const ir = ip.map((p) => new THREE.Vector2(-p.x, p.y)).reverse();
   const io = [...ip, ...ir];
   hole.moveTo(io[0].x, io[0].y + 0.001);
@@ -160,12 +155,18 @@ export function gothicArch(w: number, h: number, t: number, d: number, seg = 14)
   return g;
 }
 
+/** A bent service pipe. It is physical infrastructure, separate from customer rails. */
+export function pipeGeometry(points: THREE.Vector3[], r: number, radial = 8) {
+  const path = new THREE.CatmullRomCurve3(points, false, "centripetal");
+  return new THREE.TubeGeometry(path, Math.max(12, points.length * 10), r, radial, false);
+}
+
 /** Make a matrix from position, Euler angles and scale. */
 export function place(x: number, y: number, z: number, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1, out = new THREE.Matrix4()) {
   return out.compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
 }
 
 /** A ring (torus) geometry, low-poly. */
-export const torus = (r: number, tube: number, radial = 6, tubular = 48, arc = Math.PI * 2) => new THREE.TorusGeometry(r, tube, radial, tubular, arc);
+export const torus = (r: number, tube: number, radial = 6, tubular = 48, arc = Math.PI * 2) => new THREE.TorusGeometry(r, tube, Math.max(10, radial), Math.max(64, tubular), arc);
 
 export { _m as scratchMatrix, _b as scratchB };

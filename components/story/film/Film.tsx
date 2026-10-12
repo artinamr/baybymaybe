@@ -23,6 +23,8 @@ function detect(): { phone: boolean; quality: Quality } {
   const small = Math.min(window.innerWidth, window.innerHeight) < 600;
   const phone = coarse && small;
   const forced = q.get("q");
+  if (forced === "low") return { phone: true, quality: 0 };
+  if (forced === "high") return { phone, quality: 2 };
   if (forced === "0" || forced === "1" || forced === "2") return { phone: phone || forced === "0", quality: Number(forced) as Quality };
   return { phone, quality: phone ? 0 : 1 };
 }
@@ -34,10 +36,8 @@ function Director() {
   const gl = useThree((s) => s.gl);
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
-  const setDpr = useThree((s) => s.setDpr);
   const rig = useRef<Rig | null>(null);
   const pointer = useRef({ x: 0, y: 0, cx: 0, cy: 0, has: false, moved: 0 });
-  const perf = useRef({ avg: 16, n: 0, last: 0, dpr: 0 });
   const frames = useRef(0);
 
   // Build, compile and warm the film behind the door.
@@ -130,16 +130,23 @@ function Director() {
     });
     const onStart = () => {
       const r = rig.current;
-      if (!r) return;
+      if (!r || r.clock.lenis) return;
       r.clock.start(gl.domElement);
       if (DEV_AT !== null) {
         const P = Number(DEV_AT) || 0;
         requestAnimationFrame(() => r.clock.jump(P));
-      } else window.scrollTo(0, 0);
+      } else {
+        window.scrollTo(0, 0);
+        // Enter on the first composed shot, so starting always reveals words.
+        requestAnimationFrame(() => r.clock.goto(0.66));
+      }
       if (!HUD) document.documentElement.setAttribute("data-st-clean", "");
       if (film.sound && audio.ctx) cmd.sound(true);
     };
     const offStart = events.on("start", onStart);
+    const offRead = events.on("reading", () => {
+      rig.current?.clock.stop();
+    });
     // If the door was already passed (look-dev), start as soon as we're ready.
     const offReady = events.on("ready", () => {
       if (film.started) onStart();
@@ -159,6 +166,7 @@ function Director() {
     return () => {
       alive = false;
       offStart();
+      offRead();
       offReady();
       window.removeEventListener("pointermove", move);
       document.removeEventListener("pointerleave", leave);
@@ -194,21 +202,6 @@ function Director() {
     if (r.dom.update(P, r.world, p)) r.score.land();
     r.score.update(P, r.world, dt);
 
-    // Keep it smooth: if frames run long, draw fewer pixels (and more if there is room).
-    const pf = perf.current;
-    pf.avg += (delta * 1000 - pf.avg) * 0.05;
-    pf.n++;
-    if (pf.n > 90 && !FREEZE) {
-      const cur = state.viewport.dpr;
-      const max = Math.min(window.devicePixelRatio || 1, DETECT.phone ? 1.5 : 1.6);
-      if (pf.avg > 24 && cur > 0.75) {
-        setDpr(Math.max(0.75, cur - 0.2));
-        pf.n = 0;
-      } else if (pf.avg < 13 && cur < max) {
-        setDpr(Math.min(max, cur + 0.1));
-        pf.n = 0;
-      }
-    }
   }, 1);
 
   return null;
@@ -216,7 +209,9 @@ function Director() {
 
 /** THE FILM: its own canvas. Loaded on /story/ only, behind the door. */
 export default function Film() {
-  const start = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, DETECT.phone ? 1.25 : 1.35);
+  // Hold image quality steady. Changing resolution with frame time made
+  // rail edges visibly soften and pop during the most demanding shots.
+  const start = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, DETECT.phone ? 1.75 : 2);
   return (
     <Canvas
       gl={{ antialias: false, alpha: false, depth: true, stencil: false, powerPreference: "high-performance" }}

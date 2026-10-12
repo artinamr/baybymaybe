@@ -26,6 +26,11 @@ export const shared = {
   /** The windows' light. */
   uWin: { value: new THREE.Color(1, 0.5, 0.2) },
   uWinK: { value: 1 },
+  /** The rebuilt system taking over, and the old loss well going dark. */
+  uRebuild: { value: 0 },
+  uPit: { value: 1 },
+  uHeroPos: { value: new THREE.Vector3() },
+  uHeroK: { value: 0 },
 };
 
 const NOISE = /* glsl */ `
@@ -54,7 +59,7 @@ function withPieces(m: THREE.Material, tex: THREE.Texture, extra?: (s: THREE.Web
 
 /** The old machine's iron. */
 export function ironMaterial(tex: THREE.Texture) {
-  const m = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.82, roughness: 0.48, envMapIntensity: 1 });
+  const m = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.74, roughness: 0.42, envMapIntensity: 1.4 });
   withPieces(
     m,
     tex,
@@ -67,8 +72,10 @@ export function ironMaterial(tex: THREE.Texture) {
   float rn = fbm3(vRest * 1.35);
   float rFine = vnoise(vRest * 9.0);
   float rustMask = smoothstep(0.66 - vRustK * 0.36, 0.9 - vRustK * 0.28, rn + rFine * 0.1);
-  vec3 rustCol = mix(vec3(0.075, 0.03, 0.014), vec3(0.24, 0.09, 0.03), rFine * rFine);
-  diffuseColor.rgb = mix(diffuseColor.rgb, rustCol, rustMask * step(0.001, vRustK));`
+  vec3 rustCol = mix(vec3(0.08, 0.035, 0.018), vec3(0.32, 0.13, 0.045), rFine * rFine);
+  float abrasion = pow(vnoise(vRest * vec3(3.0, 28.0, 3.0)), 12.0);
+  diffuseColor.rgb = mix(diffuseColor.rgb, rustCol, rustMask * step(0.001, vRustK));
+  diffuseColor.rgb += vec3(0.13, 0.15, 0.17) * abrasion * (1.0 - rustMask);`
         )
         .replace("#include <roughnessmap_fragment>", `float roughnessFactor = mix(roughness + (rFine - 0.5) * 0.12, 0.95, rustMask * step(0.001, vRustK));`)
         .replace("#include <metalnessmap_fragment>", `float metalnessFactor = mix(metalness, 0.2, rustMask * step(0.001, vRustK));`)
@@ -95,7 +102,7 @@ export function clothMaterial(tex: THREE.Texture) {
 
 /** Polished black metal for the new machine's frame. */
 export function chromeMaterial(tex: THREE.Texture) {
-  const m = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 1, roughness: 0.2, envMapIntensity: 1.3 });
+  const m = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.93, roughness: 0.16, envMapIntensity: 1.8 });
   withPieces(
     m,
     tex,
@@ -135,6 +142,7 @@ varying float vGl;
 varying vec3 vN;
 varying vec3 vV;
 varying float vFog;
+varying vec3 vWorld;
 void main() {
   loadPiece();
   vec3 p = piecePoint(position);
@@ -146,6 +154,7 @@ void main() {
   vN = normalize(normalMatrix * pieceNormal(normal));
   vV = normalize(-mv.xyz);
   vFog = -mv.z;
+  vWorld = (modelMatrix * vec4(p, 1.0)).xyz;
   gl_Position = projectionMatrix * mv;
 }`;
 
@@ -187,7 +196,7 @@ export function glassMaterial(tex: THREE.Texture) {
         float rim = pow(1.0 - ndv, 4.5);
         float sheen = pow(1.0 - ndv, 1.5) * 0.06;
         vec3 edge = mix(vec3(0.32, 0.22, 1.0), vec3(0.92, 0.94, 1.0), smoothstep(0.2, 0.9, rim));
-        vec3 c = vCol * (0.012 + sheen) + edge * rim * 0.95 * vCol.g;
+        vec3 c = vCol * (0.025 + sheen) + edge * rim * 1.15 * vCol.g;
         c *= vPow * uK;
         c += vec3(0.75, 0.7, 1.0) * vGl * (0.3 + rim * 2.0);
         float f = fogK(vFog);
@@ -196,7 +205,7 @@ export function glassMaterial(tex: THREE.Texture) {
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
-    side: THREE.FrontSide,
+    side: THREE.DoubleSide,
     fog: true,
   });
 }
@@ -204,16 +213,22 @@ export function glassMaterial(tex: THREE.Texture) {
 /** The new machine's running light (pulses along `aAlong`). */
 export function coreMaterial(tex: THREE.Texture) {
   return new THREE.ShaderMaterial({
-    uniforms: { uPieces: { value: tex }, uTime: shared.uTime, fogColor: { value: new THREE.Color() }, fogDensity: { value: 0 }, uFlow: { value: 1 } },
+    uniforms: { uPieces: { value: tex }, uTime: shared.uTime, uHeroPos: shared.uHeroPos, uHeroK: shared.uHeroK, fogColor: { value: new THREE.Color() }, fogDensity: { value: 0 }, uFlow: { value: 1 } },
     vertexShader: PIECE_VERT_BASIC,
     fragmentShader: /* glsl */ `
       ${FOG_FRAG}
       uniform float uTime; uniform float uFlow;
+      uniform vec3 uHeroPos; uniform float uHeroK;
       varying vec3 vCol; varying float vAlong; varying float vPow; varying float vGl; varying float vFog;
+      varying vec3 vWorld;
       void main() {
         float ph = fract(vAlong * 0.18 - uTime * 0.55 * uFlow);
         float pulse = smoothstep(0.82, 0.98, ph) * (1.0 - smoothstep(0.98, 1.0, ph));
-        vec3 c = vCol * (0.55 + 2.2 * pulse) * vPow + vec3(0.8, 0.75, 1.0) * vGl * 2.0;
+        // The customer's own moving pool of light answers them as they pass.
+        // It follows physical position, including the gold return spiral.
+        vec3 toHero = vWorld - uHeroPos;
+        float wake = exp(-dot(toHero, toHero) * 1.25) * uHeroK;
+        vec3 c = vCol * (0.55 + 1.6 * pulse + 1.15 * wake) * vPow + vec3(0.8, 0.75, 1.0) * vGl * 2.0;
         float f = fogK(vFog);
         gl_FragColor = vec4(mix(c, fogColor * 0.0, f), 1.0);
       }`,
@@ -319,7 +334,7 @@ export function dustMaterial(px: number) {
       varying float vA;
       void main() {
         vec2 q = gl_PointCoord - 0.5;
-        float a = smoothstep(0.5, 0.0, length(q));
+        float a = 1.0 - smoothstep(0.0, 0.5, length(q));
         gl_FragColor = vec4(uKey * a * vA * 0.5 * uDust, 1.0);
       }`,
     transparent: true,
@@ -344,7 +359,7 @@ export function windowMaterial() {
       ${FOG_FRAG}
       uniform vec3 uWin; uniform float uWinK; uniform float uTime;
       varying vec2 vUv; varying float vKind; varying float vFog;
-      float bar(float x, float w) { return smoothstep(w, w * 0.5, abs(x)); }
+      float bar(float x, float w) { return 1.0 - smoothstep(w * 0.5, w, abs(x)); }
       void main() {
         vec2 p = vUv;
         float glass = 0.0;
@@ -401,6 +416,48 @@ export function haloMaterial(color: THREE.Color, k = 1) {
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
+  });
+}
+
+/** Dust reveals the actual direction of the window light and the room's height. */
+export function shaftMaterial() {
+  return new THREE.ShaderMaterial({
+    uniforms: { uWin: shared.uWin, uWinK: shared.uWinK, uRebuild: shared.uRebuild },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv; varying vec3 vN; varying vec3 vV;
+      void main() {
+        vUv = uv;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uWin; uniform float uWinK; uniform float uRebuild;
+      varying vec2 vUv; varying vec3 vN; varying vec3 vV;
+      void main() {
+        float ends = smoothstep(0.0, 0.18, vUv.y) * (1.0 - smoothstep(0.72, 1.0, vUv.y));
+        float face = pow(abs(dot(normalize(vN), normalize(vV))), 1.4);
+        vec3 c = mix(uWin, vec3(0.55, 0.66, 1.0), uRebuild * 0.35);
+        gl_FragColor = vec4(c * uWinK * ends * face * 0.055, 1.0);
+      }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+  });
+}
+
+/** Successive rings descend into the loss well. They show how far a fall goes. */
+export function pitMarkerMaterial() {
+  return new THREE.ShaderMaterial({
+    uniforms: { uPit: shared.uPit },
+    vertexShader: /* glsl */ `
+      varying float vY;
+      void main() { vY = position.y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: /* glsl */ `
+      uniform float uPit; varying float vY;
+      void main() {
+        float depth = clamp((10.0 - vY) / 40.0, 0.0, 1.0);
+        gl_FragColor = vec4(mix(vec3(0.16, 0.035, 0.018), vec3(0.65, 0.035, 0.012), depth) * uPit, 1.0);
+      }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   });
 }
 

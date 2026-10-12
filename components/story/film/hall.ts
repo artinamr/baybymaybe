@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { gothicArch, place, unitBox } from "./geo";
+import { between, gothicArch, place, unitBox } from "./geo";
 import { FLOOR_Y, PIT_R, PIT_Y } from "./layout";
-import { dustMaterial, haloMaterial, stoneMaterial, windowMaterial } from "./materials";
+import { dustMaterial, haloMaterial, pitMarkerMaterial, shaftMaterial, stoneMaterial, windowMaterial } from "./materials";
 
 /**
  * THE HALL: the business's machine stands in a cathedral, so its scale reads
@@ -33,9 +33,9 @@ function bake(g: THREE.BufferGeometry, m: THREE.Matrix4, c: THREE.Color) {
 export function buildHall(phone: boolean) {
   const group = new THREE.Group();
   const stone: THREE.BufferGeometry[] = [];
-  const S = COL(0.07, 0.065, 0.06);
-  const S2 = COL(0.05, 0.047, 0.045);
-  const FLOOR = COL(0.06, 0.055, 0.05);
+  const S = COL(0.13, 0.135, 0.155);
+  const S2 = COL(0.078, 0.084, 0.10);
+  const FLOOR = COL(0.095, 0.092, 0.10);
 
   // The floor of the nave, with the pit cut out of it.
   const floor = new THREE.RingGeometry(PIT_R, 170, 96, 4);
@@ -83,6 +83,13 @@ export function buildHall(phone: boolean) {
   }
   stone.push(wg);
   for (let k = 1; k < 5; k++) stone.push(bake(new THREE.TorusGeometry(PIT_R - 0.15, 0.22, 4, 96), place(0, FLOOR_Y - k * 8, 0, Math.PI / 2, 0, 0), S));
+  // Buttresses keep repeating below the floor: a drop with a measurable depth.
+  for (let k = 0; k < 20; k++) {
+    const a = k / 20 * Math.PI * 2;
+    const x = Math.cos(a) * (PIT_R - 0.18);
+    const z = Math.sin(a) * (PIT_R - 0.18);
+    stone.push(bake(unitBox, place(x, (FLOOR_Y + PIT_Y) / 2, z, 0, -a, 0, 0.3, FLOOR_Y - PIT_Y, 0.7), S2));
+  }
   // The pit's floor.
   stone.push(bake(new THREE.CircleGeometry(PIT_R, 72), place(0, PIT_Y, 0, -Math.PI / 2, 0, 0), COL(0.012, 0.009, 0.008)));
 
@@ -100,6 +107,8 @@ export function buildHall(phone: boolean) {
       }
       stone.push(bake(new THREE.CylinderGeometry(2.4, 1.9, 1.4, 12, 1), place(x, 49.3, z), S));
       stone.push(bake(new THREE.CylinderGeometry(2.5, 2.6, 1.2, 12, 1), place(x, FLOOR_Y + 0.6, z), S2));
+      // Joint bands break the huge columns into recognisable stone courses.
+      for (const y of [18, 30, 42, 54, 66]) stone.push(bake(new THREE.CylinderGeometry(1.76, 1.76, 0.16, 12), place(x, y, z), S2));
     }
   // Arcades between the piers (along the nave), and the walls of the aisles behind them.
   for (const x of xs)
@@ -111,9 +120,30 @@ export function buildHall(phone: boolean) {
   // Vault ribs across the nave at every pair of piers.
   for (const z of zs) {
     stone.push(bake(gothicArch(68, 26, 1.1, 1.3, 18), place(0, top, z), S));
+    // Ribbed lower vaults frame the tower instead of vanishing above the camera.
+    if (z <= 19 && z >= -56) stone.push(bake(gothicArch(68, 20, 0.48, 0.8, 18), place(0, 50, z), S2));
   }
   // The ridge.
   stone.push(bake(unitBox, place(0, top + 25.6, -26, 0, 0, 0, 1.2, 1.2, 190), S));
+
+  // A closer oculus gives the whole machine a single architectural backdrop.
+  // Its open centre keeps the wheel of hours and the customer tracks legible.
+  for (const [radius, thickness] of [[15.5, 0.55], [17.1, 0.22], [18.5, 0.7]]) {
+    stone.push(bake(new THREE.TorusGeometry(radius, thickness, 8, 96), place(0, 65, -38), S));
+  }
+  for (let k = 0; k < 16; k++) {
+    const a = k / 16 * Math.PI * 2;
+    const start = new THREE.Vector3(Math.cos(a) * 15.8, 65 + Math.sin(a) * 15.8, -38);
+    const end = new THREE.Vector3(Math.cos(a) * 18.3, 65 + Math.sin(a) * 18.3, -38);
+    stone.push(bake(unitBox, between(start, end, [0.3, 0.75]), S2));
+  }
+  // Receding floor lines lead back to the owner's very small desk.
+  for (let k = 0; k < 24; k++) {
+    const a = k / 24 * Math.PI * 2;
+    const start = new THREE.Vector3(Math.cos(a) * (PIT_R + 1.1), FLOOR_Y + 0.015, Math.sin(a) * (PIT_R + 1.1));
+    const end = new THREE.Vector3(Math.cos(a) * 74, FLOOR_Y + 0.015, Math.sin(a) * 74);
+    stone.push(bake(unitBox, between(start, end, [0.035, 0.13]), S2));
+  }
 
   const stoneGeo = mergeGeometries(stone, false)!;
   stone.forEach((g) => g.dispose());
@@ -139,11 +169,37 @@ export function buildHall(phone: boolean) {
     }
   // The rose, high at the far end: the tower stands under it.
   addWin(place(0, 70, -124, 0, 0, 0, 30, 30, 1), 1);
+  addWin(place(0, 65, -38.4, 0, 0, 0, 30, 30, 1), 1);
   const winGeo = mergeGeometries(wins, false)!;
   const winMesh = new THREE.Mesh(winGeo, windowMaterial());
   winMesh.frustumCulled = false;
   group.add(winMesh);
 
+  // Shafts stay behind the machine. Light describes the volume of the room;
+  // the foreground remains clear for the customer and the page's words.
+  const shafts = new THREE.Group();
+  const shaftMat = shaftMaterial();
+  for (const z of [-18, -38, -58]) for (const side of [-1, 1]) {
+    const source = new THREE.Vector3(side * 41, 62, z);
+    const end = new THREE.Vector3(side * 9, FLOOR_Y + 2, z + 12);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 6.0, 1, 16, 1, true), shaftMat);
+    beam.matrix.copy(between(end, source, [1, 1]));
+    beam.matrixAutoUpdate = false;
+    beam.frustumCulled = false;
+    beam.renderOrder = 2;
+    shafts.add(beam);
+  }
+  group.add(shafts);
+  const markers: THREE.BufferGeometry[] = [];
+  for (let k = 0; k < 7; k++) {
+    const g = new THREE.TorusGeometry(PIT_R - 0.7, 0.035, 4, 96);
+    g.applyMatrix4(place(0, FLOOR_Y - 1.4 - k * 6, 0, Math.PI / 2));
+    markers.push(g);
+  }
+  const pitMarkers = new THREE.Mesh(mergeGeometries(markers, false)!, pitMarkerMaterial());
+  markers.forEach((g) => g.dispose());
+  pitMarkers.frustumCulled = false;
+  group.add(pitMarkers);
 
   // Dust.
   const n = phone ? 900 : 2600;
@@ -204,5 +260,5 @@ export function buildHall(phone: boolean) {
   pitGlow.renderOrder = 1;
   group.add(pitGlow);
 
-  return { group, stoneMesh, winMesh, dust, pitGlow, haze };
+  return { group, stoneMesh, winMesh, dust, pitGlow, haze, shafts, pitMarkers };
 }

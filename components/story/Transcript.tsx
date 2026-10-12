@@ -1,15 +1,15 @@
 import { CHAPTERS, SOURCES, TRANSCRIPT, type SourceId } from "@/content/story";
 
-const ORDER: SourceId[] = ["google", "hbr"];
+const ORDER: SourceId[] = [...new Set(CHAPTERS.flatMap((chapter) => (chapter.fact ? [chapter.fact.source] : [])))];
 const num = (id: SourceId) => ORDER.indexOf(id) + 1;
 
 /**
  * THE STORY IN WORDS: everything the film shows and says, in order, with the
- * pictures described and the two facts cited. It is the page's text for
+ * pictures described and its research cited. It is the page's text for
  * screen readers and search engines, and for anyone who would rather read.
  */
 export function Transcript() {
-  const story = CHAPTERS.filter((c) => c.id !== "end");
+  const story = CHAPTERS;
   return (
     <section id="transcript" className="st-tr" aria-labelledby="st-tr-h">
       <div className="st-tr-in">
@@ -43,8 +43,7 @@ export function Transcript() {
           ))}
         </ol>
         <p className="st-tr-note" data-rv>
-          The counters in the film count the film’s own customers: how many it lost, and kept, while you watched. They
-          are not a figure about your business.
+          {TRANSCRIPT.note}
         </p>
         <section className="st-tr-sources" aria-labelledby="st-src-h" data-rv>
           <h3 id="st-src-h" className="st-tr-sh">

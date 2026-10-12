@@ -19,9 +19,12 @@ const TEAL: [number, number, number] = [0.35, 1.6, 1.9];
 const GOLDL: [number, number, number] = [3.2, 2.1, 0.7];
 const GLASS: [number, number, number] = [0.6, 0.85, 1.0];
 const CHROME: [number, number, number] = [0.06, 0.06, 0.075];
+const SILVER: [number, number, number] = [0.34, 0.40, 0.52];
 
 export type NewRig = {
   rotor: Piece;
+  counterRotor: Piece;
+  vanes: Piece[];
   rings: Piece[];
   lanes: Piece[];
   nodes: Piece[];
@@ -31,8 +34,9 @@ export type NewRig = {
   sun: Piece;
   flywheel: Piece;
   door: Piece;
+  ribs: Piece[];
   /** The assembly: where each piece comes from, and when it arrives (in P). */
-  from: { t: THREE.Vector3; q: THREE.Quaternion; at: number }[];
+  from: { t: THREE.Vector3; bend: THREE.Vector3; q: THREE.Quaternion; at: number }[];
   parts: { id: string; box: THREE.Box3 }[];
 };
 
@@ -60,6 +64,13 @@ function glassRun(kit: Kit, track: Track, col: [number, number, number], s0 = 0,
       const segs = g.getAttribute("position").count / 4;
       kit.add("core", g, p, null, col, 0, (vi) => a + ((b - a) * Math.floor(vi / 4)) / Math.max(1, segs - 1));
     }
+    // Machined collars explain the tube as a built object, and show pieces
+    // locking together during assembly instead of light appearing from nowhere.
+    const end = track.at(b, new THREE.Vector3());
+    const direction = track.tangent(b, new THREE.Vector3());
+    const collar = new THREE.Matrix4().compose(end, new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction), new THREE.Vector3(1, 1, 1));
+    kit.add("chrome", torus(0.148, 0.015, 6, 16), p, collar, SILVER);
+    if (tag === "loop") kit.add("core", torus(0.167, 0.008, 4, 16), p, collar, GOLDL, 0, () => b);
     out.push(p);
   }
   return out;
@@ -69,6 +80,8 @@ export function buildNew(L: Layout) {
   const kit = new Kit();
   const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
   const parts: { id: string; box: THREE.Box3 }[] = [];
+  const ribs: Piece[] = [];
+  const vanes: Piece[] = [];
 
   // The door: an arch of light.
   const door = kit.piece(V(DOOR.x, DOOR.y, DOOR.z), "door", 6);
@@ -89,6 +102,16 @@ export function buildNew(L: Layout) {
   const portal = kit.piece(V(GATE_X, GATE_Y + 0.5, zMid), "portal", span);
   kit.add("core", torus(span * 0.62, 0.05, 6, 64), portal, place(GATE_X, GATE_Y + 0.5, zMid, 0, Math.PI / 2, 0), IND_HI);
   kit.add("glass", torus(span * 0.62 + 0.14, 0.12, 8, 64), portal, place(GATE_X, GATE_Y + 0.5, zMid, 0, Math.PI / 2, 0), GLASS);
+  // The old drive becomes a clean, open aperture. Fine radial vanes make
+  // its scale readable while the customer's way through stays completely open.
+  for (let k = 0; k < 24; k++) {
+    const a = k / 24 * Math.PI * 2;
+    const r = span * 0.62 + 0.29;
+    const v = kit.piece(V(GATE_X, GATE_Y + 0.5 + Math.sin(a) * r, zMid + Math.cos(a) * r), "portalvane", 0.3);
+    kit.add("chrome", unitBox, v, place(GATE_X, GATE_Y + 0.5 + Math.sin(a) * r, zMid + Math.cos(a) * r, a, 0, 0, 0.32, 0.055, 0.23), SILVER);
+    kit.add("core", unitBox, v, place(GATE_X - 0.17, GATE_Y + 0.5 + Math.sin(a) * r, zMid + Math.cos(a) * r, a, 0, 0, 0.012, 0.035, 0.15), IND);
+    vanes.push(v);
+  }
   const rings: Piece[] = [];
   L.lanes.forEach((ln) => {
     const p = kit.piece(V(GATE_X, GATE_Y, ln.z), "ring", 0.5);
@@ -120,6 +143,24 @@ export function buildNew(L: Layout) {
   }
   kit.add("chrome", unitCyl(24), rotor, place(T.x, T.y, T.z, Math.PI / 2, 0, 0, 0.9, 0.5, 0.9), CHROME);
   kit.add("light", new THREE.CircleGeometry(0.3, 24), rotor, place(T.x, T.y, T.z + 0.26), [2.4, 3.2, 3.8]);
+  // A second impeller turns against the first. Its silver blades make the
+  // direction readable through the glass rather than blurring into a halo.
+  const counterRotor = kit.piece(V(T.x, T.y, T.z + 0.4), "counterrotor", T.r * 2);
+  kit.add("core", torus(T.r * 0.77, 0.022, 5, 64), counterRotor, place(T.x, T.y, T.z + 0.4), TEAL);
+  for (let k = 0; k < 12; k++) {
+    const a = k / 12 * Math.PI * 2;
+    kit.add("chrome", unitBox, counterRotor, place(T.x + Math.cos(a) * T.r * 0.81, T.y + Math.sin(a) * T.r * 0.81, T.z + 0.4, 0.3, 0, a + 0.28, T.r * 0.28, 0.12, 0.16), SILVER);
+  }
+  // A stationary housing surrounds the moving answer engine. Unlike the old
+  // inbox it has no bowl for people to wait in, only a through-flow.
+  const housing = kit.piece(V(T.x, T.y, T.z - 0.1), "housing", T.r * 2.8);
+  kit.add("chrome", torus(T.r + 0.48, 0.14, 8, 72), housing, place(T.x, T.y, T.z - 0.16), SILVER);
+  for (let k = 0; k < 36; k++) {
+    const a = k / 36 * Math.PI * 2;
+    const r = T.r + 0.5;
+    kit.add("chrome", unitBox, housing, place(T.x + Math.cos(a) * r, T.y + Math.sin(a) * r, T.z, 0, 0, a, 0.24, 0.06, 0.55), CHROME);
+    if (k % 3 === 0) kit.add("core", unitBox, housing, place(T.x + Math.cos(a) * r, T.y + Math.sin(a) * r, T.z + 0.29, 0, 0, a, 0.2, 0.022, 0.012), TEAL);
+  }
   parts.push({ id: "turbine", box: new THREE.Box3(V(T.x - T.r - 0.6, T.y - T.r - 0.6, T.z - 1), V(T.x + T.r + 0.6, T.y + T.r + 0.6, T.z + 1)) });
   // Its stand.
   {
@@ -160,6 +201,12 @@ export function buildNew(L: Layout) {
     kit.add("core", torus(0.48, 0.03, 6, 40), p, m, TEAL);
     kit.add("glass", torus(0.62, 0.09, 8, 40), p, m, GLASS);
     kit.add("core", torus(0.78, 0.012, 4, 40), p, m, IND);
+    kit.add("chrome", torus(0.63, 0.027, 8, 40), p, m, SILVER);
+    for (let petal = 0; petal < 6; petal++) {
+      const a = petal / 6 * Math.PI * 2;
+      const local = place(Math.cos(a) * 0.69, Math.sin(a) * 0.69, 0, 0, 0, a, 0.26, 0.07, 0.3);
+      kit.add("chrome", unitBox, p, m.clone().multiply(local), CHROME);
+    }
     nodes.push(p);
     void k;
   });
@@ -193,6 +240,31 @@ export function buildNew(L: Layout) {
     }
   }
 
+  // A single designed skeleton takes the place of the maintenance lattice.
+  // Repeating, curved ribs embrace the same four functional levels. The
+  // front arc stays dark, so it never crosses the customer as a bright bar.
+  for (const [level, y] of [25.8, 34.2, 43.2, 50.8].entries()) {
+    const radius = level === 3 ? 13.1 : 12.3;
+    for (let k = 0; k < 8; k++) {
+      const a = k / 8 * Math.PI * 2;
+      const p = kit.piece(V(-1.1 + Math.cos(a + Math.PI / 8) * radius, y, -1.8 + Math.sin(a + Math.PI / 8) * radius), "rib", 10);
+      kit.add("chrome", torus(radius, 0.065, 8, 20, Math.PI / 4), p, place(-1.1, y, -1.8, Math.PI / 2, 0, a), SILVER);
+      kit.add("glass", torus(radius - 0.14, 0.10, 8, 20, Math.PI / 4), p, place(-1.1, y, -1.8, Math.PI / 2, 0, a), GLASS);
+      if (k >= 4) kit.add("core", torus(radius, 0.012, 4, 20, Math.PI / 4), p, place(-1.1, y, -1.8, Math.PI / 2, 0, a), level === 0 ? GOLDL : IND, 0, () => level * 8 + k);
+      ribs.push(p);
+    }
+  }
+  // Four suspension fins join the levels behind the working paths.
+  for (const x of [-12.9, 10.7]) for (const z of [-5.4, -8.2]) {
+    for (let k = 0; k < 4; k++) {
+      const y = 29 + k * 6.6;
+      const p = kit.piece(V(x, y, z), "fin", 7);
+      kit.add("chrome", unitBox, p, place(x, y, z, 0, 0, (x < 0 ? -1 : 1) * 0.09, 0.22, 6.9, 0.7), SILVER);
+      kit.add("core", unitBox, p, place(x, y, z + 0.36, 0, 0, (x < 0 ? -1 : 1) * 0.09, 0.022, 6.7, 0.014), IND);
+      ribs.push(p);
+    }
+  }
+
   // The flywheel where the crank was: it turns on its own.
   const flywheel = kit.piece(CRANK.clone(), "flywheel", 1.8);
   kit.add("glass", new THREE.CylinderGeometry(0.85, 0.85, 0.08, 40, 1, true), flywheel, place(CRANK.x, CRANK.y, CRANK.z, Math.PI / 2, 0, 0), GLASS);
@@ -201,17 +273,35 @@ export function buildNew(L: Layout) {
   kit.add("chrome", unitCyl(16), flywheel, place(CRANK.x, CRANK.y, CRANK.z, Math.PI / 2, 0, 0, 0.3, 0.3, 0.3), CHROME);
   parts.push({ id: "flywheel", box: new THREE.Box3(V(CRANK.x - 1.4, CRANK.y - 1.4, CRANK.z - 1), V(CRANK.x + 1.4, CRANK.y + 1.4, CRANK.z + 1)) });
 
-  // The assembly: every piece comes in from the dark, nearest the camera first.
+  // The assembly is a construction sequence: structure, engine, connected
+  // paths, then the open door and return loop. A travelling lock wave follows
+  // each part's distance, so the rebuilt business feels deliberately built.
   const C = V(0.6, 38.4, 2.4);
   const from = kit.pieces.map((p) => {
     const d = p.pivot.distanceTo(C);
     const dir = p.pivot.clone().sub(C).normalize();
     // Out along the line from the middle, swung round, and spun.
     const out = dir.multiplyScalar(26 + rnd() * 40).add(V((rnd() - 0.5) * 20, (rnd() - 0.5) * 20, (rnd() - 0.5) * 20));
+    const bend = new THREE.Vector3().crossVectors(out, V(0, 1, 0)).normalize().multiplyScalar(7 + Math.min(18, d * 0.3));
     const q = new THREE.Quaternion().setFromEuler(new THREE.Euler((rnd() - 0.5) * 4, (rnd() - 0.5) * 4, (rnd() - 0.5) * 4));
-    const at = 15.98 + Math.min(1, d / 60) * 0.62 + rnd() * 0.12;
-    return { t: out, q, at };
+    if (p.tag === "ncol") {
+      // A tall foundation column is lowered vertically into the well. A
+      // random tumble made its 62 m length slice through the nave's floor.
+      out.set(0, 76, 0);
+      bend.set(0, 0, 0);
+      q.identity();
+    } else if (["nbeam", "fin", "stand"].includes(p.tag)) {
+      // Load-bearing supports approach upright from above their own socket.
+      out.set(0, 14 + rnd() * 8, 0);
+      bend.set(0, 0, 0);
+      q.identity();
+    }
+    const structural = ["ncol", "nbeam", "rib", "fin", "stand", "housing"].includes(p.tag);
+    const opening = ["door", "portal", "portalvane", "ring", "loop"].includes(p.tag);
+    const base = structural ? 15.94 : p.tag === "rotor" ? 16.06 : opening ? 16.31 : 16.14;
+    const at = base + Math.min(1, d / 60) * 0.25 + rnd() * 0.065;
+    return { t: out, bend, q, at };
   });
 
-  return { kit, rig: { rotor, rings, lanes, nodes, portal, wheel, moon, sun, flywheel, door, from, parts } as NewRig };
+  return { kit, rig: { rotor, counterRotor, vanes, rings, lanes, nodes, portal, wheel, moon, sun, flywheel, door, ribs, from, parts } as NewRig };
 }

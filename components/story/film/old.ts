@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Kit, type Piece } from "./kit";
-import { between, gearGeometry, gothicArch, place, torus, tubeAlong, unitBox, unitCyl } from "./geo";
+import { between, gearGeometry, gothicArch, pipeGeometry, place, torus, tubeAlong, unitBox, unitCyl } from "./geo";
 import {
   CRANK,
   DESK,
@@ -36,8 +36,8 @@ import type { Track } from "./track";
  * by the pit, one desk, one lamp, one crank, one person.
  */
 
-const IRON: [number, number, number] = [0.05, 0.048, 0.05];
-const IRON_L: [number, number, number] = [0.09, 0.085, 0.085];
+const IRON: [number, number, number] = [0.10, 0.105, 0.12];
+const IRON_L: [number, number, number] = [0.19, 0.18, 0.175];
 const GALV: [number, number, number] = [0.3, 0.31, 0.33];
 const COPPER: [number, number, number] = [0.42, 0.19, 0.1];
 const TAPE: [number, number, number] = [0.42, 0.42, 0.4];
@@ -75,6 +75,11 @@ export type OldRig = {
   shade: Piece;
   door: Piece;
   stamp: Piece[];
+  counterweights: Piece[];
+  faults: { p: Piece; stage: number }[];
+  gateDrives: Piece[];
+  gateRacks: Piece[];
+  pumps: { piston: Piece; cam: Piece; rod: Piece; rodDir: THREE.Vector3; phase: number }[];
   /** Attached meshes (canvas labels) and the piece each follows, from where they were built. */
   labels: { mesh: THREE.Mesh; piece: Piece; rest: THREE.Matrix4 }[];
   /** Hover: what each region of the machine is (a box in world space). */
@@ -248,6 +253,11 @@ export function buildOld(L: Layout) {
   const labels: { mesh: THREE.Mesh; piece: Piece; rest: THREE.Matrix4 }[] = [];
   const parts: { id: string; box: THREE.Box3 }[] = [];
   const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
+  const faults: { p: Piece; stage: number }[] = [];
+  const counterweights: Piece[] = [];
+  const gateDrives: Piece[] = [];
+  const gateRacks: Piece[] = [];
+  const pumps: OldRig["pumps"] = [];
 
   /* ---- the tower's frame ------------------------------------------------ */
   const colX = [-11.6, -1.2, 9.4];
@@ -282,6 +292,72 @@ export function buildOld(L: Layout) {
       const p = kit.piece(a.clone().add(b).multiplyScalar(0.5), "frame", a.distanceTo(b));
       kit.add("iron", unitBox, p, between(a, b, [0.22, 0.3]), IRON, 0.6);
     }
+  }
+
+  // Maintenance decks have accumulated around the separate systems. Their
+  // gratings, ladders and load-bearing feet make a customer bead feel tiny.
+  for (const [stage, y] of [44.6, 33.8, 28.6, 17.5].entries()) {
+    for (let bay = 0; bay < 3; bay++) {
+      const x = -8.1 + bay * 7.0;
+      const p = kit.piece(V(x, y, -4.8), "deck", 7);
+      for (let k = 0; k < 18; k++) kit.add("iron", unitBox, p, place(x - 3.35 + k * 0.4, y, -4.8, 0, 0, 0, 0.12, 0.11, 2.4), IRON_L, 0.55);
+      for (const z of [-3.6, -6.0]) kit.add("iron", unitBox, p, place(x, y - 0.16, z, 0, 0, 0, 7.0, 0.34, 0.18), IRON, 0.7);
+      kit.add("iron", unitBox, p, place(x, y + 1.05, -6.0, 0, 0, 0, 7.0, 0.05, 0.05), IRON_L, 0.4);
+      for (const dx of [-3.35, 0, 3.35]) kit.add("iron", unitBox, p, place(x + dx, y + 0.5, -6.0, 0, 0, 0, 0.055, 1.0, 0.055), IRON_L, 0.5);
+      if (bay === 2) {
+        // A protective lamp carries the warning for this system's level.
+        const lamp = kit.piece(V(x + 2.9, y + 1.35, -4.7), "fault", 0.5);
+        kit.add("iron", unitCyl(12), lamp, place(x + 2.9, y + 1.15, -4.7, 0, 0, 0, 0.32, 0.18, 0.32), IRON_L, 0.3);
+        kit.add("light", new THREE.CylinderGeometry(0.13, 0.13, 0.3, 12), lamp, place(x + 2.9, y + 1.4, -4.7), stage === 2 ? [1.0, 2.2, 0.75] : [3.2, 0.6, 0.12]);
+        faults.push({ p: lamp, stage });
+      }
+    }
+  }
+  // Patches connect one system to the next on the tower's back. Different
+  // diameters, flanges and emergency bypasses read as years of additions.
+  const services: THREE.Vector3[][] = [
+    [V(10.2, 48.6, -5.2), V(12.1, 47.9, -5.2), V(12.1, 39.0, -5.2), V(8.4, 37.3, -4.0)],
+    [V(-8.7, 43.5, -5.8), V(-13.7, 43.5, -5.8), V(-13.7, 31.2, -5.8), V(-7.5, 29.0, -5.6)],
+    [V(7.5, 30.3, -5.8), V(11.9, 28.2, -5.8), V(11.9, 18.8, -5.8), V(7.0, 16.5, -5.8)],
+  ];
+  services.forEach((points, i) => {
+    const p = kit.piece(points[1].clone().lerp(points[2], 0.5), "bypass", 13);
+    kit.add("iron", pipeGeometry(points, 0.26 + i * 0.045), p, null, i === 1 ? COPPER : IRON_L, i === 1 ? 0.18 : 0.65);
+    const middle = points[1].clone().lerp(points[2], 0.5);
+    const px = middle.x + (i === 1 ? -0.85 : 0.85);
+    const body = kit.piece(V(px, middle.y, middle.z), "compressor", 2.5);
+    kit.add("iron", new THREE.CylinderGeometry(0.35, 0.35, 1.5, 16), body, place(px, middle.y, middle.z), IRON_L, 0.55);
+    for (const dy of [-0.7, 0.7]) kit.add("iron", torus(0.36, 0.08, 6, 24), body, place(px, middle.y + dy, middle.z, Math.PI / 2), BRASS, 0.3);
+    const piston = kit.piece(V(px, middle.y + 1.05, middle.z), "piston", 1.5);
+    kit.add("iron", unitCyl(12), piston, place(px, middle.y + 1.05, middle.z, 0, 0, 0, 0.18, 1.4, 0.18), GALV, 0.08);
+    kit.add("iron", unitBox, piston, place(px, middle.y + 1.65, middle.z, 0, 0, 0, 0.52, 0.12, 0.3), BRASS, 0.3);
+    const cam = kit.piece(V(px, middle.y + 2.18, middle.z), "pumpcam", 0.9);
+    kit.add("iron", gearGeometry(0.52, 16, 0.18, 4), cam, place(px, middle.y + 2.18, middle.z), BRASS, 0.45);
+    kit.add("iron", unitCyl(10), cam, place(px + 0.29, middle.y + 2.18, middle.z + 0.14, Math.PI / 2, 0, 0, 0.12, 0.3, 0.12), GALV, 0.05);
+    const pin = V(px + 0.29, middle.y + 2.18, middle.z + 0.3);
+    const head = V(px, pin.y - Math.sqrt(0.68 * 0.68 - 0.29 * 0.29), pin.z);
+    const rod = kit.piece(head, "connectingrod", 0.68);
+    kit.add("iron", unitBox, rod, between(head, pin, [0.05, 0.075]), GALV, 0.05);
+    kit.add("iron", unitCyl(12), piston, place(px, middle.y + 1.65, middle.z + 0.22, Math.PI / 2, 0, 0, 0.13, 0.19, 0.13), BRASS, 0.15);
+    pumps.push({ piston, cam, rod, rodDir: pin.clone().sub(head).normalize(), phase: i * Math.PI * 0.7 });
+    for (const dy of [-2.5, 0, 2.5]) {
+      kit.add("iron", torus(0.4 + i * 0.04, 0.075, 6, 20), p, place(middle.x, middle.y + dy, middle.z, Math.PI / 2), GALV, 0.5);
+      for (let bolt = 0; bolt < 8; bolt++) {
+        const a = bolt / 8 * Math.PI * 2;
+        kit.add("iron", unitCyl(6), p, place(middle.x + Math.cos(a) * (0.4 + i * 0.04), middle.y + dy, middle.z + Math.sin(a) * (0.4 + i * 0.04), 0, 0, 0, 0.06, 0.19, 0.06), BRASS, 0.4);
+      }
+    }
+  });
+  // The owner turns a tiny handle against literal tonnes of machinery.
+  // Suspended counterweights move with the same exhausted, irregular crank.
+  for (const [x, y, z] of [[-14.4, 23, -4.2], [12.8, 34.5, -6.6], [-14.4, 39.8, -7.5]]) {
+    const support = kit.piece(V(x, 44, z), "suspension", 16);
+    kit.add("iron", unitBox, support, between(V(x, y + 2.1, z), V(x, 50.2, z), [0.055, 0.075]), IRON_L, 0.6);
+    kit.add("iron", torus(0.64, 0.13, 8, 24), support, place(x, 50.2, z), BRASS, 0.7);
+    const weight = kit.piece(V(x, y, z), "counterweight", 3.6);
+    for (let k = 0; k < 7; k++) kit.add("iron", unitBox, weight, place(x, y - 1.5 + k * 0.48, z, 0, 0, 0, 1.75, 0.38, 1.1), IRON, 0.65);
+    for (const dx of [-0.55, 0.55]) kit.add("iron", unitBox, weight, place(x + dx, y, z + 0.6, 0, 0, 0, 0.11, 3.7, 0.11), GALV, 0.55);
+    counterweights.push(weight);
   }
   // Cross-bracing on the back and the sides: the lattice that gives it scale.
   for (let i = 0; i < levels.length - 1; i++) {
@@ -366,6 +442,17 @@ export function buildOld(L: Layout) {
   kit.add("iron", gothicArch(span + 0.6, 2.4, 0.3, 0.42), gateArch, place(GATE_X + 0.1, GATE_Y + 1.25, zMid, 0, Math.PI / 2, 0), IRON, 0.55);
   for (const z of [zMin - 0.15, zMax + 0.15]) kit.add("iron", unitBox, gateArch, place(GATE_X + 0.1, GATE_Y + 0.15, z, 0, 0, 0, 0.42, 2.4, 0.36), IRON, 0.55);
   kit.add("iron", unitBox, gateArch, place(GATE_X + 0.1, GATE_Y + 1.32, zMid, 0, 0, 0, 0.5, 0.16, span + 0.9), IRON_L, 0.5);
+  // An oversized drive has to lift a row of tiny gates: all this machinery
+  // for a simple visit. Its exposed teeth hang directly above the queue.
+  for (const z of [zMin - 0.55, zMax + 0.55]) {
+    const drive = kit.piece(V(GATE_X + 0.3, GATE_Y + 2.05, z), "gatedrive", 1.6);
+    kit.add("iron", gearGeometry(0.62, 20, 0.26), drive, place(GATE_X + 0.3, GATE_Y + 2.05, z, 0, Math.PI / 2), BRASS, 0.4);
+    const rack = kit.piece(V(GATE_X + 0.3, GATE_Y + 0.95, z), "gaterack", 1.8);
+    kit.add("iron", unitBox, rack, place(GATE_X + 0.3, GATE_Y + 0.95, z, 0, 0, 0, 0.5, 1.8, 0.2), IRON, 0.7);
+    for (let k = 0; k < 12; k++) kit.add("iron", unitBox, rack, place(GATE_X + 0.02, GATE_Y + 0.1 + k * 0.13, z, 0, 0, 0, 0.14, 0.055, 0.2), GALV, 0.6);
+    gateDrives.push(drive);
+    gateRacks.push(rack);
+  }
   // The gauge: a lit dial facing the queue, its needle creeping past three.
   const gaugeP = kit.piece(V(GATE_X - 0.25, GATE_Y + 3.15, zMid), "gauge", 1.8);
   const gR = 0.95;
@@ -402,7 +489,7 @@ export function buildOld(L: Layout) {
       Math.PI / 3
     );
     // LatheGeometry is round the y axis at the origin: move it to the funnel.
-    kit.add("iron", g, p, place(FUNNEL.x, 0, FUNNEL.z), IRON, 0.3);
+    kit.add("sheet", g, p, place(FUNNEL.x, 0, FUNNEL.z), IRON, 0.3);
     fun.push(p);
   }
   {
@@ -434,7 +521,7 @@ export function buildOld(L: Layout) {
       (k / 6) * Math.PI * 2,
       Math.PI / 3
     );
-    kit.add("iron", g, p, place(DISH.x, 0, DISH.z), [0.035, 0.04, 0.05], 0.06);
+    kit.add("sheet", g, p, place(DISH.x, 0, DISH.z), [0.035, 0.04, 0.05], 0.06);
   }
   const hatch = kit.piece(V(DISH.x + 0.3, DISH.y - 0.02, PIPE_Z), "hatch", 0.6);
   kit.add("iron", new THREE.CylinderGeometry(0.3, 0.3, 0.04, 20), hatch, place(DISH.x, DISH.y - 0.03, PIPE_Z), BRASS, 0.3);
@@ -694,7 +781,7 @@ export function buildOld(L: Layout) {
   kit.add("iron", unitBox, crank, place(CRANK.x + HANDLE_R, CRANK.y, CRANK.z + 0.3, 0, 0, 0, 0.06, 0.06, 0.6), BRASS, 0.2);
   kit.add("iron", unitCyl(10), crank, place(CRANK.x + HANDLE_R, CRANK.y, CRANK.z + 0.66, Math.PI / 2, 0, 0, 0.085, 0.24, 0.085), WOOD, 0.1);
   {
-    // The chain: a line of links from the crank to the first gear on the tower.
+    // The original chain carries the connection from the crank to the tower.
     const a = V(CRANK.x, CRANK.y, CRANK.z - 0.1);
     const b = V(gearSpec[0][0], gearSpec[0][1] - gearSpec[0][3] * 0.2, gearSpec[0][2] + 0.4);
     const p = kit.piece(a.clone().lerp(b, 0.5), "chain", a.distanceTo(b));
@@ -778,6 +865,11 @@ export function buildOld(L: Layout) {
       shade,
       door,
       stamp,
+      counterweights,
+      faults,
+      gateDrives,
+      gateRacks,
+      pumps,
       labels,
       parts,
     } as OldRig,

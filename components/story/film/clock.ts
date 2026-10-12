@@ -1,5 +1,5 @@
 import Lenis from "lenis";
-import { FILM_LEN, RESTS, dwellAt } from "../timeline";
+import { FILM_LEN, RESTS, dwellAt, travelDuration } from "../timeline";
 import { events, film } from "../store";
 import { spring } from "./ease";
 
@@ -44,7 +44,7 @@ export class Clock {
     const key = (e: KeyboardEvent) => {
       if (!film.started || this.P > FILM_LEN + 0.2) return;
       const t = e.target as HTMLElement | null;
-      if (t && (t.closest("input, textarea, select") || t.isContentEditable)) return;
+      if (t && (t.closest("input, textarea, select, dialog") || t.isContentEditable)) return;
       const next = ["ArrowDown", "ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !t?.closest("button, a"));
       const prev = ["ArrowUp", "ArrowLeft", "PageUp"].includes(e.key);
       if (next || prev) {
@@ -218,6 +218,7 @@ export class Clock {
   }
 
   goto(P: number) {
+    this.pause();
     const lenis = this.lenis;
     if (!lenis) return;
     const d = Math.abs(P - this.P);
@@ -271,13 +272,11 @@ export class Clock {
         this.pause();
         return;
       }
-      const d = to - this.P;
-      // About five and a half seconds a screen, a little quicker over long stretches.
       a.phase = "move";
       a.t0 = now;
       a.from = this.P;
       a.to = to;
-      a.dur = Math.max(1200, d * 5200 - Math.max(0, d - 1) * 900);
+      a.dur = travelDuration(this.P, to);
     }
     if (a.phase === "move") {
       const k = Math.min(1, (now - a.t0) / a.dur);
