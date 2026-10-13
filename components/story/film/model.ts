@@ -347,7 +347,7 @@ export function interiorAO(g: THREE.BufferGeometry, box: THREE.Box3, k: number) 
 }
 
 /** Roof iron, foliage: the model's two colours besides white. */
-export const ROOF: [number, number, number] = [0.33, 0.34, 0.36];
-export const LEAF: [number, number, number] = [0.46, 0.53, 0.44];
+export const ROOF: [number, number, number] = [0.17, 0.18, 0.2];
+export const LEAF: [number, number, number] = [0.33, 0.46, 0.3];
 
 export { mergeGeometries };

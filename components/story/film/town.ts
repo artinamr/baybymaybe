@@ -698,7 +698,7 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   const sx = W / PLAN.z;
   const X = (x: number) => (x - PLAN.x) * sx;
   const Z = (z: number) => (z - PLAN.y) * sx;
-  c.fillStyle = "#b9bfa9";
+  c.fillStyle = "#a7b98f";
   c.fillRect(0, 0, W, H);
   // Faint mowing and grain over the lawns.
   for (let i = 0; i < 9000; i++) {
@@ -712,7 +712,7 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
     c.fillRect(X(Math.min(x0, x1) - (x0 === x1 ? w / 2 + 2 : 0)), Z(Math.min(z0, z1) - (z0 === z1 ? w / 2 + 2 : 0)), (Math.abs(x1 - x0) + (x0 === x1 ? w + 4 : 0)) * sx, (Math.abs(z1 - z0) + (z0 === z1 ? w + 4 : 0)) * sx);
   };
   const tar = (x0: number, z0: number, x1: number, z1: number, w: number) => {
-    c.fillStyle = "#97989b";
+    c.fillStyle = "#84878c";
     c.fillRect(X(Math.min(x0, x1) - (x0 === x1 ? w / 2 : 0)), Z(Math.min(z0, z1) - (z0 === z1 ? w / 2 : 0)), (Math.abs(x1 - x0) + (x0 === x1 ? w : 0)) * sx, (Math.abs(z1 - z0) + (z0 === z1 ? w : 0)) * sx);
   };
   // The streets run on past the town and stop short of the plan's edge (its edge pixels stretch out to the horizon).

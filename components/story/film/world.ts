@@ -1189,6 +1189,8 @@ export class World {
     g.split = 0;
     g.lift.set(0, 0, 0);
     g.gamma.set(1, 1, 1);
+    // Daylight: the mid-tones a little apart (a white model in sun reads flat without it).
+    g.contrast = 0.2 * (1 - night);
     // The old way leans cool and a touch flat; the new way warmer and clearer.
     if (!isNew(P)) {
       g.sat = 0.92;

@@ -20,6 +20,8 @@ export type Grade = {
   gamma: THREE.Vector3;
   gain: THREE.Vector3;
   sat: number;
+  /** 0..1 a gentle S-curve on the display values (mid-tones apart, ends kept). */
+  contrast: number;
   /** Split toning: the shadows' and the highlights' tint, and how far. */
   shadow: THREE.Vector3;
   high: THREE.Vector3;
@@ -46,6 +48,7 @@ export function makeGrade(): Grade {
     gamma: new THREE.Vector3(1, 1, 1),
     gain: new THREE.Vector3(1, 1, 1),
     sat: 1,
+    contrast: 0,
     shadow: new THREE.Vector3(0, 0, 0),
     high: new THREE.Vector3(0, 0, 0),
     split: 0,
@@ -153,6 +156,7 @@ uniform vec3 uLift;
 uniform vec3 uGamma;
 uniform vec3 uGain;
 uniform float uSat;
+uniform float uContrast;
 uniform vec3 uShadow;
 uniform vec3 uHigh;
 uniform float uSplit;
@@ -280,6 +284,7 @@ void main() {
   col += uSplit * (uShadow * (1.0 - hi) * smoothstep(0.0, 0.12, l) * (1.0 - l) + uHigh * hi * l) * 0.35;
 
   vec3 o = toSRGB(col);
+  o = mix(o, o * o * (3.0 - 2.0 * o), uContrast);
   // A slow vignette, deeper in the corners.
   float v = 1.0 - smoothstep(0.18, 0.85, r2 * 2.2);
   o *= mix(1.0, v, uVignette);
@@ -391,6 +396,7 @@ export class Post {
       uGamma: { value: new THREE.Vector3(1, 1, 1) },
       uGain: { value: new THREE.Vector3(1, 1, 1) },
       uSat: { value: 1 },
+      uContrast: { value: 0 },
       uShadow: { value: new THREE.Vector3() },
       uHigh: { value: new THREE.Vector3() },
       uSplit: { value: 0 },
@@ -519,6 +525,7 @@ export class Post {
     (c.uGamma.value as THREE.Vector3).copy(g.gamma);
     (c.uGain.value as THREE.Vector3).copy(g.gain);
     c.uSat.value = g.sat;
+    c.uContrast.value = g.contrast;
     (c.uShadow.value as THREE.Vector3).copy(g.shadow);
     (c.uHigh.value as THREE.Vector3).copy(g.high);
     c.uSplit.value = g.split;
