@@ -718,6 +718,12 @@ export class Score {
       this.click(1800, 3, 0.18, 0.03, 0, 0.05);
       this.bell(86, 0, 0.05, 4.2, 0.2);
     }
+    // The van's door: the latch as it opens, a low thud as it shuts behind the owner.
+    if (crossed(B.nIn[0] - 0.08)) this.click(2200, 6, 0.08, 0.04, 0.3, 0, 0.3);
+    if (crossed(B.nIn[1] - 0.01)) {
+      this.click(180, 1.2, 0.28, 0.12, 0.3, 0, 0.35);
+      this.click(1400, 4, 0.06, 0.03, 0.3, 0.01, 0.2);
+    }
     if (crossed(B.nDrive[0])) this.whoosh(3.0, 0.4, 0.05);
     // The end: it all settles.
     this.master.gain.setTargetAtTime(this.on ? 0.9 * (1 - 0.6 * range(P, 28.0, 29.2)) : 0, t, 0.5);
