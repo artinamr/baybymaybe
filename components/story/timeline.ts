@@ -55,9 +55,9 @@ export const CARDS: Card[] = [
   { id: "admin", part: "beat", in: 8.88, out: 9.54 },
   { id: "followup", part: "main", in: 9.72, out: 10.62 },
   { id: "followup", part: "beat", in: 10.74, out: 11.6 },
-  { id: "you", part: "main", in: 11.74, out: 12.78 },
+  { id: "you", part: "main", in: 12.24, out: 12.86 },
   { id: "you", part: "beat", in: 12.92, out: 13.94 },
-  { id: "turn", part: "main", in: 14.34, out: 14.96 },
+  { id: "turn", part: "main", in: 14.0, out: 14.96 },
   { id: "turn", part: "beat", in: 16.34, out: 16.96 },
   { id: "new-website", part: "main", in: 17.12, out: 18.5 },
   { id: "new-ai", part: "main", in: 18.72, out: 20.1 },
@@ -75,8 +75,8 @@ export const FACT_DELAY = 0.42;
  * edges, so a rest always has its words fully in.
  */
 export const RESTS: number[] = [
-  0, 0.66, 1.7, 2.92, 3.42, 4.2, 5.4, 5.98, 6.8, 7.9, 8.4, 9.2, 10.2, 11.5, 12.3, 12.7, 13.5, 14.66, 16.66, 17.8, 19.4,
-  21, 22.6, 23.3, 24.7, 25.62, FILM_LEN,
+  0, 0.66, 1.7, 2.92, 3.42, 4.2, 5.5, 5.98, 6.62, 7.9, 8.4, 9.2, 10.2, 11.5, 12.3, 12.7, 13.6, 14.38, 16.66, 17.8, 19.4,
+  21, 22.6, 23.3, 24.3, 24.62, 25.62, FILM_LEN,
 ];
 
 /** How long autoplay holds on a rest (seconds): time to read what is on screen. */
@@ -86,8 +86,8 @@ export function dwellAt(P: number): number {
   // Close-ups inside an already-read card hold briefly. The fall is allowed
   // to land, and the owner's reveal and the break get a longer silence.
   if ([3.42, 5.98, 8.4, 12.7, 23.3].some((rest) => Math.abs(rest - P) < 0.03)) return 1.7;
-  if (Math.abs(P - 11.5) < 0.03) return 2.2;
-  if ([13.5, 14.66, 24.7].some((rest) => Math.abs(rest - P) < 0.03)) return 4.5;
+  if (Math.abs(P - 11.5) < 0.03 || Math.abs(P - 24.3) < 0.03) return 2.2;
+  if ([13.6, 14.38, 24.62].some((rest) => Math.abs(rest - P) < 0.03)) return 4.5;
   return 3.4;
 }
 
@@ -95,10 +95,17 @@ export function dwellAt(P: number): number {
 export function travelDuration(from: number, to: number): number {
   const distance = to - from;
   const middle = (from + to) * 0.5;
-  const seconds = middle > 10.2 && middle < 11.6 ? 3.8
-    : middle > 14.9 && middle < 17 ? 4.1
-    : middle > 22.3 && middle < 23.8 ? 4.3
-    : middle > 5.2 && middle < 7.2 ? 5.7 : 5.2;
+  const seconds = middle > 10.2 && middle < 11.6 ? 4.2
+    : middle > 14.9 && middle < 17 ? 7.0
+    : middle > 22.3 && middle < 23.8 ? 4.8
+    : middle > 4.4 && middle < 5.6 ? 6.4
+    : middle > 11.6 && middle < 12.4 ? 6.0
+    : middle > 12.9 && middle < 13.9 ? 7.5
+    : middle > 17.0 && middle < 17.9 ? 6.2
+    : middle > 21.1 && middle < 22.1 ? 6.2
+    : middle > 23.4 && middle < 24.5 ? 6.0
+    : middle > 24.7 && middle < 25.5 ? 7.2
+    : middle > 5.2 && middle < 7.2 ? 5.7 : 5.4;
   return Math.max(1200, distance * seconds * 1000 - Math.max(0, distance - 1) * 900);
 }
 

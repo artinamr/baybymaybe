@@ -18,6 +18,15 @@ export class Track {
 
   constructor(points: THREE.Vector3[] | THREE.Curve<THREE.Vector3>, step = 0.05) {
     this.curve = Array.isArray(points) ? new THREE.CatmullRomCurve3(points, false, "centripetal", 0.5) : points;
+    // Measure the arc length finely (a centimetre or two per division): with
+    // three's default 200 divisions, a curve whose control points are spaced
+    // unevenly is sampled unevenly, and a customer moving at a steady s
+    // visibly surges and stalls.
+    const divisions = Math.max(this.curve.arcLengthDivisions, Math.ceil(this.curve.getLength() / 0.015));
+    if (divisions > this.curve.arcLengthDivisions) {
+      this.curve.arcLengthDivisions = divisions;
+      this.curve.updateArcLengths();
+    }
     const L = this.curve.getLength();
     this.length = L;
     this.n = Math.max(2, Math.ceil(L / step) + 1);

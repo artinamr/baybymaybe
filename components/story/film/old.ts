@@ -1,13 +1,13 @@
 import * as THREE from "three";
 import { Kit, type Piece } from "./kit";
-import { between, gearGeometry, gothicArch, pipeGeometry, place, torus, tubeAlong, unitBox, unitCyl } from "./geo";
+import { between, gearGeometry, gothicArch, pipeGeometry, place, torus, tubeAlong, unitBox, unitCyl, doorLight, orb } from "./geo";
 import {
-  CRANK,
-  DESK,
+  CORNER,
+  CX,
+  corner as cornerAt,
   DISH,
   DOOR,
   EDGE,
-  FLOOR_Y,
   FUNNEL,
   GANTRY_Y,
   GANTRY_Z,
@@ -25,6 +25,7 @@ import {
   type Layout,
 } from "./layout";
 import type { Track } from "./track";
+import { buildCorner, type Corner } from "./owner";
 
 /**
  * THE OLD MACHINE: years of parts. Iron rails on sleepers (some lengths
@@ -43,10 +44,6 @@ const COPPER: [number, number, number] = [0.42, 0.19, 0.1];
 const TAPE: [number, number, number] = [0.42, 0.42, 0.4];
 const ENAMEL: [number, number, number] = [0.07, 0.1, 0.085];
 const BRASS: [number, number, number] = [0.5, 0.34, 0.13];
-const WOOD: [number, number, number] = [0.09, 0.05, 0.03];
-
-/** How far out the crank's handle is (the hand follows it round). */
-export const HANDLE_R = 0.42;
 
 const rnd = (() => {
   let s = 1337;
@@ -55,6 +52,265 @@ const rnd = (() => {
     return (s - 1) / 2147483646;
   };
 })();
+
+/* ---- gears that really mesh ------------------------------------------------
+ * Involute teeth (20° pressure angle) of one module per mesh: two gears of a
+ * module mesh with their pitch circles touching (centres m·(n1 + n2)/2 apart),
+ * turn at the inverse ratio of their tooth counts, in opposite directions.
+ * Each gear's tooth phase is baked into its geometry so that at rest, along
+ * every line of centres, a tooth of one sits in a gap of the other: the train
+ * meshes for any common turn of its pinion. */
+
+const PRESSURE = (20 * Math.PI) / 180;
+const involute = (a: number) => Math.tan(a) - a;
+
+/** A spur gear's outline: n teeth of module m, tooth 0 centred on angle `phase`. */
+export function gearOutline(m: number, n: number, phase = 0): [number, number][] {
+  const rp = (m * n) / 2;
+  const ra = rp + m;
+  const rf = rp - 1.25 * m;
+  const rb = rp * Math.cos(PRESSURE);
+  const r0 = Math.max(rf, rb);
+  // Half a tooth's angular width at the pitch circle, less a little backlash;
+  // the involute narrows it toward the tip.
+  const half0 = Math.PI / (2 * n) - (0.05 * m) / (2 * rp) + involute(PRESSURE);
+  const halfAt = (r: number) => half0 - involute(Math.acos(Math.min(1, rb / Math.max(r, rb))));
+  const out: [number, number][] = [];
+  const at = (r: number, a: number) => out.push([Math.cos(a) * r, Math.sin(a) * r]);
+  const K = 3;
+  for (let j = 0; j < n; j++) {
+    const c = phase + (j * 2 * Math.PI) / n;
+    // The middle of the gap before this tooth, at the root.
+    at(rf, c - Math.PI / n);
+    // Up the leading flank (radial below the base circle, involute above),
+    // across the tip, down the trailing flank.
+    if (r0 > rf + 1e-6) at(rf, c - halfAt(r0));
+    for (let k = 0; k <= K; k++) at(r0 + ((ra - r0) * k) / K, c - halfAt(r0 + ((ra - r0) * k) / K));
+    for (let k = K; k >= 0; k--) at(r0 + ((ra - r0) * k) / K, c + halfAt(r0 + ((ra - r0) * k) / K));
+    if (r0 > rf + 1e-6) at(rf, c + halfAt(r0));
+  }
+  return out;
+}
+
+/** A cast gear: the toothed rim, spokes, the web cut away between them; face width `face`, axis z. */
+function spurGear(m: number, n: number, face: number, phase: number, spokes: number): THREE.BufferGeometry {
+  const shape = new THREE.Shape(gearOutline(m, n, phase).map(([x, y]) => new THREE.Vector2(x, y)));
+  const rp = (m * n) / 2;
+  const rIn = rp - 1.25 * m - Math.max(0.07, 0.08 + rp * 0.045);
+  const hub = Math.max(0.1, 0.16 + rp * 0.08);
+  const w = 0.07 + rp * 0.07;
+  for (let k = 0; spokes && k < spokes; k++) {
+    const s0 = phase + Math.PI / n + (k / spokes) * Math.PI * 2;
+    const s1 = s0 + (Math.PI * 2) / spokes;
+    const ao = w / 2 / rIn;
+    const ai = w / 2 / hub;
+    if (rIn < hub + 0.15 || s1 - ai <= s0 + ai) continue;
+    const hole = new THREE.Path();
+    const steps = 12;
+    for (let i = 0; i <= steps; i++) {
+      const a = s0 + ao + ((s1 - ao - (s0 + ao)) * i) / steps;
+      if (i === 0) hole.moveTo(Math.cos(a) * rIn, Math.sin(a) * rIn);
+      else hole.lineTo(Math.cos(a) * rIn, Math.sin(a) * rIn);
+    }
+    for (let i = 0; i <= 4; i++) {
+      const a = s1 - ai + ((s0 + ai - (s1 - ai)) * i) / 4;
+      hole.lineTo(Math.cos(a) * hub, Math.sin(a) * hub);
+    }
+    hole.closePath();
+    shape.holes.push(hole);
+  }
+  // The bevel is cut INTO the outline (bevelOffset), so the flanks stand
+  // exactly on the involute and meshing gears do not overlap.
+  const bt = Math.min(0.025, face * 0.12);
+  const bs = Math.min(0.018, m * 0.12);
+  const g = new THREE.ExtrudeGeometry(shape, {
+    depth: face - 2 * bt,
+    bevelEnabled: true,
+    bevelThickness: bt,
+    bevelSize: bs,
+    bevelOffset: -bs,
+    bevelSegments: 1,
+    curveSegments: 4,
+    steps: 1,
+  });
+  g.translate(0, 0, -(face - 2 * bt) / 2);
+  return g;
+}
+
+/**
+ * A rack for a pinion of module m: built along local x (u) with its pitch line
+ * on v = 0 and the teeth toward +y, extruded along z (face). Tooth centres at
+ * u = (k + ½)·πm, so a gap sits at u = 0.
+ */
+function rackGeometry(m: number, u0: number, u1: number, face: number, back: number): THREE.BufferGeometry {
+  const p = Math.PI * m;
+  const ha = m;
+  const hf = 1.25 * m;
+  const t = Math.tan(PRESSURE);
+  const half = p / 4 - 0.025 * m;
+  const s = new THREE.Shape();
+  s.moveTo(u0, -hf - back);
+  s.lineTo(u1, -hf - back);
+  s.lineTo(u1, -hf);
+  for (let k = Math.floor(u1 / p - 0.5); k >= Math.ceil(u0 / p - 0.5); k--) {
+    const c = (k + 0.5) * p;
+    if (c + half + hf * t > u1 || c - half - hf * t < u0) continue;
+    s.lineTo(c + half + hf * t, -hf);
+    s.lineTo(c + half - ha * t, ha);
+    s.lineTo(c - half + ha * t, ha);
+    s.lineTo(c - half - hf * t, -hf);
+  }
+  s.lineTo(u0, -hf);
+  s.closePath();
+  const bt = 0.012;
+  const g = new THREE.ExtrudeGeometry(s, { depth: face - 2 * bt, bevelEnabled: true, bevelThickness: bt, bevelSize: 0.008, bevelOffset: -0.008, bevelSegments: 1, steps: 1 });
+  g.translate(0, 0, -(face - 2 * bt) / 2);
+  return g;
+}
+
+/** The tower's columns (x) and its front and back faces (z). */
+const TOWER_X = [-11.6, -1.2, 9.4];
+const TOWER_Z = [3.0, -6.4];
+const Y_UP = new THREE.Vector3(0, 1, 0);
+/** Where the windlass's chain turns the sprocket on the front-left column (owner.ts builds it). */
+export const SPROCKET = cornerAt(-0.25, 4.6, Math.hypot(CORNER.x, CORNER.z) - Math.hypot(TOWER_X[0], TOWER_Z[0]) - 0.42);
+/** The sprocket's radius in owner.ts: it turns by −wound / SPROCKET_R about CX. */
+const SPROCKET_R = 0.28;
+/** The windlass drum's radius in owner.ts: the chain winds DRUM_R per radian of the crank. */
+const DRUM_R = 0.2;
+/** The universal joint behind the sprocket: the line-shaft turns from the sprocket's axle (CX) to the train's (−z). */
+export const JOINT = SPROCKET.clone().addScaledVector(CX, 0.36);
+/** The gears' planes: the main train, and behind it the fine first reduction. */
+const TRAIN_Z = -7.0;
+const TRAIN_REAR = -7.33;
+
+export type Wheel = {
+  name: string;
+  m: number;
+  n: number;
+  /** Pitch radius. */
+  rp: number;
+  x: number;
+  y: number;
+  z: number;
+  face: number;
+  /** Tooth 0's angle at rest (baked into the geometry). */
+  phase: number;
+  /** Its turn about +z per turn of the pinion about +z. */
+  rel: number;
+  /** The wheel it meshes with (or shares an axle with), −1 for the pinion. */
+  from: number;
+  axle: boolean;
+};
+
+/**
+ * The tower's gear train, as a chain from the pinion on the line-shaft:
+ * the pinion (fine teeth) drives the big rear wheel of the great gear, a
+ * compound (its front wheel shares the axle), and the great gear drives the
+ * rest one after another; the fourth gear also drives the lowest, largest one.
+ * Every centre is placed from the gear it meshes with, at the sum of their
+ * pitch radii; the angles keep the old layout's places on the tower's back,
+ * and land the axles by the frame's columns, girders and cross-bracing.
+ */
+const TRAIN_SPEC: { name: string; from: number; ang: number; m: number; n: number; axle?: boolean; rear?: boolean }[] = [
+  { name: "pinion", from: -1, ang: 0, m: 0.12, n: 16, rear: true },
+  { name: "drive", from: 0, ang: -0.2531, m: 0.12, n: 60, rear: true },
+  { name: "great", from: 1, ang: 0, m: 0.2, n: 22, axle: true },
+  { name: "b", from: 2, ang: 1.9199, m: 0.2, n: 27 },
+  { name: "c", from: 3, ang: 0.7679, m: 0.2, n: 19 },
+  { name: "d", from: 4, ang: -0.3491, m: 0.2, n: 32 },
+  { name: "e", from: 5, ang: 0.2705, m: 0.2, n: 24 },
+  { name: "f", from: 6, ang: -0.384, m: 0.2, n: 32 },
+  { name: "g", from: 5, ang: -0.9425, m: 0.2, n: 40 },
+];
+
+export function trainLayout(): Wheel[] {
+  const out: Wheel[] = [];
+  for (const s of TRAIN_SPEC) {
+    const rp = (s.m * s.n) / 2;
+    const z = s.rear ? TRAIN_REAR : TRAIN_Z;
+    const face = s.rear ? 0.18 : 0.3;
+    if (s.from < 0) {
+      out.push({ name: s.name, m: s.m, n: s.n, rp, x: JOINT.x, y: JOINT.y, z, face, phase: 0, rel: 1, from: -1, axle: false });
+      continue;
+    }
+    const p = out[s.from];
+    if (s.axle) {
+      out.push({ name: s.name, m: s.m, n: s.n, rp, x: p.x, y: p.y, z, face, phase: 0, rel: p.rel, from: s.from, axle: true });
+      continue;
+    }
+    const d = p.rp + rp;
+    // A tooth of the parent at the contact point meets a gap of this gear.
+    const uP = (s.ang - p.phase) / ((2 * Math.PI) / p.n);
+    const phase = s.ang + Math.PI - ((2 * Math.PI) / s.n) * (0.5 - uP);
+    out.push({
+      name: s.name,
+      m: s.m,
+      n: s.n,
+      rp,
+      x: p.x + d * Math.cos(s.ang),
+      y: p.y + d * Math.sin(s.ang),
+      z,
+      face,
+      phase: phase % (2 * Math.PI),
+      rel: (-p.rel * p.n) / s.n,
+      from: s.from,
+      axle: false,
+    });
+  }
+  return out;
+}
+
+/** The pinions that lift the gates: module, teeth (pitch radius 0.62), face width. */
+const GATE_M = 0.062;
+const GATE_N = 20;
+export const GATE_RP = (GATE_M * GATE_N) / 2;
+
+export type Train = {
+  /** The line-shaft's output half: yoke, shaft, bearings' collars and the pinion; turns about −z. */
+  shaft: Piece;
+  /** The universal joint's cross. */
+  spider: Piece;
+  /** The gears behind the tower (the compound counts once), each with its turn per turn of the pinion. */
+  wheels: { p: Piece; rel: number }[];
+};
+
+const AXIS_OUT = new THREE.Vector3(0, 0, -1);
+const AXIS_Z = new THREE.Vector3(0, 0, 1);
+/** The cross at rest: one arm along y (the input yoke's), one along −x (the output yoke's). */
+const ARM_IN = new THREE.Vector3(0, 1, 0);
+const ARM_OUT = new THREE.Vector3(-1, 0, 0);
+const CROSS_REST_T = new THREE.Matrix4().makeBasis(ARM_IN, ARM_OUT, new THREE.Vector3().crossVectors(ARM_IN, ARM_OUT)).transpose();
+const _u = new THREE.Vector3();
+const _w = new THREE.Vector3();
+const _n = new THREE.Vector3();
+const _cm = new THREE.Matrix4();
+
+/**
+ * Turn the line-shaft and the gear train from the windlass (call after
+ * Owner.update, with owner.wound). The sprocket turns ψ = −wound/SPROCKET_R
+ * about CX; through the universal joint (14.5° between the axles) the shaft
+ * follows at Hooke's angle: the cross's input arm turns with the sprocket, its
+ * output arm stays square to it and to the shaft. The pinion turns with the
+ * shaft and every gear by its tooth ratio, so the teeth stay in mesh.
+ */
+export function turnTrain(R: OldRig, wound: number) {
+  const psi = -wound / SPROCKET_R;
+  _u.copy(ARM_IN).applyAxisAngle(CX, psi);
+  _w.crossVectors(_u, AXIS_OUT).normalize();
+  const raw = Math.atan2(_n.crossVectors(ARM_OUT, _w).dot(AXIS_OUT), ARM_OUT.dot(_w));
+  // Unwrapped about the input's own turn (the two differ by under a degree).
+  let d = (raw - psi) % (Math.PI * 2);
+  if (d > Math.PI) d -= Math.PI * 2;
+  if (d < -Math.PI) d += Math.PI * 2;
+  const phi = psi + d;
+  R.train.shaft.q.setFromAxisAngle(AXIS_OUT, phi);
+  _cm.makeBasis(_u, _w, _n.crossVectors(_u, _w)).multiply(CROSS_REST_T);
+  R.train.spider.q.setFromRotationMatrix(_cm);
+  // The pinion's turn about +z (the shaft's about −z, reversed); the gears follow it.
+  const a = -phi;
+  for (const { p, rel } of R.train.wheels) p.q.setFromAxisAngle(AXIS_Z, rel * a);
+}
 
 export type Claw = { trolley: Piece; head: Piece; fingers: Piece[]; rail: "front" | "back"; from: number; to: number; restY: number; restX: number };
 
@@ -67,9 +323,17 @@ export type OldRig = {
   hatch: Piece;
   claws: Claw[];
   tubes: Piece[];
-  gears: { p: Piece; ratio: number }[];
-  crank: Piece;
-  figure: { torso: Piece; upper: Piece; fore: Piece; hips: THREE.Vector3; SH0: THREE.Vector3; EL0: THREE.Vector3; HA0: THREE.Vector3; legs: Piece };
+  /**
+   * Everything the crank turns about +z: the line-shaft (with its pinion) and
+   * the gears. `ratio` is the turn per unit of world.ts's `crankA * 0.22`
+   * (matching the sprocket's turn, from tooth counts down the train); `phase`
+   * is 0 because each gear's mesh phase is baked into its geometry.
+   * turnTrain() drives the same parts exactly, joint included.
+   */
+  gears: { p: Piece; ratio: number; phase: number }[];
+  train: Train;
+  /** The owner's corner: windlass, desk, lamp and the owner (owner.ts). */
+  corner: Corner;
   lid: Piece;
   bulb: Piece;
   shade: Piece;
@@ -79,6 +343,8 @@ export type OldRig = {
   faults: { p: Piece; stage: number }[];
   gateDrives: Piece[];
   gateRacks: Piece[];
+  /** For each gate drive, which side of its pinion the rack runs (+1: +z, −1: −z): turn the pinion by −side·lift / GATE_RP about +x. */
+  gateSides: number[];
   pumps: { piston: Piece; cam: Piece; rod: Piece; rodDir: THREE.Vector3; phase: number }[];
   /** Attached meshes (canvas labels) and the piece each follows, from where they were built. */
   labels: { mesh: THREE.Mesh; piece: Piece; rest: THREE.Matrix4 }[];
@@ -260,8 +526,8 @@ export function buildOld(L: Layout) {
   const pumps: OldRig["pumps"] = [];
 
   /* ---- the tower's frame ------------------------------------------------ */
-  const colX = [-11.6, -1.2, 9.4];
-  const colZ = [3.0, -6.4];
+  const colX = TOWER_X;
+  const colZ = TOWER_Z;
   const levels = [-28, -14, 0, 9.4, 17.5, 24.4, 28.6, 33.8, 39.6, 44.6, 49.2];
   for (const x of colX)
     for (const z of colZ) {
@@ -408,8 +674,8 @@ export function buildOld(L: Layout) {
     kit.add("iron", unitBox, door, place(DOOR.x, DOOR.y - DOOR.h * 0.3, DOOR.z + DOOR.w / 2 + 0.25, 0, 0, 0, 0.6, DOOR.h * 0.78, 0.42), IRON, 0.5);
     kit.add("iron", unitBox, door, place(DOOR.x, DOOR.y - DOOR.h * 0.3, DOOR.z - DOOR.w / 2 - 0.25, 0, 0, 0, 0.6, DOOR.h * 0.78, 0.42), IRON, 0.5);
     // The light of the world outside, filling the doorway.
-    const glow = new THREE.PlaneGeometry(DOOR.w, DOOR.h * 0.86);
-    kit.add("light", glow, door, place(DOOR.x - 0.3, DOOR.y - DOOR.h * 0.17, DOOR.z, 0, Math.PI / 2, 0), [3.2, 2.3, 1.45]);
+    const [glow, glowCol] = doorLight(DOOR.w, DOOR.h * 0.86, [2.6, 1.85, 1.15]);
+    kit.add("light", glow, door, place(DOOR.x - 0.3, DOOR.y - DOOR.h * 0.17, DOOR.z, 0, Math.PI / 2, 0), glowCol);
     kit.add("iron", unitBox, door, place(DOOR.x + 0.4, 50.1, DOOR.z, 0, 0, 0, 1.4, 0.12, DOOR.w + 0.6), IRON_L, 0.5);
   }
   parts.push({ id: "door", box: new THREE.Box3(V(DOOR.x - 1, 47, -3.2), V(DOOR.x + 1.6, 57.5, 2.8)) });
@@ -443,15 +709,52 @@ export function buildOld(L: Layout) {
   for (const z of [zMin - 0.15, zMax + 0.15]) kit.add("iron", unitBox, gateArch, place(GATE_X + 0.1, GATE_Y + 0.15, z, 0, 0, 0, 0.42, 2.4, 0.36), IRON, 0.55);
   kit.add("iron", unitBox, gateArch, place(GATE_X + 0.1, GATE_Y + 1.32, zMid, 0, 0, 0, 0.5, 0.16, span + 0.9), IRON_L, 0.5);
   // An oversized drive has to lift a row of tiny gates: all this machinery
-  // for a simple visit. Its exposed teeth hang directly above the queue.
-  for (const z of [zMin - 0.55, zMax + 0.55]) {
-    const drive = kit.piece(V(GATE_X + 0.3, GATE_Y + 2.05, z), "gatedrive", 1.6);
-    kit.add("iron", gearGeometry(0.62, 20, 0.26), drive, place(GATE_X + 0.3, GATE_Y + 2.05, z, 0, Math.PI / 2), BRASS, 0.4);
-    const rack = kit.piece(V(GATE_X + 0.3, GATE_Y + 0.95, z), "gaterack", 1.8);
-    kit.add("iron", unitBox, rack, place(GATE_X + 0.3, GATE_Y + 0.95, z, 0, 0, 0, 0.5, 1.8, 0.2), IRON, 0.7);
-    for (let k = 0; k < 12; k++) kit.add("iron", unitBox, rack, place(GATE_X + 0.02, GATE_Y + 0.1 + k * 0.13, z, 0, 0, 0, 0.14, 0.055, 0.2), GALV, 0.6);
+  // for a simple visit. Each pinion turns in a bearing on a bracket bolted to
+  // the back of the arch; its rack runs on the side toward the lanes, tangent
+  // to the pinion's pitch circle, held into the teeth by two rollers on the
+  // same bracket. (The teeth are cut to the same module, so a turn of
+  // lift / GATE_RP moves the rack by exactly the lift.)
+  const gateSides: number[] = [];
+  const DX = GATE_X + 0.52;
+  const DY = GATE_Y + 2.15;
+  for (const s of [-1, 1]) {
+    // s: which end of the arch (−1 the zMin end, +1 the zMax end); d: distance from the arch's middle.
+    const Z = (d: number) => zMid + s * d;
+    const dc = span / 2 + 0.55;
+    const zc = Z(dc);
+    const side = -s;
+    const drive = kit.piece(V(DX, DY, zc), "gatedrive", 1.6);
+    kit.add("iron", spurGear(GATE_M, GATE_N, 0.22, 0, 5), drive, place(DX, DY, zc, 0, Math.PI / 2), BRASS, 0.4);
+    kit.add("iron", unitCyl(18), drive, place(GATE_X + 0.53, DY, zc, 0, 0, Math.PI / 2, 0.2, 0.26, 0.2), BRASS, 0.3);
+    kit.add("iron", unitCyl(12), drive, place(GATE_X + 0.52, DY, zc, 0, 0, Math.PI / 2, 0.08, 0.44, 0.08), IRON_L, 0.4);
+    kit.add("iron", new THREE.CylinderGeometry(0.068, 0.068, 0.05, 6), drive, place(GATE_X + 0.685, DY, zc, 0, 0, Math.PI / 2), IRON_L, 0.3);
+    // The rack: its pitch line touches the pinion's pitch circle; at rest a gap faces the pinion's tooth.
+    const rackZ = zc + side * GATE_RP;
+    const rack = kit.piece(V(DX, DY - 0.3, rackZ), "gaterack", 1.9);
+    const frame = new THREE.Matrix4().makeBasis(V(0, 1, 0), V(0, 0, -side), V(-side, 0, 0)).setPosition(DX, DY, rackZ);
+    kit.add("iron", rackGeometry(GATE_M, -1.25, 0.65, 0.2, 0.1), rack, frame, IRON, 0.7);
+    // Stops at both ends of the rack, on its back: at full lift (0.46) the
+    // lower one comes up against the lower roller.
+    const backD = dc - GATE_RP - 1.25 * GATE_M - 0.1;
+    for (const y of [DY - 1.215, DY + 0.615]) kit.add("iron", unitBox, rack, place(DX, y, Z(backD - 0.03), 0, 0, 0, 0.24, 0.07, 0.07), GALV, 0.5);
+    // The bracket on the back of the arch: an arm out to the pinion's bearing,
+    // a hanger down to the arch's crossbar, a roller on each behind the rack.
+    const rollD = backD - 0.06;
+    kit.add("iron", unitBox, gateArch, place(GATE_X + 0.34, DY, Z((rollD - 0.1 + dc) / 2), 0, 0, 0, 0.06, 0.13, dc - rollD + 0.1), IRON_L, 0.55);
+    kit.add("iron", unitBox, gateArch, place(GATE_X + 0.34, DY - 0.4, Z(rollD), 0, 0, 0, 0.06, 0.86, 0.12), IRON_L, 0.55);
+    kit.add("iron", unitCyl(18), gateArch, place(GATE_X + 0.365, DY, zc, 0, 0, Math.PI / 2, 0.27, 0.07, 0.27), IRON_L, 0.4);
+    for (let k = 0; k < 4; k++) {
+      const a = (k / 4) * Math.PI * 2 + Math.PI / 4;
+      kit.add("iron", unitCyl(6), gateArch, place(GATE_X + 0.32, DY + Math.sin(a) * 0.1, zc + Math.cos(a) * 0.1, 0, 0, Math.PI / 2, 0.035, 0.03, 0.035), BRASS, 0.3);
+    }
+    for (const y of [DY, DY - 0.66]) {
+      kit.add("iron", unitCyl(16), gateArch, place(DX, y, Z(rollD), 0, 0, Math.PI / 2, 0.12, 0.2, 0.12), GALV, 0.3);
+      kit.add("iron", unitCyl(8), gateArch, place(GATE_X + 0.4, y, Z(rollD), 0, 0, Math.PI / 2, 0.05, 0.08, 0.05), IRON_L, 0.4);
+      kit.add("iron", unitCyl(8), gateArch, place(GATE_X + 0.635, y, Z(rollD), 0, 0, Math.PI / 2, 0.06, 0.03, 0.06), IRON_L, 0.4);
+    }
     gateDrives.push(drive);
     gateRacks.push(rack);
+    gateSides.push(side);
   }
   // The gauge: a lit dial facing the queue, its needle creeping past three.
   const gaugeP = kit.piece(V(GATE_X - 0.25, GATE_Y + 3.15, zMid), "gauge", 1.8);
@@ -570,9 +873,15 @@ export function buildOld(L: Layout) {
     wheel.push(p);
   }
   const sun = kit.piece(wc, "sun", 2);
-  kit.add("light", new THREE.CircleGeometry(1.15, 40), sun, place(wc.x, wc.y + WHEEL.r, wc.z + 0.2), [4.2, 2.4, 0.9]);
+  {
+    const [g, c] = orb(1.05, [4.2, 2.4, 0.9]);
+    kit.add("light", g, sun, place(wc.x, wc.y + WHEEL.r, wc.z + 0.2), c);
+  }
   const moon = kit.piece(wc, "moon", 2);
-  kit.add("light", new THREE.CircleGeometry(0.95, 40), moon, place(wc.x, wc.y - WHEEL.r, wc.z + 0.2), [1.3, 1.75, 2.8]);
+  {
+    const [g, c] = orb(0.88, [1.1, 1.45, 2.3], true);
+    kit.add("light", g, moon, place(wc.x, wc.y - WHEEL.r, wc.z + 0.2), c);
+  }
   {
     const p = kit.piece(wc, "hub", 1);
     kit.add("iron", new THREE.CylinderGeometry(0.9, 0.9, 0.5, 24), p, place(wc.x, wc.y, wc.z, Math.PI / 2, 0, 0), BRASS, 0.4);
@@ -714,136 +1023,144 @@ export function buildOld(L: Layout) {
   }
   parts.push({ id: "cliff", box: new THREE.Box3(V(9.5, 23.5, -2), V(EDGE.x + 1.2, 30, EDGE.z + 1.5)) });
 
-  /* ---- gears on the tower's back, turned by the crank's chain ----------------- */
-  const gears: { p: Piece; ratio: number }[] = [];
-  const gearSpec: [number, number, number, number, number][] = [
-    // x, y, z, radius, ratio
-    [-9.6, 20.5, -6.9, 3.2, 1],
-    [-4.35, 22.4, -6.9, 2.1, -1.52],
-    [-0.3, 19.6, -6.9, 2.9, 1.1],
-    [4.9, 22.0, -6.9, 2.4, -1.33],
-    [9.8, 18.8, -6.9, 3.4, 0.94],
-    [-8.0, 13.4, -6.9, 2.4, -1.33],
-    [2.6, 13.2, -6.9, 3.8, 0.84],
-  ];
-  for (const [x, y, z, r, ratio] of gearSpec) {
-    const p = kit.piece(V(x, y, z), "gear", r * 2);
-    const teeth = Math.round(r * 9);
-    kit.add("iron", gearGeometry(r, teeth, 0.32, r > 3 ? 6 : 5), p, place(x, y, z), rnd() < 0.3 ? BRASS : IRON, 0.65);
-    kit.add("iron", unitCyl(16), p, place(x, y, z + 0.1, Math.PI / 2, 0, 0, 0.5, 0.7, 0.5), IRON_L, 0.6);
-    gears.push({ p, ratio });
+  /* ---- the gear train on the tower's back, turned by the crank ---------------- */
+  // The windlass's chain turns a sprocket on the front-left column; a line-shaft
+  // runs from it along the tower's left side (built below, after the corner)
+  // to a small pinion behind the back-left column. The pinion drives the rear
+  // wheel of the great gear; the great gear the rest, one after another.
+  const wheels = trainLayout();
+  const trainParts: { p: Piece; rel: number }[] = [];
+  const trainAxles: { x: number; y: number; r: number; z1: number }[] = [];
+  const TRAIN_COLOR: Record<string, [number, number, number]> = { drive: BRASS, c: BRASS, f: BRASS };
+  for (const w of wheels) {
+    if (w.from < 0) continue; // the pinion is on the line-shaft
+    const p = w.axle ? trainParts[trainParts.length - 1].p : kit.piece(V(w.x, w.y, TRAIN_Z), "gear", (w.rp + w.m) * 2);
+    kit.add("iron", spurGear(w.m, w.n, w.face, w.phase, w.rp > 3 ? 6 : 5), p, place(w.x, w.y, w.z), TRAIN_COLOR[w.name] ?? IRON, TRAIN_COLOR[w.name] ? 0.45 : 0.65);
+    if (w.axle) continue;
+    // Hub, axle, a hexagon nut behind (it shows the turn), the boss on the front.
+    const hub = Math.max(0.1, 0.16 + w.rp * 0.08) + 0.06;
+    const back = w.name === "drive" ? TRAIN_REAR - 0.12 : TRAIN_Z - 0.2;
+    kit.add("iron", unitCyl(20), p, place(w.x, w.y, (TRAIN_Z + 0.16 + back) / 2, Math.PI / 2, 0, 0, hub * 2, TRAIN_Z + 0.16 - back, hub * 2), IRON_L, 0.55);
+    kit.add("iron", unitCyl(14), p, place(w.x, w.y, (-6.58 + back - 0.1) / 2, Math.PI / 2, 0, 0, 0.17, -6.58 - back + 0.1, 0.17), IRON_L, 0.4);
+    kit.add("iron", new THREE.CylinderGeometry(hub * 0.62, hub * 0.62, 0.08, 6), p, place(w.x, w.y, back - 0.05, Math.PI / 2, 0, 0), IRON_L, 0.35);
+    trainParts.push({ p, rel: w.rel });
+    trainAxles.push({ x: w.x, y: w.y, r: hub, z1: TRAIN_Z + 0.16 });
   }
 
-  /* ---- the owner's corner, on the floor by the pit ---------------------------- */
-  const dx = DESK.x;
-  const dz = DESK.z;
-  const fy = FLOOR_Y;
-  const deskP = kit.piece(V(dx, fy + 0.7, dz), "desk", 2);
-  kit.add("iron", unitBox, deskP, place(dx, fy + 0.95, dz, 0, 0.35, 0, 2.0, 0.08, 0.95), WOOD, 0.1);
-  for (const [ax, az] of [
-    [-0.9, -0.4],
-    [0.9, -0.4],
-    [-0.9, 0.4],
-    [0.9, 0.4],
-  ])
-    kit.add("iron", unitBox, deskP, place(dx + ax * Math.cos(0.35) + az * Math.sin(0.35), fy + 0.47, dz - ax * Math.sin(0.35) + az * Math.cos(0.35), 0, 0.35, 0, 0.07, 0.94, 0.07), WOOD, 0.1);
-  // Paper: stacks of it.
-  for (let k = 0; k < 4; k++) kit.add("iron", unitBox, deskP, place(dx - 0.5 + k * 0.08, fy + 1.0 + k * 0.035, dz + 0.1 - k * 0.05, 0, 0.35 + k * 0.2, 0, 0.42, 0.03, 0.3), [0.55, 0.53, 0.48], 0);
-  // A mug.
-  kit.add("iron", new THREE.CylinderGeometry(0.07, 0.065, 0.16, 12), deskP, place(dx + 0.55, fy + 1.07, dz + 0.15), [0.35, 0.33, 0.3], 0);
-  // The lamp: base, two arms, the shade, the bulb.
-  kit.add("iron", unitCyl(14), deskP, place(dx + 0.35, fy + 1.0, dz - 0.2, 0, 0, 0, 0.26, 0.04, 0.26), IRON, 0.2);
-  kit.add("iron", unitBox, deskP, between(V(dx + 0.35, fy + 1.02, dz - 0.2), V(dx + 0.2, fy + 1.55, dz - 0.15), 0.025), IRON, 0.2);
-  kit.add("iron", unitBox, deskP, between(V(dx + 0.2, fy + 1.55, dz - 0.15), V(dx - 0.15, fy + 1.62, dz + 0.0), 0.025), IRON, 0.2);
-  const shade = kit.piece(V(dx - 0.2, fy + 1.55, dz + 0.02), "shade", 0.4);
-  kit.add("iron", new THREE.ConeGeometry(0.17, 0.2, 18, 1, true), shade, place(dx - 0.2, fy + 1.55, dz + 0.02, 0.35, 0, 0.2), [0.12, 0.2, 0.14], 0.1);
-  const bulb = kit.piece(V(dx - 0.2, fy + 1.49, dz + 0.04), "bulb", 0.1);
-  kit.add("light", new THREE.SphereGeometry(0.06, 10, 8), bulb, place(dx - 0.2, fy + 1.49, dz + 0.04), [14, 8.4, 3.8]);
-  // A chair, pushed back.
-  const chair = kit.piece(V(dx + 0.2, fy + 0.5, dz + 1.0), "chair", 1);
-  kit.add("iron", unitBox, chair, place(dx + 0.3, fy + 0.5, dz + 1.15, 0, 0.6, 0, 0.5, 0.05, 0.5), WOOD, 0.1);
-  kit.add("iron", unitBox, chair, place(dx + 0.45, fy + 0.85, dz + 1.38, 0.12, 0.6, 0, 0.5, 0.65, 0.05), WOOD, 0.1);
-  for (const [ax, az] of [
-    [-0.2, -0.2],
-    [0.2, -0.2],
-    [-0.2, 0.2],
-    [0.2, 0.2],
-  ])
-    kit.add("iron", unitBox, chair, place(dx + 0.3 + ax, fy + 0.25, dz + 1.15 + az, 0, 0.6, 0, 0.04, 0.5, 0.04), IRON, 0.3);
-  // The crank: a stand, a big wheel, a handle; the chain up to the first gear.
-  const cs = kit.piece(V(CRANK.x, fy + 0.6, CRANK.z), "crankstand", 1.4);
-  kit.add("iron", unitBox, cs, place(CRANK.x, fy + 0.62, CRANK.z - 0.35, 0, 0, 0, 0.18, 1.25, 0.18), IRON, 0.7);
-  kit.add("iron", unitBox, cs, place(CRANK.x, fy + 0.06, CRANK.z - 0.35, 0, 0, 0, 1.0, 0.12, 0.7), IRON, 0.7);
-  const crank = kit.piece(CRANK.clone(), "crank", 1.6);
-  kit.add("iron", torus(0.78, 0.06, 6, 36), crank, place(CRANK.x, CRANK.y, CRANK.z), IRON_L, 0.6);
-  for (let k = 0; k < 4; k++) kit.add("iron", unitBox, crank, place(CRANK.x, CRANK.y, CRANK.z, 0, 0, (k / 4) * Math.PI, 1.5, 0.05, 0.05), IRON, 0.6);
-  // The handle: an arm out from the hub, a wooden grip toward whoever turns it.
-  kit.add("iron", unitBox, crank, place(CRANK.x + HANDLE_R, CRANK.y, CRANK.z + 0.3, 0, 0, 0, 0.06, 0.06, 0.6), BRASS, 0.2);
-  kit.add("iron", unitCyl(10), crank, place(CRANK.x + HANDLE_R, CRANK.y, CRANK.z + 0.66, Math.PI / 2, 0, 0, 0.085, 0.24, 0.085), WOOD, 0.1);
-  {
-    // The original chain carries the connection from the crank to the tower.
-    const a = V(CRANK.x, CRANK.y, CRANK.z - 0.1);
-    const b = V(gearSpec[0][0], gearSpec[0][1] - gearSpec[0][3] * 0.2, gearSpec[0][2] + 0.4);
-    const p = kit.piece(a.clone().lerp(b, 0.5), "chain", a.distanceTo(b));
-    const n = Math.round(a.distanceTo(b) / 0.22);
-    for (let k = 0; k < n; k++) {
-      const c = a.clone().lerp(b, k / n);
-      const c2 = a.clone().lerp(b, (k + 0.8) / n);
-      kit.add("iron", unitBox, p, between(c, c2, [0.05, 0.12], k % 2 ? Math.PI / 2 : 0), IRON_L, 0.8);
+  /* ---- the owner's corner: the windlass, the desk, the owner (owner.ts) ------ */
+  // The chain runs from the windlass to a sprocket on the front-left column.
+  const corner = buildCorner(kit, {
+    sprocket: SPROCKET.clone(),
+    column: V(colX[0], 0, colZ[0]),
+  });
+  parts.push({ id: "crank", box: corner.box });
+  parts.push({ id: "pit", box: new THREE.Box3(V(-20, -30, -20), V(20, 6, 20)) });
+
+  /* ---- the line-shaft: sprocket → universal joint → along the side → pinion -- */
+  // (Built after the corner, so the pieces before keep their ids.)
+  const J = JOINT;
+  const ji = (k: number) => J.clone().addScaledVector(CX, k);
+  // On the sprocket (it turns about CX): the axle through both bearings, the input yoke.
+  const sp = corner.sprocket;
+  kit.add("iron", unitCyl(14), sp, between(SPROCKET.clone().addScaledVector(CX, -0.16), ji(-0.13), [0.11, 0.11]), IRON_L, 0.35);
+  kit.add("iron", unitCyl(18), sp, between(ji(-0.16), ji(-0.11), [0.19, 0.19]), IRON_L, 0.35);
+  for (const sd of [1, -1]) kit.add("iron", unitBox, sp, between(ji(-0.13).addScaledVector(Y_UP, sd * 0.095), ji(0.045).addScaledVector(Y_UP, sd * 0.095), [0.05, 0.05]), IRON_L, 0.35);
+  // The cross between the yokes (turnTrain keeps it square to both).
+  const spider = kit.piece(J.clone(), "ujoint", 0.3);
+  kit.add("iron", unitBox, spider, place(J.x, J.y, J.z, 0, 0, 0, 0.075, 0.075, 0.075), BRASS, 0.25);
+  kit.add("iron", unitCyl(10), spider, place(J.x, J.y, J.z, 0, 0, 0, 0.045, 0.25, 0.045), BRASS, 0.25);
+  kit.add("iron", unitCyl(10), spider, place(J.x, J.y, J.z, 0, 0, Math.PI / 2, 0.045, 0.25, 0.045), BRASS, 0.25);
+  // The output half: yoke, the shaft along the tower's left side, the pinion behind the back-left column.
+  const pin = wheels[0];
+  const endZ = TRAIN_REAR - 0.16;
+  const shaft = kit.piece(V(J.x, J.y, (J.z + endZ) / 2), "shaft", J.z - endZ);
+  const zc = (z0: number, z1: number, r: number) => place(J.x, J.y, (z0 + z1) / 2, Math.PI / 2, 0, 0, r * 2, Math.abs(z1 - z0), r * 2);
+  kit.add("iron", unitCyl(18), shaft, zc(J.z - 0.16, J.z - 0.11, 0.095), IRON_L, 0.35);
+  for (const sd of [1, -1]) kit.add("iron", unitBox, shaft, place(J.x + sd * 0.095, J.y, J.z - 0.045, 0, 0, 0, 0.05, 0.05, 0.18), IRON_L, 0.35);
+  kit.add("iron", unitCyl(14), shaft, zc(J.z - 0.13, endZ, 0.058), GALV, 0.3);
+  const HANG = [1.4, -3.0];
+  for (const z of [...HANG, TOWER_Z[1]]) for (const dz of [-0.17, 0.17]) kit.add("iron", unitCyl(14), shaft, zc(z + dz - 0.025, z + dz + 0.025, 0.085), IRON_L, 0.4);
+  kit.add("iron", spurGear(pin.m, pin.n, pin.face, pin.phase, 0), shaft, place(pin.x, pin.y, pin.z), BRASS, 0.4);
+  kit.add("iron", unitCyl(18), shaft, zc(pin.z + 0.13, pin.z - 0.13, 0.17), BRASS, 0.35);
+  kit.add("iron", new THREE.CylinderGeometry(0.1, 0.1, 0.06, 6), shaft, place(J.x, J.y, endZ + 0.02, Math.PI / 2, 0, 0), IRON_L, 0.3);
+  // Its bearings: drop hangers from the side girder overhead, and one on the back-left column.
+  const SIDE_GIRDER = 17.5;
+  for (const z of [...HANG, TOWER_Z[1]]) {
+    const b = kit.piece(V(J.x, J.y, z), "frame", 1);
+    kit.add("iron", unitBox, b, place(J.x, J.y - 0.02, z, 0, 0, 0, 0.36, 0.2, 0.26), IRON_L, 0.55);
+    kit.add("iron", unitCyl(16), b, place(J.x, J.y + 0.04, z, Math.PI / 2, 0, 0, 0.24, 0.26, 0.24), IRON_L, 0.5);
+    for (const sd of [1, -1]) kit.add("iron", unitCyl(6), b, place(J.x + sd * 0.13, J.y + 0.09, z, 0, 0, 0, 0.05, 0.05, 0.05), BRASS, 0.3);
+    if (z === TOWER_Z[1]) {
+      kit.add("iron", unitBox, b, between(V(J.x + 0.1, J.y, z), V(TOWER_X[0], J.y, z), [0.2, 0.22]), IRON, 0.6);
+    } else {
+      const xg = TOWER_X[0] - 0.08;
+      kit.add("iron", unitBox, b, between(V(J.x, J.y + 0.1, z), V(J.x, SIDE_GIRDER + 0.1, z), [0.1, 0.14]), IRON, 0.6);
+      kit.add("iron", unitBox, b, between(V(J.x - 0.07, SIDE_GIRDER, z), V(xg, SIDE_GIRDER, z), [0.2, 0.18]), IRON, 0.6);
+      // A diagonal stay keeps the hanger square.
+      kit.add("iron", unitBox, b, between(V(J.x, SIDE_GIRDER - 0.7, z), V(xg, SIDE_GIRDER - 0.1, z), [0.06, 0.08]), IRON, 0.65);
     }
   }
-  // The laptop on the desk, open: the emails. (It closes at six, in the new world.)
-  const lx = dx - 0.08;
-  const lz = dz + 0.2;
-  const laptop = kit.piece(V(lx, fy + 1.0, lz), "laptop", 0.4);
-  kit.add("iron", unitBox, laptop, place(lx, fy + 1.0, lz, 0, 0.35, 0, 0.36, 0.018, 0.25), [0.05, 0.05, 0.055], 0);
-  const hinge = V(lx - 0.125 * Math.sin(0.35), fy + 1.01, lz - 0.125 * Math.cos(0.35));
-  const lid = kit.piece(hinge, "lid", 0.4);
-  {
-    // Built open (about 105 degrees), facing the chair.
-    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.26, 0.35, 0, "YXZ"));
-    const up = new THREE.Vector3(0, 0.125, 0).applyQuaternion(q);
-    const c = hinge.clone().add(up);
-    kit.add("iron", unitBox, lid, new THREE.Matrix4().compose(c, q, new THREE.Vector3(0.36, 0.25, 0.012)), [0.05, 0.05, 0.055], 0);
-    const glow = new THREE.PlaneGeometry(0.32, 0.21);
-    const n = new THREE.Vector3(0, 0, 0.008).applyQuaternion(q);
-    kit.add("light", glow, lid, new THREE.Matrix4().compose(c.clone().add(n), q, new THREE.Vector3(1, 1, 1)), [0.9, 1.05, 1.35]);
+
+  /* ---- each gear's bearing, bolted to the back frame ------------------------- */
+  const levelsY = [0, 9.4, 17.5, 24.4, 28.6];
+  const anchors = (x: number, y: number) => {
+    const out: { x: number; y: number; d: number; node: boolean }[] = [];
+    const seg = (x0: number, y0: number, x1: number, y1: number, weak: boolean) => {
+      const dx = x1 - x0;
+      const dy = y1 - y0;
+      const t = Math.max(0, Math.min(1, ((x - x0) * dx + (y - y0) * dy) / (dx * dx + dy * dy)));
+      const px = x0 + t * dx;
+      const py = y0 + t * dy;
+      out.push({ x: px, y: py, d: Math.hypot(px - x, py - y) * (weak ? 1.3 : 1), node: false });
+    };
+    for (const cx of TOWER_X) seg(cx, levelsY[0], cx, levelsY[levelsY.length - 1], false);
+    for (const gy of levelsY) seg(TOWER_X[0], gy, TOWER_X[2], gy, false);
+    for (let j = 0; j < 2; j++)
+      for (let i = 0; i < levelsY.length - 1; i++) {
+        const [x0, x1, y0, y1] = [TOWER_X[j], TOWER_X[j + 1], levelsY[i], levelsY[i + 1]];
+        seg(x0, y0, x1, y1, true);
+        seg(x1, y0, x0, y1, true);
+        const nx = (x0 + x1) / 2;
+        const ny = (y0 + y1) / 2;
+        out.push({ x: nx, y: ny, d: Math.hypot(nx - x, ny - y) * 0.9, node: true });
+      }
+    return out.sort((a, b) => a.d - b.d);
+  };
+  const BZ0 = TOWER_Z[1] - 0.07;
+  const BZ1 = TRAIN_Z + 0.16;
+  for (const ax of trainAxles) {
+    const b = kit.piece(V(ax.x, ax.y, (BZ0 + BZ1) / 2), "frame", 1.2);
+    const s = ax.r * 1.6 + 0.12;
+    kit.add("iron", unitBox, b, place(ax.x, ax.y, (BZ0 + BZ1) / 2 + 0.01, 0, 0, Math.PI / 4, s, s, BZ0 - BZ1 - 0.02), IRON_L, 0.55);
+    for (let k = 0; k < 4; k++) {
+      const a = (k / 4) * Math.PI * 2;
+      kit.add("iron", unitCyl(6), b, place(ax.x + Math.cos(a) * s * 0.52, ax.y + Math.sin(a) * s * 0.52, BZ0, Math.PI / 2, 0, 0, 0.07, 0.05, 0.07), BRASS, 0.3);
+    }
+    const list = anchors(ax.x, ax.y);
+    const first = list[0];
+    const struts = [first];
+    if (first.d > 0.45) {
+      const a0 = Math.atan2(first.y - ax.y, first.x - ax.x);
+      const second = list.find((q) => {
+        let da = Math.abs(Math.atan2(q.y - ax.y, q.x - ax.x) - a0);
+        if (da > Math.PI) da = Math.PI * 2 - da;
+        return da > 0.9 && q.d < 2.6;
+      });
+      if (second) struts.push(second);
+    }
+    for (const q of struts) {
+      if (q.d < s * 0.5) continue;
+      kit.add("iron", unitBox, b, between(V(ax.x, ax.y, TOWER_Z[1] - 0.16), V(q.x, q.y, TOWER_Z[1] - 0.16), [0.2, 0.2]), IRON, 0.6);
+      if (q.node) kit.add("iron", unitBox, b, place(q.x, q.y, TOWER_Z[1] - 0.05, 0, 0, Math.PI / 4, 0.6, 0.6, 0.05), IRON_L, 0.6);
+    }
   }
 
-  // THE PERSON AT THE CRANK: standing, leaning into it, one hand on the grip.
-  // Cloth, not metal: a figure in the lamp's light, the hand following the
-  // handle round (two-bone IK, world.ts).
-  const CLOTH: [number, number, number] = [0.05, 0.05, 0.06];
-  const SKIN: [number, number, number] = [0.2, 0.13, 0.1];
-  const px = CRANK.x + 0.14;
-  const pz = CRANK.z + 1.22;
-  const legs = kit.piece(V(px, fy + 0.5, pz), "legs", 1);
-  for (const sd of [-0.1, 0.1]) {
-    kit.add("cloth", new THREE.CapsuleGeometry(0.07, 0.78, 4, 8), legs, place(px + sd, fy + 0.47, pz + 0.03), CLOTH, 0);
-    kit.add("cloth", unitBox, legs, place(px + sd, fy + 0.04, pz - 0.04, 0, 0, 0, 0.1, 0.08, 0.26), [0.015, 0.015, 0.015], 0);
-  }
-  const hips = V(px, fy + 0.92, pz);
-  const torso = kit.piece(hips, "torso", 1.2);
-  kit.add("cloth", new THREE.CapsuleGeometry(0.16, 0.42, 4, 12), torso, place(px, fy + 1.2, pz, 0, 0, 0, 1, 1, 0.72), CLOTH, 0);
-  kit.add("cloth", new THREE.SphereGeometry(0.1, 14, 10), torso, place(px, fy + 1.66, pz - 0.02), SKIN, 0);
-  kit.add("cloth", new THREE.SphereGeometry(0.106, 14, 10), torso, place(px, fy + 1.69, pz + 0.02, 0, 0, 0, 1, 0.88, 1), [0.018, 0.014, 0.012], 0);
-  kit.add("cloth", new THREE.CapsuleGeometry(0.048, 0.5, 4, 8), torso, place(px - 0.21, fy + 1.2, pz + 0.02, 0, 0, -0.07), CLOTH, 0);
-  const SH0 = V(px + 0.2, fy + 1.45, pz);
-  const EL0 = V(px + 0.22, fy + 1.1, pz);
-  const HA0 = V(px + 0.23, fy + 0.74, pz);
-  const along = (a: THREE.Vector3, b: THREE.Vector3) =>
-    new THREE.Matrix4().compose(
-      a.clone().add(b).multiplyScalar(0.5),
-      new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()),
-      new THREE.Vector3(1, 1, 1)
-    );
-  const upper = kit.piece(SH0.clone(), "upper", 0.4);
-  kit.add("cloth", new THREE.CapsuleGeometry(0.05, SH0.distanceTo(EL0) - 0.04, 4, 8), upper, along(SH0, EL0), CLOTH, 0);
-  const fore = kit.piece(EL0.clone(), "fore", 0.4);
-  kit.add("cloth", new THREE.CapsuleGeometry(0.044, EL0.distanceTo(HA0) - 0.04, 4, 8), fore, along(EL0, HA0), CLOTH, 0);
-  kit.add("cloth", new THREE.SphereGeometry(0.048, 10, 8), fore, place(HA0.x, HA0.y, HA0.z), SKIN, 0);
-  parts.push({ id: "crank", box: new THREE.Box3(V(DESK.x - 1.6, FLOOR_Y - 0.2, CRANK.z - 1.4), V(CRANK.x + 2.2, FLOOR_Y + 2.6, DESK.z + 2)) });
-  parts.push({ id: "pit", box: new THREE.Box3(V(-20, -30, -20), V(20, 6, 20)) });
+  // Everything the crank turns about z, for world.ts's `crankA * 0.22 * ratio`:
+  // the sprocket turns −wound / SPROCKET_R about CX (≈ −z), wound = DRUM_R·(θ − 2.2),
+  // so the shaft turns (DRUM_R / SPROCKET_R)·θ about +z, and each gear by its tooth ratio.
+  const PIN = DRUM_R / SPROCKET_R / (0.22 / 1.6);
+  const gears = [{ p: shaft, ratio: PIN, phase: 0 }, ...trainParts.map(({ p, rel }) => ({ p, ratio: PIN * rel, phase: 0 }))];
+  const train: Train = { shaft, spider, wheels: trainParts };
 
   return {
     kit,
@@ -858,11 +1175,12 @@ export function buildOld(L: Layout) {
       claws,
       tubes,
       gears,
-      crank,
-      figure: { torso, upper, fore, hips, SH0, EL0, HA0, legs },
-      lid,
-      bulb,
-      shade,
+      train,
+      gateSides,
+      corner,
+      lid: corner.lid,
+      bulb: corner.bulb,
+      shade: corner.shade,
       door,
       stamp,
       counterweights,

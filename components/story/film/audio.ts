@@ -1,6 +1,8 @@
 import type * as THREE from "three";
 import type { World } from "./world";
 import { range } from "./ease";
+import { SIX } from "./owner";
+import { FALL_HIT } from "./hero";
 
 /**
  * THE SCORE, made live (Web Audio: no files, nothing licensed). Half of the
@@ -535,7 +537,7 @@ export class Score {
     const inOld = P < 14.0;
     const silent = P >= 14.0 && P < 16.08;
     // THE SILENCE: from the freeze to the hit, nothing at all, not even the room.
-    const hush = P >= 14.0 && P < 14.95;
+    const hush = P >= 14.22 && P < 14.95;
     this.duck.gain.setTargetAtTime(hush ? 0 : 1, t, hush ? 0.035 : 0.006);
     // The machine's hum (old: a low drone of gears; new: brighter, quieter).
     this.hum.g.gain.setTargetAtTime(silent ? 0 : inOld ? 0.05 : 0.025, t, 0.3);
@@ -597,10 +599,21 @@ export class Score {
       }
     }
 
+    // The crank coasting to a stop: the pawl's last, slowing clicks.
+    for (const k of [14.03, 14.07, 14.12, 14.18]) if (crossed(k)) this.click(1400, 6, 0.12, 0.05, 0.1, 0, 0.4);
+
     // Our customer: the gate lifting; over the edge; the stamp.
     if (crossed(3.9)) this.clang(90, 0.12, 1.6, -0.1);
     if (crossed(10.66)) this.fallTone(0, true);
-    if (crossed(9.44)) this.clang(140, 0.14, 1.2, 0.1);
+    if (crossed(9.457)) this.clang(140, 0.14, 1.2, 0.1);
+    if (crossed(9.614)) {
+      this.clang(70, 0.2, 0.8, 0);
+      this.bell(79, 0, 0.09, 2.5);
+    }
+    if (crossed(FALL_HIT)) {
+      this.clang(55, 0.08, 1.8, 0.2);
+      this.bell(50, 0, 0.05, 3);
+    }
     if (crossed(6.8)) this.click(600, 2, 0.15, 0.25, 0, 0, 0.5);
 
     // The inbox: the clock, faster as the night flies past.
@@ -653,8 +666,9 @@ export class Score {
       for (let i = 0; i < Math.min(n, 5); i++) this.click(2600 + Math.random() * 2400, 18, 0.05, 0.06 + Math.random() * 0.05, (Math.random() - 0.5) * 1.6, i * 0.012, 0.6);
       if (n > 0 && Math.random() < 0.15) this.bell(root + 24 + PENTA[Math.floor(Math.random() * 5)], (Math.random() - 0.5), 0.03, 1.4);
     }
-    // Six o'clock: the lamp clicks off.
-    if (crossed(24.62)) {
+    // Six o'clock: the lid comes down, then the lamp clicks off.
+    if (crossed(SIX.close1)) this.click(420, 1.4, 0.2, 0.05, 0, 0, 0.4);
+    if (crossed(SIX.lamp)) {
       this.click(3000, 3, 0.25, 0.02);
       this.click(1800, 3, 0.18, 0.03, 0, 0.05);
       this.bell(86, 0, 0.055, 4.2, 0.2);

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Kit, type Piece } from "./kit";
-import { gothicArch, place, torus, tubeAlong, unitBox, unitCyl, between } from "./geo";
-import { CRANK, DOOR, GATE_X, GATE_Y, RAIL_DROP, RAIL_HALF, TRAYS, TRAY_Y, WHEEL, type Layout } from "./layout";
+import { gothicArch, place, torus, tubeAlong, unitBox, unitCyl, between, doorLight, orb } from "./geo";
+import { CRANK, CX, DOOR, GATE_X, GATE_Y, RAIL_DROP, RAIL_HALF, TRAYS, TRAY_Y, WHEEL, type Layout } from "./layout";
 import type { Track } from "./track";
 
 /**
@@ -35,8 +35,12 @@ export type NewRig = {
   flywheel: Piece;
   door: Piece;
   ribs: Piece[];
-  /** The assembly: where each piece comes from, and when it arrives (in P). */
-  from: { t: THREE.Vector3; bend: THREE.Vector3; q: THREE.Quaternion; at: number }[];
+  /**
+   * The assembly: where each piece comes from (t, bend, q), when it sets off
+   * (at, in P), how long its flight takes (fly), the way it arrives (dir, a
+   * unit vector) and whether it is lowered like a load (heavy).
+   */
+  from: { t: THREE.Vector3; bend: THREE.Vector3; q: THREE.Quaternion; at: number; fly: number; dir: THREE.Vector3; heavy: boolean }[];
   parts: { id: string; box: THREE.Box3 }[];
 };
 
@@ -89,12 +93,23 @@ export function buildNew(L: Layout) {
     const arch = gothicArch(DOOR.w + 0.6, DOOR.h * 0.42, 0.08, 0.08);
     kit.add("core", arch, door, place(DOOR.x, DOOR.y + DOOR.h * 0.08, DOOR.z, 0, Math.PI / 2, 0), IND_HI);
     for (const dz of [DOOR.w / 2 + 0.15, -DOOR.w / 2 - 0.15]) kit.add("core", unitBox, door, place(DOOR.x, DOOR.y - DOOR.h * 0.3, DOOR.z + dz, 0, 0, 0, 0.08, DOOR.h * 0.78, 0.08), IND_HI);
-    kit.add("light", new THREE.PlaneGeometry(DOOR.w, DOOR.h * 0.86), door, place(DOOR.x - 0.3, DOOR.y - DOOR.h * 0.17, DOOR.z, 0, Math.PI / 2, 0), [2.6, 2.4, 3.4]);
+    const [glow, glowCol] = doorLight(DOOR.w, DOOR.h * 0.86, [1.6, 1.5, 2.25]);
+    kit.add("light", glow, door, place(DOOR.x - 0.3, DOOR.y - DOOR.h * 0.17, DOOR.z, 0, Math.PI / 2, 0), glowCol);
   }
 
   // The lanes, in glass.
   const lanes: Piece[] = [];
   L.lanes.forEach((ln) => lanes.push(...glassRun(kit, ln.track, IND)));
+  // Each lane comes out of the door's light: a short straight lead-in from
+  // behind the glowing doorway to where the lane's track begins.
+  L.lanes.forEach((ln) => {
+    const a = ln.track.at(0, new THREE.Vector3());
+    const t = ln.track.tangent(0, new THREE.Vector3());
+    const b = a.clone().addScaledVector(t, -1.7);
+    const p = kit.piece(a.clone().lerp(b, 0.5), "tube", 1.7);
+    kit.add("glass", unitCyl(16), p, between(b, a, 0.27), GLASS);
+    lanes.push(p);
+  });
   // The ring of light where the gate was: one great ring, and a small one round each lane.
   const zs = L.lanesZ;
   const zMid = (Math.min(...zs) + Math.max(...zs)) / 2;
@@ -126,9 +141,13 @@ export function buildNew(L: Layout) {
   // THE TURBINE: where the inbox was. A rotor of glass blades round a bright hub.
   const T = L.TURB;
   const rotor = kit.piece(V(T.x, T.y, T.z), "rotor", T.r * 2);
-  kit.add("core", torus(T.r + 0.1, 0.045, 6, 64), rotor, place(T.x, T.y, T.z), TEAL);
-  kit.add("glass", torus(T.r + 0.22, 0.1, 8, 64), rotor, place(T.x, T.y, T.z), GLASS);
-  kit.add("glass", new THREE.CylinderGeometry(T.r + 0.1, T.r + 0.1, 0.06, 48, 1, true), rotor, place(T.x, T.y, T.z, Math.PI / 2, 0, 0), GLASS);
+  // The blades run between two glass shrouds: behind, a ring on their tips;
+  // in front, a smaller ring on their faces. The way in and out, in the
+  // blades' own plane, stays open: a customer is carried through, never
+  // through glass. (The counter-rotor turns just in front of the small ring.)
+  kit.add("glass", torus(T.r + 0.05, 0.07, 8, 64), rotor, place(T.x, T.y, T.z - 0.28), GLASS);
+  kit.add("core", torus(T.r + 0.05, 0.03, 6, 64), rotor, place(T.x, T.y, T.z - 0.36), TEAL);
+  kit.add("glass", torus(T.r * 0.79, 0.05, 8, 64), rotor, place(T.x, T.y, T.z + 0.25), GLASS);
   for (let b = 0; b < 9; b++) {
     const a0 = (b / 9) * Math.PI * 2;
     // A curved blade: a few short boxes bending as they go out.
@@ -142,7 +161,10 @@ export function buildNew(L: Layout) {
     kit.add("core", unitBox, rotor, between(V(T.x + Math.cos(a0) * 0.45, T.y + Math.sin(a0) * 0.45, T.z + 0.22), V(T.x + Math.cos(a0 + 0.56) * T.r, T.y + Math.sin(a0 + 0.56) * T.r, T.z + 0.22), 0.016), TEAL);
   }
   kit.add("chrome", unitCyl(24), rotor, place(T.x, T.y, T.z, Math.PI / 2, 0, 0, 0.9, 0.5, 0.9), CHROME);
-  kit.add("light", new THREE.CircleGeometry(0.3, 24), rotor, place(T.x, T.y, T.z + 0.26), [2.4, 3.2, 3.8]);
+  {
+    const [g, c] = orb(0.26, [1.7, 2.3, 2.8]);
+    kit.add("light", g, rotor, place(T.x, T.y, T.z + 0.26), c);
+  }
   // A second impeller turns against the first. Its silver blades make the
   // direction readable through the glass rather than blurring into a halo.
   const counterRotor = kit.piece(V(T.x, T.y, T.z + 0.4), "counterrotor", T.r * 2);
@@ -156,6 +178,9 @@ export function buildNew(L: Layout) {
   const housing = kit.piece(V(T.x, T.y, T.z - 0.1), "housing", T.r * 2.8);
   kit.add("chrome", torus(T.r + 0.48, 0.14, 8, 72), housing, place(T.x, T.y, T.z - 0.16), SILVER);
   for (let k = 0; k < 36; k++) {
+    // Two ports: where the chute brings customers in (60–70°) and where the
+    // channel takes them out (210–220°).
+    if (k === 6 || k === 7 || k === 21 || k === 22) continue;
     const a = k / 36 * Math.PI * 2;
     const r = T.r + 0.5;
     kit.add("chrome", unitBox, housing, place(T.x + Math.cos(a) * r, T.y + Math.sin(a) * r, T.z, 0, 0, a, 0.24, 0.06, 0.55), CHROME);
@@ -183,9 +208,15 @@ export function buildNew(L: Layout) {
     wheel.push(p);
   }
   const moon = kit.piece(wc, "nmoon", 2);
-  kit.add("light", new THREE.CircleGeometry(0.95, 40), moon, place(wc.x, wc.y - WHEEL.r, wc.z + 0.2), [1.6, 2.2, 3.6]);
+  {
+    const [g, c] = orb(0.88, [1.3, 1.75, 2.9], true);
+    kit.add("light", g, moon, place(wc.x, wc.y - WHEEL.r, wc.z + 0.2), c);
+  }
   const sun = kit.piece(wc, "nsun", 2);
-  kit.add("light", new THREE.CircleGeometry(1.15, 40), sun, place(wc.x, wc.y + WHEEL.r, wc.z + 0.2), [8, 4.6, 1.8]);
+  {
+    const [g, c] = orb(1.05, [6, 3.5, 1.4]);
+    kit.add("light", g, sun, place(wc.x, wc.y + WHEEL.r, wc.z + 0.2), c);
+  }
 
   // THE CHANNEL: out of the turbine, through three nodes, on to where the edge was.
   lanes.push(...glassRun(kit, L.channel, TEAL));
@@ -265,13 +296,19 @@ export function buildNew(L: Layout) {
     }
   }
 
-  // The flywheel where the crank was: it turns on its own.
+  // The flywheel where the windlass was, on the same axle line: it turns on its own.
   const flywheel = kit.piece(CRANK.clone(), "flywheel", 1.8);
-  kit.add("glass", new THREE.CylinderGeometry(0.85, 0.85, 0.08, 40, 1, true), flywheel, place(CRANK.x, CRANK.y, CRANK.z, Math.PI / 2, 0, 0), GLASS);
-  kit.add("core", torus(0.86, 0.035, 6, 48), flywheel, place(CRANK.x, CRANK.y, CRANK.z), GOLDL);
-  for (let k = 0; k < 6; k++) kit.add("core", unitBox, flywheel, place(CRANK.x, CRANK.y, CRANK.z, 0, 0, (k / 6) * Math.PI, 1.6, 0.025, 0.025), GOLDL);
-  kit.add("chrome", unitCyl(16), flywheel, place(CRANK.x, CRANK.y, CRANK.z, Math.PI / 2, 0, 0, 0.3, 0.3, 0.3), CHROME);
-  parts.push({ id: "flywheel", box: new THREE.Box3(V(CRANK.x - 1.4, CRANK.y - 1.4, CRANK.z - 1), V(CRANK.x + 1.4, CRANK.y + 1.4, CRANK.z + 1)) });
+  {
+    // Built in a wheel frame (axis +z), turned so the axle lies along the windlass's.
+    const qa = new THREE.Quaternion().setFromUnitVectors(V(0, 0, 1), CX);
+    const wm = (m: THREE.Matrix4) => new THREE.Matrix4().compose(CRANK, qa, V(1, 1, 1)).multiply(m);
+    kit.add("glass", new THREE.CylinderGeometry(0.85, 0.85, 0.08, 48, 1, true), flywheel, wm(place(0, 0, 0, Math.PI / 2, 0, 0)), GLASS);
+    kit.add("core", torus(0.86, 0.035, 6, 64), flywheel, wm(place(0, 0, 0)), GOLDL);
+    for (let k = 0; k < 6; k++) kit.add("core", unitBox, flywheel, wm(place(0, 0, 0, 0, 0, (k / 6) * Math.PI, 1.6, 0.025, 0.025)), GOLDL);
+    kit.add("chrome", unitCyl(16), flywheel, wm(place(0, 0, 0, Math.PI / 2, 0, 0, 0.3, 0.3, 0.3)), CHROME);
+  }
+  const fb = new THREE.Box3().setFromCenterAndSize(CRANK, V(2.2, 2.2, 2.2));
+  parts.push({ id: "flywheel", box: fb });
 
   // The assembly is a construction sequence: structure, engine, connected
   // paths, then the open door and return loop. A travelling lock wave follows
@@ -282,12 +319,26 @@ export function buildNew(L: Layout) {
     const dir = p.pivot.clone().sub(C).normalize();
     // Out along the line from the middle, swung round, and spun.
     const out = dir.multiplyScalar(26 + rnd() * 40).add(V((rnd() - 0.5) * 20, (rnd() - 0.5) * 20, (rnd() - 0.5) * 20));
+    // Every start is inside the hall: within the piers (x ±34), above the
+    // floor outside the well, under the vaults.
+    {
+      const start = p.pivot.clone().add(out);
+      const rad = Math.hypot(start.x, start.z);
+      const maxR = 27;
+      if (rad > maxR) {
+        start.x *= maxR / rad;
+        start.z *= maxR / rad;
+      }
+      if (Math.hypot(start.x, start.z) > 19.5 && start.y < 14) start.y = 14 + rnd() * 8;
+      start.y = Math.min(start.y, 68);
+      out.subVectors(start, p.pivot);
+    }
     const bend = new THREE.Vector3().crossVectors(out, V(0, 1, 0)).normalize().multiplyScalar(7 + Math.min(18, d * 0.3));
     const q = new THREE.Quaternion().setFromEuler(new THREE.Euler((rnd() - 0.5) * 4, (rnd() - 0.5) * 4, (rnd() - 0.5) * 4));
     if (p.tag === "ncol") {
-      // A tall foundation column is lowered vertically into the well. A
-      // random tumble made its 62 m length slice through the nave's floor.
-      out.set(0, 76, 0);
+      // A tall foundation column rises out of the well where the old machine
+      // fell (it never comes through the roof, or slices the nave's floor).
+      out.set(0, -44, 0);
       bend.set(0, 0, 0);
       q.identity();
     } else if (["nbeam", "fin", "stand"].includes(p.tag)) {
@@ -298,9 +349,13 @@ export function buildNew(L: Layout) {
     }
     const structural = ["ncol", "nbeam", "rib", "fin", "stand", "housing"].includes(p.tag);
     const opening = ["door", "portal", "portalvane", "ring", "loop"].includes(p.tag);
-    const base = structural ? 15.94 : p.tag === "rotor" ? 16.06 : opening ? 16.31 : 16.14;
+    // The structure builds inside the white cut; the rest on top of it.
+    const base = structural ? 16.07 : p.tag === "rotor" ? 16.1 : opening ? 16.31 : 16.16;
     const at = base + Math.min(1, d / 60) * 0.25 + rnd() * 0.065;
-    return { t: out, bend, q, at };
+    // Load-bearing members come in like a crane's load: longer, settling hard.
+    const heavy = ["ncol", "nbeam", "fin", "stand"].includes(p.tag);
+    const inDir = out.clone().negate().normalize();
+    return { t: out, bend, q, at, fly: heavy ? 0.36 : 0.3, dir: inDir, heavy };
   });
 
   return { kit, rig: { rotor, counterRotor, vanes, rings, lanes, nodes, portal, wheel, moon, sun, flywheel, door, ribs, from, parts } as NewRig };

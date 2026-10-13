@@ -4,6 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { World } from "./world";
+import { makeGpuTimer } from "@/components/stage/gpuTimer";
 import { Clock } from "./clock";
 import { Dom } from "./dom";
 import { Score } from "./audio";
@@ -16,6 +17,8 @@ const q = typeof window === "undefined" ? new URLSearchParams() : new URLSearchP
 const DEV_AT = q.get("at");
 const FREEZE = q.get("freeze") === "1";
 const HUD = q.get("hud") !== "0";
+const PERF = q.get("perf") === "1";
+const CAM = q.get("cam")?.split(",").map(Number) ?? null;
 
 function detect(): { phone: boolean; quality: Quality } {
   if (typeof window === "undefined") return { phone: false, quality: 1 };
@@ -54,6 +57,11 @@ function Director() {
       const world = new World(gl, { ...DETECT, reduced: film.reduced });
       film.progress = 0.42;
       world.setSize(size.width, size.height, dpr);
+      if (PERF) {
+        const w = window as unknown as { __perf?: { gpu?: Record<string, { sum: number; n: number }> } };
+        world.post.timer = makeGpuTimer(gl.getContext() as WebGL2RenderingContext, (w.__perf ??= {}));
+      }
+      if (CAM && CAM.length >= 7) world.camOverride = { eye: new THREE.Vector3(CAM[0], CAM[1], CAM[2]), at: new THREE.Vector3(CAM[3], CAM[4], CAM[5]), fov: CAM[6] };
       world.prewarm(80);
       world.sim.lost = { website: 0, inbox: 0, admin: 0, followup: 0 };
       world.sim.kept = 0;

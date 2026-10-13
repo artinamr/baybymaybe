@@ -89,6 +89,7 @@ export class Dom {
   update(P: number, w: World, pointer: { cx: number; cy: number; has: boolean; moved: number }): boolean {
     // The words.
     let left = false;
+    let centre = false;
     let landed = false;
     for (const c of this.cards) {
       const card = CARDS[c.i];
@@ -104,8 +105,10 @@ export class Dom {
         c.el.toggleAttribute("data-fact", fact);
       }
       if (on && card.id !== "open" && card.id !== "turn") left = true;
+      if (on && (card.id === "open" || card.id === "turn")) centre = true;
     }
     this.set("shade", left, () => this.shade?.style.setProperty("--shade", left ? "1" : "0"));
+    this.set("shadeC", centre, () => this.shade?.style.setProperty("--shade-c", centre ? "1" : "0"));
 
     // The counter: the film's own customers.
     const sim = w.sim;
@@ -117,7 +120,10 @@ export class Dom {
     this.set("cmode", mode, () => this.count?.setAttribute("data-mode", mode));
     this.set("cshow", show, () => this.count?.toggleAttribute("data-show", show));
     this.set("cfull", full && mode === "lost", () => this.count?.toggleAttribute("data-full", full && mode === "lost"));
-    const n = mode === "lost" ? lost : sim.kept;
+    // Our own customer, carried round and back through the door, counts too.
+    const heroKept = P >= 23.7 ? 1 : 0;
+    const kept = sim.kept + heroKept;
+    const n = mode === "lost" ? lost : kept;
     this.set("cn", n, () => {
       if (this.countN) this.countN.textContent = String(n);
     });
@@ -137,11 +143,11 @@ export class Dom {
       if (this.yours) this.yours.textContent = yours;
     });
     film.lost = { ...sim.lost, followup: sim.lost.followup + heroLost };
-    film.kept = sim.kept;
+    film.kept = kept;
     if (P > 25.7) {
       const sum =
         lost > 0
-          ? `In the film, while you watched: ${lost} lost to the old machine${sim.kept > 0 ? `, ${sim.kept} back again in the new one` : ""}.`
+          ? `In the film, while you watched: ${lost} lost to the old machine${kept > 0 ? `, ${kept} back again in the new one` : ""}.`
           : "";
       this.set("sum", sum, () => {
         if (this.endSum) this.endSum.textContent = sum;

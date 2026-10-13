@@ -4,6 +4,24 @@ import { marbleMaterial, streakMaterial } from "./materials";
 import { M, type Sim } from "./sim";
 import type { HeroState } from "./hero";
 
+const smooth01 = (x: number) => {
+  const t = Math.min(1, Math.max(0, x));
+  return t * t * (3 - 2 * t);
+};
+
+/**
+ * Our customer's signature: a slow heartbeat in its light (lub-dub, 56 a
+ * minute, the score's heartbeat), 0 at rest and up to about 1 on the beat.
+ * Brightness alone saturates after the tone curve; a light that breathes
+ * can be told from the crowd anywhere.
+ */
+export function heroBeat(time: number) {
+  const ph = (time * 0.94) % 1;
+  const lub = (ph - 0.08) / 0.07;
+  const dub = (ph - 0.3) / 0.08;
+  return Math.exp(-lub * lub) + 0.55 * Math.exp(-dub * dub);
+}
+
 /**
  * Drawing the customers: one instanced draw for every marble (ours a little
  * larger and brighter), one for the streaks of the ones falling, one for the
@@ -121,7 +139,11 @@ export class Marbles {
     this.m.setPosition(x, y - R * size * compression, z);
   }
 
-  update(sim: Sim, hero: HeroState, heroK: number) {
+  /**
+   * wave: per customer, how far the rebuilt machine's power-on has reached it
+   * (0 dark, 1 lit; null when it is all on); beat: our customer's heartbeat.
+   */
+  update(sim: Sim, hero: HeroState, heroK: number, crowdK = 1, wave: Float32Array | null = null, beat = 0) {
     const m = this.m;
     const col = this.color.array as Float32Array;
     let k = 0;
@@ -136,14 +158,23 @@ export class Marbles {
         continue;
       }
       const o = i * 3;
-      const s = sim.user[i] ? 1.12 : 1;
+      // A new arrival grows out of the door's light over its first metre.
+      const grow = (mode === M.LANE || mode === M.N_LANE) && sim.s[i] < 0.9 && !sim.laps[i] ? smooth01(sim.s[i] / 0.9) : 1;
+      // Powering on: it condenses out of the passing light, a little brighter as it does.
+      const w = wave ? wave[i] : 1;
+      const lit = w >= 1 ? 1 : smooth01(w) * (1 + 3.2 * w * (1 - w));
+      const s = (sim.user[i] ? 1.12 : 1) * grow * crowdK * smooth01(w);
+      if (s < 0.01) {
+        this.active[i] = 0;
+        continue;
+      }
       const dishContact = mode === M.DROP && sim.t[i] > 0.85 * 0.35 ? 0.018 * Math.exp(-((sim.t[i] / 0.85 - 0.35) / 0.65) * 14) : 0;
       const trayContact = mode === M.TRAY ? 0.016 * Math.exp(-sim.t[i] * 18) : 0;
       this.place(i, sim.pos[o], sim.pos[o + 1], sim.pos[o + 2], s, Math.max(dishContact, trayContact), mode === M.FALL, mode === M.CARRIED);
       this.mesh.setMatrixAt(k, m);
-      col[k * 3] = sim.col[o];
-      col[k * 3 + 1] = sim.col[o + 1];
-      col[k * 3 + 2] = sim.col[o + 2];
+      col[k * 3] = sim.col[o] * lit;
+      col[k * 3 + 1] = sim.col[o + 1] * lit;
+      col[k * 3 + 2] = sim.col[o + 2] * lit;
       k++;
       if (mode === M.FALL) {
         sp[f * 3] = sim.pos[o];
@@ -162,9 +193,10 @@ export class Marbles {
       const s = 1.18;
       this.place(sim.n, hero.pos.x, hero.pos.y, hero.pos.z, s, hero.squash, hero.falling, hero.claw.some((claw) => claw.open < 0.1));
       this.mesh.setMatrixAt(k, m);
-      col[k * 3] = hero.col.r * 1.2 * heroK;
-      col[k * 3 + 1] = hero.col.g * 1.2 * heroK;
-      col[k * 3 + 2] = hero.col.b * 1.2 * heroK;
+      const glow = 0.95 * heroK * (1 + 0.35 * beat);
+      col[k * 3] = hero.col.r * glow;
+      col[k * 3 + 1] = hero.col.g * glow;
+      col[k * 3 + 2] = hero.col.b * glow;
       k++;
       if (hero.falling) {
         sp.set([hero.pos.x, hero.pos.y, hero.pos.z], f * 3);

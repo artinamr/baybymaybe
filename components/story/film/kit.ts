@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { chamfered } from "./geo";
 
 /**
  * THE KIT: a machine is many parts but few draws. Every part is a PIECE with
@@ -75,7 +76,8 @@ export class Kit {
 
   /**
    * Add a geometry (in its own space) placed by `m` into `bucket`, as part of
-   * piece `p`. `color` is linear RGB (may exceed 1 for light). `along` (per
+   * piece `p`. `color` is linear RGB (may exceed 1 for light), or a function of
+   * the vertex in the geometry's own space. `along` (per
    * vertex, optional) is distance along a path, for light that travels.
    */
   add(
@@ -83,19 +85,23 @@ export class Kit {
     geo: THREE.BufferGeometry,
     p: Piece,
     m: THREE.Matrix4 | null,
-    color: THREE.Color | [number, number, number],
+    color: THREE.Color | [number, number, number] | ((local: THREE.Vector3) => [number, number, number]),
     rust = 0,
     along?: (i: number, pos: THREE.Vector3) => number
   ) {
     const b = this.bucket(bucket);
-    const g = geo;
+    // A scaled unit box becomes a chamfered box of that size (geo.ts).
+    const [g, mm] = chamfered(geo, m);
+    m = mm;
     const P = g.getAttribute("position") as THREE.BufferAttribute;
     const N = g.getAttribute("normal") as THREE.BufferAttribute | undefined;
     const base = b.pos.length / 3;
     if (m) _m3.getNormalMatrix(m);
-    const c = Array.isArray(color) ? color : [color.r, color.g, color.b];
+    const each = typeof color === "function" ? color : null;
+    let c = each ? [0, 0, 0] : Array.isArray(color) ? color : [(color as THREE.Color).r, (color as THREE.Color).g, (color as THREE.Color).b];
     for (let i = 0; i < P.count; i++) {
       _v.fromBufferAttribute(P, i);
+      if (each) c = each(_v);
       if (m) _v.applyMatrix4(m);
       b.pos.push(_v.x, _v.y, _v.z);
       if (N) {

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { PIECE_GLSL } from "./kit";
+import { FLOOR_Y as FLOOR_LEVEL } from "./layout";
 
 /**
  * THE FILM'S MATERIALS. Few, cheap, and each with a job:
@@ -44,15 +45,64 @@ float vnoise(vec3 p) {
 float fbm3(vec3 p) { return 0.55 * vnoise(p) + 0.3 * vnoise(p * 2.13 + 3.1) + 0.15 * vnoise(p * 4.37 + 7.7); }
 `;
 
+/**
+ * THE DEPTH PRE-PASS. The machine is a lattice of beams in front of a hall of
+ * piers: most of the frame was shaded two to four times over. Opaque meshes
+ * first lay down depth alone (this material, colour off); the full materials
+ * then shade only what is seen. Both programs compute gl_Position with the
+ * same expressions and declare it invariant, so the depths match exactly
+ * (the home film's glass does the same).
+ */
+const INVARIANT = "invariant gl_Position;\n";
+export function depthMaterial(tex: THREE.Texture | null, side: THREE.Side = THREE.FrontSide) {
+  return new THREE.ShaderMaterial({
+    uniforms: tex ? { uPieces: { value: tex } } : {},
+    vertexShader: tex
+      ? `${INVARIANT}${PIECE_GLSL}
+void main() {
+  loadPiece();
+  vec3 transformed = piecePoint(vec3(position));
+  vec4 mvPosition = vec4(transformed, 1.0);
+  mvPosition = modelViewMatrix * mvPosition;
+  gl_Position = projectionMatrix * mvPosition;
+}`
+      : `${INVARIANT}
+void main() {
+  vec3 transformed = vec3(position);
+  vec4 mvPosition = vec4(transformed, 1.0);
+  mvPosition = modelViewMatrix * mvPosition;
+  gl_Position = projectionMatrix * mvPosition;
+}`,
+    fragmentShader: "void main() { gl_FragColor = vec4(0.0); }",
+    colorWrite: false,
+    side,
+  });
+}
+
+/**
+ * A point light beyond its range, or switched off, adds exactly nothing, but
+ * three still evaluates its whole BRDF on every pixel. Most of the hall and
+ * the machine are out of reach of all seven point lights, so skip them there.
+ * (Same pixels: the skipped term is zero.)
+ */
+function cullLights(frag: string) {
+  const chunk = THREE.ShaderChunk.lights_fragment_begin;
+  const point = chunk.indexOf("getPointLightInfo( pointLight, geometryPosition, directLight );");
+  const call = chunk.indexOf("RE_Direct( directLight,", point);
+  if (point < 0 || call < 0) return frag;
+  return frag.replace("#include <lights_fragment_begin>", chunk.slice(0, call) + "if ( directLight.visible ) " + chunk.slice(call));
+}
+
 /** Inject the kit's piece transforms into a built-in material. */
 function withPieces(m: THREE.Material, tex: THREE.Texture, extra?: (s: THREE.WebGLProgramParametersWithUniforms) => void, key = "") {
   m.onBeforeCompile = (s) => {
     s.uniforms.uPieces = { value: tex };
-    s.vertexShader = s.vertexShader
-      .replace("#include <common>", `#include <common>\n${PIECE_GLSL}\nattribute float aRust;\nvarying vec3 vRest;\nvarying float vRustK;\nvarying float vGlow;`)
+    s.vertexShader = INVARIANT + s.vertexShader
+      .replace("#include <common>", `#include <common>\n${PIECE_GLSL}\nattribute float aRust;\nvarying vec3 vRest;\nvarying vec3 vRestN;\nvarying float vRustK;\nvarying float vGlow;`)
       .replace("#include <beginnormal_vertex>", `loadPiece();\nvec3 objectNormal = pieceNormal(vec3(normal));`)
-      .replace("#include <begin_vertex>", `vec3 transformed = piecePoint(vec3(position));\nvRest = position;\nvRustK = aRust;\nvGlow = pcGlow;`);
+      .replace("#include <begin_vertex>", `vec3 transformed = piecePoint(vec3(position));\nvRest = position;\nvRestN = normal;\nvRustK = aRust;\nvGlow = pcGlow;`);
     extra?.(s);
+    s.fragmentShader = cullLights(s.fragmentShader);
   };
   m.customProgramCacheKey = () => `kit-${key}`;
 }
@@ -65,20 +115,29 @@ export function ironMaterial(tex: THREE.Texture) {
     tex,
     (s) => {
       s.fragmentShader = s.fragmentShader
-        .replace("#include <common>", `#include <common>\n${NOISE}\nvarying vec3 vRest;\nvarying float vRustK;\nvarying float vGlow;`)
+        .replace("#include <common>", `#include <common>\n${NOISE}\nvarying vec3 vRest;\nvarying vec3 vRestN;\nvarying float vRustK;\nvarying float vGlow;`)
         .replace(
           "#include <color_fragment>",
           `#include <color_fragment>
-  float rn = fbm3(vRest * 1.35);
-  float rFine = vnoise(vRest * 9.0);
-  float rustMask = smoothstep(0.66 - vRustK * 0.36, 0.9 - vRustK * 0.28, rn + rFine * 0.1);
-  vec3 rustCol = mix(vec3(0.08, 0.035, 0.018), vec3(0.32, 0.13, 0.045), rFine * rFine);
+  // Rust where water runs and sits: long vertical runs (a rotated, stretched
+  // noise), more on undersides and less on tops, a darker stain at its edge.
+  // (Round blotches read as mould.)
+  const mat3 ROT = mat3(0.788, -0.408, 0.462, 0.577, 0.707, -0.408, -0.211, 0.577, 0.789);
+  vec3 rq = ROT * vRest;
+  float rn = fbm3(rq * vec3(1.9, 0.55, 1.9));
+  float rFine = vnoise(rq * 11.0);
+  float rOn = step(0.001, vRustK);
+  float rTh = 0.95 - vRustK * 0.45 - 0.08 * smoothstep(0.3, 0.9, -vRestN.y);
+  float rustMask = smoothstep(rTh, rTh + 0.05, rn + (rFine - 0.5) * 0.08) * rOn;
+  rustMask *= 1.0 - 0.7 * smoothstep(0.55, 0.85, vRestN.y);
+  float stain = smoothstep(rTh - 0.12, rTh, rn) * (1.0 - rustMask) * rOn;
+  vec3 rustCol = mix(vec3(0.05, 0.024, 0.014), vec3(0.17, 0.065, 0.026), rFine);
+  diffuseColor.rgb = mix(diffuseColor.rgb * (1.0 - 0.3 * stain), rustCol, rustMask);
   float abrasion = pow(vnoise(vRest * vec3(3.0, 28.0, 3.0)), 12.0);
-  diffuseColor.rgb = mix(diffuseColor.rgb, rustCol, rustMask * step(0.001, vRustK));
   diffuseColor.rgb += vec3(0.13, 0.15, 0.17) * abrasion * (1.0 - rustMask);`
         )
-        .replace("#include <roughnessmap_fragment>", `float roughnessFactor = mix(roughness + (rFine - 0.5) * 0.12, 0.95, rustMask * step(0.001, vRustK));`)
-        .replace("#include <metalnessmap_fragment>", `float metalnessFactor = mix(metalness, 0.2, rustMask * step(0.001, vRustK));`)
+        .replace("#include <roughnessmap_fragment>", `float roughnessFactor = mix(roughness + stain * 0.15 + (rFine - 0.5) * 0.06, 0.9, rustMask);`)
+        .replace("#include <metalnessmap_fragment>", `float metalnessFactor = mix(metalness, 0.15, rustMask);`)
         .replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>\n  totalEmissiveRadiance += vec3(1.0, 0.82, 0.6) * vGlow;`);
     },
     "iron"
@@ -86,14 +145,28 @@ export function ironMaterial(tex: THREE.Texture) {
   return m;
 }
 
-/** Cloth (the person at the crank): matte, not metal. */
+/** What a cloth-bucket surface is, carried in the kit's rust attribute. */
+export const KIND = { cloth: 0, wood: 0.3, skin: 0.6 } as const;
+
+/** Cloth, wood and skin (the owner's corner): matte, not metal. */
 export function clothMaterial(tex: THREE.Texture) {
   const m = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0, roughness: 0.92, envMapIntensity: 0.5 });
   withPieces(
     m,
     tex,
     (s) => {
-      s.fragmentShader = s.fragmentShader.replace("#include <common>", `#include <common>\nvarying vec3 vRest;\nvarying float vRustK;\nvarying float vGlow;`);
+      s.fragmentShader = s.fragmentShader
+        .replace("#include <common>", `#include <common>\nvarying vec3 vRest;\nvarying vec3 vRestN;\nvarying float vRustK;\nvarying float vGlow;`)
+        .replace(
+          "#include <color_fragment>",
+          `#include <color_fragment>
+  float isWood = step(0.15, vRustK) * step(vRustK, 0.45);
+  float isSkin = step(0.45, vRustK) * step(vRustK, 0.75);
+  // Wood: a long grain with a little figure in it, along the piece's own length.
+  float grain = sin(vRest.x * 150.0 + sin(vRest.z * 9.0) * 2.4 + sin(vRest.x * 4.3 + vRest.z * 2.1) * 2.2) * 0.5 + 0.5;
+  diffuseColor.rgb *= mix(1.0, (0.88 + 0.12 * grain) * 0.88, isWood);`
+        )
+        .replace("#include <roughnessmap_fragment>", `float roughnessFactor = mix(mix(roughness, 0.55, isSkin), 0.46 + 0.1 * grain, isWood);`);
     },
     "cloth"
   );
@@ -120,19 +193,46 @@ export function chromeMaterial(tex: THREE.Texture) {
 export function stoneMaterial() {
   const m = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.0, roughness: 0.82, envMapIntensity: 0.6 });
   m.onBeforeCompile = (s) => {
-    s.vertexShader = s.vertexShader
-      .replace("#include <common>", "#include <common>\nvarying vec3 vW;")
-      .replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
+    s.vertexShader = INVARIANT + s.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vW;\nvarying vec3 vNw;")
+      .replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz;\nvNw = normalize(mat3(modelMatrix) * objectNormal);");
     s.fragmentShader = s.fragmentShader
-      .replace("#include <common>", `#include <common>\n${NOISE}\nvarying vec3 vW;`)
-      .replace("#include <color_fragment>", `#include <color_fragment>\n  diffuseColor.rgb *= 0.74 + 0.48 * vnoise(vW * 0.35);`);
+      .replace("#include <common>", `#include <common>\n${NOISE}\nvarying vec3 vW;\nvarying vec3 vNw;\nfloat h21(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }`)
+      .replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>
+  // The nave's floor: large slabs in courses, each a little different, worn and
+  // polished enough to hold the lamps. Joints and slab-to-slab variation fade
+  // with distance (no tiled grid far off); other stone keeps its mottling.
+  float isFloor = step(0.9, vNw.y) * (1.0 - step(0.06, abs(vW.y - ${FLOOR_LEVEL.toFixed(1)})));
+  vec2 fp = vW.xz / vec2(2.6, 1.7);
+  fp.x += 0.5 * step(1.0, mod(floor(fp.y), 2.0));
+  vec2 cell = floor(fp);
+  vec2 fr = fract(fp);
+  vec2 dEdge = min(fr, 1.0 - fr) * vec2(2.6, 1.7);
+  float dj = min(dEdge.x, dEdge.y);
+  float jw = 0.014 + fwidth(dj) * 0.9;
+  float far = smoothstep(22.0, 60.0, length(vViewPosition));
+  float joint = (1.0 - smoothstep(jw * 0.5, jw, dj)) * (1.0 - far);
+  float hs = h21(cell);
+  float hs2 = h21(cell + 17.3);
+  float wear = vnoise(vW * vec3(0.7, 0.0, 0.7));
+  float slab = mix(0.86 + 0.24 * hs, 1.0, far);
+  vec3 fcol = diffuseColor.rgb * slab * mix(vec3(1.0), mix(vec3(1.02, 1.0, 0.97), vec3(0.97, 1.0, 1.03), hs2), 1.0 - far) * (0.92 + 0.16 * wear);
+  fcol *= 1.0 - 0.5 * joint;
+  float stoneVar = 0.74 + 0.48 * vnoise(vW * 0.35);
+  diffuseColor.rgb = mix(diffuseColor.rgb * stoneVar, fcol, isFloor);
+  float floorRough = mix(mix(0.36 + 0.26 * hs2 + 0.12 * wear, 0.6, far), 0.92, joint);`
+      )
+      .replace("#include <roughnessmap_fragment>", "float roughnessFactor = mix(roughness, floorRough, isFloor);");
+    s.fragmentShader = cullLights(s.fragmentShader);
   };
   m.customProgramCacheKey = () => "stone";
   return m;
 }
 
 const PIECE_VERT_BASIC = /* glsl */ `
-${PIECE_GLSL}
+${INVARIANT}${PIECE_GLSL}
 attribute vec3 color;
 attribute float aAlong;
 varying vec3 vCol;
@@ -145,8 +245,12 @@ varying float vFog;
 varying vec3 vWorld;
 void main() {
   loadPiece();
-  vec3 p = piecePoint(position);
-  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  // (Written as the depth pre-pass writes it: the depths must match exactly.)
+  vec3 transformed = piecePoint(vec3(position));
+  vec3 p = transformed;
+  vec4 mvPosition = vec4(transformed, 1.0);
+  mvPosition = modelViewMatrix * mvPosition;
+  vec4 mv = mvPosition;
   vCol = color;
   vAlong = aAlong;
   vPow = pcPower;
@@ -155,7 +259,7 @@ void main() {
   vV = normalize(-mv.xyz);
   vFog = -mv.z;
   vWorld = (modelMatrix * vec4(p, 1.0)).xyz;
-  gl_Position = projectionMatrix * mv;
+  gl_Position = projectionMatrix * mvPosition;
 }`;
 
 const FOG_FRAG = /* glsl */ `
@@ -174,7 +278,10 @@ export function lightMaterial(tex: THREE.Texture) {
       varying vec3 vCol; varying float vPow; varying float vFog; varying vec3 vN; varying vec3 vV;
       void main() {
         float f = fogK(vFog);
-        float face = 0.75 + 0.25 * abs(dot(vN, vV));
+        // Glowing glass: brightest face-on, falling off toward its edge (a sphere
+        // reads as a sphere, a tube as a tube), never a flat card of colour.
+        float ndv = abs(dot(normalize(vN), normalize(vV)));
+        float face = 0.42 + 0.58 * pow(ndv, 0.7);
         gl_FragColor = vec4(mix(vCol * vPow * face, fogColor, f * 0.85), 1.0);
       }`,
     fog: true,
@@ -242,26 +349,38 @@ export function marbleMaterial() {
     uniforms: { fogColor: { value: new THREE.Color() }, fogDensity: { value: 0 } },
     vertexShader: /* glsl */ `
       attribute vec3 aColor;
-      varying vec3 vCol; varying vec3 vN; varying vec3 vV; varying float vFog;
+      varying vec3 vCol; varying vec3 vN; varying vec3 vV; varying float vFog; varying vec3 vLocal;
       void main() {
         vec4 mv = modelViewMatrix * instanceMatrix * vec4(position, 1.0);
         vCol = aColor;
         vN = normalize(normalMatrix * mat3(instanceMatrix) * normal);
         vV = normalize(-mv.xyz);
         vFog = -mv.z;
+        // The bead's own frame: the swirl inside turns with it as it rolls.
+        vLocal = normalize(normal);
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: /* glsl */ `
       ${FOG_FRAG}
-      varying vec3 vCol; varying vec3 vN; varying vec3 vV; varying float vFog;
+      varying vec3 vCol; varying vec3 vN; varying vec3 vV; varying float vFog; varying vec3 vLocal;
       void main() {
-        float ndv = clamp(dot(normalize(vN), normalize(vV)), 0.0, 1.0);
-        // A glass bead lit from inside: a hot heart, a coloured body, a bright rim.
-        vec3 heart = vCol * 1.4 + vec3(0.25) * dot(vCol, vec3(0.33));
-        vec3 c = mix(vCol * 0.55, heart, pow(ndv, 1.6));
-        c += vCol * pow(1.0 - ndv, 3.0) * 0.8;
-        float spec = pow(max(dot(normalize(vN), normalize(vec3(-0.4, 0.75, 0.55))), 0.0), 40.0);
-        c += vec3(1.0) * spec * 0.6 * min(1.0, dot(vCol, vec3(0.5)));
+        vec3 n = normalize(vN);
+        float ndv = clamp(dot(n, normalize(vV)), 0.0, 1.0);
+        // A glass bead with a light inside: a hot heart seen through the glass,
+        // the body darker toward the rim (it has depth, not a flat disc), a
+        // thin fresnel edge, one crisp highlight. Its brightness is held under
+        // a soft ceiling so a close bead stays a bead, not a white blot.
+        float peak = max(max(vCol.r, vCol.g), vCol.b);
+        vec3 tint = vCol / max(peak, 1e-3);
+        float lum = peak / (1.0 + 0.32 * peak);
+        float heart = pow(ndv, 4.5);
+        vec3 c = tint * lum * (0.07 + 1.25 * heart) + vec3(1.0, 0.92, 0.82) * lum * pow(ndv, 16.0) * 0.55;
+        // The swirl: a soft ribbon round the bead in its own frame.
+        float band = exp(-pow(dot(vLocal, normalize(vec3(0.35, 1.0, 0.2))) / 0.2, 2.0));
+        c += tint * lum * band * (0.3 + 0.7 * heart) * 0.4;
+        c += mix(vec3(1.0), tint, 0.5) * pow(1.0 - ndv, 5.0) * 0.4 * min(1.0, lum);
+        vec3 h = normalize(normalize(vec3(-0.4, 0.75, 0.55)) + normalize(vV));
+        c += vec3(1.0) * pow(max(dot(n, h), 0.0), 140.0) * 1.1 * min(1.0, lum + 0.3);
         float f = fogK(vFog);
         gl_FragColor = vec4(mix(c, fogColor, f * 0.6), 1.0);
       }`,

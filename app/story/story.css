@@ -427,6 +427,19 @@ html:not([data-st-paper]) .st-bar {
   opacity: var(--shade, 0);
   transition: opacity 600ms ease;
 }
+/* The centred titles (the opening, the turn): a wide, soft dimming behind them. */
+.st-cards::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(1200px, 110vw);
+  height: 70vh;
+  translate: -50% -50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(3, 3, 6, 0.56), rgba(3, 3, 6, 0.22) 55%, transparent 100%);
+  opacity: var(--shade-c, 0);
+  transition: opacity 700ms ease;
+}
 .st-card {
   position: absolute;
   left: var(--g);
@@ -577,6 +590,9 @@ html:not([data-st-paper]) .st-bar {
 .st-card[data-ch="turn"] .st-t {
   font-size: clamp(44px, 6.4vw, 118px);
   letter-spacing: -0.045em;
+}
+.st-card[data-ch="turn"]:not(.st-card-beat) {
+  top: 27%;
 }
 .st-card[data-ch="turn"].st-card-beat .st-t {
   max-width: none;
@@ -1171,7 +1187,8 @@ html[data-st-paper] .st-hud {
     bottom: 104px;
   }
   .st-card[data-ch="open"],
-  .st-card[data-ch="turn"] {
+  .st-card[data-ch="turn"],
+  .st-card[data-ch="turn"]:not(.st-card-beat) {
     width: auto;
     left: var(--g);
     right: var(--g);

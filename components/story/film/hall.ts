@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { between, gothicArch, place, unitBox } from "./geo";
-import { FLOOR_Y, PIT_R, PIT_Y } from "./layout";
+import { between, chamfered, gothicArch, place, unitBox } from "./geo";
+import { CORNER, FLOOR_Y, PIT_R, PIT_Y } from "./layout";
 import { dustMaterial, haloMaterial, pitMarkerMaterial, shaftMaterial, stoneMaterial, windowMaterial } from "./materials";
 
 /**
@@ -23,7 +23,10 @@ function tint(g: THREE.BufferGeometry, c: THREE.Color) {
   return g;
 }
 
-function bake(g: THREE.BufferGeometry, m: THREE.Matrix4, c: THREE.Color) {
+function bake(g0: THREE.BufferGeometry, m0: THREE.Matrix4, c: THREE.Color) {
+  // (A scaled unit box comes out chamfered, as in the machines: geo.ts.)
+  const [g, mm] = chamfered(g0, m0);
+  const m = mm ?? m0;
   const h = g.index ? g.toNonIndexed() : g.clone();
   h.deleteAttribute("uv");
   h.applyMatrix4(m);
@@ -43,15 +46,24 @@ export function buildHall(phone: boolean) {
   // The curb round the pit.
   stone.push(bake(new THREE.TorusGeometry(PIT_R + 0.2, 0.3, 6, 96), place(0, FLOOR_Y + 0.1, 0, Math.PI / 2, 0, 0), S));
   // A railing round the pit: posts and a rail, at human height (it gives the scale).
+  // It opens where the owner's chain crosses to the tower (layout.ts: the corner).
   const rail: THREE.BufferGeometry[] = [];
+  const gapA = Math.atan2(CORNER.z, CORNER.x);
+  const gap = 0.16;
+  const inGap = (a: number) => Math.abs(Math.atan2(Math.sin(a - gapA), Math.cos(a - gapA))) < gap;
   for (let k = 0; k < 72; k++) {
     const a = (k / 72) * Math.PI * 2;
-    if (Math.abs(a - 0.25) < 0.12) continue;
+    if (Math.abs(a - 0.25) < 0.12 || inGap(a)) continue;
     const x = Math.cos(a) * (PIT_R + 0.45);
     const z = Math.sin(a) * (PIT_R + 0.45);
     rail.push(bake(unitBox, place(x, FLOOR_Y + 0.55, z, 0, -a, 0, 0.05, 1.1, 0.05), COL(0.04, 0.04, 0.042)));
   }
-  rail.push(bake(new THREE.TorusGeometry(PIT_R + 0.45, 0.03, 4, 120), place(0, FLOOR_Y + 1.1, 0, Math.PI / 2, 0, 0), COL(0.06, 0.055, 0.05)));
+  rail.push(bake(new THREE.TorusGeometry(PIT_R + 0.45, 0.03, 4, 120, Math.PI * 2 - gap * 2), place(0, FLOOR_Y + 1.1, 0, Math.PI / 2, 0, gapA + gap), COL(0.06, 0.055, 0.05)));
+  // The gap's two end posts, a little heavier.
+  for (const s of [-1, 1]) {
+    const a = gapA + s * gap;
+    rail.push(bake(unitBox, place(Math.cos(a) * (PIT_R + 0.45), FLOOR_Y + 0.58, Math.sin(a) * (PIT_R + 0.45), 0, -a, 0, 0.08, 1.16, 0.08), COL(0.05, 0.05, 0.05)));
+  }
   stone.push(...rail);
   // The pit's wall, banded, down into the dark.
   const wall = new THREE.CylinderGeometry(PIT_R, PIT_R, FLOOR_Y - PIT_Y, 72, 8, true);
@@ -121,7 +133,8 @@ export function buildHall(phone: boolean) {
   for (const z of zs) {
     stone.push(bake(gothicArch(68, 26, 1.1, 1.3, 18), place(0, top, z), S));
     // Ribbed lower vaults frame the tower instead of vanishing above the camera.
-    if (z <= 19 && z >= -56) stone.push(bake(gothicArch(68, 20, 0.48, 0.8, 18), place(0, 50, z), S2));
+    // (Open at the base: a tie bar at this height crossed the door and the ramp.)
+    if (z <= 19 && z >= -56) stone.push(bake(gothicArch(68, 20, 0.48, 0.8, 18, false), place(0, 50, z), S2));
   }
   // The ridge.
   stone.push(bake(unitBox, place(0, top + 25.6, -26, 0, 0, 0, 1.2, 1.2, 190), S));
@@ -221,7 +234,7 @@ export function buildHall(phone: boolean) {
 
   // The pit's light, rising out of the floor: a red haze down the well, brightest at the bottom.
   const haze = new THREE.Mesh(
-    new THREE.CylinderGeometry(PIT_R - 0.6, PIT_R - 0.6, FLOOR_Y - PIT_Y + 8, 64, 1, true),
+    new THREE.CylinderGeometry(PIT_R - 0.6, PIT_R - 0.6, FLOOR_Y - PIT_Y + 0.4, 64, 1, true),
     new THREE.ShaderMaterial({
       uniforms: { uK: { value: 1 } },
       vertexShader: /* glsl */ `
@@ -237,7 +250,7 @@ export function buildHall(phone: boolean) {
         uniform float uK;
         varying float vY; varying vec3 vN; varying vec3 vV;
         void main() {
-          float h = clamp((vY - ${PIT_Y.toFixed(1)}) / ${(FLOOR_Y - PIT_Y + 8).toFixed(1)}, 0.0, 1.0);
+          float h = clamp((vY - ${PIT_Y.toFixed(1)}) / ${(FLOOR_Y - PIT_Y + 0.4).toFixed(1)}, 0.0, 1.0);
           float a = pow(1.0 - h, 2.2) * 0.22 + smoothstep(0.62, 0.8, h) * (1.0 - smoothstep(0.8, 1.0, h)) * 0.05;
           float edge = 0.35 + 0.65 * pow(max(1.0 - abs(dot(vN, vV)), 0.0), 1.5);
           gl_FragColor = vec4(vec3(1.0, 0.12, 0.04) * a * edge * uK, 1.0);
@@ -248,7 +261,8 @@ export function buildHall(phone: boolean) {
       side: THREE.DoubleSide,
     })
   );
-  haze.position.set(0, (FLOOR_Y + 8 + PIT_Y) / 2, 0);
+  // It stays inside the well: above the floor it read as a tinted glass wall.
+  haze.position.set(0, (FLOOR_Y + 0.4 + PIT_Y) / 2, 0);
   haze.renderOrder = 2;
   haze.frustumCulled = false;
   group.add(haze);

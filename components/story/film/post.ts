@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import type { GpuTimer } from "@/components/stage/gpuTimer";
 
 /**
  * THE FILM'S LOOK: the scene is drawn in linear HDR into a multisampled
@@ -30,6 +31,8 @@ export type Grade = {
   flash: number;
   flashColor: THREE.Vector3;
   black: number;
+  /** 0..1 the end: light filling the frame from its bright parts outward. */
+  fill: number;
   paper: number;
   /** The bloom's threshold in linear light. */
   threshold: number;
@@ -52,6 +55,7 @@ export function makeGrade(): Grade {
     flash: 0,
     flashColor: new THREE.Vector3(1, 1, 1),
     black: 0,
+    fill: 0,
     paper: 0,
     threshold: 0.9,
   };
@@ -158,6 +162,7 @@ uniform float uAberration;
 uniform float uFlash;
 uniform vec3 uFlashColor;
 uniform float uBlack;
+uniform float uFill;
 uniform float uPaper;
 uniform float uFXAA;
 in vec2 vUv;
@@ -250,12 +255,13 @@ void main() {
   col = mix(col, col * mix(vec3(1.0), hue, 0.28), colourLight);
 
   // The grade: lift / gamma / gain, saturation, split toning.
-  col = clamp(col * uGain + uLift * (1.0 - col), 0.0, 1.0);
+  // (The lift is a breath, not a wash: blacks stay black.)
+  col = clamp(col * uGain + uLift * 0.12 * (1.0 - col), 0.0, 1.0);
   col = pow(col, 1.0 / max(uGamma, vec3(0.01)));
   float l = luma(col);
   col = mix(vec3(l), col, uSat);
   float hi = smoothstep(0.25, 0.85, l);
-  col += uSplit * (uShadow * (1.0 - hi) * (1.0 - l) + uHigh * hi * l) * 0.35;
+  col += uSplit * (uShadow * (1.0 - hi) * smoothstep(0.0, 0.12, l) * (1.0 - l) + uHigh * hi * l) * 0.35;
 
   vec3 o = toSRGB(col);
   // A slow vignette, deeper in the corners.
@@ -263,7 +269,11 @@ void main() {
   o *= mix(1.0, v, uVignette);
   // The flash, then black, then paper.
   o = mix(o, uFlashColor, clamp(uFlash, 0.0, 1.0));
-  o *= 1.0 - uBlack;
+  // The end's light comes out of the brights first (the machine, the windows),
+  // then takes the rest: a bloom-out, not a veil.
+  o = mix(o, uFlashColor, clamp(uFill * (0.35 + 1.8 * luma(o)), 0.0, 1.0));
+  float keep = smoothstep(0.45, 0.9, luma(o));
+  o *= 1.0 - uBlack * (1.0 - 0.8 * keep);
   vec3 paper = vec3(0.9647, 0.9608, 0.9490);
   o = mix(o, paper, clamp(uPaper, 0.0, 1.0));
 
@@ -307,6 +317,8 @@ export class Post {
   private h = 1;
   private aaReady = false;
   private requestedSamples: number;
+  /** Look-dev (`?perf=1`): the GPU time of each pass. */
+  timer: GpuTimer | null = null;
 
   constructor(samples: number, levels: number) {
     this.levels = levels;
@@ -323,6 +335,10 @@ export class Post {
       magFilter: THREE.LinearFilter,
       generateMipmaps: false,
     });
+    // Only the colour is read after the scene. Resolving a multisampled depth
+    // buffer has no fast path on D3D (ANGLE draws it with a shader): it cost
+    // a fifth of the scene pass on an integrated GPU, for nothing.
+    this.scene.resolveDepthBuffer = false;
     for (let i = 0; i < levels; i++) {
       this.mips.push(
         new THREE.WebGLRenderTarget(1, 1, {
@@ -368,6 +384,7 @@ export class Post {
       uFlash: { value: 0 },
       uFlashColor: { value: new THREE.Vector3(1, 1, 1) },
       uBlack: { value: 0 },
+      uFill: { value: 0 },
       uPaper: { value: 0 },
       uFXAA: { value: 0 },
     });
@@ -404,25 +421,52 @@ export class Post {
   }
 
   /** Draw a frame: the scene into HDR, the bloom, the composite to the screen. */
-  render(r: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, g: Grade, time: number) {
+  render(r: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, g: Grade, time: number, pre?: THREE.Scene) {
     if (!this.aaReady) {
       const gl = r.getContext() as WebGL2RenderingContext;
-      const colour = Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER, gl.RGBA16F, gl.SAMPLES) as Int32Array);
       const depth = Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, gl.SAMPLES) as Int32Array);
-      const allowed = colour.filter((n) => n <= this.requestedSamples && n <= r.capabilities.maxSamples && depth.includes(n));
-      const samples = allowed.length ? Math.max(...allowed) : 0;
-      if (this.scene.samples !== samples) {
-        this.scene.dispose();
-        this.scene.samples = samples;
+      const pick = (format: number) => {
+        const colour = Array.from((gl.getInternalformatParameter(gl.RENDERBUFFER, format, gl.SAMPLES) as Int32Array | null) ?? []);
+        const allowed = colour.filter((n) => n <= this.requestedSamples && n <= r.capabilities.maxSamples && depth.includes(n));
+        return allowed.length ? Math.max(...allowed) : 0;
+      };
+      // The scene's HDR in 32 bits (R11G11B10F) where it can be drawn to and
+      // multisampled as well as RGBA16F: half the bandwidth of a 4x target,
+      // which an integrated GPU spends most of its frame on. The picture is
+      // the same (measured: mean 0.2/255); the alpha was never read.
+      const wide = pick(gl.RGBA16F);
+      const compact = r.extensions.has("EXT_color_buffer_float") ? pick(gl.R11F_G11F_B10F) : 0;
+      const samples = compact >= wide && compact > 0 ? compact : wide;
+      this.scene.dispose();
+      if (compact >= wide && compact > 0) {
+        this.scene.texture.format = THREE.RGBFormat;
+        this.scene.texture.type = THREE.UnsignedInt101111Type;
       }
+      this.scene.samples = samples;
       this.comp.uniforms.uFXAA.value = samples > 0 ? 0 : 1;
       this.aaReady = true;
     }
     const auto = r.autoClear;
     r.autoClear = true;
+    const T = this.timer;
+    T?.poll();
+    T?.begin("scene");
     r.setRenderTarget(this.scene);
-    r.render(scene, camera);
+    if (pre) {
+      // Depth first (it clears to the scene's background), then the scene
+      // shades only the nearest surface. A Color background would clear the
+      // depth again, so the scene draws without it.
+      pre.background = scene.background;
+      r.render(pre, camera);
+      r.autoClear = false;
+      const bg = scene.background;
+      scene.background = null;
+      r.render(scene, camera);
+      scene.background = bg;
+    } else r.render(scene, camera);
+    T?.end();
     r.autoClear = false;
+    T?.begin("bloom");
 
     // Bloom: down the chain…
     const d = this.down.uniforms;
@@ -449,6 +493,7 @@ export class Post {
       this.blit(r, this.up, this.mips[i - 1]);
     }
 
+    T?.end();
     const c = this.comp.uniforms;
     c.tBloom.value = this.mips[0].texture;
     c.uTime.value = time;
@@ -467,8 +512,11 @@ export class Post {
     c.uFlash.value = g.flash;
     (c.uFlashColor.value as THREE.Vector3).copy(g.flashColor);
     c.uBlack.value = g.black;
+    c.uFill.value = g.fill;
     c.uPaper.value = g.paper;
+    T?.begin("composite");
     this.blit(r, this.comp, null);
+    T?.end();
     r.autoClear = auto;
   }
 

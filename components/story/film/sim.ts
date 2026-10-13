@@ -52,7 +52,7 @@ export type SimEvent =
   | { type: "catch"; pos: THREE.Vector3 }
   | { type: "lake"; pos: THREE.Vector3 };
 
-const WARM = new THREE.Color(1.45, 0.74, 0.3);
+const WARM = new THREE.Color(1.02, 0.52, 0.21);
 const GOLD = new THREE.Color(1.9, 1.25, 0.42);
 const RED = new THREE.Color(1.5, 0.2, 0.08);
 const USER = new THREE.Color(2.6, 2.2, 1.8);
@@ -115,8 +115,12 @@ export class Sim {
 
   /** Which machine is running: "old", "none" (the turn), "new". */
   machine: "old" | "none" | "new" = "old";
+  /** Released at the turn: falls without a sound or a count. */
+  private quiet: Uint8Array;
   /** Gate heights (0 shut .. 1 open) per lane, for the rig. */
   gateH: Float32Array;
+  /** Each gate's speed (it is lifted on a spring and drops under its weight). */
+  private gateV: Float32Array;
   /** Crowd claws (back gantry): x, drop below the rail, fingers open 0..1. */
   claw: { x: number; drop: number; open: number }[] = [
     { x: TRAYS[0].x, drop: 1, open: 1 },
@@ -158,6 +162,7 @@ export class Sim {
     this.glow = new Float32Array(n);
     this.gold = new Float32Array(n);
     this.user = new Uint8Array(n);
+    this.quiet = new Uint8Array(n);
     this.laps = new Uint16Array(n);
     this.col = new Float32Array(n * 3);
     this.laneQ = L.lanes.map(() => []);
@@ -172,6 +177,7 @@ export class Sim {
     this.spawnT = new Float32Array(L.lanes.length);
     this.gateT = new Float32Array(L.lanes.length);
     this.gateH = new Float32Array(L.lanes.length);
+    this.gateV = new Float32Array(L.lanes.length);
     this.clawT = new Float32Array(2);
     this.clawHold = new Int32Array(2).fill(-1);
     this.clawSlip = new Float32Array(2).fill(-1);
@@ -212,6 +218,7 @@ export class Sim {
   private enter(i: number, mode: M) {
     this.mode[i] = mode;
     this.t[i] = 0;
+    if (mode !== M.FALL) this.quiet[i] = 0;
   }
 
   /** Start a fall from where it is, with velocity (vx, vy, vz). */
@@ -326,6 +333,70 @@ export class Sim {
     return true;
   }
 
+  /**
+   * The turn: the old machine comes apart under the crowd, top first. Everyone
+   * still on it above height `y` falls with the iron (not counted, and
+   * silent: the counters and the score are what the machine did, not its end).
+   */
+  releaseAbove(y: number) {
+    for (let i = 0; i < this.n; i++) {
+      const m = this.mode[i];
+      if (m === M.FREE || m === M.FALL || this.pos[i * 3 + 1] < y) continue;
+      this.enter(i, M.FALL);
+      this.quiet[i] = 1;
+      this.vel[i * 3] = (this.rnd() - 0.5) * 1.6;
+      this.vel[i * 3 + 1] = this.rnd() * 0.6;
+      this.vel[i * 3 + 2] = (this.rnd() - 0.5) * 1.6;
+    }
+  }
+
+  /**
+   * The crowd's whole state (not the counts, the lake or the machine), so
+   * scrolling back up through the turn restores the old machine's crowd at
+   * once instead of re-running a minute of it in one frame.
+   */
+  snapshot(): Record<string, unknown> {
+    const skip = new Set(["L", "tune", "rnd", "lost", "kept", "yoursIn", "yoursLost", "yoursKept", "lake", "lakeN", "lakeHead", "lakeMax", "events", "machine", "n"]);
+    const copy = (e: unknown): unknown => (ArrayBuffer.isView(e) ? (e as Float32Array).slice() : Array.isArray(e) ? e.map(copy) : e && typeof e === "object" ? { ...(e as object) } : e);
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(this)) {
+      if (skip.has(k) || typeof v === "function") continue;
+      if (ArrayBuffer.isView(v) || Array.isArray(v) || typeof v === "number") out[k] = copy(v);
+    }
+    return out;
+  }
+  restore(snap: Record<string, unknown>) {
+    const self = this as unknown as Record<string, unknown>;
+    const copy = (e: unknown): unknown => (ArrayBuffer.isView(e) ? (e as Float32Array).slice() : Array.isArray(e) ? e.map(copy) : e && typeof e === "object" ? { ...(e as object) } : e);
+    for (const [k, v] of Object.entries(snap)) {
+      const cur = self[k];
+      if (ArrayBuffer.isView(cur)) (cur as Float32Array).set(v as Float32Array);
+      else if (Array.isArray(cur)) {
+        cur.length = 0;
+        for (const e of v as unknown[]) cur.push(copy(e));
+      } else self[k] = v;
+    }
+  }
+
+  /**
+   * The beats that point at a loss make sure one happens where the camera
+   * looks: the waiting customer nearest the gate on lane 1 gives up now; the
+   * crowd's claw lets go of the one it carries a moment from now.
+   */
+  forceLeave(lane = 1) {
+    const q = this.laneQ[lane];
+    if (!q) return;
+    const stopAt = this.L.lanes[lane].sGate - 0.14;
+    let best = -1;
+    for (const i of q) if (this.s[i] > stopAt - 3.2 && (best < 0 || this.s[i] > this.s[best])) best = i;
+    if (best < 0) return;
+    q.splice(q.indexOf(best), 1);
+    this.fall(best, -0.5 - this.rnd() * 0.3, 1.6, (best % 2 ? 1 : -1) * 0.8, "website");
+  }
+  forceSlip() {
+    for (let c = 0; c < 2; c++) if (this.clawHold[c] >= 0 && this.clawSlip[c] < 0) this.clawSlip[c] = 0.35 + this.rnd() * 0.2;
+  }
+
   /** Clear everything (the turn), keeping the counts. */
   clear() {
     this.mode.fill(M.FREE);
@@ -376,8 +447,22 @@ export class Sim {
         this.gateT[l] += dt;
         const ph = this.gateT[l] % tn.gatePeriod;
         const open = ph > tn.gatePeriod - tn.gateOpen;
-        const target = open ? 1 : 0;
-        this.gateH[l] += (target - this.gateH[l]) * (1 - Math.exp(-dt * (open ? 7 : 5)));
+        const v = this.gateV;
+        if (open) {
+          const w = 9;
+          const d0 = this.gateH[l] - 1;
+          const c0 = v[l] + w * d0;
+          const e = Math.exp(-w * dt);
+          this.gateH[l] = 1 + (d0 + c0 * dt) * e;
+          v[l] = (v[l] - w * c0 * dt) * e;
+        } else {
+          v[l] -= 13 * dt;
+          this.gateH[l] += v[l] * dt;
+          if (this.gateH[l] < 0) {
+            this.gateH[l] = 0;
+            v[l] = Math.abs(v[l]) > 0.4 ? -v[l] * 0.22 : 0;
+          }
+        }
       }
       this.stepLanes(dt);
       this.stepChute(dt);
@@ -645,7 +730,7 @@ export class Sim {
           // It slips.
           this.clawHold[c] = -1;
           this.clawSlip[c] = -1;
-          this.fall(i, (tx - fx) * 0.25, -0.3, 0.1, "admin");
+          this.fall(i, ((tx - fx) * 6 * k * (1 - k)) / (seg[3] * T), -0.3, 0.1, "admin");
           this.events.push({ type: "slip", claw: c + 2, pos: this.getPos(i, new THREE.Vector3()) });
         }
       } else if (u < edges[4]) {
@@ -830,7 +915,8 @@ export class Sim {
         this.lake[k * 4 + 3] = this.user[i] ? 1.6 : 1;
         this.lakeHead = (k + 1) % this.lakeMax;
         this.lakeN = Math.min(this.lakeMax, this.lakeN + 1);
-        this.events.push({ type: "lake", pos: new THREE.Vector3(this.pos[o], PIT_Y, this.pos[o + 2]) });
+        if (!this.quiet[i]) this.events.push({ type: "lake", pos: new THREE.Vector3(this.pos[o], PIT_Y, this.pos[o + 2]) });
+        this.quiet[i] = 0;
         this.mode[i] = M.FREE;
       }
     }
