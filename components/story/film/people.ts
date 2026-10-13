@@ -321,8 +321,10 @@ export function standPhone(o: Pose, at: THREE.Vector3, yaw: number, t: number, r
  * over it, then swings to its next mark: no sliding. The hips bob and sway,
  * the arms swing against the legs.
  */
-export function walk(o: Pose, path: THREE.Vector3[], s: number, t: number, floor = 0, look: THREE.Vector3 | null = null) {
+export function walk(o: Pose, path: THREE.Vector3[], s: number, t: number, floor = 0, look: THREE.Vector3 | null = null, floorAt?: (x: number, z: number) => number) {
   const L = 0.66;
+  // The ground under a point (a step up onto a deck, a threshold), or one level.
+  const fl = (x: number, z: number) => (floorAt ? floorAt(x, z) : floor);
   const total = pathLength(path);
   const ss = Math.max(0, Math.min(total, s));
   const at = pointAt(path, ss);
@@ -334,7 +336,7 @@ export function walk(o: Pose, path: THREE.Vector3[], s: number, t: number, floor
   dir.normalize();
   const yaw = Math.atan2(dir.x, dir.z);
   const moving = Math.min(1, ss / 0.4, (total - ss) / 0.4);
-  stand(o, V(at.x, floor, at.z), yaw, t, look);
+  stand(o, V(at.x, fl(at.x, at.z), at.z), yaw, t, look);
   const side = V(dir.z, 0, -dir.x);
   const phase = ss / (2 * L);
   for (let i = 0; i < 2; i++) {
@@ -346,7 +348,7 @@ export function walk(o: Pose, path: THREE.Vector3[], s: number, t: number, floor
     const land = (m: number) => {
       const sp = Math.max(0, Math.min(total, (m + off) * 2 * L + L * 0.3));
       const p = pointAt(path, sp);
-      return V(p.x, floor, p.z).addScaledVector(side, (i === 0 ? 1 : -1) * 0.1);
+      return V(p.x, 0, p.z).addScaledVector(side, (i === 0 ? 1 : -1) * 0.1);
     };
     let p: THREE.Vector3;
     let lift = 0;
@@ -358,9 +360,9 @@ export function walk(o: Pose, path: THREE.Vector3[], s: number, t: number, floor
       lift = Math.sin(u * Math.PI) * 0.12;
     }
     // Standing still at either end: both feet beside each other.
-    const restP = V(at.x, floor, at.z).addScaledVector(side, (i === 0 ? 1 : -1) * 0.105);
+    const restP = V(at.x, 0, at.z).addScaledVector(side, (i === 0 ? 1 : -1) * 0.105);
     p.lerp(restP, 1 - moving);
-    p.y = floor + 0.075 + lift * moving;
+    p.y = fl(p.x, p.z) + 0.075 + lift * moving;
     o.feet[i].p.copy(p);
     o.feet[i].pole.copy(dir);
     o.feet[i].q = Figure.footQ(dir, o.feet[i].q ?? new THREE.Quaternion());
@@ -375,6 +377,20 @@ export function walk(o: Pose, path: THREE.Vector3[], s: number, t: number, floor
   o.hipR[1] += Math.sin(phase * Math.PI * 2) * 0.1 * moving;
   o.chest[1] -= Math.sin(phase * Math.PI * 2) * 0.12 * moving;
   o.spine[0] += 0.04 * moving;
+  return o;
+}
+
+/** The phone carried in the right hand, down at the side, its screen to the leg (walking, standing about). */
+export function carryPhone(o: Pose) {
+  const c = Math.cos(o.yaw);
+  const sn = Math.sin(o.yaw);
+  const up = V(0, 1, 0);
+  // The right hand is on the figure's -x side; the leg is toward +x from it.
+  const n = V(c, 0, -sn);
+  const xr = new THREE.Vector3().crossVectors(up, n).normalize();
+  o.phone = o.phone ?? { p: new THREE.Vector3(), q: new THREE.Quaternion() };
+  o.phone.p.copy(o.hands[1].p).add(V(0, -0.06, 0)).addScaledVector(n, 0.02);
+  o.phone.q.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xr, up, n));
   return o;
 }
 

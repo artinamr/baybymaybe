@@ -94,7 +94,7 @@ export const KEYS: Key[] = [
   { P: 9.86, eye: fix(40.3, 1.84, -14.88), at: fix(41.2, 1.86, -11.95), fov: 46, ppx: 0.6 },
   ...hold(10.3, fix(40.1, 1.95, -14.9), fix(40.1, 1.9, -11.9), 64, 0.5, 0.06),
   // FOLLOW-UP: out through the office window and across the town to Sam's new deck; a year; the other van.
-  { P: 10.4, eye: S(-3.15, 1.32, 3.1), at: S(-3.6, 1.2, 8.0), fov: 54, ppx: 0.5 },
+  { P: 10.4, eye: S(-2.8, 1.42, 3.0), at: S(-3.4, 1.2, 8.0), fov: 54, ppx: 0.5 },
   { P: 10.46, eye: S(-3.45, 1.08, 5.4), at: S(-3.6, 1.3, 12.0), fov: 54, ppx: 0.5 },
   { P: 10.52, eye: S(-3.55, 1.25, 7.6), at: S(-3.0, 3.0, 16.0), fov: 52, ppx: 0.5 },
   { P: 10.58, eye: fix(40.0, 3.4, -6.0), at: fix(34.0, 5.0, 6.0), fov: 50, ppx: 0.5 },

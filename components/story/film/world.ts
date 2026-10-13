@@ -4,14 +4,14 @@ import { Sky } from "./sky";
 import { buildTown, SHOP, type Town } from "./town";
 import { buildHome, buildShop, inFrame, type Home, type Shop } from "./places";
 import { Figure } from "./figure";
-import { apply, blend, deskType, makePhone, newPose, placePhone, sofaPhone, stand, standPhone, walk, pathLength, copyPose, type Pose } from "./people";
+import { apply, blend, carryPhone, deskType, makePhone, newPose, placePhone, sofaPhone, stand, standPhone, walk, pathLength, copyPose, type Pose } from "./people";
 import { Card, Screen, Strips, carry, uiScale } from "./cards";
 import { Crowd } from "./crowd";
 import { Envelope, type Flight } from "./mail";
 import { NODES, System } from "./system";
 import { ContactShade } from "./shade";
 import { BACK_STEP, cameraSmooth, phoneAdjust, phoneBackBase, phoneBackTable, type BackBase, type CamOut, type Ctx as CamCtx } from "./camera";
-import { B, bump, clockAt, inW, isNew, k, ke, weathered } from "./script";
+import { B, bump, clockAt, inW, isNew, k, ke, weathered, type W } from "./script";
 import { clamp01, lerp, range, smooth, smoother } from "./ease";
 import { FILM_LEN } from "../timeline";
 import * as UI from "./ui";
@@ -92,6 +92,8 @@ export class World {
   private gl: THREE.WebGLRenderer;
   private poseA = newPose();
   private poseB = newPose();
+  private poseC = newPose();
+  private poseD = newPose();
   private samPose = newPose();
   private ownerPose = newPose();
   private crowd: Crowd;
@@ -337,9 +339,11 @@ export class World {
   private vanAt(P: number): { p: THREE.Vector3; yaw: number; lights: number } {
     const park = S(3.6, 0, 9.0);
     const samKerb = V(-44, 0, 3.4);
-    if (isNew(P) && P >= B.nVan[0] && P < 25.8) {
+    if (isNew(P) && P >= B.nVan[0] && P < 26.0) {
+      // To Sam's kerb; after the measure-up, on and away west.
       const t = smooth(k(P, B.nVan));
-      return { p: V(lerp(-10, samKerb.x, t), 0, samKerb.z), yaw: -Math.PI / 2, lights: 1 - t * 0.6 };
+      const away = smooth(range(P, B.nVan[1] + 0.04, 25.78));
+      return { p: V(lerp(-10, samKerb.x, t) - away * 22, 0, samKerb.z), yaw: -Math.PI / 2, lights: 1 - t * 0.6 + away * 0.6 };
     }
     if (P >= B.nDrive[0]) {
       const t = k(P, B.nDrive);
@@ -502,7 +506,7 @@ export class World {
     const hod = ((hours % 24) + 24) % 24;
     const evening = hod > 18.5 || hod < 6.5;
     // HOME: the lamp is on while Sam is up in the evening.
-    const samUp = (!nw && P < B.samBed && evening) || (nw && P < B.n3am[0] && evening) || inW(P, [22.36, 22.6]);
+    const samUp = (!nw && P < B.samBed && evening) || (nw && P < B.n3am[0] && evening) || inW(P, [22.36, 22.74]);
     const lamp = samUp ? 1 : 0;
     h.lampLight.intensity = 3.0 * lamp;
     (h.lampGlow.material as THREE.MeshBasicMaterial).color.setRGB(2.6, 1.7, 0.9).multiplyScalar(lamp + 0.03);
@@ -542,7 +546,9 @@ export class World {
     const v = this.vanAt(P);
     this.ourVan.position.copy(v.p);
     this.ourVan.rotation.set(0, v.yaw, 0);
-    this.ourVan.visible = !(nw && P >= B.nVan[1] + 0.1 && P < 25.8);
+    this.ourVan.visible = !(nw && P >= 25.78 && P < 26.0);
+    // The driver's door: open for the owner, shut behind them.
+    this.shop.van.door.rotation.y = nw ? 1.2 * smooth(range(P, B.nIn[0] - 0.08, B.nIn[0])) * (1 - smooth(range(P, B.nIn[1] - 0.03, B.nIn[1] + 0.05))) : 0;
     (this.shop.van.lights.material as THREE.MeshBasicMaterial).color.setScalar(0.03 + v.lights * 3);
     const rivalK = !nw && P >= B.van[0] && P < 12.8 ? smooth(k(P, B.van)) : 0;
     this.rival.visible = rivalK > 0;
@@ -553,7 +559,7 @@ export class World {
   /** The laptop's lid: 0 shut … 1 open. */
   private lidAt(P: number) {
     if (P < B.ownerIn[0]) return 0;
-    if (P < 16.4) return smooth(range(P, 6.94, 7.02));
+    if (P < 16.4) return smooth(range(P, 7.02, 7.1));
     if (P < 25.8) return 0;
     return 1 - smooth(k(P, B.nClose));
   }
@@ -634,9 +640,12 @@ export class World {
         const check = bump(P, B.samCheck[0], B.samCheck[1], 0.06);
         return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.15 + 0.7 * check, check * 0.5, 0.7 - check * 0.4);
       }
-      if (P >= 10.9 && P < B.year[0]) return stand(o, deckSpot, 0, t, H(-1.0, 1.2, -14));
-      if (P >= B.year[1] && P < B.van[0]) return standPhone(o, deckSpot, 0, t, 0.7, 1);
-      if (P >= B.van[0] && P < 12.8) return stand(o, H(-2.6, 0.6, -5.2), Math.PI, t, V(-36, 1.5, 3.4));
+      // A summer on the new deck: out through the sliders for a look at it, back in; a year;
+      // out again with the phone; then a step across to see the van go by.
+      const deck = this.samDeck(P, t, o, deckSpot, [10.66, 10.92], [11.0, 11.24], null, false);
+      if (deck) return deck;
+      const later = this.samDeck(P, t, o, deckSpot, [11.6, 11.86], [B.van[0], 12.8], [B.van[0], 12.3], true);
+      if (later) return later;
       o.visible = 0;
       return o;
     }
@@ -645,22 +654,112 @@ export class World {
       return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.62 + 0.15 * typing, 1, 0.25);
     }
     if (inW(P, [22.36, 22.6])) return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.66, 1, 0.3);
-    if (inW(P, [23.1, B.nYear[0]]) || inW(P, [B.nYear[1], B.nVan[0]])) return standPhone(o, deckSpot, 0, t, 0.7, 1);
-    if (inW(P, [B.nVan[0], 25.8])) return stand(o, H(-2.6, 0.6, -5.2), Math.PI, t, V(-36, 1.5, 3.4));
+    // Yes said, up from the sofa and off to bed (the lamp goes off at the door).
+    if (inW(P, [22.6, 22.8])) {
+      const bed = [H(-2.1, 0, -0.62), H(-0.7, 0, -0.62), H(0.25, 0, -0.3), H(0.25, 0, 0.66), H(0.25, 0, 2.2)];
+      walk(this.poseC, bed, smooth(range(P, 22.62, 22.8)) * pathLength(bed), t, 0, null, this.homeFloor);
+      carryPhone(this.poseC);
+      const up = smooth(range(P, 22.6, 22.66));
+      if (up < 1) {
+        sofaPhone(this.poseD, h.seat, h.seatYaw, h.floor, t, 0.66, 0, 0.3);
+        return blend(this.poseD, this.poseC, up, o);
+      }
+      return copyPose(this.poseC, o);
+    }
+    // Out onto the new deck as its last boards land; in for the year, out again.
+    const a = this.samDeck(P, t, o, deckSpot, [22.96, 23.14], [B.nYear[0], B.nYear[0] + 0.18], null, true);
+    if (a) return a;
+    const b = this.samDeck(P, t, o, deckSpot, [B.nYear[1] - 0.18, B.nYear[1]], [B.nVan[0], 25.8], [B.nVan[0], B.nVan[0] + 0.16], true);
+    if (b) return b;
     o.visible = 0;
     return o;
   }
+
+  /** Where Sam walks: inside it is the room's floor, out past the sliders the deck's (a step up). */
+  private homeFloor = (x: number, z: number) => {
+    const lz = 15.5 - z;
+    return 0.45 + 0.15 * smooth(clamp01((-4.35 - lz) / 0.4));
+  };
+  /** The hall, the doorway behind the sofa, round the room, the sliders, the deck. */
+  private samWay(out: boolean) {
+    const p = [H(0.25, 0, 2.2), H(0.25, 0, 0.66), H(0.25, 0, -0.3), H(-0.6, 0, -3.0), H(-1.3, 0, -4.6), H(-1.6, 0, -6.3)];
+    return out ? p : p.reverse();
+  }
+  /**
+   * A stretch of time on the deck: walk out over `outW`, stand (with the phone
+   * up, or looking at the garden), then either walk back in from `inW_[0]` or,
+   * with `aside`, step across the deck to look toward the street until
+   * `inW_[1]`. Null outside it.
+   */
+  private samDeck(P: number, t: number, o: Pose, spot: THREE.Vector3, outW: W, inW_: W, aside: W | null, phone: boolean): Pose | null {
+    if (P < outW[0] || P >= inW_[1]) return null;
+    const hold = (into: Pose) => (phone ? standPhone(into, spot, 0, t, 0.7, 1) : stand(into, spot, 0, t, H(-1.0, 1.2, -14)));
+    const go = (into: Pose, w: W, out: boolean) => {
+      const way = this.samWay(out);
+      walk(into, way, smooth(k(P, w)) * pathLength(way), t, 0, null, this.homeFloor);
+      if (phone) carryPhone(into);
+      return into;
+    };
+    // Out, easing into the stand as the last steps land.
+    if (P < outW[1]) {
+      go(this.poseC, outW, true);
+      const settle = smooth(range(P, outW[1] - 0.05, outW[1]));
+      if (settle <= 0) return copyPose(this.poseC, o);
+      hold(this.poseD);
+      return blend(this.poseC, this.poseD, settle, o);
+    }
+    if (aside) {
+      // A few steps across, the phone lowered, then a look toward the street.
+      const to = H(-2.6, 0.6, -5.2);
+      if (P < aside[0]) return hold(o);
+      const path = [spot.clone().setY(0), to.clone().setY(0)];
+      walk(this.poseC, path, smooth(k(P, aside)) * pathLength(path), t, 0, null, this.homeFloor);
+      if (phone) carryPhone(this.poseC);
+      const lower = smooth(range(P, aside[0], aside[0] + 0.05));
+      if (lower < 1) {
+        hold(this.poseD);
+        return blend(this.poseD, this.poseC, lower, o);
+      }
+      if (P < aside[1]) return copyPose(this.poseC, o);
+      stand(this.poseD, to, Math.PI, t, V(-36, 1.5, 3.4));
+      if (phone) carryPhone(this.poseD);
+      const turn = smooth(range(P, aside[1], aside[1] + 0.06));
+      return blend(this.poseC, this.poseD, turn, o);
+    }
+    if (P < inW_[0]) return hold(o);
+    // Back in, turning off the stand.
+    go(this.poseC, inW_, false);
+    const leave = smooth(range(P, inW_[0], inW_[0] + 0.05));
+    if (leave >= 1) return copyPose(this.poseC, o);
+    hold(this.poseD);
+    return blend(this.poseD, this.poseC, leave, o);
+  }
+
+  /** The office's floor inside the front wall, the yard's outside. */
+  private shopFloor = (x: number, z: number) => 0.15 * smooth(clamp01((-10.8 - z) / 0.3));
+  /** Up into the van's cab past its side. */
+  private vanStep = (x: number) => 0.45 * smooth(clamp01((x - 46.45) / 0.35));
 
   private ownerAt(P: number, t: number, nw: boolean, o: Pose): Pose {
     const s = this.shop;
     const F = 0.15;
     if (!nw) {
-      if (P >= B.ownerIn[0] && P < 10.42) {
+      // Morning: along the footpath, into the yard, through the door, to the desk; sits.
+      if (P >= 6.6 && P < 7.04) {
+        const door = s.doorAt;
+        const path = [V(60, 0, -1.6), V(44.4, 0, -2.4), V(43.2, 0, -8.0), V(door.x, 0, door.z), S(-1.62, 0, 5.6), S(-2.0, 0, 4.4), S(-3.0, 0, 2.7), V(s.seat.x, 0, s.seat.z + 0.05)];
+        walk(this.poseA, path, smooth(range(P, 6.6, 6.98)) * pathLength(path), t, 0, null, this.shopFloor);
+        const sit = smooth(range(P, 6.95, 7.04));
+        if (sit <= 0) return copyPose(this.poseA, o);
+        deskType(this.poseB, s.seat, s.seatYaw, F, s.keys, t, 0.15, 0.05);
+        return blend(this.poseA, this.poseB, sit, o);
+      }
+      if (P >= 7.04 && P < 10.42) {
         const busy = inW(P, B.reply) || inW(P, B.sheet) || inW(P, B.quote) || inW(P, B.invoice) ? 1 : 0.15;
         const slump = inW(P, B.quote) || inW(P, B.invoice) ? 0.45 : 0.05;
         return deskType(o, s.seat, s.seatYaw, F, s.keys, t, busy, slump);
       }
-      if (P >= B.late[0] && P < B.black[0] + 0.06) {
+      if (P >= B.late[0] && P < B.black[0] + 0.16) {
         deskType(o, s.seat, s.seatYaw, F, s.keys, t, P < B.handsOff[0] ? 1 : 0, 1);
         // Late: now and then a hand to the face.
         const rub = bump(P, 13.42, 13.66, 0.06);
@@ -700,14 +799,24 @@ export class World {
       }
       return o;
     }
-    if (P >= B.nStand[0] && P < B.nWalk[1] + 0.02) {
-      // Up from the chair, then out of the office's door.
+    if (P >= B.nWalk[1] && P < B.nIn[1]) {
+      // The driver's door open, a duck, in; the door shuts behind.
+      const path = [S(1.9, 0, 9.6), S(2.15, 0, 10.15), S(3.1, 0, 10.3), S(3.3, 0, 10.1)];
+      walk(this.poseA, path, smooth(range(P, B.nIn[0], B.nIn[1] - 0.02)) * pathLength(path), t, 0, null, this.vanStep);
+      const duck = smooth(range(P, B.nIn[0], B.nIn[0] + 0.06));
+      this.poseA.spine[0] += 0.62 * duck;
+      this.poseA.chest[0] += 0.36 * duck;
+      this.poseA.head[0] += 0.25 * duck;
+      return copyPose(this.poseA, o);
+    }
+    if (P >= B.nStand[0] && P < B.nWalk[1]) {
+      // Up from the chair, out of the office's door, round to the van's driver door.
       const door = s.doorAt;
-      const path = [V(s.seat.x, 0, s.seat.z + 0.05), S(-3.0, 0, 2.7), S(-2.0, 0, 4.4), S(-1.62, 0, 5.6), V(door.x, 0, door.z), S(-1.2, 0, 8.0), S(1.6, 0, 9.4)];
+      const path = [V(s.seat.x, 0, s.seat.z + 0.05), S(-3.0, 0, 2.7), S(-2.0, 0, 4.4), S(-1.62, 0, 5.6), V(door.x, 0, door.z), S(-1.2, 0, 8.0), S(1.9, 0, 9.6)];
       const len = pathLength(path);
       const up = ke(P, B.nStand);
       const sK = P < B.nWalk[0] ? 0 : smooth(k(P, B.nWalk)) * len;
-      walk(this.poseA, path, sK, t, F);
+      walk(this.poseA, path, sK, t, 0, null, this.shopFloor);
       if (up < 1) {
         deskType(this.poseB, s.seat, s.seatYaw, F, s.keys, t, 0, 0);
         return blend(this.poseB, this.poseA, up, o);

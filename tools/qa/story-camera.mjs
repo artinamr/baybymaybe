@@ -68,7 +68,7 @@ if (PHONE) {
 world.scene.updateMatrixWorld(true);
 
 const SKIP = new Set();
-for (const o of [world.sam.root, world.owner.root, world.samPhone.group]) o.traverse((c) => SKIP.add(c));
+for (const o of [world.sam.root, world.owner.root, world.samPhone.group, world["ourVan"], world["rival"]]) o.traverse((c) => SKIP.add(c));
 const pos = [];
 const v = new THREE.Vector3();
 const m = new THREE.Matrix4();
@@ -131,6 +131,26 @@ const cardGap = (eye) => {
   }
   return best;
 };
+// Things that move: the vans (boxes) and the two people (upright capsules), where they are at P.
+const vanGap = (eye) => {
+  let best = 9;
+  for (const v of [world["ourVan"], world["rival"]]) {
+    if (!v.visible) continue;
+    v.updateMatrixWorld(true);
+    local.copy(eye).applyMatrix4(new THREE.Matrix4().copy(v.matrixWorld).invert());
+    const dx = Math.max(0, Math.abs(local.x) - 1.0);
+    const dy = Math.max(0, Math.abs(local.y - 1.1) - 1.1);
+    const dz = Math.max(0, Math.abs(local.z + 0.05) - 2.65);
+    best = Math.min(best, Math.hypot(dx, dy, dz));
+  }
+  for (const fig of [world.sam, world.owner]) {
+    if (!fig.root.visible) continue;
+    const r = fig.root.getWorldPosition(new THREE.Vector3());
+    const y = Math.min(Math.max(eye.y, r.y + 0.3), r.y + 1.5);
+    best = Math.min(best, Math.max(0, Math.hypot(eye.x - r.x, eye.y - y, eye.z - r.z) - 0.35));
+  }
+  return best;
+};
 const rows = [];
 for (let P = from; P <= to + 1e-9; P += step) {
   cameraSmooth(P, ctx, cam, FILM_LEN);
@@ -140,7 +160,8 @@ for (let P = from; P <= to + 1e-9; P += step) {
   const ground = !inRoom(cam.eye) && cam.eye.y < 0.3 ? "below 0.3 m over the ground" : "";
   world.update({ dt: 0, time: 8, P, pointer: { x: 0, y: 0, has: false } });
   const card = cardGap(world.camera.position);
-  rows.push({ P: +P.toFixed(3), clear: +clear.toFixed(3), ground, card: +card.toFixed(3), eye: cam.eye.toArray().map((x) => +x.toFixed(2)) });
+  const mover = vanGap(world.camera.position);
+  rows.push({ P: +P.toFixed(3), clear: +clear.toFixed(3), ground, card: +card.toFixed(3), mover: +mover.toFixed(3), eye: cam.eye.toArray().map((x) => +x.toFixed(2)) });
 }
 
 /** Contiguous runs of rows matching a test, as [from, to, worst]. */
@@ -175,6 +196,8 @@ const low = runs((r) => !!r.ground, (rs) => rs[0]);
 report("GROUND", low, (r) => r.worst.ground, () => true);
 const close = runs((r) => r.card < 0.6, (rs) => rs.reduce((a, b) => (b.card < a.card ? b : a)));
 report("CARDS (a card in the air within 0.6 m of the lens)", close, (r) => `closest ${r.worst.card} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}`, (r) => r.worst.card < 0.25);
+const movers = runs((r) => r.mover < 0.6, (rs) => rs.reduce((a, b) => (b.mover < a.mover ? b : a)));
+report("MOVERS (a van or a person within 0.6 m of the lens)", movers, (r) => `closest ${r.worst.mover} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}`, (r) => r.worst.mover < 0.25);
 if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify(rows));
 console.log(`\n${fails ? "FAIL" : "PASS"}: ${fails} problem run(s)`);
 process.exitCode = fails ? 1 : 0;

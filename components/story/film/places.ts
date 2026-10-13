@@ -413,7 +413,7 @@ export type Shop = {
   clock: { hands: [THREE.Object3D, THREE.Object3D] };
   door: { pivot: THREE.Object3D; open: number };
   roller: THREE.Mesh;
-  van: { group: THREE.Group; lights: THREE.Mesh };
+  van: { group: THREE.Group; lights: THREE.Mesh; door: THREE.Group };
   front: THREE.Mesh;
   /** The office's door (world) and the point out front by the van. */
   doorAt: THREE.Vector3;
@@ -650,6 +650,19 @@ export function buildShop(scene: THREE.Scene): Shop {
     glow
   );
   vanG.add(vanLights);
+  // The driver's door (right-hand drive: the van's -X side) at the front of the box, hinged at its front edge; behind it, the dark of the cab.
+  const vanDoor = new THREE.Group();
+  vanDoor.position.set(-0.99, 0, 1.65);
+  vanG.add(vanDoor);
+  const doorB = new Batch();
+  doorB.add(block(0.03, 1.3, 0.7, 0.01), at(0, 1.2, -0.35), (p) => (p.y < 0.75 ? 0.75 : 1));
+  const doorMesh = new THREE.Mesh(doorB.build(), white);
+  doorMesh.castShadow = true;
+  vanDoor.add(doorMesh);
+  const doorWin = new THREE.Mesh(new Batch().add(block(0.004, 0.32, 0.5), at(-0.018, 1.62, -0.32), 1, [0.06, 0.07, 0.09]).build(), vanWheels.material);
+  vanDoor.add(doorWin);
+  const cabDark = new THREE.Mesh(new Batch().add(block(0.004, 1.24, 0.66), at(-0.974, 1.2, 1.3), 1, [0.035, 0.035, 0.04]).build(), vanWheels.material);
+  vanG.add(cabDark);
 
   // Lights: the desk lamp (a spot with a soft shadow), the screen's glow, the ceiling.
   const spot = new THREE.SpotLight(0xffc489, 0, 6, 0.95, 0.75, 1.5);
@@ -697,7 +710,7 @@ export function buildShop(scene: THREE.Scene): Shop {
     clock: { hands },
     door: { pivot: doorPivot, open: 0 },
     roller,
-    van: { group: vanG, lights: vanLights },
+    van: { group: vanG, lights: vanLights, door: vanDoor },
     front,
     doorAt: inFrame(f, -1.65, 0, SD / 2 + 0.6),
     outside: inFrame(f, -1.0, 0, SD / 2 + 3.0),
