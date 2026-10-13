@@ -68,14 +68,20 @@ function Director() {
       world.update({ dt: 0, time: 0, P: 0, pointer: { x: 0, y: 0, has: false } });
       film.progress = 0.5;
       try {
+        const was: [THREE.Object3D, boolean][] = [];
+        world.scene.traverse((o) => {
+          was.push([o, o.visible]);
+          o.visible = true;
+        });
         await gl.compileAsync(world.scene, world.camera);
+        for (const [o, v] of was) o.visible = v;
       } catch {
         /* compileAsync is an optimisation; drawing compiles anything left */
       }
       if (!alive) return;
       film.progress = 0.82;
       // Draw a few frames from the film's far ends, so every program is ready.
-      for (const P of [0, 3.4, 15.5, 16.8, 19]) {
+      for (const P of [0, 2.3, 3.5, 5.98, 8.3, 13.3, 16.0, 17.7, 20.76, 22.9]) {
         world.update({ dt: 0, time: 0, P, pointer: { x: 0, y: 0, has: false } });
         world.render(0);
       }
@@ -97,7 +103,7 @@ function Director() {
       };
       cmd.drop = () => {
         const P = clock.Ps;
-        const st = P < 4.6 ? "website" : P < 7.2 ? "inbox" : P < 9.6 ? "admin" : P < 14 ? "followup" : P > 16.9 ? "new" : null;
+        const st = P < 5.0 ? "website" : P < 7.8 ? "inbox" : P < 10.6 ? "admin" : P < 15.0 ? "followup" : P > 18.0 ? "new" : null;
         if (!st) return;
         if (world.sim.drop(st)) score.drop();
       };

@@ -167,6 +167,22 @@ uniform float uPaper;
 uniform float uFXAA;
 in vec2 vUv;
 
+// Khronos PBR Neutral: linear through the mid-tones (screens and paper keep
+// their true colour and white), a soft shoulder above.
+vec3 neutral(vec3 color) {
+  const float startCompression = 0.8 - 0.04;
+  const float desaturation = 0.15;
+  float x = min(color.r, min(color.g, color.b));
+  float offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
+  color -= offset;
+  float peak = max(color.r, max(color.g, color.b));
+  if (peak < startCompression) return color;
+  const float d = 1.0 - startCompression;
+  float newPeak = 1.0 - d * d / (peak + d - startCompression);
+  color *= newPeak / peak;
+  float g = 1.0 - 1.0 / (desaturation * (peak - newPeak) + 1.0);
+  return mix(color, newPeak * vec3(1.0), g);
+}
 vec3 RRTAndODTFit(vec3 v) {
   vec3 a = v * (v + 0.0245786) - 0.000090537;
   vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081;
@@ -245,7 +261,7 @@ void main() {
   bloom += trail;
   bloom /= 1.0 + luma(bloom) * 0.12;
   vec3 lit = (hdr + bloom * uBloom) * uExposure;
-  vec3 col = aces(lit);
+  vec3 col = clamp(neutral(lit), 0.0, 1.0);
   // Keep amber, indigo and gold in bright lights instead of letting every
   // chapter's brightest detail converge to the same flat white.
   float peak = max(max(lit.r, lit.g), lit.b);

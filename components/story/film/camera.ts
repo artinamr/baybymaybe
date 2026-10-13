@@ -1,218 +1,176 @@
 import * as THREE from "three";
-import { CORNER, corner, DISH, EDGE, FUNNEL, GATE_X, GATE_Y, PIT_Y, TRAYS, TRAY_Y, UTURN, type Layout } from "./layout";
-
-import { FALL_END, FALL_T, heroAt, heroInit, type HeroState } from "./hero";
-import { lerp, range, smoother } from "./ease";
+import { B, k } from "./script";
+import { flightAt, type Flight } from "./mail";
 
 /**
- * THE CAMERA: one flight through the whole film, keyed on the film's clock.
- * A key is an eye, a point to look at, a lens and a frame; some keys ride
- * with our customer (their points are offsets from it), some are set. All
- * keys are evaluated at the current moment, then joined by a shape-preserving
- * Hermite curve. Shared tangents keep the flight C1 in P without throwing
- * the eye beyond a shot when a moving chase meets a fixed composition.
+ * THE CAMERA: one unbroken flight through the film, keyed on the film's
+ * clock. A key is an eye, a point to look at, a lens and where on screen
+ * the subject sits; some keys ride with a moving thing (the envelope, the
+ * van), most are set. The keys are joined by a shape-preserving Hermite
+ * curve (no overshoot past a key), then averaged over a short window of
+ * film time so no corner is left anywhere between them (cameraSmooth).
+ *
+ * Desktop framing: the words sit on the left, so the subject sits right of
+ * centre (ppx ~0.6). On a phone (portrait) the lens widens and the subject
+ * comes to the middle (see `phoneAdjust`).
  */
 
-type Ctx = { h: HeroState; L: Layout };
-type Pt = (c: Ctx) => THREE.Vector3;
-export type Key = {
-  P: number;
-  eye: Pt;
-  at: Pt;
-  fov: number;
-  /** Where the point looked at sits on screen (0..1 across, 0..1 down). */
-  ppx?: number;
-  ppy?: number;
-  roll?: number;
+export type Ctx = {
+  /** The flights, as pure functions of P (for keys that ride with them). */
+  flight: (P: number) => { f: Flight; t: number } | null;
+  van: (P: number) => THREE.Vector3;
 };
+type Pt = (c: Ctx, P: number) => THREE.Vector3;
+export type Key = { P: number; eye: Pt; at: Pt; fov: number; ppx?: number; ppy?: number; roll?: number };
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 const fix = (x: number, y: number, z: number): Pt => () => V(x, y, z);
-/** A fixed point in the owner's corner (layout.ts: x right, y above the floor, z toward the tower). */
-const cfix = (x: number, y: number, z: number): Pt => () => corner(x, y, z);
-/** Round the tower's axis (x 0, z -1): angle a, radius r, height y. */
-const orbit = (a: number, r: number, y: number): Pt => () => V(Math.cos(a) * r, y, Math.sin(a) * r - 1);
-/** On the tower's axis at the customer's height, drawn toward the customer by k. */
-const axisToward = (k: number, dy = 0): Pt => (c) => V(0, c.h.pos.y + dy, -1).lerp(c.h.pos, k);
-const rel = (x: number, y: number, z: number): Pt => (c) => c.h.pos.clone().add(V(x, y, z));
-const T = (L: Layout) => L.TURB;
-/**
- * The chase: behind our customer along the way it is heading (level), up,
- * and to one side (+ is its right); looking ahead of it, a little down.
- */
-const chase =
-  (back: number, up: number, side: number): Pt =>
-  (c) => {
-    const d = c.h.dir;
-    const n = Math.hypot(d.x, d.z) || 1;
-    const fx = d.x / n;
-    const fz = d.z / n;
-    return c.h.pos.clone().add(V(-fx * back - fz * side, up, -fz * back + fx * side));
+/** Home-local (the customer's house: x along it, +z out the front, which faces north). */
+const H = (x: number, y: number, z: number): Pt => () => V(-44 - x, y, 15.5 - z);
+/** Shop-local (the workshop: +z out the front, which faces south). */
+const S = (x: number, y: number, z: number): Pt => () => V(44 + x, y, -17 + z);
+/** Ride with the envelope in flight: an offset from it. */
+const env =
+  (dx: number, dy: number, dz: number): Pt =>
+  (c, P) => {
+    const fl = c.flight(P);
+    if (!fl) return V(0, 0, 0);
+    return flightAt(fl.f, fl.t).add(V(dx, dy, dz));
   };
-const ahead =
-  (dist: number, down: number): Pt =>
-  (c) =>
-    c.h.pos.clone().addScaledVector(c.h.dir, dist).add(V(0, -down, 0));
-/** Where our customer lands, at the bottom of the pit (hero.ts: the fall). */
-const landing = (Ld: Layout) => {
-  const d = Ld.final.tangent(Ld.final.length, new THREE.Vector3());
-  return V(EDGE.x + d.x * 1.15 * FALL_T, PIT_Y + 0.12, EDGE.z + d.z * 1.15 * FALL_T);
-};
-/** The dive: how far behind and beside the customer the eye falls, and where it brakes. */
-const DIVE_BACK = 3;
-const DIVE_SIDE = 0.4;
-const DIVE_REST = PIT_Y + 26;
-const diveAt = (p: THREE.Vector3, d: THREE.Vector3, out: THREE.Vector3) => {
-  const n = Math.hypot(d.x, d.z) || 1;
-  return out.set(p.x + (d.x / n) * 1.2, p.y, p.z + (d.z / n) * 1.2);
-};
-/** Where the dive comes to rest, above the lake, looking down at it. */
-/** Level heading from the landing toward the owner's corner. The dive turns to it while it brakes over the round lake (where a turn reads as a slow settle, not a spin), so the rise out of the pit only has to tilt up into the corner. */
-const toCorner = (Ld: Layout, out = new THREE.Vector3()) => { const l = landing(Ld); return out.set(CORNER.x - l.x, 0, CORNER.z - l.z).normalize(); };
-const REST_BACK = 0.4;
-const restEye = (c: Ctx) => { const l = landing(c.L); const d = toCorner(c.L); return V(l.x - d.x * REST_BACK, DIVE_REST, l.z - d.z * REST_BACK); };
-const restAt = (c: Ctx) => diveAt(landing(c.L), toCorner(c.L), new THREE.Vector3());
-/** A point at the end of the last track, in the frame of the way it heads. */
-const edge = (back: number, up: number, side: number, Ld: Layout) => {
-  const d = Ld.final.tangent(Ld.final.length, new THREE.Vector3());
-  const n = Math.hypot(d.x, d.z) || 1;
-  const fx = d.x / n;
-  const fz = d.z / n;
-  return EDGE.clone().add(V(-fx * back - fz * side, up, -fz * back + fx * side));
-};
+const van =
+  (dx: number, dy: number, dz: number): Pt =>
+  (c, P) =>
+    c.van(P).clone().add(V(dx, dy, dz));
 
-/** The shot list (docs/STORY.md). Desktop framing; phones adjust ppx/ppy and pull back. */
+/** Reading Sam's lifted phone (in the garden, looking into the living room). */
+const READ_EYE = H(-3.0, 1.62, -6.3);
+const READ_AT = H(-3.1, 1.45, -2.2);
+/** Reading it on the deck (Sam standing, the card beside them). */
+const DECK_EYE = H(0.9, 1.85, -11.2);
+const DECK_AT = H(-1.0, 1.45, -6.2);
+/** The new route's cards (under their parts). */
+const node = (x: number, y: number, z: number): Pt => () => V(x, y, z);
+
+/** A composed frame held for a moment either side of P (a rest sits still). */
+function hold(P: number, eye: Pt, at: Pt, fov: number, ppx = 0.6, half = 0.05, ppy?: number): Key[] {
+  return [
+    { P: P - half, eye, at, fov, ppx, ppy },
+    { P: P + half, eye, at, fov, ppx, ppy },
+  ];
+}
+
 export const KEYS: Key[] = [
-  // OPEN: rise from the nave, cross its silhouette, then find one
-  // small customer. The scale change is the first reveal, before any loss.
-  { P: 0, eye: fix(16, 16, 106), at: fix(0, 34, -8), fov: 39, ppx: 0.57, ppy: 0.48 },
-  { P: 0.7, eye: fix(-14, 29, 76), at: fix(-1, 36, -4), fov: 34, ppx: 0.61, ppy: 0.46 },
-  { P: 1.35, eye: fix(-9.2, 52.8, 11.5), at: fix(-11.6, 50.7, 0), fov: 33, ppx: 0.57 },
-  { P: 1.9, eye: rel(-1.7, 0.55, 2.7), at: rel(1.1, -0.2, -0.3), fov: 46, ppx: 0.68, ppy: 0.7 },
-  // WEBSITE: down the ramp, the queue, the gate from the side, through.
-  { P: 2.5, eye: rel(-1.1, 0.6, 2.1), at: rel(0.8, 0.15, -0.4), fov: 40, ppx: 0.68 },
-  // Pull away while tightening the lens: the queue stays close, but the
-  // gate looms behind it. Waiting makes the business feel less reachable.
-  { P: 2.95, eye: fix(GATE_X - 3.2, GATE_Y + 0.8, 4.1), at: fix(GATE_X - 0.4, GATE_Y + 1.0, -0.4), fov: 45, ppx: 0.63 },
-  { P: 3.45, eye: fix(GATE_X - 5.4, GATE_Y + 1.2, 7.9), at: fix(GATE_X - 0.6, GATE_Y + 1.1, -0.5), fov: 28, ppx: 0.63, roll: -0.025 },
-  { P: 3.92, eye: rel(-1.4, 0.45, 1.75), at: rel(0.55, 0.15, -0.2), fov: 38, ppx: 0.67 },
-  { P: 4.35, eye: rel(-1.5, 1.0, 3.2), at: rel(1.2, -0.25, -0.2), fov: 42, ppx: 0.64 },
-  // INBOX: the turn, into the funnel, the dish under the wheel of hours, a whole night.
-  // Travel along the front of the tower. Riding the U-turn cut directly
-  // through the front-right column and its work lamp.
-  { P: 4.82, eye: fix(11.8, 44.6, 10.0), at: fix(UTURN.cx - 0.4, UTURN.y0 - 0.6, UTURN.cz + 0.6), fov: 36, ppx: 0.6 },
-  { P: 5.22, eye: fix(FUNNEL.x - 3.9, FUNNEL.yTop + 5.2, FUNNEL.z + 11.0), at: fix(FUNNEL.x, FUNNEL.yBot - 0.2, FUNNEL.z), fov: 34, ppx: 0.6 },
-  // First look down at all the enquiries. Then fall to their height, with
-  // the whole clock towering behind them, before isolating our dim light.
-  { P: 5.5, eye: fix(DISH.x + 1.1, DISH.y + 11.8, DISH.z + 7.4), at: fix(DISH.x, DISH.y + 0.25, DISH.z), fov: 36, ppx: 0.62, roll: -0.04 },
-  { P: 6.05, eye: fix(DISH.x + 2.1, DISH.y + 3.5, DISH.z + 15.4), at: fix(DISH.x - 0.6, DISH.y + 3.2, DISH.z - 5.3), fov: 46, ppx: 0.63 },
-  { P: 6.6, eye: fix(DISH.x + 0.8, DISH.y + 1.6, DISH.z + 5.2), at: (c) => c.h.pos.clone().add(V(0, 0.1, 0)), fov: 29, ppx: 0.63 },
-  { P: 7.08, eye: fix(DISH.x + 2.8, 31.6, 4.4), at: fix(DISH.x + 0.2, 30.2, -1.6), fov: 40, ppx: 0.6 },
-  // ADMIN: the first tray, carried across, the floor of claws, the stamp.
-  // The admin slowly loses its horizon. Only the stamp briefly restores it.
-  { P: 7.45, eye: fix(TRAYS[0].x + 1.6, TRAY_Y + 2.0, 4.2), at: fix(TRAYS[0].x + 0.5, TRAY_Y + 1.0, -1.0), fov: 46, ppx: 0.62, roll: -0.03 },
-  { P: 8.0, eye: rel(0.1, 1.6, 4.2), at: rel(0.5, -0.3, 0), fov: 43, ppx: 0.63, roll: 0.05 },
-  { P: 8.55, eye: fix(TRAYS[1].x + 1.8, TRAY_Y + 2.6, 8.0), at: fix(TRAYS[1].x + 1.6, TRAY_Y + 1.0, -1.2), fov: 34, ppx: 0.63, roll: -0.065 },
-  { P: 9.05, eye: rel(-0.6, 0.7, 2.5), at: rel(0.6, -0.1, 0), fov: 42, ppx: 0.63, roll: 0.04 },
-  { P: 9.45, eye: fix(TRAYS[2].x - 0.3, TRAY_Y + 0.65, 2.4), at: fix(TRAYS[2].x + 0.05, TRAY_Y + 0.4, -0.55), fov: 31, ppx: 0.63 },
-  // FOLLOW-UP: we chase it down the last track, faster and faster, and see
-  // the track just end in mid-air ahead of it; we stop at the edge, it doesn't.
-  // Keep the eye above the descending track. A low chase placed the camera
-  // inside the invoice rim and the rail when the customer rounded the bend.
-  { P: 9.66, eye: fix(TRAYS[2].x - 1.5, TRAY_Y + 2.7, 1.3), at: fix(TRAYS[2].x + 0.7, TRAY_Y + 0.1, -0.7), fov: 40, ppx: 0.62 },
-  { P: 9.9, eye: chase(1.9, 2.4, -1.2), at: ahead(1.6, 0.3), fov: 44, ppx: 0.6 },
-  { P: 10.2, eye: chase(2.3, 2.6, -1.6), at: ahead(3.2, 0.7), fov: 50, ppx: 0.58 },
-  { P: 10.45, eye: chase(2.4, 2.8, -1.4), at: ahead(4.6, 1.2), fov: 54, ppx: 0.56 },
-  { P: 10.68, eye: (c) => edge(1.7, 1.7, -0.55, c.L), at: (c) => edge(-3.4, -2.6, 0, c.L), fov: 48, ppx: 0.55 },
-  // Then over the edge after it (the dive, in cameraAt), braking above the
-  // lake while it falls the last of the way into the red.
-  { P: 10.9, eye: (c) => edge(-0.5, 2.3, 0.45, c.L), at: (c) => c.h.pos.clone(), fov: 46, ppx: 0.5 },
-  { P: FALL_END + 0.05, eye: restEye, at: restAt, fov: 46, ppx: 0.5 },
-  // YOU: up out of the pit, across to the owner's lamp, then all of it.
-  // (Rising out of the well toward the corner: the owner's back, the chain
-  // running past us up to the tower; then beside them at the crank.)
-  { P: 11.68, eye: fix(5, 1.5, 8.8), at: fix(-5, -8.5, 7.9), fov: 46, ppx: 0.55 },
-  { P: 11.9, eye: fix(-8, 8, 7.5), at: cfix(-0.3, 1.6, 0.4), fov: 46, ppx: 0.6 },
-  { P: 12.12, eye: cfix(2.2, 3.0, 6.5), at: cfix(-0.25, 1.1, 0.3), fov: 42, ppx: 0.64 },
-  { P: 12.3, eye: cfix(2.7, 2.2, 4.4), at: cfix(-0.25, 1.0, 0.35), fov: 38, ppx: 0.67 },
-  { P: 12.62, eye: cfix(3.05, 1.38, 0.55), at: cfix(0.1, 1.05, 0.35), fov: 27, ppx: 0.64 },
-  { P: 12.95, eye: cfix(2.95, 1.5, -0.2), at: cfix(0.05, 1.08, 0.4), fov: 28, ppx: 0.63 },
-  // Then up and back over the corner, until the whole tower is in.
-  // (In front of the owner, low: their silhouette at the crank under the
-  // whole tower it turns, the chain running up into it. Then in close to the
-  // hands as they let go, in the lamp's light; the dark takes the rest.)
-  { P: 13.6, eye: cfix(0.95, 0.85, -2.5), at: fix(0, 24, -1), fov: 62, ppx: 0.56, ppy: 0.3 },
-  // (The title is said above them; the hands and the crank in the lower third.)
-  { P: 14.0, eye: cfix(1.3, 1.25, -2.3), at: cfix(0.45, 1.0, 0.2), fov: 40, ppx: 0.5, ppy: 0.68 },
-  { P: 14.4, eye: cfix(1.45, 1.3, -2.7), at: cfix(0.45, 1.05, 0.25), fov: 38, ppx: 0.5, ppy: 0.68 },
-  { P: 14.64, eye: cfix(1.5, 1.32, -2.85), at: cfix(0.45, 1.05, 0.25), fov: 37, ppx: 0.5, ppy: 0.68 },
-  // THE TURN: in to the middle of the tower as it comes apart; the new one round us.
-  // (Moved in the dark: the teardown is seen whole.)
-  { P: 14.9, eye: fix(9, 31, 96), at: fix(0, 24, 0), fov: 36, ppx: 0.5 },
-  // Cross the falling structure. At assembly, a wide, level frame lets the
-  // pieces build around us instead of keeping the viewer outside the work.
-  { P: 15.3, eye: fix(-18, 34, 24), at: fix(0, 35, 0), fov: 58, ppx: 0.5, roll: -0.11 },
-  { P: 15.9, eye: fix(10, 40, 12), at: fix(-0.5, 37, -2), fov: 62, ppx: 0.5, roll: 0.14 },
-  { P: 16.45, eye: fix(0.8, 38.5, 3.2), at: fix(-1.2, 38.8, -3), fov: 65, ppx: 0.5 },
-  { P: 16.9, eye: fix(-1, 45, 27), at: fix(-6, 44, 0), fov: 40, ppx: 0.5 },
-  // NEW: the door, the ring of light.
-  { P: 17.28, eye: fix(-9.0, 52.4, 10.8), at: fix(-11.4, 50.6, 0), fov: 38, ppx: 0.6 },
-  { P: 17.6, eye: rel(-1.7, 0.8, 3.5), at: rel(1.2, -0.2, -0.3), fov: 42, ppx: 0.67 },
-  // (Held in front of the column line while it runs on to the turn.)
-  { P: 17.86, eye: fix(6.6, 47.8, 5.5), at: (c) => c.h.pos.clone().add(V(0.4, 0.1, 0)), fov: 42, ppx: 0.58 },
-  { P: 18.2, eye: fix(GATE_X + 3.2, GATE_Y + 2.1, 6.4), at: fix(GATE_X - 0.2, GATE_Y + 0.8, -0.2), fov: 40, ppx: 0.6 },
-  // AI: the turbine, at 3am, under the moon.
-  { P: 18.8, eye: (c) => V(T(c.L).x + 4.4, T(c.L).y + 3.4, T(c.L).z + 11), at: (c) => V(T(c.L).x - 0.6, T(c.L).y + 1.4, T(c.L).z - 2), fov: 40, ppx: 0.62 },
-  { P: 19.2, eye: (c) => V(T(c.L).x + 1.4, T(c.L).y + 0.7, T(c.L).z + 5.4), at: (c) => c.h.pos.clone(), fov: 40, ppx: 0.6 },
-  { P: 19.85, eye: (c) => V(T(c.L).x - 0.6, T(c.L).y + 1.2, T(c.L).z + 13), at: (c) => V(T(c.L).x - 1.2, T(c.L).y - 2.4, T(c.L).z), fov: 40, ppx: 0.62 },
-  // PLATFORM: along the channel through the three nodes.
-  { P: 20.45, eye: rel(0.2, 1.0, 4.6), at: rel(0.5, -0.3, 0), fov: 42, ppx: 0.68 },
-  // One level horizon and one uninterrupted view through all three nodes:
-  // the visual answer to the fragmented, tilted tray-to-tray sequence.
-  { P: 21.05, eye: fix(TRAYS[0].x - 5.8, TRAY_Y + 2.5, 7.1), at: fix(TRAYS[2].x + 0.5, TRAY_Y + 0.5, -0.8), fov: 38, ppx: 0.62 },
-  // FOLLOW-UP: the same chase down the same last track as before (a rhyme);
-  // where it ended, the track now turns up into the gold spiral.
-  // (From above this time, then out to the spiral's outside as it climbs.)
-  // (In front of the new frame's columns, then down behind our customer.)
-  { P: 21.5, eye: fix(EDGE.x - 6.2, EDGE.y + 4.4, EDGE.z + 7.2), at: (c) => c.h.pos.clone().addScaledVector(c.h.dir, 1.2), fov: 44, ppx: 0.58 },
-  // (A slow climbing circle outside the spiral: the customer goes round the
-  // tower and up through the frame, instead of the world spinning round them.)
-  { P: 22.3, eye: orbit(0.55, 21, 30.5), at: axisToward(0.5, 0.4), fov: 48, ppx: 0.58 },
-  { P: 22.55, eye: orbit(0.86, 28.5, 33.5), at: axisToward(0.35, 0.8), fov: 50, ppx: 0.58 },
-  { P: 23.1, eye: orbit(1.6, 30, 43), at: axisToward(0.3, 0.6), fov: 50, ppx: 0.58 },
-  { P: 23.45, eye: orbit(2.2, 28.5, 51), at: axisToward(0.45, 0), fov: 46, ppx: 0.6 },
-  // YOU: down to the desk; the lid, the lamp, up; then past them to the machine.
-  { P: 24.0, eye: cfix(2.2, 8.5, -7.6), at: cfix(-1.3, 1.0, 1.4), fov: 42, ppx: 0.6 },
-  { P: 24.3, eye: cfix(2.2, 1.45, -2.2), at: cfix(-1.2, 1.0, 1.3), fov: 42, ppx: 0.66 },
-  // (In front of the flywheel, not through its rim.)
-  { P: 24.47, eye: cfix(0.1, 1.4, -2.0), at: cfix(-1.4, 0.98, 1.45), fov: 36, ppx: 0.63 },
-  { P: 24.62, eye: cfix(-0.95, 1.32, -0.62), at: cfix(-1.55, 0.95, 1.55), fov: 31, ppx: 0.62 },
-  { P: 24.98, eye: cfix(-1.02, 1.24, -0.42), at: cfix(-1.6, 0.97, 1.6), fov: 30, ppx: 0.61 },
-  { P: 25.3, eye: cfix(-2.3, 1.6, -1.5), at: cfix(-1.2, 1.7, 3.0), fov: 40, ppx: 0.6 },
-  // (Behind the owner, who has turned to look: their silhouette, and the machine running on.)
-  { P: 25.62, eye: cfix(-2.7, 0.95, -1.4), at: fix(0, 21, -1), fov: 54, ppx: 0.6, ppy: 0.44 },
-  { P: 27.4, eye: cfix(-3.2, 1.1, -3.6), at: fix(0, 23, -1), fov: 50, ppx: 0.58, ppy: 0.44 },
+  // OPEN: the town at dusk, then down to one lit room.
+  { P: 0, eye: fix(-112, 56, 94), at: fix(-38, 0, 8), fov: 36, ppx: 0.6 },
+  ...hold(0.62, fix(-94, 40, 77), fix(-41, 1, 13), 34),
+  { P: 1.22, eye: fix(-66, 19, 52), at: fix(-42.5, 2.0, 17), fov: 34, ppx: 0.6 },
+  ...hold(1.66, fix(-42.6, 10.6, 42.5), fix(-42.4, 1.6, 17.0), 34, 0.6, 0.06),
+  { P: 1.88, eye: fix(-42.1, 6.9, 27.6), at: fix(-42.2, 1.5, 16.9), fov: 34, ppx: 0.6 },
+  { P: 2.06, eye: H(-2.6, 1.85, -7.6), at: H(-2.9, 1.4, -1.8), fov: 33, ppx: 0.6 },
+  ...hold(2.3, READ_EYE, READ_AT, 33, 0.6, 0.06),
+  // WEBSITE: the page loading; up over the town's phones; back to the form.
+  ...hold(2.9, H(-3.05, 1.6, -6.0), READ_AT, 32, 0.6, 0.05),
+  { P: 3.2, eye: fix(-50, 17, 34), at: fix(-36, 7, 9), fov: 44, ppx: 0.6 },
+  ...hold(3.5, fix(-52, 19, 37), fix(-35, 7, 8), 44, 0.6, 0.08),
+  { P: 3.92, eye: H(-2.4, 3.0, -10.5), at: H(-2.9, 1.4, -1.8), fov: 34, ppx: 0.6 },
+  ...hold(4.3, READ_EYE, READ_AT, 32, 0.6, 0.06),
+  ...hold(4.74, H(-2.2, 2.0, -8.4), H(-2.7, 1.6, -1.8), 35, 0.6, 0.04),
+  // INBOX: up after the envelope, across the town, to the workshop; the pile grows all night.
+  { P: 4.98, eye: H(-2.4, 2.6, -8.0), at: H(-2.9, 3.0, -2.6), fov: 38, ppx: 0.58 },
+  { P: 5.16, eye: env(-9, 4, 13), at: env(4, -1, -3), fov: 44, ppx: 0.56 },
+  { P: 5.42, eye: env(-12, 7, 16), at: env(10, -3, -6), fov: 46, ppx: 0.56 },
+  { P: 5.68, eye: fix(50.5, 2.6, 5.5), at: fix(47.6, 3.8, -8.6), fov: 40, ppx: 0.6 },
+  ...hold(5.98, fix(50.2, 2.6, 4.2), fix(47.4, 4.8, -8.6), 42, 0.6, 0.06),
+  ...hold(6.5, fix(39, 3.6, 9.5), fix(47.3, 8.6, -8.6), 46, 0.6, 0.06),
+  { P: 6.86, eye: fix(39.5, 2.6, 3), at: fix(42.5, 4.0, -11), fov: 46, ppx: 0.6 },
+  ...hold(7.1, S(-3.2, 1.9, 9.6), S(-3.8, 1.2, 4.0), 36, 0.6, 0.05),
+  ...hold(7.58, S(-3.5, 1.82, 2.12), S(-3.9, 1.3, 4.8), 50, 0.56, 0.05),
+  // ADMIN: behind the owner; the card being typed framed each time.
+  ...hold(8.3, fix(40.25, 1.86, -14.88), fix(38.9, 1.82, -12.0), 46, 0.6, 0.08),
+  ...hold(8.9, fix(40.7, 1.86, -14.88), fix(40.05, 1.9, -11.8), 46, 0.6, 0.06),
+  ...hold(9.5, fix(39.7, 1.95, -14.5), fix(38.6, 1.86, -12.0), 40, 0.6, 0.08),
+  { P: 9.86, eye: fix(40.3, 1.84, -14.88), at: fix(41.2, 1.86, -11.95), fov: 46, ppx: 0.6 },
+  ...hold(10.3, fix(40.1, 1.95, -14.9), fix(40.1, 1.9, -11.9), 64, 0.5, 0.06),
+  // FOLLOW-UP: out through the office window and across the town to Sam's new deck; a year; the other van.
+  { P: 10.43, eye: fix(40.0, 1.8, -12.2), at: fix(40.0, 1.9, -6.0), fov: 54, ppx: 0.5 },
+  { P: 10.5, eye: fix(40.0, 2.4, -8.6), at: fix(36.0, 4.0, 4.0), fov: 50, ppx: 0.5 },
+  { P: 10.64, eye: fix(-14, 30, 40), at: fix(-34, 2, 18), fov: 42, ppx: 0.58 },
+  ...hold(11.0, H(1.6, 4.2, -15.0), H(-1.6, 0.9, -6.0), 36, 0.6, 0.06),
+  ...hold(11.6, H(4.0, 7.0, -19.5), H(-1.4, 1.2, -5.0), 38, 0.6, 0.08),
+  ...hold(12.1, DECK_EYE, DECK_AT, 34, 0.6, 0.05),
+  { P: 12.32, eye: fix(-40.5, 10.5, 16.0), at: fix(-43.5, 1.0, 6.0), fov: 42, ppx: 0.6 },
+  ...hold(12.56, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.06),
+  // YOU: night; across to the office window; the owner in the clutter; out over the town; back.
+  { P: 12.9, eye: fix(30, 26, 26), at: fix(40, 2, -13), fov: 40, ppx: 0.6 },
+  ...hold(13.3, S(-3.9, 1.8, 11.0), S(-3.9, 1.6, 3.6), 36, 0.6, 0.06),
+  { P: 13.8, eye: S(-3.4, 2.1, 14.5), at: S(-3.9, 1.7, 3.6), fov: 38, ppx: 0.58 },
+  ...hold(14.4, fix(16, 34, 48), fix(40, 2, -13), 28, 0.56, 0.06),
+  { P: 14.78, eye: S(-4.0, 2.0, 8.5), at: S(-3.9, 1.2, 3.8), fov: 40, ppx: 0.5 },
+  { P: 15.0, eye: S(-3.95, 1.75, 5.6), at: S(-3.92, 1.05, 3.75), fov: 40, ppx: 0.5, ppy: 0.56 },
+  // THE TURN: the hands; the paper coming apart round them; black; the town at dusk; the new route.
+  ...hold(15.4, S(-2.62, 1.22, 4.1), S(-3.9, 1.0, 3.68), 40, 0.5, 0.06, 0.52),
+  { P: 15.66, eye: S(-2.3, 1.75, 2.25), at: S(-4.1, 1.55, 4.4), fov: 54, ppx: 0.5 },
+  { P: 16.22, eye: S(-2.1, 1.95, 2.2), at: S(-4.2, 1.35, 4.5), fov: 58, ppx: 0.5 },
+  { P: 16.34, eye: S(-3.95, 1.9, 8.2), at: S(-3.9, 3.0, 20.0), fov: 50, ppx: 0.5 },
+  { P: 16.5, eye: fix(-30, 80, 110), at: fix(0, 6, 0), fov: 40, ppx: 0.5 },
+  ...hold(16.9, fix(-24, 72, 100), fix(0, 8, 0), 40, 0.5, 0.08),
+  ...hold(17.7, fix(-20, 34, 58), fix(0, 14, 2), 46, 0.56, 0.08),
+  // NEW WEBSITE.
+  { P: 18.06, eye: H(-2.4, 3.0, -10.5), at: H(-2.9, 1.4, -1.8), fov: 34, ppx: 0.6 },
+  ...hold(18.4, READ_EYE, READ_AT, 32, 0.6, 0.06),
+  { P: 18.7, eye: fix(-50, 17, 34), at: fix(-36, 7, 9), fov: 44, ppx: 0.6 },
+  ...hold(19.0, fix(-52, 19, 37), fix(-35, 7, 8), 44, 0.6, 0.05),
+  ...hold(19.4, READ_EYE, READ_AT, 32, 0.6, 0.06),
+  // NEW AI: along the line to the reply and back; the reply read; the booking; 3am.
+  { P: 19.72, eye: H(-2.2, 3.0, -9.0), at: H(-2.8, 3.0, -2.4), fov: 40, ppx: 0.58 },
+  { P: 19.92, eye: env(-8, 6, 13), at: env(6, -1, -4), fov: 44, ppx: 0.56 },
+  { P: 20.08, eye: env(8, 6, -5), at: env(-6, -2, 5), fov: 46, ppx: 0.56 },
+  { P: 20.26, eye: fix(-38.0, 7.2, 26.5), at: fix(-41.0, 1.6, 18.0), fov: 38, ppx: 0.6 },
+  ...hold(20.5, READ_EYE, READ_AT, 32, 0.6, 0.06),
+  { P: 20.62, eye: fix(-37.5, 9.0, 25.0), at: fix(-20, 12, 6), fov: 42, ppx: 0.58 },
+  ...hold(20.76, node(2.4, 15.9, 2.8), node(4, 15.5, -6), 38, 0.6, 0.04),
+  { P: 20.98, eye: fix(-28, 24, 26), at: fix(-12, 15, -1), fov: 44, ppx: 0.6 },
+  ...hold(21.3, node(-16.4, 15.0, 7.4), node(-14, 14.1, -1), 40, 0.6, 0.08),
+  // NEW PLATFORM: the quote, filled in by itself; it flies to Sam; accepted; the deck; paid.
+  ...hold(22.1, node(18.6, 15.0, -1.6), node(21, 14.1, -10), 40, 0.6, 0.12),
+  { P: 22.38, eye: env(-8, 3, 12), at: env(-6, -1, 4), fov: 46, ppx: 0.56 },
+  ...hold(22.52, READ_EYE, READ_AT, 32, 0.6, 0.04),
+  ...hold(22.9, H(4.0, 5.5, -15.5), H(-1.2, 0.8, -6.5), 38, 0.6, 0.06),
+  ...hold(23.4, DECK_EYE, DECK_AT, 34, 0.6, 0.08),
+  // NEW FOLLOW-UP: the review; a year; the reminder; our van.
+  ...hold(24.2, DECK_EYE, DECK_AT, 34, 0.6, 0.1),
+  ...hold(24.7, H(4.0, 7.0, -19.5), H(-1.4, 1.2, -5.0), 38, 0.6, 0.12),
+  ...hold(25.2, DECK_EYE, DECK_AT, 34, 0.6, 0.08),
+  { P: 25.4, eye: fix(-40.5, 10.5, 16.0), at: fix(-43.5, 1.0, 6.0), fov: 42, ppx: 0.6 },
+  ...hold(25.64, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.06),
+  // NEW YOU: across the town at roof height; the office at six; the lid, the lamp; out the door; the van away.
+  { P: 25.8, eye: fix(0, 22, 14), at: fix(30, 4, -8), fov: 44, ppx: 0.56 },
+  { P: 25.96, eye: S(-3.3, 2.0, 10.4), at: S(-3.9, 1.4, 3.8), fov: 36, ppx: 0.6 },
+  ...hold(26.3, S(-3.5, 1.8, 2.12), S(-3.9, 1.75, 5.0), 50, 0.56, 0.06),
+  ...hold(26.62, S(-2.75, 1.3, 3.3), S(-4.1, 1.0, 4.0), 40, 0.5, 0.05),
+  { P: 26.8, eye: S(-3.95, 1.75, 5.2), at: S(-2.0, 1.2, 6.5), fov: 44, ppx: 0.56 },
+  { P: 27.0, eye: S(-0.5, 2.0, 13.0), at: S(-1.6, 1.2, 6.5), fov: 40, ppx: 0.56 },
+  { P: 27.3, eye: S(4.0, 2.6, 17.0), at: S(3.0, 1.2, 9.0), fov: 40, ppx: 0.56 },
+  ...hold(27.7, van(-14, 9, 16), van(0, 1, 0), 40, 0.56, 0.06),
+  // END: up over the town at dusk; the light fills it.
+  { P: 28.4, eye: fix(30, 40, 70), at: fix(4, 8, -4), fov: 44, ppx: 0.5 },
+  { P: 29.6, eye: fix(24, 64, 96), at: fix(0, 8, -4), fov: 46, ppx: 0.5 },
 ];
 
 export type CamOut = { eye: THREE.Vector3; at: THREE.Vector3; fov: number; ppx: number; ppy: number; roll: number };
-
-const cache: { eye: THREE.Vector3; at: THREE.Vector3 }[] = KEYS.map(() => ({ eye: new THREE.Vector3(), at: new THREE.Vector3() }));
 
 function hermite(p0: number, p1: number, m0: number, m1: number, t: number) {
   const t2 = t * t;
   const t3 = t2 * t;
   return (2 * t3 - 3 * t2 + 1) * p0 + (t3 - 2 * t2 + t) * m0 + (-2 * t3 + 3 * t2) * p1 + (t3 - t2) * m1;
 }
-
-/** A shared, weighted harmonic tangent. At a change of direction it settles
- * into the corner instead of swinging past it and returning to the shot. */
+/** A shared, weighted harmonic tangent: at a change of direction it settles instead of swinging past. */
 function tangent(h0: number, h1: number, d0: number, d1: number) {
   if (d0 * d1 <= 0) return 0;
   const w0 = 2 * h1 + h0;
   const w1 = h1 + 2 * h0;
   return (w0 + w1) / (w0 / d0 + w1 / d1);
 }
-
 function shotCurve(p0: number, p1: number, p2: number, p3: number, h0: number, h1: number, h2: number, t: number) {
   const d = (p2 - p1) / h1;
   const m0 = h0 > 0 ? tangent(h0, h1, (p1 - p0) / h0, d) : d;
@@ -220,7 +178,9 @@ function shotCurve(p0: number, p1: number, p2: number, p3: number, h0: number, h
   return hermite(p1, p2, m0 * h1, m1 * h1, t);
 }
 
-/** The camera at film time P (before the breath and the lean). */
+const cache = KEYS.map(() => ({ eye: new THREE.Vector3(), at: new THREE.Vector3() }));
+
+/** The camera at film time P. */
 export function cameraAt(P: number, c: Ctx, out: CamOut) {
   let i = 0;
   while (i < KEYS.length - 2 && P >= KEYS[i + 1].P) i++;
@@ -228,83 +188,42 @@ export function cameraAt(P: number, c: Ctx, out: CamOut) {
   const i1 = i;
   const i2 = Math.min(KEYS.length - 1, i + 1);
   const i3 = Math.min(KEYS.length - 1, i + 2);
-  for (const k of [i0, i1, i2, i3]) {
-    cache[k].eye.copy(KEYS[k].eye(c));
-    cache[k].at.copy(KEYS[k].at(c));
+  for (const j of [i0, i1, i2, i3]) {
+    cache[j].eye.copy(KEYS[j].eye(c, P));
+    cache[j].at.copy(KEYS[j].at(c, P));
   }
   const A = KEYS[i1];
-  const B = KEYS[i2];
-  const span = Math.max(1e-4, B.P - A.P);
+  const Bk = KEYS[i2];
+  const span = Math.max(1e-4, Bk.P - A.P);
   const t = Math.min(1, Math.max(0, (P - A.P) / span));
   const h0 = KEYS[i1].P - KEYS[i0].P;
   const h2 = KEYS[i3].P - KEYS[i2].P;
-  for (const f of ["eye", "at"] as const) {
-    const p0 = cache[i0][f];
-    const p1 = cache[i1][f];
-    const p2 = cache[i2][f];
-    const p3 = cache[i3][f];
-    for (const ax of ["x", "y", "z"] as const) {
-      out[f][ax] = shotCurve(p0[ax], p1[ax], p2[ax], p3[ax], h0, span, h2, t);
-    }
-  }
-  // Lens, banking and composition use the same continuous shot curve as the
-  // flight. Their velocity no longer resets every time the camera passes a key.
+  for (const f of ["eye", "at"] as const)
+    for (const ax of ["x", "y", "z"] as const) out[f][ax] = shotCurve(cache[i0][f][ax], cache[i1][f][ax], cache[i2][f][ax], cache[i3][f][ax], h0, span, h2, t);
   for (const field of ["fov", "ppx", "ppy", "roll"] as const) {
-    const fallback = field === "roll" ? 0 : field === "fov" ? 40 : 0.5;
-    out[field] = shotCurve(KEYS[i0][field] ?? fallback, A[field] ?? fallback, B[field] ?? fallback, KEYS[i3][field] ?? fallback, h0, span, h2, t);
-  }
-
-  // THE DIVE: over the edge after it. The eye falls with it, a few metres
-  // behind and above, looking down at it; then it brakes (a curve of its
-  // own, easing out) and the customer falls away from us into the red. It
-  // settles above the lake as it lands.
-  const w = Math.min(smoother(range(P, 10.86, 11.1)), 1 - smoother(range(P, FALL_END - 0.04, FALL_END + 0.07)));
-  if (w > 0) {
-    const k = range(P, 10.9, FALL_END);
-    const brake = lerp(EDGE.y + 2.3, DIVE_REST, 1 - (1 - k) * (1 - k));
-    const y = smax(c.h.pos.y + 4, brake, 1.5);
-    const s = smoother(range(P, 11.0, FALL_END));
-    const n = Math.hypot(c.h.dir.x, c.h.dir.z) || 1;
-    _hd.set(c.h.dir.x / n, 0, c.h.dir.z / n).lerp(toCorner(c.L, _tc), s).normalize();
-    const back = lerp(lerp(1.2, DIVE_BACK, smoother(range(P, 10.9, 11.3))), REST_BACK, s);
-    _de.set(c.h.pos.x - _hd.x * back - _hd.z * DIVE_SIDE * (1 - s), y, c.h.pos.z - _hd.z * back + _hd.x * DIVE_SIDE * (1 - s));
-    diveAt(c.h.pos, _hd, _da);
-    out.eye.lerp(_de, w);
-    out.at.lerp(_da, w);
+    const fb = field === "roll" ? 0 : field === "fov" ? 40 : 0.5;
+    out[field] = shotCurve(KEYS[i0][field] ?? fb, A[field] ?? fb, Bk[field] ?? fb, KEYS[i3][field] ?? fb, h0, span, h2, t);
   }
 }
-const _de = new THREE.Vector3();
-const _hd = new THREE.Vector3();
-const _tc = new THREE.Vector3();
-const _da = new THREE.Vector3();
-/** A smooth max (log-sum-exp): the larger of a and b, rounded over about s. */
-const smax = (a: number, b: number, s: number) => Math.max(a, b) + s * Math.log(1 + Math.exp(-Math.abs(a - b) / s));
-
 
 /**
- * THE CAMERA, SMOOTHED. Keys that ride with the customer inherit every
- * change in its pace (a stop at the merge, the drop into the chute), and a
- * chase meeting a fixed composition bends the flight. Averaging the flight
- * over a short window of film time (a Gaussian, ±0.07 screens) rounds those
- * corners off: the same shots, without a kink anywhere between them. The
- * customer is re-placed at each sample, so a shot that follows it still
- * follows it. Composed frames move by millimetres; a held shot not at all.
+ * THE CAMERA, SMOOTHED: the flight averaged over a short window of film
+ * time (a Gaussian, about ±0.07 screens), re-evaluating every key at each
+ * sample so a shot that rides with the envelope still rides with it.
  */
 const SM_N = 4;
 const SM_STEP = 0.0175;
 const SM_W = Array.from({ length: SM_N * 2 + 1 }, (_, i) => Math.exp(-0.5 * Math.pow(((i - SM_N) * SM_STEP) / 0.034, 2)));
 const SM_SUM = SM_W.reduce((a, b) => a + b, 0);
-const _hs = heroInit();
 const _o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0 };
-export function cameraSmooth(P: number, c: Ctx, time: number, out: CamOut, end = 27.4) {
+export function cameraSmooth(P: number, c: Ctx, out: CamOut, end: number) {
   out.eye.set(0, 0, 0);
   out.at.set(0, 0, 0);
   out.fov = out.ppx = out.ppy = out.roll = 0;
   for (let i = 0; i < SM_W.length; i++) {
     const Pk = Math.min(end, Math.max(0, P + (i - SM_N) * SM_STEP));
     const w = SM_W[i] / SM_SUM;
-    heroAt(Pk, c.L, _hs, time);
-    cameraAt(Pk, { h: _hs, L: c.L }, _o);
+    cameraAt(Pk, c, _o);
     out.eye.addScaledVector(_o.eye, w);
     out.at.addScaledVector(_o.at, w);
     out.fov += _o.fov * w;
@@ -313,3 +232,19 @@ export function cameraSmooth(P: number, c: Ctx, time: number, out: CamOut, end =
     out.roll += _o.roll * w;
   }
 }
+
+/** On a portrait screen: a wider lens, the subject toward the middle and a little lower. */
+export function phoneAdjust(c: CamOut, aspect: number) {
+  if (aspect >= 1) return c;
+  const w = Math.min(1, (1 - aspect) / 0.45);
+  const vfov = THREE.MathUtils.degToRad(c.fov);
+  // Keep the horizontal field near what the desktop shot had.
+  const hWide = 2 * Math.atan(Math.tan(vfov / 2) * 1.6);
+  const vNeed = 2 * Math.atan(Math.tan(hWide / 2) / aspect);
+  c.fov = THREE.MathUtils.lerp(c.fov, Math.min(78, THREE.MathUtils.radToDeg(vNeed) * 0.62), w);
+  c.ppx = THREE.MathUtils.lerp(c.ppx, 0.5 + (c.ppx - 0.5) * 0.25, w);
+  c.ppy = THREE.MathUtils.lerp(c.ppy, c.ppy + 0.06, w);
+  return c;
+}
+
+export { k as _k, B as _B };

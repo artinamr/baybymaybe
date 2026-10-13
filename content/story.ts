@@ -40,7 +40,7 @@ export const STORY_TITLE = "The quiet leak";
 export const DOOR = {
   kicker: "A short film by Nerodyn",
   title: STORY_TITLE,
-  line: "Follow one customer through the gaps, then see a better route take shape.",
+  line: "Follow one customer from the first search to the finished job and beyond. Then watch the same evening go another way.",
   sound: "Start with sound",
   silent: "Start in silence",
   how: "Scroll, drag or use the arrow keys. Or press play and sit back.",
@@ -79,7 +79,7 @@ export type StoryChapter = {
   beat?: string;
   /** What the picture shows, for the transcript (and anyone listening to it). */
   scene: string;
-  /** Which machine is on screen. */
+  /** Which way of working is on screen. */
   machine: "old" | "new" | "none";
 };
 
@@ -89,103 +89,105 @@ export const CHAPTERS: StoryChapter[] = [
     name: "One customer",
     kicker: "Prologue",
     title: "Someone chose you.",
-    line: "They need a job done. You have spent years building the business that can do it.",
-    beat: "Every light is a person. Stay with this one.",
+    line: "Sam needs a new deck. Out of every business in town, they’re looking at yours.",
+    beat: "Every lit window is someone who might need you. Stay with Sam.",
     scene:
-      "An iron machine rises through a dark cathedral. Its tracks, trays and gears have accumulated around a central tower. Warm lights enter at the top. One burns brighter than the others. The camera moves close to it: this is the customer we will follow.",
+      "A small town at dusk, built like an architect’s model: white houses, dark roofs, streetlights coming on. The camera comes down to one lit living room. On the sofa sits Sam, a plain white figure, lit by a phone. Outside the open doors is an old deck, grey, with a board missing. Sam searches for deck builders and taps your business.",
     machine: "old",
   },
   {
     id: "website",
     name: "Your website",
     kicker: "01 Your website",
-    title: "They arrive. The door stays shut.",
-    line: "On their phone, a page loads slowly. They wait for a way to ask.",
+    title: "They tap. The page takes its time.",
+    line: "On a phone, every second of loading is a chance to give up.",
     fact: { text: "Google’s 2016 global data put likely abandonment at 53% when a mobile page took over three seconds.", source: "google" },
-    beat: "Our customer stays. Watch the others fall.",
+    beat: "Sam waits it out. Most people don’t.",
     scene:
-      "Amber light catches the teeth of a heavy iron gate. The customers queue while a loading gauge passes three seconds. Lights leave the track and fall through the machine. The one we follow waits until the gate opens, then slips underneath it.",
+      "The phone’s screen lifts into the air beside Sam: a blank page, a spinner, a timer counting the seconds. Above the town, a hundred other phones are loading the same page. Past three seconds, more than half of them tip over and go dark. Sam waits. The page arrives, a pop-up gets in the way, and a small contact link sits at the very bottom. Sam fills in a long form and presses submit.",
     machine: "old",
   },
   {
     id: "inbox",
     name: "Your inbox",
     kicker: "02 Your inbox",
-    title: "They send a message. Then wait.",
-    line: "7:40pm. The form says sent. Your inbox says nothing back.",
-    beat: "The night moves. They’re still waiting.",
+    title: "7:40pm. Sent. Then nothing.",
+    line: "Sam’s message lands in your inbox. All night, more mail piles up on top of it.",
+    beat: "Sam waited all night. Others went elsewhere.",
     scene:
-      "The track empties into a broad inbox tray. A clock reads 7:40pm. The great wheel above it carries the sun out of sight and the moon across the room. The waiting lights dim. Some drift over the rim. Our customer is still there when morning reaches the tray.",
+      "The form folds into an envelope of light and flies across the dark town to your workshop. It becomes the first strip of an inbox that grows into a pile in the air: suppliers, the bank, newsletters, and other people asking for quotes. As the clock runs through the night, some of those customers give up and their emails slide off the pile. At 9:13am you arrive, find Sam’s message at the bottom and reply.",
     machine: "old",
   },
   {
     id: "admin",
     name: "Your admin",
     kicker: "03 Your admin",
-    title: "They told you once.",
-    line: "You copy their details into a spreadsheet, a quote, an invoice. The person becomes a stack of entries.",
-    beat: "Our customer makes it through. Others don’t.",
+    title: "Then you type it all again.",
+    line: "Into the spreadsheet. Into the quote. Into the invoice. The same details, three times, by hand.",
+    beat: "The job’s done. Paid in full.",
     scene:
-      "Green lights flicker over three disconnected trays: spreadsheet, quote and invoice. Metal claws carry each customer across the gaps while typewriters strike. Some lights slip through the claws. The one we follow reaches the invoice tray and is stamped gold. The job is paid.",
+      "At your desk, behind your shoulder, three cards lift off the laptop one after another: a spreadsheet, a quote typed at night, an invoice. Each holds the same name, email and job, typed out again. In the spreadsheet, other jobs go cold: a quote that was never sent, an email address with a typo. Sam says yes, the deck gets built, and you stamp the invoice paid.",
     machine: "old",
   },
   {
     id: "followup",
     name: "Your follow-up",
     kicker: "04 Your follow-up",
-    title: "The invoice is paid. The track ends.",
-    line: "The job is done. Nothing in this machine remembers to ask how it went.",
-    beat: "You watch them fall. You can’t reach them.",
+    title: "Paid. Then nothing.",
+    line: "No thank-you. No check-in. A year later Sam needs you again and can’t remember your name.",
+    beat: "They’d have come back. Nobody asked.",
     scene:
-      "The camera follows our gold light along the last track. Red light rises from below. Ahead, the rail stops in open air. The customer rolls beyond it. For a moment the light hangs alone, then falls. The camera dives after it into the pit. The person we followed joins the lights lost from every floor.",
+      "The camera crosses the town to Sam’s garden as the last boards of the new deck drop into place. Sam steps out onto it. Then a year passes in a few seconds: the sun circles, the timber turns grey. Sam searches for someone to oil the deck, taps the first result, and another company’s van pulls up outside.",
     machine: "old",
   },
   {
     id: "you",
     name: "You",
     kicker: "05 You",
-    title: "11:47pm. Still turning.",
-    line: "The last email. The unpaid invoice. Another night at the desk, making all these parts behave.",
-    beat: "Tomorrow asks you to do it again.",
+    title: "11:47pm. Still typing.",
+    line: "Every enquiry, quote and invoice still goes through you, by hand, after hours.",
+    beat: "Tomorrow, the same again.",
     scene:
-      "The camera rises from the lost lights and pulls back until the whole tower is visible. Each floor leaks into the same red pit. At the foot of the machine, one small figure sits under a desk lamp. A clock reads 11:47pm. The figure turns a hand crank. The weight of the whole tower depends on that motion.",
+      "Night again. Through the workshop window you sit at the desk under a lamp, typing, with cards crowding the air around you: quotes to write, an overdue invoice, a call to return. The camera pulls back over the sleeping town until yours is the only lit window, the inbox pile still standing beside it.",
     machine: "old",
   },
   {
     id: "turn",
     name: "The turn",
-    title: "Take your hand off the crank.",
-    beat: "Rebuild the route. Give the evening back.",
+    title: "Take your hands off the keyboard.",
+    beat: "Same customer. Same evening. A different route.",
     scene:
-      "The crank stops. The lights and gears hold still. Silence gives us time to see the machine as a whole. Then its joints open. Rust and iron fall away; great gears tumble past the camera into the dark. A white flash clears the frame. Glass channels and indigo rings assemble around the same route, each connection locking into the next.",
+      "Your hands stop and lift off the keys. Silence. The cards around the desk hold still, then let go and fall like paper into the dark. The clock runs backward to 7:38pm and the town lights up again at dusk. Over it, a single line of indigo light draws itself from Sam’s house to your workshop and back, and six parts lock onto it: website, instant reply, booking, quote, invoice, follow-up.",
     machine: "none",
   },
   {
     id: "new-website",
     name: "Website",
     kicker: "Website",
-    title: "This time, the door opens.",
-    line: "The same customer. A clear page on their phone. A visible way to ask for the job.",
-    scene: "We return to the top of the rebuilt machine and follow the same warm light. Where the iron gate stood, an open ring pulses as the customer passes through. There is no queue at the entrance.",
+    title: "This time, the page is ready.",
+    line: "Fast on a phone, with one clear button: Get a free quote. Three questions and it’s sent.",
+    scene:
+      "Sam on the sofa again, the same evening. The page is there at once, with a photo of a deck and one indigo button. Over the town, almost every phone stays lit. Sam answers three short questions, adds a photo of the old deck and sends it.",
     machine: "new",
   },
   {
     id: "new-ai",
     name: "AI automation",
     kicker: "AI automation",
-    title: "This time, they get a reply.",
-    line: "The assistant handles the first questions. It gathers the job details and leaves the judgement with your team.",
+    title: "This time, they hear back in a minute.",
+    line: "An assistant replies at 7:41pm, asks what you’d ask and offers times to measure up. Anything it can’t answer, it passes to you.",
     scene:
-      "The moon crosses the same space where the inbox once waited. A glass turbine catches our customer and sends the light into the next channel. The light keeps its warmth. The route continues while the desk below is quiet.",
+      "The enquiry runs along the line of light to the instant reply, and an answer comes straight back. On Sam’s phone: thanks for getting in touch, three times for a free measure-up. Sam taps Wednesday at 2pm and it appears in your calendar. At 3am another enquiry arrives and is answered. One asks about council consent, so the assistant passes it to you for the morning.",
     machine: "new",
   },
   {
     id: "new-platform",
     name: "Platform",
     kicker: "Platform",
-    title: "The person stays in the picture.",
-    line: "Their details travel with the job. The quote becomes a booking, then an invoice, without another copy.",
-    scene: "One continuous glass channel replaces the disconnected trays. Our customer passes through the quote, booking and invoice nodes. Each node lights in turn. No claw has to lift the customer across an open gap.",
+    title: "Typed once. Used everywhere.",
+    line: "The enquiry fills in the booking, the quote and the invoice. Sam accepts and pays from their phone.",
+    scene:
+      "At the quote, the details are already filled in from Sam’s enquiry; you add the price and send it. The quote flies to Sam’s phone and Sam accepts it. The new deck goes in, board by board. The invoice is made from the quote and Sam pays it online, standing on the new deck.",
     machine: "new",
   },
   {
@@ -193,17 +195,19 @@ export const CHAPTERS: StoryChapter[] = [
     name: "Follow-up",
     kicker: "Follow-up",
     title: "The end becomes a way back.",
-    line: "The job closes with a thank-you. A check-in follows. When they need you again, the way back is clear.",
-    scene: "The camera chases the same gold light towards the place where the old rail ended. This time the track curves upward. The customer enters a gold spiral, climbs around the tower and returns to the first door. The fall has become a return.",
+    line: "A thank-you, a review, and a reminder a year on when the deck needs oiling. Sam books again.",
+    scene:
+      "Two days after the job, Sam’s phone asks how it went, and Sam gives five stars. A year passes and the deck starts to grey. A message arrives: it’s been a year, time for an oil. Sam taps Book a time, and this time it’s your van that pulls up outside.",
     machine: "new",
   },
   {
     id: "new-you",
     name: "You",
     kicker: "You",
-    title: "6pm. The light goes out.",
-    line: "The work has a route of its own. You finish for the day. The machine keeps turning.",
-    scene: "The camera pulls back to the desk again. A flywheel turns where the hand crank used to be. The rebuilt tower carries the lights above it. At 6pm, the owner switches off the lamp. The small pool of light at the desk disappears; the light in the machine continues.",
+    title: "6pm. Laptop closed.",
+    line: "The work keeps moving without you at the keyboard. You go home.",
+    scene:
+      "Six o’clock, golden light in the workshop. A card shows the day: enquiries answered, measure-ups booked, quotes accepted, invoices paid, nothing waiting on you. You close the laptop, switch off the lamp and walk out to the van. As you drive home, a new enquiry crosses the town and gets its answer.",
     machine: "new",
   },
   {
@@ -211,7 +215,7 @@ export const CHAPTERS: StoryChapter[] = [
     name: "Find your leaks",
     title: "Find your leaks.",
     line: "Free audit in two days.",
-    scene: "The light fills the frame and settles to warm paper white.",
+    scene: "The camera rises over the town at dusk, the line of light still turning over it, and the picture settles to warm paper white.",
     machine: "none",
   },
 ];
@@ -231,57 +235,43 @@ export const ENDING = {
 
 /** The counters: the film's own customers, and it says so. */
 export const COUNTER = {
-  lost: "Lights lost in this run",
-  kept: "Lights carried through",
+  lost: "Customers lost in this film",
+  kept: "Customers kept",
   note: "Illustrative film counters",
   leaks: {
     website: "At the website",
     inbox: "In the inbox",
     admin: "In the admin",
-    followup: "After the sale",
+    followup: "After the job",
   },
   yours: "Yours",
-  drop: "Drop a customer in",
-  dropShort: "Drop one in",
+  drop: "Send an enquiry",
+  dropShort: "Send one",
 };
 
-export type PartId =
-  | "door"
-  | "gate"
-  | "dish"
-  | "wheel"
-  | "admin"
-  | "cliff"
-  | "crank"
-  | "pit"
-  | "portal"
-  | "turbine"
-  | "channel"
-  | "loop"
-  | "flywheel";
+export type PartId = "phone" | "inbox" | "owner" | "admin" | "deck" | "van" | "site" | "reply" | "booking" | "quote" | "invoice" | "followup";
 
-/** Hover a part of the machine: what it really is in your business. */
+/** Hover a part of the picture: what it really is in your business. */
 export const PARTS: Record<PartId, { name: string; line: string }> = {
-  door: { name: "The way in", line: "Search, ads and word of mouth: how people find you." },
-  gate: { name: "Your website", line: "The first door. In this story, it keeps people waiting." },
-  dish: { name: "Your inbox", line: "Enquiries wait here until someone gets to them." },
-  wheel: { name: "The hours", line: "Evening, night and morning go by while they wait." },
-  admin: { name: "Your admin", line: "The same details copied into the spreadsheet, the quote and the invoice." },
-  cliff: { name: "No follow-up", line: "The job ends here. The relationship has no route back." },
-  crank: { name: "You", line: "The owner’s evening keeps the old machine turning." },
-  pit: { name: "The lost lights", line: "The people this film’s machine dropped along the way." },
-  portal: { name: "Your new website", line: "Fast on a phone, with one clear next step." },
-  turbine: { name: "AI automation", line: "First questions answered, job details gathered, judgement left with your team." },
-  channel: { name: "Your platform", line: "Details entered once and used everywhere: quote, booking, invoice." },
-  loop: { name: "Follow-up", line: "A thank-you and a check-in. A clear way to return when the customer needs you." },
-  flywheel: { name: "The system", line: "Connected parts carry the work after the desk lamp goes out." },
+  phone: { name: "Sam’s phone", line: "Where most of your customers meet your business first." },
+  inbox: { name: "Your inbox", line: "Every enquiry waits here until someone gets to it." },
+  owner: { name: "You", line: "The one person every job passes through, by hand." },
+  admin: { name: "Your admin", line: "The same details typed into the spreadsheet, the quote and the invoice." },
+  deck: { name: "The job", line: "The work you’re good at. The admin shouldn’t stand in its way." },
+  van: { name: "The next visit", line: "Whoever the customer calls when they need help again." },
+  site: { name: "Your new website", line: "Fast on a phone, with one clear next step." },
+  reply: { name: "AI automation", line: "First replies in a minute, any hour. Questions it can’t answer go to you." },
+  booking: { name: "Online booking", line: "The customer picks a time that suits you both." },
+  quote: { name: "Quotes", line: "Filled in from the enquiry. You check the price and send." },
+  invoice: { name: "Invoices", line: "Made from the quote and paid online." },
+  followup: { name: "Follow-up", line: "A thank-you, a review and a reminder when it’s time again." },
 };
 
 /** The transcript's opening, and the controls' words. */
 export const TRANSCRIPT = {
   title: "The story, in words",
-  intro: "A customer arrives, an enquiry waits and the same details are copied between tools. The business takes another evening to keep running. Then the route changes.",
-  note: "The business, timings and outcomes are illustrative. The lights and counters describe this film. The cited finding comes from Google’s global research in 2016; it does not measure your website or predict your results.",
+  intro: "A customer called Sam finds a slow website, sends an enquiry that waits all night, and has their details typed out three times. The job gets done and paid, then nothing, and the owner is still at the desk at 11:47pm. Then the same evening plays again, another way.",
+  note: "The business, its customers, timings and outcomes are illustrative. The counters describe this film. The cited finding comes from Google’s global research in 2016; it does not measure your website or predict your results.",
   sources: "Sources",
 };
 

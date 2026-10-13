@@ -1,5 +1,5 @@
 // The story (/story/), used: the door, the film starting, scroll, settling on a
-// composed frame, the keys, dropping a customer in, a part's label on hover,
+// composed frame, the keys, sending an enquiry of your own, a part's label on hover,
 // play and pause, the end on paper; then no WebGL, "Rather read it?", reduced
 // motion, and the transcript in the HTML. PASS/FAIL per check; exits 1 on a FAIL.
 // usage: node tools/qa/story.mjs <base>   (serve a plain build of out/ first)
@@ -72,17 +72,17 @@ const watch = (page, errs) => {
   const restTip = await page.$eval(".st-tip", (e) => e.hasAttribute("data-on"));
   ok(!restTip, `a part sliding under a resting pointer shows no label (under it: ${rest.hover ?? "nothing"})`);
 
-  await page.evaluate(() => window.__story.jump(3.0));
+  await page.evaluate(() => window.__story.jump(2.9));
   await sleep(2500);
   const before = (await st()).yours;
   await page.click(".st-drop");
   await sleep(1500);
   const after = (await st()).yours;
-  ok(after > before, `"Drop one in" adds a customer of yours (${before} → ${after})`);
+  ok(after > before, `"Send an enquiry" adds a customer of yours (${before} → ${after})`);
 
   const xy = await page.evaluate(() => {
     const w = window.__story.world;
-    const part = w.old.rig.parts.find((p) => p.id === "gate");
+    const part = w.parts.find((p) => p.id === "phone");
     const c = part.box.getCenter(part.box.min.clone());
     c.project(w.camera);
     return { x: (c.x * 0.5 + 0.5) * innerWidth, y: (-c.y * 0.5 + 0.5) * innerHeight };
@@ -90,12 +90,12 @@ const watch = (page, errs) => {
   await page.mouse.move(xy.x, xy.y);
   await sleep(3000);
   const tip = await page.$eval(".st-tip", (e) => (e.hasAttribute("data-on") ? e.textContent.trim() : ""));
-  ok(tip.length > 10, `hovering the gate says what it is ("${tip.slice(0, 50)}…")`);
+  ok(tip.length > 10, `hovering the phone says what it is ("${tip.slice(0, 50)}…")`);
 
   await page.click(".st-play");
   await sleep(9000);
   const s4 = await st();
-  ok(s4.playing && s4.P > 3.1, `play runs the film (P ${s4.P.toFixed(2)})`);
+  ok(s4.playing && s4.P > 3.0, `play runs the film (P ${s4.P.toFixed(2)})`);
   await page.keyboard.press("k");
   await sleep(600);
   ok((await st()).playing === false, "K pauses it");
@@ -146,7 +146,7 @@ const watch = (page, errs) => {
   const html = await (await fetch(`${B}/story/`)).text();
   const h3 = (html.match(/<h3/g) || []).length;
   ok(h3 >= 12, `the transcript is in the HTML (${h3} chapter headings)`);
-  ok(html.includes("blog.google/products/admanager/the-need-for-mobile-speed") && html.includes("hbr.org/2011/03/the-short-life-of-online-sales-leads"), "both sources are cited in the HTML");
+  ok(html.includes("blog.google/products/admanager/the-need-for-mobile-speed"), "the cited source is in the HTML");
   ok(!/\u2014/.test(html.replace(/<script[\s\S]*?<\/script>/g, "")), "no em dashes in what a reader sees");
 }
 

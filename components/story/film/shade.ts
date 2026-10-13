@@ -65,10 +65,10 @@ export class ContactShade {
   }
 
   /** A pool at (x, z) on the floor, sx by sz, turned by `yaw`, `dark` deep. */
-  add(x: number, z: number, sx: number, sz: number, yaw: number, dark: number) {
+  add(x: number, z: number, sx: number, sz: number, yaw: number, dark: number, y = this.y) {
     if (dark <= 0.002 || this.n >= this.dark.count) return;
     this.q.setFromAxisAngle(_Y, yaw);
-    this.m.compose(this.p.set(x, this.y + 0.004, z), this.q, this.s.set(sx, 1, sz));
+    this.m.compose(this.p.set(x, y + 0.004, z), this.q, this.s.set(sx, 1, sz));
     this.mesh.setMatrixAt(this.n, this.m);
     (this.dark.array as Float32Array)[this.n] = Math.min(1, dark);
     this.n++;

@@ -1,26 +1,26 @@
 import type * as THREE from "three";
 import type { World } from "./world";
 import { range } from "./ease";
-import { SIX } from "./owner";
-import { FALL_HIT } from "./hero";
+import { B } from "./script";
 
 /**
  * THE SCORE, made live (Web Audio: no files, nothing licensed). Half of the
  * film. Everything is synthesised here:
  *
- *   room      a cathedral's reverb, generated: noise that decays over ~4.5 s,
+ *   room      a large room's reverb, generated: noise that decays over ~4.5 s,
  *             darker as it fades
  *   pad       six voices that glide to a new chord as each chapter begins:
- *             dusk, waiting, a cold minor for the inbox, a sour cluster for
- *             the admin, a low phrygian drone at the edge; at the turn,
- *             nothing; then lydian, major, warm
- *   roll      our customer rolling, the pitch following its speed
- *   lost      a falling tone for every customer that falls
- *   ticks     the clock, faster as the hours fly past
- *   type      typewriters and a carriage bell in the admin; a clank as a claw grabs
- *   turn      silence; a sub-bass hit; groans and clangs as it comes apart; a
- *             riser into the flash; a glass tick as each new piece locks
- *   kept      a bell for every customer who comes back
+ *             dusk, waiting, a cold minor for the night, a sour cluster for
+ *             the admin, a low drone a year on; at the turn, nothing; then
+ *             lydian, major, warm
+ *   taps      a soft click for every tap on a screen
+ *   mail      a whoosh as an envelope flies; a ping as it lands
+ *   lost      a falling tone for every customer who leaves
+ *   ticks     the clock, faster as the hours fly past (backward at the turn)
+ *   type      keys in bursts while the owner types it all out again
+ *   turn      silence; a sub-bass hit; paper as it comes apart; a riser into
+ *             the evening again; a glass tick as each new part locks
+ *   kept      a bell for every customer who stays, or comes back
  */
 
 const mtof = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
@@ -45,18 +45,18 @@ const MOODS: Record<string, Mood> = {
 };
 
 function moodAt(P: number): string {
-  if (P < 2.2) return "open";
-  if (P < 4.6) return "website";
-  if (P < 7.2) return "inbox";
-  if (P < 9.6) return "admin";
-  if (P < 11.6) return "followup";
-  if (P < 14.0) return "you";
-  if (P < 16.08) return "silence";
-  if (P < 18.6) return "indigo";
-  if (P < 20.2) return "teal";
-  if (P < 21.8) return "platform";
-  if (P < 23.8) return "gold";
-  if (P < 26.0) return "home";
+  if (P < 2.4) return "open";
+  if (P < 5.0) return "website";
+  if (P < 7.8) return "inbox";
+  if (P < 10.6) return "admin";
+  if (P < 12.8) return "followup";
+  if (P < B.handsOff[1]) return "you";
+  if (P < B.rewind[1]) return "silence";
+  if (P < 19.8) return "indigo";
+  if (P < 21.8) return "teal";
+  if (P < 23.8) return "platform";
+  if (P < 25.8) return "gold";
+  if (P < 28.0) return "home";
   return "end";
 }
 
@@ -499,6 +499,45 @@ export class Score {
 
   /* ---- the frame -------------------------------------------------------------- */
 
+  /** Air through a band-pass sweeping up then down: an envelope flying past. */
+  private whoosh(seconds: number, pan = 0, v = 0.12) {
+    const c = this.ctx!;
+    const t = c.currentTime;
+    const src = c.createBufferSource();
+    src.buffer = this.noise;
+    const bp = c.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.Q.value = 1.4;
+    bp.frequency.setValueAtTime(300, t);
+    bp.frequency.exponentialRampToValueAtTime(2400, t + seconds * 0.45);
+    bp.frequency.exponentialRampToValueAtTime(500, t + seconds);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + seconds * 0.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + seconds);
+    const p = this.pan(pan);
+    src.connect(bp).connect(g).connect(p).connect(this.bus);
+    const s = c.createGain();
+    s.gain.value = 0.5;
+    p.connect(s).connect(this.rev);
+    src.start(t, Math.random() * 1.5);
+    src.stop(t + seconds + 0.05);
+  }
+
+  /** A message arriving: two soft notes. */
+  private ping(high = false, v = 0.05) {
+    const root = high ? 81 : 76;
+    this.bell(root, 0.15, v, 1.4);
+    this.bell(root + 7, 0.2, v * 0.8, 1.6, 0.11);
+  }
+
+  /** A finger on glass. */
+  private tap() {
+    this.click(1800, 3, 0.07, 0.02, 0.1, 0, 0.15);
+  }
+
+  /* ---- the frame -------------------------------------------------------------- */
+
   update(P: number, w: World, dt: number) {
     const c = this.ctx;
     if (!c || !this.on) {
@@ -508,8 +547,9 @@ export class Score {
     const t = c.currentTime;
     const prev = this.prevP < 0 ? P : this.prevP;
     this.prevP = P;
-    const fwd = P > prev;
+    const fwd = P > prev && P - prev < 0.5;
     const crossed = (x: number) => fwd && prev < x && P >= x;
+    const inW = (a: number, b: number) => P > a && P < b;
 
     // The chord, per chapter.
     const m = moodAt(P);
@@ -534,38 +574,33 @@ export class Score {
       if (m === "you") this.theme(false, true);
       if (m === "home") this.theme(true, true);
     }
-    const inOld = P < 14.0;
-    const silent = P >= 14.0 && P < 16.08;
-    // THE SILENCE: from the freeze to the hit, nothing at all, not even the room.
-    const hush = P >= 14.22 && P < 14.95;
+    const inOld = P < B.handsOff[1];
+    const silent = P >= B.handsOff[1] && P < B.rewind[1];
+    // THE SILENCE: hands off the keys, the room held still; nothing at all.
+    const hush = P >= B.handsOff[1] && P < B.fall[0];
     this.duck.gain.setTargetAtTime(hush ? 0 : 1, t, hush ? 0.035 : 0.006);
-    // The machine's hum (old: a low drone of gears; new: brighter, quieter).
-    this.hum.g.gain.setTargetAtTime(silent ? 0 : inOld ? 0.05 : 0.025, t, 0.3);
-    this.hum.bp.frequency.setTargetAtTime(inOld ? 80 : 160, t, 0.5);
+    // The room's air: the night hums low; the new evening is lighter.
+    this.hum.g.gain.setTargetAtTime(silent ? 0 : inOld ? 0.035 : 0.02, t, 0.3);
+    this.hum.bp.frequency.setTargetAtTime(inOld ? 90 : 170, t, 0.5);
+    this.roll.g.gain.setTargetAtTime(0, t, 0.1);
 
-    // Our customer rolling.
-    const roll = !silent && w.hero.visible && !w.hero.falling ? w.info.speed : 0;
-    this.roll.g.gain.setTargetAtTime(0.16 * roll, t, 0.08);
-    this.roll.bp.frequency.setTargetAtTime(160 + 1100 * roll, t, 0.1);
-
-    // Tension has a physical pace, then the rebuilt machine finds a clear,
-    // repeating pattern. It continues at a held frame, like the customers.
-    const pulseRate = P > 7.2 && P < 9.6 ? 1.42 : P >= 9.6 && P < 11.6 ? 1.7 : P >= 11.6 && P < 14 ? 0.94 : P >= 17 && P < 25.8 ? 1.2 : 0;
+    // A pulse under the old way (the owner's heartbeat, late), a clear rhythm in the new.
+    const pulseRate = P > 7.8 && P < 10.6 ? 1.3 : P >= 12.8 && P < B.handsOff[0] ? 0.94 : P >= 18 && P < 27.6 ? 1.15 : 0;
     if (!silent && pulseRate) {
       this.pulseAcc += Math.min(dt, 0.1) * pulseRate;
       if (this.pulseAcc >= 1) {
         this.pulseAcc -= 1;
         this.pulseN++;
-        if (inOld) this.heartbeat(P >= 11.6 ? 0.11 : 0.075);
+        if (inOld) this.heartbeat(P >= 12.8 ? 0.1 : 0.06);
         else {
           const root = MOODS[this.mood]?.notes[0] ?? 38;
           const step = [24, 31, 36, 31][this.pulseN % 4];
-          this.bell(root + step, this.pulseN % 2 ? -0.24 : 0.24, 0.018, 1.3);
+          this.bell(root + step, this.pulseN % 2 ? -0.24 : 0.24, 0.016, 1.3);
         }
       }
     }
 
-    // Events from the crowd.
+    // Events from the world.
     this.secT += dt;
     if (this.secT > 1) {
       this.secT = 0;
@@ -586,94 +621,105 @@ export class Score {
           this.bellsThisSec++;
           const root = MOODS[this.mood]?.notes[0] ?? 41;
           const note = root + 36 + PENTA[Math.floor(Math.random() * PENTA.length)] + (Math.random() < 0.3 ? 12 : 0);
-          this.bell(note, panOf(e.pos), e.user ? 0.12 : 0.07);
+          this.bell(note, panOf(e.pos), e.user ? 0.12 : 0.06);
         }
-      } else if (e.type === "grab" && P > 7.1 && P < 9.7) {
-        this.clang(180 + Math.random() * 60, 0.05, 0.6, 0.3);
-      } else if (e.type === "slip" && P > 7.1 && P < 9.7) {
-        this.clang(320, 0.04, 0.4, 0.2);
-      } else if ((e.type === "ring" || e.type === "node") && P > 16.9) {
-        if (Math.random() < 0.5) this.bell(84 + PENTA[Math.floor(Math.random() * 5)], 0, 0.018, 0.8);
-      } else if (e.type === "catch" && P > 18.5 && P < 20.3) {
-        this.click(900, 0.8, 0.05, 0.35, 0, 0, 0.5);
       }
     }
 
-    // The crank coasting to a stop: the pawl's last, slowing clicks.
-    for (const k of [14.03, 14.07, 14.12, 14.18]) if (crossed(k)) this.click(1400, 6, 0.12, 0.05, 0.1, 0, 0.4);
+    // Taps on Sam's phone.
+    for (const k of [B.tap, B.form, B.send, B.nTap, B.nSend, B.nPick, B.nAccept[1] - 0.02, B.nPaid - 0.02, 24.02, 24.08, 24.14, 24.2, 24.26, 25.24]) if (crossed(k)) this.tap();
+    // The envelopes: off, and in.
+    if (crossed(B.fly[0])) this.whoosh(2.4, -0.2, 0.13);
+    if (crossed(B.land)) this.ping(false, 0.045);
+    if (crossed(B.nFly[0])) this.whoosh(1.0, -0.2, 0.1);
+    if (crossed(B.nBack[0])) this.whoosh(1.0, 0.2, 0.08);
+    if (crossed(B.nBack[1])) this.ping(true, 0.06);
+    if (crossed(22.3)) this.whoosh(1.2, 0.1, 0.09);
+    if (crossed(22.46)) this.ping(true, 0.05);
+    if (crossed(B.nRemind[0])) this.whoosh(1.0, 0.1, 0.08);
+    if (crossed(B.nRemind[0] + 0.12)) this.ping(true, 0.06);
+    if (crossed(B.replySent + 0.02)) this.ping(false, 0.04);
+    // Mail landing on the pile all night, quietly.
+    if (inW(B.night[0], B.night[1]) && Math.random() < dt * 1.4) this.click(2900, 6, 0.035, 0.03, 0.4, 0, 0.5);
 
-    // Our customer: the gate lifting; over the edge; the stamp.
-    if (crossed(3.9)) this.clang(90, 0.12, 1.6, -0.1);
-    if (crossed(10.66)) this.fallTone(0, true);
-    if (crossed(9.457)) this.clang(140, 0.14, 1.2, 0.1);
-    if (crossed(9.614)) {
-      this.clang(70, 0.2, 0.8, 0);
-      this.bell(79, 0, 0.09, 2.5);
-    }
-    if (crossed(FALL_HIT)) {
-      this.clang(55, 0.08, 1.8, 0.2);
-      this.bell(50, 0, 0.05, 3);
-    }
-    if (crossed(6.8)) this.click(600, 2, 0.15, 0.25, 0, 0, 0.5);
-
-    // The inbox: the clock, faster as the night flies past.
-    if (P > 4.7 && P < 7.15 && !silent) {
-      const rate = 1 + 9 * Math.min(1, Math.abs(P - prev) / Math.max(dt, 1e-3) / 0.4) * (P > 5.3 && P < 6.75 ? 1 : 0.2);
+    // The clock: through the night, faster as the hours fly; backward at the turn; 3am.
+    const rewinding = inW(B.rewind[0], B.rewind[1]);
+    const ticking = inW(4.7, 7.2) || inW(20.78, 21.1) || rewinding;
+    if (ticking && !hush) {
+      const speed = Math.min(1, Math.abs(P - prev) / Math.max(dt, 1e-3) / 0.3);
+      const rate = 1 + (rewinding ? 22 : 9) * speed * (inW(5.8, 6.9) || inW(20.8, 21.06) || rewinding ? 1 : 0.2);
       this.tickAcc += dt * rate;
       while (this.tickAcc > 1) {
         this.tickAcc -= 1;
         this.tickN++;
-        this.click(this.tickN % 2 ? 3200 : 2500, 9, 0.09, 0.03, -0.2, 0, 0.35);
+        this.click(this.tickN % 2 ? 3200 : 2500, 9, 0.08, 0.03, -0.2, 0, 0.35);
       }
     }
-    // The admin: typewriters, in bursts, and the carriage bell.
-    if (P > 7.25 && P < 9.6) {
+    // Typing: the reply, the spreadsheet, the quote, the invoice; late at night; Sam's thumbs.
+    const typing =
+      inW(B.reply[0], B.reply[1]) ||
+      inW(B.sheet[0], B.sheet[1]) ||
+      inW(B.quote[0], B.quote[1]) ||
+      inW(B.invoice[0], B.invoice[1]) ||
+      inW(12.86, B.handsOff[0]) ||
+      inW(B.type[0], B.type[1]) ||
+      inW(B.nForm[0], B.nForm[1]);
+    if (typing && !silent) {
       this.typeT -= dt;
       if (this.typeT <= 0) {
         if (this.typeBurst <= 0) {
           this.typeBurst = 3 + Math.floor(Math.random() * 9);
-          this.typeT = 0.25 + Math.random() * 0.6;
-          if (Math.random() < 0.25) this.bell(91, 0.4, 0.035, 0.8);
+          this.typeT = 0.2 + Math.random() * 0.5;
         } else {
           this.typeBurst--;
-          this.typeT = 0.06 + Math.random() * 0.07;
-          this.click(2200 + Math.random() * 1600, 2.5, 0.07, 0.025, (Math.random() - 0.5) * 0.8, 0, 0.2);
+          this.typeT = 0.055 + Math.random() * 0.06;
+          this.click(1600 + Math.random() * 1400, 2.2, 0.05, 0.02, (Math.random() - 0.5) * 0.6, 0, 0.15);
         }
       }
     }
+    // The stamp: PAID, by hand; the new way's paid chime; the quote going out.
+    if (crossed(B.paid)) {
+      this.clang(70, 0.16, 0.6, 0.1);
+      this.click(400, 1.2, 0.2, 0.06);
+    }
+    if (crossed(B.nPaid)) this.ping(true, 0.07);
+    if (crossed(B.quoteSent)) this.whoosh(0.7, 0.3, 0.06);
 
     // THE TURN.
-    if (crossed(14.95)) {
+    if (crossed(B.handsOff[0])) this.theme(false, true);
+    if (crossed(B.fall[0])) {
       this.hit();
-      // Groans and clangs as it comes apart, spread over the fall.
-      this.clangs = Array.from({ length: 11 }, (_, i) => 14.98 + i * 0.09 + Math.random() * 0.08);
+      // Paper as it lets go: soft noise bursts spread over the fall.
+      this.clangs = Array.from({ length: 14 }, (_, i) => B.fall[0] + 0.02 + i * 0.045 + Math.random() * 0.04);
     }
-    for (const k of this.clangs) if (crossed(k)) this.clang(60 + Math.random() * 120, 0.09, 2.2, (Math.random() - 0.5) * 1.4);
-    if (crossed(15.72)) this.riser(Math.max(0.8, (16.1 - 15.72) * 2.8));
-    if (crossed(16.08)) {
+    for (const k of this.clangs) if (crossed(k)) this.click(700 + Math.random() * 1600, 0.8, 0.08, 0.18 + Math.random() * 0.2, (Math.random() - 0.5) * 1.4, 0, 0.6);
+    if (crossed(B.rewind[0])) this.riser(Math.max(0.8, (B.rewind[1] - B.rewind[0]) * 4));
+    if (crossed(B.rewind[1])) {
       this.hit();
       this.theme(true);
-      this.bell(74, 0, 0.12, 4);
-      this.bell(81, -0.3, 0.08, 4);
-      this.bell(86, 0.3, 0.06, 4);
+      this.bell(74, 0, 0.1, 4);
+      this.bell(81, -0.3, 0.07, 4);
+      this.bell(86, 0.3, 0.05, 4);
     }
-    // A glass tick as each new piece locks into place.
-    if (fwd && P > 15.9 && P < 17.1) {
+    // A glass tick as each part of the new route locks into place.
+    if (fwd && P > B.assemble[0] && P < B.assemble[1] + 0.1) {
       if (!this.lockAt.length) this.lockAt = w.lockTimes();
       let n = 0;
       for (const a of this.lockAt) if (prev < a && P >= a) n++;
-      const root = 62;
-      for (let i = 0; i < Math.min(n, 5); i++) this.click(2600 + Math.random() * 2400, 18, 0.05, 0.06 + Math.random() * 0.05, (Math.random() - 0.5) * 1.6, i * 0.012, 0.6);
-      if (n > 0 && Math.random() < 0.15) this.bell(root + 24 + PENTA[Math.floor(Math.random() * 5)], (Math.random() - 0.5), 0.03, 1.4);
+      for (let i = 0; i < Math.min(n, 5); i++) {
+        this.click(2600 + Math.random() * 2400, 18, 0.05, 0.06 + Math.random() * 0.05, (Math.random() - 0.5) * 1.6, i * 0.012, 0.6);
+        this.bell(86 + PENTA[(this.pulseN + i) % 5], (Math.random() - 0.5) * 0.6, 0.03, 1.6);
+      }
     }
-    // Six o'clock: the lid comes down, then the lamp clicks off.
-    if (crossed(SIX.close1)) this.click(420, 1.4, 0.2, 0.05, 0, 0, 0.4);
-    if (crossed(SIX.lamp)) {
+    // Six o'clock: the lid comes down, the lamp clicks off; the van starts.
+    if (crossed(B.nClose[1] - 0.02)) this.click(420, 1.4, 0.2, 0.05, 0, 0, 0.4);
+    if (crossed(B.nLamp[0] + 0.04)) {
       this.click(3000, 3, 0.25, 0.02);
       this.click(1800, 3, 0.18, 0.03, 0, 0.05);
-      this.bell(86, 0, 0.055, 4.2, 0.2);
+      this.bell(86, 0, 0.05, 4.2, 0.2);
     }
+    if (crossed(B.nDrive[0])) this.whoosh(3.0, 0.4, 0.05);
     // The end: it all settles.
-    this.master.gain.setTargetAtTime(this.on ? 0.9 * (1 - 0.6 * range(P, 26.0, 27.2)) : 0, t, 0.5);
+    this.master.gain.setTargetAtTime(this.on ? 0.9 * (1 - 0.6 * range(P, 28.0, 29.2)) : 0, t, 0.5);
   }
 }

@@ -17,12 +17,13 @@ export function clockText(hours: number) {
   return m === 0 ? `${h12}${ampm}` : `${h12}:${String(m).padStart(2, "0")}${ampm}`;
 }
 
-/** When the clock is shown on screen (the inbox's night, the late hour, 3am, six o'clock). */
+/** When the clock is shown on screen (the night the enquiry waits, 11:47pm, the rewind, 7:41pm and 3am, six o'clock). */
 const CLOCK_ON: [number, number][] = [
-  [4.72, 7.15],
-  [11.74, 13.9],
-  [18.7, 20.15],
-  [23.94, 25.7],
+  [4.62, 7.36],
+  [12.84, 15.42],
+  [16.34, 16.72],
+  [19.84, 21.5],
+  [25.84, 27.3],
 ];
 
 /**
@@ -112,23 +113,20 @@ export class Dom {
 
     // The counter: the film's own customers.
     const sim = w.sim;
-    const heroLost = P >= 10.66 && P < 16.6 ? 1 : 0;
-    const lost = sim.lost.website + sim.lost.inbox + sim.lost.admin + sim.lost.followup + heroLost;
-    const mode = P >= 16.6 ? "kept" : "lost";
-    const show = (P > 2.62 && P < 14.02) || (P > 17.2 && P < 25.75);
-    const full = (P > 12.9 && P < 14.02) || (P > 24.3 && P < 25.75);
+    const lost = sim.lost.website + sim.lost.inbox + sim.lost.admin + sim.lost.followup;
+    const mode = P >= 16.66 ? "kept" : "lost";
+    const show = (P > 3.16 && P < 15.2) || (P > 18.56 && P < 27.8);
+    const full = (P > 13.9 && P < 15.2) || (P > 26.9 && P < 27.8);
     this.set("cmode", mode, () => this.count?.setAttribute("data-mode", mode));
     this.set("cshow", show, () => this.count?.toggleAttribute("data-show", show));
     this.set("cfull", full && mode === "lost", () => this.count?.toggleAttribute("data-full", full && mode === "lost"));
-    // Our own customer, carried round and back through the door, counts too.
-    const heroKept = P >= 23.7 ? 1 : 0;
-    const kept = sim.kept + heroKept;
+    const kept = sim.kept;
     const n = mode === "lost" ? lost : kept;
     this.set("cn", n, () => {
       if (this.countN) this.countN.textContent = String(n);
     });
     for (const k of ["website", "inbox", "admin", "followup"] as const) {
-      const v = sim.lost[k] + (k === "followup" ? heroLost : 0);
+      const v = sim.lost[k];
       this.set(`by-${k}`, v, () => {
         if (this.countBy[k]) this.countBy[k].textContent = String(v);
       });
@@ -142,12 +140,12 @@ export class Dom {
     this.set("yours", yours, () => {
       if (this.yours) this.yours.textContent = yours;
     });
-    film.lost = { ...sim.lost, followup: sim.lost.followup + heroLost };
+    film.lost = { ...sim.lost };
     film.kept = kept;
-    if (P > 25.7) {
+    if (P > 27.9) {
       const sum =
         lost > 0
-          ? `In the film, while you watched: ${lost} lost to the old machine${kept > 0 ? `, ${kept} back again in the new one` : ""}.`
+          ? `In the film, while you watched: ${lost} customers lost the old way${kept > 0 ? `, ${kept} kept the new way` : ""}.`
           : "";
       this.set("sum", sum, () => {
         if (this.endSum) this.endSum.textContent = sum;
@@ -176,7 +174,7 @@ export class Dom {
       if (this.nowT) this.nowT.textContent = ch.name;
       this.ticks.forEach((li, k) => li.toggleAttribute("data-past", k <= ci));
     });
-    const canDrop = P < 13.9 || (P > 17.0 && P < 25.7);
+    const canDrop = P < 14.9 || (P > 18.0 && P < 27.6);
     this.set("drop", canDrop, () => this.drop?.toggleAttribute("data-hidden", !canDrop));
     const paper = P > FILM_LEN - 0.8;
     this.set("paper", paper, () => document.documentElement.toggleAttribute("data-st-paper", paper));
@@ -184,7 +182,7 @@ export class Dom {
     // Hover a part: what it is in your business. Only the part you moved
     // onto, kept while you stay on it: parts the film slides under a resting
     // pointer (while you read, or scroll) don't pop up over the words.
-    const under = pointer.has && P < 25.6 && !(P > 13.95 && P < 16.9) ? (w.hover as PartId | null) : null;
+    const under = pointer.has && P < 27.9 && !(P > 14.95 && P < 18.0) ? (w.hover as PartId | null) : null;
     if (pointer.moved !== this.tipMove) {
       this.tipMove = pointer.moved;
       this.tipFor = under;

@@ -8,24 +8,24 @@ import type { ChapterId } from "@/content/story";
  * arrow keys step between them, autoplay holds on them to read).
  */
 
-export const FILM_LEN = 27.4;
+export const FILM_LEN = 29.6;
 
 export type Span = { id: ChapterId; P0: number; P1: number };
 
 export const SPANS: Span[] = [
-  { id: "open", P0: 0, P1: 2.2 },
-  { id: "website", P0: 2.2, P1: 4.6 },
-  { id: "inbox", P0: 4.6, P1: 7.2 },
-  { id: "admin", P0: 7.2, P1: 9.6 },
-  { id: "followup", P0: 9.6, P1: 11.6 },
-  { id: "you", P0: 11.6, P1: 14 },
-  { id: "turn", P0: 14, P1: 17 },
-  { id: "new-website", P0: 17, P1: 18.6 },
-  { id: "new-ai", P0: 18.6, P1: 20.2 },
-  { id: "new-platform", P0: 20.2, P1: 21.8 },
-  { id: "new-followup", P0: 21.8, P1: 23.8 },
-  { id: "new-you", P0: 23.8, P1: 25.8 },
-  { id: "end", P0: 25.8, P1: FILM_LEN },
+  { id: "open", P0: 0, P1: 2.4 },
+  { id: "website", P0: 2.4, P1: 5.0 },
+  { id: "inbox", P0: 5.0, P1: 7.8 },
+  { id: "admin", P0: 7.8, P1: 10.6 },
+  { id: "followup", P0: 10.6, P1: 12.8 },
+  { id: "you", P0: 12.8, P1: 15.0 },
+  { id: "turn", P0: 15.0, P1: 18.0 },
+  { id: "new-website", P0: 18.0, P1: 19.8 },
+  { id: "new-ai", P0: 19.8, P1: 21.8 },
+  { id: "new-platform", P0: 21.8, P1: 23.8 },
+  { id: "new-followup", P0: 23.8, P1: 25.8 },
+  { id: "new-you", P0: 25.8, P1: 28.0 },
+  { id: "end", P0: 28.0, P1: FILM_LEN },
 ];
 
 export const span = (id: ChapterId) => SPANS.find((s) => s.id === id)!;
@@ -41,29 +41,28 @@ export type Card = { id: ChapterId; part: "main" | "beat"; in: number; out: numb
 
 /**
  * The cards' windows. The main card arrives just after its chapter starts and
- * leaves before the beat; the beat closes the chapter. The turn's two lines
- * and the opening are timed to their pictures.
+ * leaves before the beat; the beat closes the chapter.
  */
 export const CARDS: Card[] = [
-  { id: "open", part: "main", in: 0.12, out: 1.12 },
-  { id: "open", part: "beat", in: 1.24, out: 2.08 },
-  { id: "website", part: "main", in: 2.32, out: 3.74 },
-  { id: "website", part: "beat", in: 3.86, out: 4.54 },
-  { id: "inbox", part: "main", in: 4.72, out: 6.3 },
-  { id: "inbox", part: "beat", in: 6.42, out: 7.14 },
-  { id: "admin", part: "main", in: 7.32, out: 8.76 },
-  { id: "admin", part: "beat", in: 8.88, out: 9.54 },
-  { id: "followup", part: "main", in: 9.72, out: 10.62 },
-  { id: "followup", part: "beat", in: 10.74, out: 11.6 },
-  { id: "you", part: "main", in: 12.24, out: 12.86 },
-  { id: "you", part: "beat", in: 12.92, out: 13.94 },
-  { id: "turn", part: "main", in: 14.0, out: 14.96 },
-  { id: "turn", part: "beat", in: 16.34, out: 16.96 },
-  { id: "new-website", part: "main", in: 17.12, out: 18.5 },
-  { id: "new-ai", part: "main", in: 18.72, out: 20.1 },
-  { id: "new-platform", part: "main", in: 20.32, out: 21.7 },
-  { id: "new-followup", part: "main", in: 21.94, out: 23.7 },
-  { id: "new-you", part: "main", in: 23.94, out: 25.7 },
+  { id: "open", part: "main", in: 0.12, out: 1.14 },
+  { id: "open", part: "beat", in: 1.26, out: 2.06 },
+  { id: "website", part: "main", in: 2.5, out: 3.92 },
+  { id: "website", part: "beat", in: 4.44, out: 4.96 },
+  { id: "inbox", part: "main", in: 5.12, out: 6.62 },
+  { id: "inbox", part: "beat", in: 7.36, out: 7.78 },
+  { id: "admin", part: "main", in: 7.92, out: 9.36 },
+  { id: "admin", part: "beat", in: 10.08, out: 10.56 },
+  { id: "followup", part: "main", in: 10.72, out: 11.9 },
+  { id: "followup", part: "beat", in: 12.36, out: 12.78 },
+  { id: "you", part: "main", in: 12.92, out: 13.86 },
+  { id: "you", part: "beat", in: 14.0, out: 14.86 },
+  { id: "turn", part: "main", in: 15.04, out: 15.96 },
+  { id: "turn", part: "beat", in: 17.4, out: 17.96 },
+  { id: "new-website", part: "main", in: 18.12, out: 19.66 },
+  { id: "new-ai", part: "main", in: 19.92, out: 21.62 },
+  { id: "new-platform", part: "main", in: 21.92, out: 23.64 },
+  { id: "new-followup", part: "main", in: 23.92, out: 25.64 },
+  { id: "new-you", part: "main", in: 25.92, out: 27.5 },
 ];
 
 /** The fact inside a main card comes in a little after the title. */
@@ -75,37 +74,32 @@ export const FACT_DELAY = 0.42;
  * edges, so a rest always has its words fully in.
  */
 export const RESTS: number[] = [
-  0, 0.66, 1.7, 2.92, 3.42, 4.2, 5.5, 5.98, 6.62, 7.9, 8.4, 9.2, 10.2, 11.5, 12.3, 12.7, 13.6, 14.38, 16.66, 17.8, 19.4,
-  21, 22.6, 23.3, 24.3, 24.62, 25.62, FILM_LEN,
+  0, 0.62, 1.66, 2.3, 2.9, 3.5, 4.3, 4.74, 5.42, 5.98, 6.5, 7.1, 7.58, 8.3, 8.9, 9.5, 10.3, 11.0, 11.6, 12.56, 13.3, 14.4, 15.4, 16.9, 17.7, 18.4, 19.0, 19.4,
+  20.5, 21.1, 22.3, 23.1, 24.3, 25.3, 26.3, 27.0, 27.7, FILM_LEN,
 ];
 
 /** How long autoplay holds on a rest (seconds): time to read what is on screen. */
 export function dwellAt(P: number): number {
   if (P >= FILM_LEN - 0.01) return 0;
   if (P < 0.01) return 1.2;
-  // Close-ups inside an already-read card hold briefly. The fall is allowed
-  // to land, and the owner's reveal and the break get a longer silence.
-  if ([3.42, 5.98, 8.4, 12.7, 23.3].some((rest) => Math.abs(rest - P) < 0.03)) return 1.7;
-  if (Math.abs(P - 11.5) < 0.03 || Math.abs(P - 24.3) < 0.03) return 2.2;
-  if ([13.6, 14.38, 24.62].some((rest) => Math.abs(rest - P) < 0.03)) return 4.5;
+  // Moments that need to land: the turn's silence, the last image of each half.
+  if ([14.4, 15.4, 27.7].some((r) => Math.abs(r - P) < 0.03)) return 4.4;
+  if ([2.3, 5.42, 9.5, 16.9, 22.3].some((r) => Math.abs(r - P) < 0.03)) return 2.2;
   return 3.4;
 }
 
-/** The film's pace follows the action: wait, chase, fall, break, return. */
+/** The film's pace follows the action: the slow page, the long night, the flight, the turn. */
 export function travelDuration(from: number, to: number): number {
   const distance = to - from;
   const middle = (from + to) * 0.5;
-  const seconds = middle > 10.2 && middle < 11.6 ? 4.2
-    : middle > 14.9 && middle < 17 ? 7.0
-    : middle > 22.3 && middle < 23.8 ? 4.8
-    : middle > 4.4 && middle < 5.6 ? 6.4
-    : middle > 11.6 && middle < 12.4 ? 6.0
-    : middle > 12.9 && middle < 13.9 ? 7.5
-    : middle > 17.0 && middle < 17.9 ? 6.2
-    : middle > 21.1 && middle < 22.1 ? 6.2
-    : middle > 23.4 && middle < 24.5 ? 6.0
-    : middle > 24.7 && middle < 25.5 ? 7.2
-    : middle > 5.2 && middle < 7.2 ? 5.7 : 5.4;
+  const seconds =
+    middle > 5.0 && middle < 5.7 ? 6.2
+    : middle > 5.7 && middle < 7.0 ? 7.0
+    : middle > 15.4 && middle < 17.2 ? 7.4
+    : middle > 9.0 && middle < 9.6 ? 6.4
+    : middle > 11.0 && middle < 12.0 ? 6.4
+    : middle > 26.4 && middle < 27.6 ? 6.6
+    : 5.4;
   return Math.max(1200, distance * seconds * 1000 - Math.max(0, distance - 1) * 900);
 }
 

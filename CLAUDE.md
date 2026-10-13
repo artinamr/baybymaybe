@@ -460,8 +460,9 @@ the story, only then the craziness, and every effect has to MEAN something).**
   `components/story/` (StoryFilm: door/phases/overlay/HUD; StoryBar; Transcript
   (server, the whole story in HTML); `timeline.ts` FILM_LEN, SPANS, CARDS,
   RESTS; `store.ts`); `components/story/film/` (Film.tsx entry, lazy via
-  next/dynamic; world, layout, hall, old, next, sim, hero, camera, look,
-  post, kit, track, materials, geo, marbles, clock, dom, audio).
+  next/dynamic; since round 23: world, script, camera, sky, town, places,
+  figure, people, ui, cards, mail, crowd, system, mats, model, shade, post,
+  clock, dom, audio).
 - **Engine**: P = scroll / vh through a critically damped spring (ω 4.2) on
   Lenis; rests (composed frames) for auto-settle (as on the home page: past
   a fifth of the gap it goes on, never pulls a deliberate scroll back), the
@@ -503,6 +504,59 @@ the story, only then the craziness, and every effect has to MEAN something).**
   the offline score. **Owed on a real GPU**: frame time on an integrated and
   a discrete GPU and on phones, first-visit compile time on Windows/ANGLE,
   the bloom/MSAA look, and the whole thing in motion with sound.
+- **The marble machine above was REPLACED in round 23** (below). Its
+  engine survives (the clock, the post, the score's synths, the overlay);
+  its world, kit, tracks, hall and sim are deleted.
+
+**ROUND 23 (2026-10-14 — "completely renovate story mode … the roller
+coaster thingy … doesn't have spreadsheet or reply automation … too far of a
+metaphor and too complicated for the target audience … the cramped shit …
+make the character gender neutral, remove all the hair, white blank … closer
+and sensible examples of automation or email comeback … current length if
+not longer, but the bar really raised").**
+- **A literal story** (`docs/STORY.md`): one customer, Sam, wants a new deck.
+  The old way: a slow website (53 of 100 phones over the town give up), an
+  enquiry that waits all night under a growing pile of email, the same
+  details typed into a spreadsheet, a quote and an invoice, the job paid and
+  then nothing (a year on, another company's van). 11:47pm at the desk. The
+  turn. The same evening again: a fast site, an assistant's reply in a
+  minute with times to book, the quote filled in from the enquiry, paid
+  online, a review and a reminder a year on (our van this time), the laptop
+  closed at six. 29.6 screens (was 27.4); thirteen chapters, IDs unchanged.
+- **The world**: a model town at full size (`town.ts`: ~108 houses in six
+  NZ kinds, trees, hedges, cars, streetlights, hills; white walls, charcoal
+  roofs, muted greens), the customer's house with a cutaway living room and
+  the deck that gets rebuilt (`places.ts`), the workshop with the office
+  behind glass, the desk facing the street, the van. A sky that follows the
+  film's clock (`sky.ts`; jumps only by whole days so the light never pops).
+- **People**: one white, blank, gender-neutral figure (`figure.ts`: egg
+  head, no face, no hair, mitten hands; FK body + two-bone IK limbs), posed
+  from data blended between beats (`people.ts`: sofa with phone, typing,
+  standing, walking with planted feet).
+- **Screens are the story's evidence** (`ui.ts`, drawn on canvases in Inter):
+  search results, the slow site, the pop-up, the long form, the inbox,
+  the spreadsheet with cold rows, the quote, the invoice with a PAID stamp,
+  the fast site, the auto-reply with times, the calendar, the handover
+  ("Over to you"), the review, the reminder, "Today". They lift off the
+  devices as cards to be read (`cards.ts`; two-sided; brightness pinned to
+  the exposure so white stays white).
+- **Camera**: a new shot list (`camera.ts`) with holds at every rest;
+  `tools/qa/story-camera.mjs` rewritten for the new world (fails on any
+  surface within 0.2 m of the lens: it caught a camera through Sam's roof,
+  street trees in front of both places, the office shelves, window
+  transoms, and envelope-riding keys that pointed at the origin when no
+  envelope flew).
+- **Speed** (real GPU, 1080p, the user's integrated AMD): median ~10 ms
+  per frame, worst ~14 ms. Found the hard way: (1) three shades every point
+  light at every pixel, even dark ones (light cull patch in `mats.ts`);
+  (2) uploading a canvas texture with `flipY` stalls Chrome (~30 ms per
+  upload): live screens draw upside down and upload unflipped, in software
+  (`willReadFrequently`); (3) the town's instanced meshes must be split by
+  region to be culled (`chunked`); (4) the streetlights' pools are baked
+  into a ground texture, not looped per pixel. Recording 2.0→5.0: 0 frames
+  over 25 ms.
+- **Tone mapping**: Khronos PBR Neutral in the composite (was ACES): UI
+  white and the brand's colours stay true.
 
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**

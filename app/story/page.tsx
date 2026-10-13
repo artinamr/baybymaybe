@@ -10,13 +10,13 @@ import { PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
 const DESCRIPTION =
-  "Follow one customer through a failing business machine, its rebuild and the evening the owner gets back. An interactive short film by Nerodyn.";
+  "Follow one customer, Sam, from a slow website to a forgotten follow-up, then watch the same evening go another way. An interactive short film by Nerodyn.";
 
 export const metadata: Metadata = pageMeta({
   title: `${STORY_TITLE}: a short film`,
   description: DESCRIPTION,
   path: "story/",
-  image: ogCard("story", "The quiet leak: a machine the size of a cathedral, losing customers as rivers of light."),
+  image: ogCard("story", "The quiet leak: a small town at dusk and the route one customer takes through a business."),
 });
 
 /**
