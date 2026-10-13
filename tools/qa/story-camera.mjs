@@ -11,8 +11,10 @@
 //   - CARDS      a card in the air (a screen lifted off a device, a part of the
 //                new route) within 0.6 m of the lens; < 0.25 m FAIL (the world
 //                is run at each P, so the cards are where the film puts them)
-// Moving things (people, cards, envelopes, the van) are left out; the decks
-// are taken built.
+//   - MOVERS     a van or a person (where the film puts them at P) within
+//                0.6 m of the lens; < 0.25 m FAIL
+// Envelopes are left out (they fly with the camera); the decks are taken built.
+// --phone flies the portrait framing (camera.ts phoneAdjust, its pull-back).
 //
 // usage: node tools/qa/story-camera.mjs [step=0.005] [from=0] [to=FILM_LEN] [--phone] [--json out.json]
 import { createJiti } from "jiti";

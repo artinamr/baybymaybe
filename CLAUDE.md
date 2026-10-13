@@ -557,6 +557,17 @@ not longer, but the bar really raised").**
   over 25 ms.
 - **Tone mapping**: Khronos PBR Neutral in the composite (was ACES): UI
   white and the brand's colours stay true.
+- **Second pass (same day)**: the words come first (cards fade behind the
+  words, `keepClear`; the route's parts framed whole on the right; the
+  admin, turn and opening words leave before the 3D crosses them); nothing
+  appears or vanishes in view (the owner walks in at dawn and gets into the
+  van behind a new hinged door; Sam walks the sliders and the doorway behind
+  the sofa; `walk` takes a floor function); phone framing backs away by a
+  table worked out ahead from a town height field (`phoneBackBase`), labels
+  smaller on phones; daylight with depth (charcoal roofs, greener lawns, a
+  warm sun, low fill, a day-only S-curve); the harshest camera moves spread
+  out. New checks: `story-overlap.mjs`, `story-pops.mjs`, `story-flow.mjs`,
+  and `story-camera.mjs --phone` with vans and people as moving obstacles.
 
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**

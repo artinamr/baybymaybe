@@ -107,7 +107,32 @@ follows the film's clock (`sky.ts`: dusk, night under a moon, morning, day,
 golden hour), soft shadows from the sun or moon focused on what the camera
 sees, baked occlusion, streetlight pools baked into the ground, bloom on the
 lights only. Screens are drawn at the same brightness whatever the
-exposure (`uiScale`), so white stays white and text stays crisp.
+exposure (`uiScale`), so white stays white and text stays crisp. By day the
+fill is low and the sun warm, so form reads by light and colour (a white
+model front-lit reads as a grey card), with a gentle S-curve on the
+display values; the route's labels mark their work by their light, never by
+burning their own faces out.
+
+## Three rules the film keeps
+
+- **The words come first.** No card in the air sits behind a title or a
+  line at a rest: the compositions keep them apart (the route's parts are
+  framed whole on the right, 13 m off), and a card the camera swings past
+  fades while it is behind the words (`world.ts` `keepClear`, with the
+  words' place measured from the page by `dom.ts`), eased in time so it
+  dips rather than blinks.
+- **Nothing appears or vanishes in view.** People walk in and out (the
+  owner along the footpath at dawn and into the van behind its door; Sam
+  through the sliders and the doorway behind the sofa), the van drives out
+  of frame; anything that must switch does so out of shot or in the turn's
+  black. Walks are scrubbed by the scroll with planted feet; most run inside
+  a time-lapse, where speed reads as time passing.
+- **A phone is framed, not cropped.** On a portrait screen the subject
+  rises into the upper part, the lens widens, and the camera backs away by a
+  distance worked out ahead for the whole film from a height field of the
+  town (houses, trees, cars, fences, the route's cards), smoothed so it never
+  jumps and stopping short of a roof under the lens; the route's labels are
+  smaller.
 
 ## Reading and control
 
@@ -142,8 +167,14 @@ clock), `sky.ts`, `mats.ts`, `model.ts`, `post.ts`, `audio.ts`, `dom.ts`.
 
 - Look-dev: `/story/?at=<P>&freeze=1&hud=0`; `q=low|high`; `?cam=x,y,z,ax,ay,az,fov`;
   `window.__story` exposes `jump`, `frames`, `state`, `bench`, `world`.
-- `node tools/qa/story-camera.mjs` flies the film's camera through the
-  built world and fails on any surface within 0.2 m of the lens.
+- `node tools/qa/story-camera.mjs [step] [--phone]` flies the film's camera
+  through the built world and fails on any surface within 0.2 m of the lens,
+  a card in the air within 0.25 m, or a van or a person within 0.25 m.
+- `node tools/qa/story-overlap.mjs <base> [W H]` fails on a card over a
+  title or a line; `story-pops.mjs <base>` lists anything that turns on or
+  off, or jumps, in frame (check each in stills: occlusion is not known);
+  `story-flow.mjs` lists where the picture moves fastest or changes speed
+  abruptly (no browser).
 - `node tools/qa/story.mjs <base>` uses the page: the door, scroll, rests,
   keys, sending an enquiry, hover labels, play, the end, no WebGL, reading.
 - GPU per pass: `?perf=1`. Keep the scene pass under ~12 ms at 1080p on an
