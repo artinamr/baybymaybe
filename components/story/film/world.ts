@@ -421,7 +421,7 @@ export class World {
     this.column(P);
     this.crowdAndCounts(P, t, nw);
     this.route(P, t);
-    this.keepClear();
+    this.keepClear(f.dt);
     this.pointer(f.pointer);
     this.prevP = P;
   }
@@ -439,15 +439,25 @@ export class World {
    * fades while it is there (the compositions keep them apart; this is for
    * the moments in between, when the camera swings past a card).
    */
-  private keepClear() {
+  private keepClear(dt: number) {
+    // Eased in time (a card that only grazes the words as the camera whips past dips, it does not blink).
+    const ease = dt > 0 ? 1 - Math.exp(-dt / 0.12) : 1;
     const wd = this.words;
     const cam = this.camera;
     cam.updateMatrixWorld();
     const sysOn = this.system.group.visible;
     for (const card of [...this.allCards(), ...this.system.cards]) {
-      if (card.shown <= 0.002 || (!sysOn && this.system.cards.includes(card)) || wd.k <= 0) {
+      if (card.shown <= 0.002 || (!sysOn && this.system.cards.includes(card))) {
         if (card.clear !== 1) {
           card.clear = 1;
+          card.apply();
+        }
+        continue;
+      }
+      if (wd.k <= 0) {
+        // No words: back to whole, eased.
+        if (card.clear !== 1) {
+          card.clear = card.clear > 0.999 ? 1 : card.clear + (1 - card.clear) * ease;
           card.apply();
         }
         continue;
@@ -490,7 +500,7 @@ export class World {
         }
       }
       if (Math.abs(clear - card.clear) > 1e-4) {
-        card.clear = clear;
+        card.clear += (clear - card.clear) * ease;
         card.apply();
       }
     }
