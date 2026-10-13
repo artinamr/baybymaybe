@@ -64,7 +64,7 @@ export const KEYS: Key[] = [
   { P: 0, eye: fix(-112, 56, 94), at: fix(-38, 0, 8), fov: 36, ppx: 0.6 },
   ...hold(0.62, fix(-94, 40, 77), fix(-41, 1, 13), 34),
   { P: 1.22, eye: fix(-66, 19, 52), at: fix(-42.5, 2.0, 17), fov: 34, ppx: 0.6 },
-  ...hold(1.66, fix(-42.6, 10.6, 42.5), fix(-42.4, 1.6, 17.0), 34, 0.6, 0.06),
+  ...hold(1.66, fix(-48, 8, 38), fix(-43.5, 2.0, 18), 34, 0.55, 0.06),
   { P: 1.88, eye: fix(-42.1, 6.9, 27.6), at: fix(-42.2, 1.5, 16.9), fov: 34, ppx: 0.6 },
   { P: 2.06, eye: H(-2.6, 1.85, -7.6), at: H(-2.9, 1.4, -1.8), fov: 33, ppx: 0.6 },
   ...hold(2.3, READ_EYE, READ_AT, 33, 0.6, 0.06),
@@ -280,7 +280,7 @@ const BACK_MAX = 18;
 export type BackBase = { free: Float32Array; d: Float32Array; fov: Float32Array };
 /** Something in the air the camera keeps clear of (a card), from film time `from` on. */
 export type Air = { c: THREE.Vector3; r: number; from: number };
-export function phoneBackBase(c: Ctx, end: number, field: { get: (x: number, z: number) => number }, air: Air[] = []): BackBase {
+export function phoneBackBase(c: Ctx, end: number, field: { get: (x: number, z: number) => number; bld: (x: number, z: number) => number }, air: Air[] = []): BackBase {
   const n = Math.ceil(end / BACK_STEP) + 1;
   const base = { free: new Float32Array(n), d: new Float32Array(n), fov: new Float32Array(n) };
   const o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0 };
@@ -319,7 +319,7 @@ export function phoneBackBase(c: Ctx, end: number, field: { get: (x: number, z: 
         const reach = Math.min(10, p.distanceTo(o.at) * 0.5);
         for (let t = 0.5; t <= reach; t += 0.5) {
           q.copy(p).addScaledVector(low, t);
-          if (q.y > 0 && q.y < field.get(q.x, q.z) - 0.6) {
+          if (q.y > 0 && q.y < field.bld(q.x, q.z) - 0.6) {
             hit = true;
             break;
           }

@@ -142,12 +142,12 @@ export class World {
     this.shop = buildShop(this.scene);
     // The two places, the garden's tree, the deck and the pile's van in the camera's height field.
     const fld = this.town.field;
-    fld.box(-44, 15.5, 11.2, 10.2, 0, 5.6);
+    fld.house(-44, 15.5, 11.2, 10.2, 0, 5.6);
     fld.disc(-40.8, 31.5, 4.2, 6.4);
     fld.box(-44, 40.4, 17, 0.4, 0, 1.9);
     fld.box(-38.5, 30.3, 0.4, 20, 0, 1.9);
     fld.disc(-47.4, 30, 1.5, 2.2);
-    fld.box(44, -17, 15.2, 13.2, 0, 6.6);
+    fld.house(44, -17, 15.2, 13.2, 0, 6.6);
     fld.box(47.6, -8, 2.2, 5.2, 0, 2.4);
     this.scene.add(this.sam.root, this.owner.root, this.samPhone.group, this.shadeG.mesh);
     this.phoneLight = new THREE.PointLight(0xcfe0ff, 0, 1.6, 1.5);
@@ -248,6 +248,7 @@ export class World {
   setSize(w: number, h: number, dpr: number) {
     this.w = w;
     this.h = h;
+    this.system.labelScale = w / h < 1 ? 0.72 : 1;
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.post.setSize(w * dpr, h * dpr);

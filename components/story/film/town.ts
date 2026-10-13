@@ -399,11 +399,26 @@ export class HeightField {
   readonly n = 340;
   readonly m = 300;
   readonly h = new Float32Array(340 * 300);
+  /** Buildings only (a tree in the foreground frames a shot; a roof under the lens does not). */
+  readonly b = new Float32Array(340 * 300);
+  private building = false;
   get(x: number, z: number) {
     const i = Math.floor(x - this.x0);
     const j = Math.floor(z - this.z0);
     if (i < 0 || j < 0 || i >= this.n || j >= this.m) return 0;
     return this.h[j * this.n + i];
+  }
+  bld(x: number, z: number) {
+    const i = Math.floor(x - this.x0);
+    const j = Math.floor(z - this.z0);
+    if (i < 0 || j < 0 || i >= this.n || j >= this.m) return 0;
+    return this.b[j * this.n + i];
+  }
+  /** A building: a box in both maps. */
+  house(cx: number, cz: number, w: number, d: number, yaw: number, top: number) {
+    this.building = true;
+    this.box(cx, cz, w, d, yaw, top);
+    this.building = false;
   }
   /** A rotated box (centre, size, turn about y) up to height top. */
   box(cx: number, cz: number, w: number, d: number, yaw: number, top: number) {
@@ -431,6 +446,7 @@ export class HeightField {
     if (i < 0 || j < 0 || i >= this.n || j >= this.m) return;
     const k = j * this.n + i;
     if (top > this.h[k]) this.h[k] = top;
+    if (this.building && top > this.b[k]) this.b[k] = top;
   }
 }
 
@@ -848,7 +864,7 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
 
   // What stands where, for the camera.
   const field = new HeightField();
-  for (const p of placed) field.box(p.x, p.z, kinds[p.kind].w, kinds[p.kind].d, p.yaw, kinds[p.kind].h + 0.6);
+  for (const p of placed) field.house(p.x, p.z, kinds[p.kind].w, kinds[p.kind].d, p.yaw, kinds[p.kind].h + 0.6);
   for (const t of trees) field.disc(t.x, t.z, (t.kind === 2 ? 4.0 : t.kind === 1 ? 1.4 : 2.9) * t.s, (t.kind === 1 ? 9.4 : t.kind === 2 ? 5.1 : 6.8) * t.s * 1.1);
   for (const c of cars) field.box(c.x, c.z, 1.9, 4.4, c.yaw, 1.6);
   for (const l of lampAt) field.disc(l.x + Math.sin(l.yaw) * 0.7, l.z + Math.cos(l.yaw) * 0.7, 0.9, 6.6);

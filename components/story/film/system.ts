@@ -137,6 +137,8 @@ export class System {
    * turn); `show` overall; `pulse` the customer's place along the line (or
    * <0 for none); `lit` per node 0..1 (passed, working); `camera` for facing.
    */
+  /** 1 on a wide screen; smaller on a narrow one. */
+  labelScale = 1;
   update(show: number, draw: number, build: number, pulse: number, lit: number[], time: number, camera: THREE.Camera, reduced: boolean) {
     this.group.visible = show > 0.005;
     if (!this.group.visible) return;
@@ -155,7 +157,7 @@ export class System {
       // Face the camera across the town (turned only about the vertical).
       const yaw = Math.atan2(camera.position.x - card.group.position.x, camera.position.z - card.group.position.z);
       card.group.rotation.set(-0.08, yaw, (1 - e) * 0.6 * (i % 2 ? 1 : -1));
-      const s = 0.4 + 0.6 * e;
+      const s = (0.4 + 0.6 * e) * this.labelScale;
       card.group.scale.setScalar(s);
       const on = lit[i] ?? 0;
       card.show(Math.min(1, kk * 3) * show, 1.04 + on * 0.1);
