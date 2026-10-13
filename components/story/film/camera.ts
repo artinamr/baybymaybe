@@ -84,6 +84,8 @@ export const KEYS: Key[] = [
   ...hold(6.5, fix(39, 3.6, 9.5), fix(47.3, 8.6, -8.6), 46, 0.6, 0.06),
   { P: 6.86, eye: fix(39.5, 2.6, 3), at: fix(42.5, 4.0, -11), fov: 46, ppx: 0.6 },
   ...hold(7.1, S(-3.2, 1.9, 9.6), S(-3.8, 1.2, 4.0), 36, 0.6, 0.05),
+  { P: 7.3, eye: S(-5.82, 1.85, 5.55), at: S(-4.6, 1.4, 2.5), fov: 46, ppx: 0.56 },
+  { P: 7.44, eye: S(-6.0, 1.85, 4.2), at: S(-3.9, 1.35, 4.2), fov: 48, ppx: 0.56 },
   ...hold(7.58, S(-3.5, 1.82, 2.12), S(-3.9, 1.3, 4.8), 50, 0.56, 0.05),
   // ADMIN: behind the owner; the card being typed framed each time.
   ...hold(8.3, fix(40.25, 1.86, -14.88), fix(38.9, 1.82, -12.0), 46, 0.6, 0.08),
@@ -92,8 +94,10 @@ export const KEYS: Key[] = [
   { P: 9.86, eye: fix(40.3, 1.84, -14.88), at: fix(41.2, 1.86, -11.95), fov: 46, ppx: 0.6 },
   ...hold(10.3, fix(40.1, 1.95, -14.9), fix(40.1, 1.9, -11.9), 64, 0.5, 0.06),
   // FOLLOW-UP: out through the office window and across the town to Sam's new deck; a year; the other van.
-  { P: 10.43, eye: fix(40.0, 1.8, -12.2), at: fix(40.0, 1.9, -6.0), fov: 54, ppx: 0.5 },
-  { P: 10.5, eye: fix(40.0, 2.4, -8.6), at: fix(36.0, 4.0, 4.0), fov: 50, ppx: 0.5 },
+  { P: 10.4, eye: S(-3.15, 1.32, 3.1), at: S(-3.6, 1.2, 8.0), fov: 54, ppx: 0.5 },
+  { P: 10.46, eye: S(-3.45, 1.08, 5.4), at: S(-3.6, 1.3, 12.0), fov: 54, ppx: 0.5 },
+  { P: 10.52, eye: S(-3.55, 1.25, 7.6), at: S(-3.0, 3.0, 16.0), fov: 52, ppx: 0.5 },
+  { P: 10.58, eye: fix(40.0, 3.4, -6.0), at: fix(34.0, 5.0, 6.0), fov: 50, ppx: 0.5 },
   { P: 10.64, eye: fix(-14, 30, 40), at: fix(-34, 2, 18), fov: 42, ppx: 0.58 },
   ...hold(11.0, H(1.6, 4.2, -15.0), H(-1.6, 0.9, -6.0), 36, 0.6, 0.06),
   ...hold(11.6, H(4.0, 7.0, -19.5), H(-1.4, 1.2, -5.0), 38, 0.6, 0.08),
@@ -105,8 +109,8 @@ export const KEYS: Key[] = [
   ...hold(13.3, S(-3.9, 1.8, 11.0), S(-3.9, 1.6, 3.6), 36, 0.6, 0.06),
   { P: 13.8, eye: S(-3.4, 2.1, 14.5), at: S(-3.9, 1.7, 3.6), fov: 38, ppx: 0.58 },
   ...hold(14.4, fix(16, 34, 48), fix(40, 2, -13), 28, 0.56, 0.06),
-  { P: 14.78, eye: S(-4.0, 2.0, 8.5), at: S(-3.9, 1.2, 3.8), fov: 40, ppx: 0.5 },
-  { P: 15.0, eye: S(-3.95, 1.75, 5.6), at: S(-3.92, 1.05, 3.75), fov: 40, ppx: 0.5, ppy: 0.56 },
+  { P: 14.78, eye: S(-2.6, 1.15, 9.2), at: S(-3.9, 1.0, 3.8), fov: 40, ppx: 0.5 },
+  { P: 15.04, eye: S(-2.85, 1.1, 5.3), at: S(-3.9, 1.0, 3.7), fov: 40, ppx: 0.5, ppy: 0.53 },
   // THE TURN: the hands; the paper coming apart round them; black; the town at dusk; the new route.
   ...hold(15.4, S(-2.62, 1.22, 4.1), S(-3.9, 1.0, 3.68), 40, 0.5, 0.06, 0.52),
   { P: 15.66, eye: S(-2.3, 1.75, 2.25), at: S(-4.1, 1.55, 4.4), fov: 54, ppx: 0.5 },
@@ -146,9 +150,13 @@ export const KEYS: Key[] = [
   // NEW YOU: across the town at roof height; the office at six; the lid, the lamp; out the door; the van away.
   { P: 25.8, eye: fix(0, 22, 14), at: fix(30, 4, -8), fov: 44, ppx: 0.56 },
   { P: 25.96, eye: S(-3.3, 2.0, 10.4), at: S(-3.9, 1.4, 3.8), fov: 36, ppx: 0.6 },
+  // In through the glass between two mullions and round by the side wall (the day's card hangs over the desk).
+  { P: 26.08, eye: S(-5.82, 1.9, 5.55), at: S(-4.6, 1.5, 2.6), fov: 46, ppx: 0.56 },
+  { P: 26.18, eye: S(-6.0, 1.85, 4.2), at: S(-3.9, 1.5, 4.4), fov: 48, ppx: 0.56 },
   ...hold(26.3, S(-3.5, 1.8, 2.12), S(-3.9, 1.75, 5.0), 50, 0.56, 0.06),
   ...hold(26.62, S(-2.75, 1.3, 3.3), S(-4.1, 1.0, 4.0), 40, 0.5, 0.05),
-  { P: 26.8, eye: S(-3.95, 1.75, 5.2), at: S(-2.0, 1.2, 6.5), fov: 44, ppx: 0.56 },
+  // Out through the glass (between two mullions) to watch them leave.
+  { P: 26.84, eye: S(-2.6, 1.6, 8.0), at: S(-3.0, 1.2, 4.0), fov: 44, ppx: 0.56 },
   { P: 27.0, eye: S(-0.5, 2.0, 13.0), at: S(-1.6, 1.2, 6.5), fov: 40, ppx: 0.56 },
   { P: 27.3, eye: S(4.0, 2.6, 17.0), at: S(3.0, 1.2, 9.0), fov: 40, ppx: 0.56 },
   ...hold(27.7, van(-14, 9, 16), van(0, 1, 0), 40, 0.56, 0.06),

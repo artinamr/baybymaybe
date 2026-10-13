@@ -531,7 +531,7 @@ export class World {
         const check = bump(P, B.samCheck[0], B.samCheck[1], 0.06);
         return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.15 + 0.7 * check, check * 0.5, 0.7 - check * 0.4);
       }
-      if (P >= 10.62 && P < B.year[0]) return stand(o, deckSpot, 0, t, H(-1.0, 1.2, -14));
+      if (P >= 10.9 && P < B.year[0]) return stand(o, deckSpot, 0, t, H(-1.0, 1.2, -14));
       if (P >= B.year[1] && P < B.van[0]) return standPhone(o, deckSpot, 0, t, 0.7, 1);
       if (P >= B.van[0] && P < 12.8) return stand(o, H(-2.6, 0.6, -5.2), Math.PI, t, V(-36, 1.5, 3.4));
       o.visible = 0;
@@ -542,7 +542,7 @@ export class World {
       return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.62 + 0.15 * typing, 1, 0.25);
     }
     if (inW(P, [22.36, 22.6])) return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.66, 1, 0.3);
-    if (inW(P, [23.1, 23.62]) || inW(P, [23.84, B.nYear[0]]) || inW(P, [B.nYear[1], B.nVan[0]])) return standPhone(o, deckSpot, 0, t, 0.7, 1);
+    if (inW(P, [23.1, B.nYear[0]]) || inW(P, [B.nYear[1], B.nVan[0]])) return standPhone(o, deckSpot, 0, t, 0.7, 1);
     if (inW(P, [B.nVan[0], 25.8])) return stand(o, H(-2.6, 0.6, -5.2), Math.PI, t, V(-36, 1.5, 3.4));
     o.visible = 0;
     return o;
