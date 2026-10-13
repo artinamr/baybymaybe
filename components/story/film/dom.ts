@@ -80,6 +80,43 @@ export class Dom {
     this.endSum = q(".st-end-sum");
   }
 
+  /**
+   * Where each card's words are on screen (measured when it comes on; again
+   * after a resize): across, the words' own lines (a block spans the whole
+   * column, its words may not); up and down, the card's box (the words rise
+   * into place, so their lines are not where they will rest yet).
+   */
+  private boxes = new Map<HTMLElement, { left: number; right: number; top: number; bottom: number }>();
+  private boxW = 0;
+  private boxH = 0;
+  private boxOf(el: HTMLElement) {
+    if (innerWidth !== this.boxW || innerHeight !== this.boxH) {
+      this.boxes.clear();
+      this.boxW = innerWidth;
+      this.boxH = innerHeight;
+    }
+    let b = this.boxes.get(el);
+    if (!b) {
+      const r = el.getBoundingClientRect();
+      b = { left: Infinity, right: -Infinity, top: r.top, bottom: r.bottom };
+      const rg = document.createRange();
+      for (const t of el.querySelectorAll(".st-k, .st-t, .st-l, .st-fact")) {
+        rg.selectNodeContents(t);
+        for (const l of rg.getClientRects()) {
+          if (l.width < 1) continue;
+          b.left = Math.min(b.left, l.left);
+          b.right = Math.max(b.right, l.right);
+        }
+      }
+      if (b.left > b.right) {
+        b.left = r.left;
+        b.right = r.right;
+      }
+      this.boxes.set(el, b);
+    }
+    return b;
+  }
+
   private set(key: string, v: string | number | boolean, fn: () => void) {
     if (this.last[key] === v) return;
     this.last[key] = v;
@@ -107,6 +144,20 @@ export class Dom {
       }
       if (on && card.id !== "open" && card.id !== "turn") left = true;
       if (on && (card.id === "open" || card.id === "turn")) centre = true;
+    }
+    // Where the words are, for the film (it keeps its cards clear of them).
+    const wd = w.words;
+    wd.k = 0;
+    for (const c of this.cards) {
+      if (!c.on) continue;
+      const card = CARDS[c.i];
+      const b = this.boxOf(c.el);
+      const m = 10;
+      wd.x0 = ((b.left - m) / innerWidth) * 2 - 1;
+      wd.x1 = ((b.right + m) / innerWidth) * 2 - 1;
+      wd.y0 = 1 - ((b.bottom + m) / innerHeight) * 2;
+      wd.y1 = 1 - ((b.top - m) / innerHeight) * 2;
+      wd.k = Math.max(0, Math.min(1, (P - card.in) / 0.05, (card.out - P) / 0.05));
     }
     this.set("shade", left, () => this.shade?.style.setProperty("--shade", left ? "1" : "0"));
     this.set("shadeC", centre, () => this.shade?.style.setProperty("--shade-c", centre ? "1" : "0"));

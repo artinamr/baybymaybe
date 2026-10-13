@@ -89,15 +89,17 @@ export class Card {
     readonly w: number,
     readonly h: number,
     radius = 0.06,
-    thick = 0.03
+    thick = 0.03,
+    look: { bezel?: number; body?: THREE.ColorRepresentation; metal?: number } = {}
   ) {
-    this.bodyMat = new THREE.MeshStandardMaterial({ color: 0xf2f1ee, roughness: 0.35, metalness: 0, transparent: true });
+    this.bodyMat = new THREE.MeshStandardMaterial({ color: look.body ?? 0xf2f1ee, roughness: look.body ? 0.28 : 0.35, metalness: look.metal ?? 0, transparent: true });
     this.body = new THREE.Mesh(tablet(w, h, thick, radius, Math.min(0.01, thick * 0.3)), this.bodyMat);
     this.body.castShadow = true;
     this.faceMat = faceMat(screen.tex);
-    this.face = new THREE.Mesh(faceGeometry(w - radius * 0.35, h - radius * 0.35, radius * 0.85), this.faceMat);
+    const inset = look.bezel ?? radius * 0.175;
+    this.face = new THREE.Mesh(faceGeometry(w - inset * 2, h - inset * 2, Math.max(0.005, radius - inset * 0.7)), this.faceMat);
     this.face.position.z = thick / 2 + 0.002;
-    const bg = faceGeometry(w - radius * 0.35, h - radius * 0.35, radius * 0.85);
+    const bg = faceGeometry(w - inset * 2, h - inset * 2, Math.max(0.005, radius - inset * 0.7));
     // Turned to face the other way, its UVs as they were: from behind it reads left to right too.
     bg.rotateY(Math.PI);
     this.back = new THREE.Mesh(bg, this.faceMat);
@@ -105,13 +107,27 @@ export class Card {
     this.group.add(this.body, this.face, this.back);
     this.group.visible = false;
   }
+  private k = 0;
+  private glow = 1;
+  /** 1, or less while it passes behind the words (World.keepClear). */
+  clear = 1;
   /** Show at a brightness (the screen's light) and an opacity. */
   show(k: number, glow = 1) {
+    this.k = k;
+    this.glow = glow;
+    this.apply();
+  }
+  /** What show() asked for, at the current clearance. */
+  get shown() {
+    return this.k;
+  }
+  apply() {
+    const k = this.k * this.clear;
     this.group.visible = k > 0.002;
     this.faceMat.opacity = k;
     this.bodyMat.opacity = k;
     this.body.visible = k > 0.98 ? true : k > 0.02;
-    this.faceMat.color.setScalar(glow * uiScale.k);
+    this.faceMat.color.setScalar(this.glow * uiScale.k);
     this.bodyMat.depthWrite = k > 0.98;
   }
 }

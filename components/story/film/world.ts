@@ -10,7 +10,7 @@ import { Crowd } from "./crowd";
 import { Envelope, type Flight } from "./mail";
 import { NODES, System } from "./system";
 import { ContactShade } from "./shade";
-import { cameraSmooth, phoneAdjust, type CamOut, type Ctx as CamCtx } from "./camera";
+import { BACK_STEP, cameraSmooth, phoneAdjust, phoneBackBase, phoneBackTable, type BackBase, type CamOut, type Ctx as CamCtx } from "./camera";
 import { B, bump, clockAt, inW, isNew, k, ke, weathered } from "./script";
 import { clamp01, lerp, range, smooth, smoother } from "./ease";
 import { FILM_LEN } from "../timeline";
@@ -138,6 +138,15 @@ export class World {
     this.town = buildTown(this.scene, opts.quality);
     this.home = buildHome(this.scene);
     this.shop = buildShop(this.scene);
+    // The two places, the garden's tree, the deck and the pile's van in the camera's height field.
+    const fld = this.town.field;
+    fld.box(-44, 15.5, 11.2, 10.2, 0, 5.6);
+    fld.disc(-40.8, 31.5, 4.2, 6.4);
+    fld.box(-44, 40.4, 17, 0.4, 0, 1.9);
+    fld.box(-38.5, 30.3, 0.4, 20, 0, 1.9);
+    fld.disc(-47.4, 30, 1.5, 2.2);
+    fld.box(44, -17, 15.2, 13.2, 0, 6.6);
+    fld.box(47.6, -8, 2.2, 5.2, 0, 2.4);
     this.scene.add(this.sam.root, this.owner.root, this.samPhone.group, this.shadeG.mesh);
     this.phoneLight = new THREE.PointLight(0xcfe0ff, 0, 1.6, 1.5);
     this.scene.add(this.phoneLight);
@@ -159,7 +168,7 @@ export class World {
     // Screens and cards.
     this.phoneScreen = new Screen(UI.PHONE.w, UI.PHONE.h, UI.PHONE.s, false);
     (this.samPhone.screen.material as THREE.MeshBasicMaterial).map = this.phoneScreen.tex;
-    this.phoneCard = new Card(this.phoneScreen, 0.62, 1.34, 0.075, 0.02);
+    this.phoneCard = new Card(this.phoneScreen, 0.66, 1.38, 0.09, 0.03, { bezel: 0.022, body: 0x17181c, metal: 0.35 });
     this.laptopScreen = new Screen(UI.DESK.w, UI.DESK.h, UI.DESK.s, false);
     (this.shop.laptop.screen.material as THREE.MeshBasicMaterial).map = this.laptopScreen.tex;
     const deskCard = (w = 1.4, h = 0.875, mips = true) => new Card(new Screen(UI.DESK.w, UI.DESK.h, UI.DESK.s, mips), w, h, 0.05, 0.02);
@@ -240,6 +249,29 @@ export class World {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.post.setSize(w * dpr, h * dpr);
+  }
+
+  /** The phone's pull-back at P (camera.ts phoneBackTable): the free distances once, a table per screen shape. */
+  private backBase: BackBase | null = null;
+  private backTables = new Map<number, Float32Array>();
+  phoneBack(P: number) {
+    const a = this.w / this.h;
+    if (a >= 1) return 0;
+    const key = Math.round(a * 50) / 50;
+    let t = this.backTables.get(key);
+    if (!t) {
+      this.backBase ??= phoneBackBase(
+        this.camCtx,
+        FILM_LEN,
+        this.town.field,
+        NODES.map((n) => ({ c: n.pos.clone().setY(n.pos.y + 2.6), r: 5, from: B.assemble[0] }))
+      );
+      this.backTables.set(key, (t = phoneBackTable(this.backBase, key)));
+    }
+    const f = Math.min(t.length - 1, Math.max(0, P / BACK_STEP));
+    const i = Math.floor(f);
+    const j = Math.min(t.length - 1, i + 1);
+    return t[i] + (t[j] - t[i]) * (f - i);
   }
 
   prewarm(_n: number) {
@@ -337,7 +369,7 @@ export class World {
     // THE CAMERA (first: the shadows follow what it looks at).
     const cam = this.camera;
     cameraSmooth(P, this.camCtx, this.cam, FILM_LEN);
-    phoneAdjust(this.cam, this.w / this.h);
+    phoneAdjust(this.cam, this.w / this.h, this.phoneBack(P));
     if (this.camOverride) {
       const e = this.camOverride.eye;
       const a = this.camOverride.at;
@@ -385,8 +417,79 @@ export class World {
     this.column(P);
     this.crowdAndCounts(P, t, nw);
     this.route(P, t);
+    this.keepClear();
     this.pointer(f.pointer);
     this.prevP = P;
+  }
+
+  /**
+   * Where the words are on screen (normalised device coordinates, y up) and
+   * how much they are there (0..1): written by the page (dom.ts) each frame.
+   */
+  readonly words = { x0: 0, y0: 0, x1: 0, y1: 0, k: 0 };
+  private readonly _c = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+  private readonly _q = new THREE.Vector3();
+
+  /**
+   * THE WORDS COME FIRST: a card in the air that passes behind the words
+   * fades while it is there (the compositions keep them apart; this is for
+   * the moments in between, when the camera swings past a card).
+   */
+  private keepClear() {
+    const wd = this.words;
+    const cam = this.camera;
+    cam.updateMatrixWorld();
+    const sysOn = this.system.group.visible;
+    for (const card of [...this.allCards(), ...this.system.cards]) {
+      if (card.shown <= 0.002 || (!sysOn && this.system.cards.includes(card)) || wd.k <= 0) {
+        if (card.clear !== 1) {
+          card.clear = 1;
+          card.apply();
+        }
+        continue;
+      }
+      card.group.updateMatrixWorld(true);
+      // The card's rectangle, in the camera's space, cut at the near plane, projected.
+      let x0 = Infinity;
+      let y0 = Infinity;
+      let x1 = -Infinity;
+      let y1 = -Infinity;
+      const c = this._c;
+      c[0].set(-card.w / 2, -card.h / 2, 0);
+      c[1].set(card.w / 2, -card.h / 2, 0);
+      c[2].set(card.w / 2, card.h / 2, 0);
+      c[3].set(-card.w / 2, card.h / 2, 0);
+      for (const v of c) v.applyMatrix4(card.group.matrixWorld).applyMatrix4(cam.matrixWorldInverse);
+      const near = -0.06;
+      const take = (v: THREE.Vector3) => {
+        this._q.copy(v).applyMatrix4(cam.projectionMatrix);
+        x0 = Math.min(x0, this._q.x);
+        x1 = Math.max(x1, this._q.x);
+        y0 = Math.min(y0, this._q.y);
+        y1 = Math.max(y1, this._q.y);
+      };
+      for (let i = 0; i < 4; i++) {
+        const a = c[i];
+        const b = c[(i + 1) % 4];
+        if (a.z <= near) take(a);
+        if (a.z <= near !== b.z <= near) take(this._q.copy(a).lerp(b, (near - a.z) / (b.z - a.z)).clone());
+      }
+      let clear = 1;
+      if (x1 > x0) {
+        const ox = Math.min(x1, wd.x1, 1) - Math.max(x0, wd.x0, -1);
+        const oy = Math.min(y1, wd.y1, 1) - Math.max(y0, wd.y0, -1);
+        if (ox > 0 && oy > 0) {
+          const onCard = (Math.min(x1, 1) - Math.max(x0, -1)) * (Math.min(y1, 1) - Math.max(y0, -1));
+          const zone = (wd.x1 - wd.x0) * (wd.y1 - wd.y0);
+          const frac = (ox * oy) / Math.max(1e-6, Math.min(onCard, zone));
+          clear = 1 - wd.k * smoother(range(frac, 0.04, 0.2));
+        }
+      }
+      if (Math.abs(clear - card.clear) > 1e-4) {
+        card.clear = clear;
+        card.apply();
+      }
+    }
   }
 
   /* ---------------------------------------------------------------- */
@@ -421,7 +524,7 @@ export class World {
     s.laptop.lid.rotation.set(lerp(-Math.PI / 2 + 0.03, 0.33, lidOpen), Math.PI, 0);
     s.screenLight.intensity = ownerIn ? 0.9 * smooth(range(lidOpen, 0.5, 1)) : 0;
     (s.laptop.screen.material as THREE.MeshBasicMaterial).color.setScalar(ownerIn ? 1.15 * smooth(range(lidOpen, 0.6, 1)) : 0.02);
-    s.ceiling.intensity = ownerIn && !lampOn && night < 0.5 ? 0.9 : 0;
+    s.ceiling.intensity = ownerIn && !lampOn && night < 0.5 ? 2.2 : 0;
     s.wall.intensity = night > 0.4 ? 9 * night : 0;
     (s.wallGlow.material as THREE.MeshBasicMaterial).color.setRGB(3.2, 2.5, 1.7).multiplyScalar(night > 0.4 ? night : 0.03);
     this.town.pool(0, s.wallAt.x, s.wallAt.z + 2.2, 4.0, night > 0.4 ? 1.1 * night : 0, WALL_COL);
@@ -1073,6 +1176,10 @@ export class World {
 
   private look(P: number, night: number) {
     const g = this.grade;
+    // The room's sheen follows the sky's own light: soft by day, nearly nothing at dusk and night.
+    const sky = this.sky.hemi;
+    const lum = sky.color.r * 0.2126 + sky.color.g * 0.7152 + sky.color.b * 0.0722;
+    this.scene.environmentIntensity = Math.min(0.45, 0.8 * sky.intensity * lum);
     g.exposure = lerp(1.0, 1.9, night);
     g.bloom = 0.6;
     g.threshold = 1.35;
@@ -1126,7 +1233,53 @@ export class World {
     this.hover = best;
   }
 
+  /**
+   * The environment the materials reflect: a soft room (a sky-bright top, a
+   * pale horizon, a dark ground, two long light panels), baked once into a
+   * PMREM. Its strength follows the time of day (look), so the model has a
+   * soft sheen by day and only a trace at night; edges catch the panels.
+   */
+  private envReady = false;
+  private makeEnv() {
+    const pm = new THREE.PMREMGenerator(this.gl);
+    const room = new THREE.Scene();
+    const g = new THREE.SphereGeometry(10, 48, 24);
+    const pos = g.getAttribute("position");
+    const col = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i) / 10;
+      const top = new THREE.Color(0.92, 0.95, 1.0);
+      const hor = new THREE.Color(0.78, 0.77, 0.75);
+      const low = new THREE.Color(0.2, 0.19, 0.18);
+      const c = y > 0 ? hor.clone().lerp(top, Math.pow(y, 0.6)) : hor.clone().lerp(low, Math.pow(-y, 0.5));
+      col.set([c.r, c.g, c.b], i * 3);
+    }
+    g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    room.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+    for (const [x, z, yaw] of [
+      [0, 7, 0],
+      [-7, -3, 1.9],
+    ] as const) {
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(9, 1.6), new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 3, 3), side: THREE.DoubleSide }));
+      p.position.set(x, 6.5, z);
+      p.rotation.set(-0.9, yaw, 0);
+      room.add(p);
+    }
+    const rt = pm.fromScene(room, 0.02);
+    this.scene.environment = rt.texture;
+    pm.dispose();
+    g.dispose();
+  }
+
   render(time: number) {
+    if (!this.envReady) {
+      this.envReady = true;
+      try {
+        this.makeEnv();
+      } catch {
+        /* no environment: the lights carry the picture */
+      }
+    }
     this.post.render(this.gl, this.scene, this.camera, this.grade, time);
   }
 }

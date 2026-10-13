@@ -66,9 +66,14 @@ export function rr(ctx: Ctx, x: number, y: number, w: number, h: number, r: numb
   }
 }
 
-type TextOpt = { size?: number; weight?: number; color?: string; align?: CanvasTextAlign; base?: CanvasTextBaseline; track?: number };
+type TextOpt = { size?: number; weight?: number; color?: string; align?: CanvasTextAlign; base?: CanvasTextBaseline; track?: number; max?: number };
 export function text(ctx: Ctx, s: string, x: number, y: number, o: TextOpt = {}) {
   font(ctx, o.size ?? 14, o.weight ?? 400);
+  // Too long for its room: a smaller size, never a cut word.
+  if (o.max) {
+    const m = ctx.measureText(s).width;
+    if (m > o.max) font(ctx, Math.floor((o.size ?? 14) * (o.max / m) * 10) / 10, o.weight ?? 400);
+  }
   ctx.fillStyle = o.color ?? C.ink;
   ctx.textAlign = o.align ?? "left";
   ctx.textBaseline = o.base ?? "alphabetic";
@@ -1059,6 +1064,6 @@ export function nodeLabel(ctx: Ctx, w: number, h: number, title: string, line: s
     ctx.lineTo(cx + r * 0.45, cy - r * 0.15);
     ctx.stroke();
   }
-  text(ctx, title, h + 6, h / 2 - 4, { size: h * 0.25, weight: 700, color: C.ink });
-  text(ctx, line, h + 6, h / 2 + h * 0.22, { size: h * 0.16, color: C.mute });
+  text(ctx, title, h + 6, h / 2 - 4, { size: h * 0.25, weight: 700, color: C.ink, max: w - h - 46 });
+  text(ctx, line, h + 6, h / 2 + h * 0.22, { size: h * 0.16, color: C.mute, max: w - h - 46 });
 }

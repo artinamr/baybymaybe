@@ -14,7 +14,7 @@
 // Moving things (people, cards, envelopes, the van) are left out; the decks
 // are taken built.
 //
-// usage: node tools/qa/story-camera.mjs [step=0.005] [from=0] [to=FILM_LEN] [--json out.json]
+// usage: node tools/qa/story-camera.mjs [step=0.005] [from=0] [to=FILM_LEN] [--phone] [--json out.json]
 import { createJiti } from "jiti";
 import fs from "node:fs";
 
@@ -43,10 +43,14 @@ const film = (f) => jiti.import(new URL(`components/story/film/${f}`, root).href
 const THREE = await jiti.import("three");
 const { MeshBVH } = await jiti.import("three-mesh-bvh");
 const { World } = await film("world.ts");
-const { cameraSmooth } = await film("camera.ts");
+const { cameraSmooth, phoneAdjust } = await film("camera.ts");
 const { FILM_LEN } = await jiti.import(new URL("components/story/timeline.ts", root).href);
 
 const args = process.argv.slice(2);
+// --phone: the portrait framing (390 x 844), as a phone shows the film.
+const phoneAt = args.indexOf("--phone");
+const PHONE = phoneAt >= 0;
+if (PHONE) args.splice(phoneAt, 1);
 const jsonAt = args.indexOf("--json");
 const jsonOut = jsonAt >= 0 ? args.splice(jsonAt, 2)[1] : null;
 const [step = 0.005, from = 0, to = FILM_LEN] = args.map(Number);
@@ -54,6 +58,12 @@ const [step = 0.005, from = 0, to = FILM_LEN] = args.map(Number);
 // A stand-in renderer: the world only sets flags on it while it builds.
 const gl = { shadowMap: { enabled: false, type: 0 }, getContext: () => ({}), capabilities: { maxSamples: 4 }, extensions: { has: () => false } };
 const world = new World(gl, { phone: false, quality: 1, reduced: true });
+if (PHONE) world.setSize(390, 844, 1);
+if (PHONE) {
+  const t0 = performance.now();
+  world.phoneBack(0);
+  console.log(`phone pull-back table: ${(performance.now() - t0).toFixed(0)} ms`);
+}
 // Built decks; everything placed.
 world.scene.updateMatrixWorld(true);
 
@@ -124,6 +134,7 @@ const cardGap = (eye) => {
 const rows = [];
 for (let P = from; P <= to + 1e-9; P += step) {
   cameraSmooth(P, ctx, cam, FILM_LEN);
+  if (PHONE) phoneAdjust(cam, 390 / 844, world.phoneBack(P));
   const r = bvh.closestPointToPoint(cam.eye, target, 0, 5);
   const clear = r ? target.distance : 5;
   const ground = !inRoom(cam.eye) && cam.eye.y < 0.3 ? "below 0.3 m over the ground" : "";

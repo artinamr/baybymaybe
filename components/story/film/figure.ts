@@ -96,9 +96,25 @@ export class Figure {
     };
     const shade = (y0: number, y1: number, lo = 0.8) => (p: THREE.Vector3) => lo + (1 - lo) * Math.min(1, Math.max(0, (p.y - y0) / (y1 - y0)));
 
-    // The pelvis and the abdomen: smooth, neither broad-hipped nor broad-shouldered.
-    part(this.hips, new Batch().add(ball(1, 28, 18), at(0, 0.005, 0, 0, 0, 0, 0.158, 0.118, 0.11), shade(-0.1, 0.05, 0.82)).build());
-    part(this.spine, new Batch().add(ball(1, 28, 18), at(0, 0.09, 0.004, 0, 0, 0, 0.135, 0.15, 0.1), 1).build());
+    // The pelvis and the waist: turned forms, oval in section, neither broad-hipped
+    // nor broad-shouldered; the waist narrower than both, so the figure reads as a
+    // figure, not a stack of balls.
+    part(
+      this.hips,
+      new Batch()
+        .add(
+          turned([[0.0, -0.1], [0.06, -0.097], [0.112, -0.062], [0.138, -0.01], [0.136, 0.04], [0.118, 0.085], [0.1, 0.11], [0.0, 0.118]], 36),
+          at(0, 0, 0.004, 0, 0, 0, 1, 1, 0.74),
+          shade(-0.1, 0.05, 0.82)
+        )
+        .build()
+    );
+    part(
+      this.spine,
+      new Batch()
+        .add(turned([[0.0, -0.03], [0.1, -0.022], [0.098, 0.04], [0.096, 0.09], [0.106, 0.15], [0.12, 0.2], [0.0, 0.215]], 36), at(0, 0, 0.004, 0, 0, 0, 1, 1, 0.74), 1)
+        .build()
+    );
     // The chest: a soft barrel tapering to the shoulders.
     part(
       this.chest,

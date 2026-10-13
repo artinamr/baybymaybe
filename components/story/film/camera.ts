@@ -106,7 +106,7 @@ export const KEYS: Key[] = [
   ...hold(12.56, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.06),
   // YOU: night; across to the office window; the owner in the clutter; out over the town; back.
   { P: 12.9, eye: fix(30, 26, 26), at: fix(40, 2, -13), fov: 40, ppx: 0.6 },
-  ...hold(13.3, S(-3.9, 1.8, 11.0), S(-3.9, 1.6, 3.6), 36, 0.6, 0.06),
+  ...hold(13.3, S(-3.9, 1.8, 11.0), S(-3.9, 1.6, 3.6), 36, 0.6, 0.06, 0.46),
   { P: 13.8, eye: S(-3.4, 2.1, 14.5), at: S(-3.9, 1.7, 3.6), fov: 38, ppx: 0.58 },
   ...hold(14.4, fix(16, 34, 48), fix(40, 2, -13), 28, 0.56, 0.06),
   { P: 14.78, eye: S(-2.6, 1.15, 9.2), at: S(-3.9, 1.0, 3.8), fov: 40, ppx: 0.5 },
@@ -132,19 +132,19 @@ export const KEYS: Key[] = [
   { P: 20.26, eye: fix(-38.0, 7.2, 26.5), at: fix(-41.0, 1.6, 18.0), fov: 38, ppx: 0.6 },
   ...hold(20.5, READ_EYE, READ_AT, 32, 0.6, 0.06),
   { P: 20.62, eye: fix(-37.5, 9.0, 25.0), at: fix(-20, 12, 6), fov: 42, ppx: 0.58 },
-  ...hold(20.76, node(2.4, 15.9, 2.8), node(4, 15.5, -6), 38, 0.6, 0.04),
+  ...hold(20.76, node(1.67, 17.4, 6.79), node(4, 17.4, -6), 40, 0.7, 0.04),
   { P: 20.98, eye: fix(-28, 24, 26), at: fix(-12, 15, -1), fov: 44, ppx: 0.6 },
-  ...hold(21.3, node(-16.4, 15.0, 7.4), node(-14, 14.1, -1), 40, 0.6, 0.08),
+  ...hold(21.3, node(-17.57, 15.9, 11.5), node(-14, 15.9, -1), 40, 0.7, 0.08),
   // NEW PLATFORM: the quote, filled in by itself; it flies to Sam; accepted; the deck; paid.
-  ...hold(22.1, node(18.6, 15.0, -1.6), node(21, 14.1, -10), 40, 0.6, 0.12),
+  ...hold(22.1, node(17.43, 15.9, 2.5), node(21, 15.9, -10), 40, 0.7, 0.12),
   { P: 22.38, eye: env(-8, 3, 12), at: env(-6, -1, 4), fov: 46, ppx: 0.56 },
   ...hold(22.52, READ_EYE, READ_AT, 32, 0.6, 0.04),
   ...hold(22.9, H(4.0, 5.5, -15.5), H(-1.2, 0.8, -6.5), 38, 0.6, 0.06),
-  ...hold(23.4, DECK_EYE, DECK_AT, 34, 0.6, 0.08),
+  ...hold(23.4, DECK_EYE, DECK_AT, 34, 0.64, 0.08),
   // NEW FOLLOW-UP: the review; a year; the reminder; our van.
-  ...hold(24.2, DECK_EYE, DECK_AT, 34, 0.6, 0.1),
+  ...hold(24.2, DECK_EYE, DECK_AT, 34, 0.64, 0.1),
   ...hold(24.7, H(4.0, 7.0, -19.5), H(-1.4, 1.2, -5.0), 38, 0.6, 0.12),
-  ...hold(25.2, DECK_EYE, DECK_AT, 34, 0.6, 0.08),
+  ...hold(25.2, DECK_EYE, DECK_AT, 34, 0.64, 0.08),
   { P: 25.4, eye: fix(-40.5, 10.5, 16.0), at: fix(-43.5, 1.0, 6.0), fov: 42, ppx: 0.6 },
   ...hold(25.64, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.06),
   // NEW YOU: across the town at roof height; the office at six; the lid, the lamp; out the door; the van away.
@@ -241,17 +241,140 @@ export function cameraSmooth(P: number, c: Ctx, out: CamOut, end: number) {
   }
 }
 
-/** On a portrait screen: a wider lens, the subject toward the middle and a little lower. */
-export function phoneAdjust(c: CamOut, aspect: number) {
+/** Inside one of the two rooms (where the camera must not back away through a wall). */
+function indoors(e: THREE.Vector3) {
+  const home = e.x > -49.2 && e.x < -38.8 && e.z > 10.8 && e.z < 20.2 && e.y < 3.3;
+  const shop = e.x > 36.8 && e.x < 51.2 && e.z > -23.2 && e.z < -10.8 && e.y < 4.6;
+  return home || shop;
+}
+const _dir = new THREE.Vector3();
+const _up = new THREE.Vector3(0, 1, 0);
+
+/** The way back: along the line of sight, or level when looking up (backing down that line would sink into the ground). */
+function backDir(c: CamOut, out: THREE.Vector3) {
+  out.subVectors(c.eye, c.at);
+  if (out.y < 0) out.y = 0;
+  const l = out.length();
+  return l < 1e-4 ? out.set(0, 0, 0) : out.divideScalar(l);
+}
+
+/**
+ * THE PHONE'S PULL-BACK, worked out ahead for the whole film. Once: at each
+ * moment the free distance behind the camera (the town's height field, the
+ * rooms, the cards in the air; none from inside a room), short of the point
+ * where something near would fill the bottom of the taller frame (a roof
+ * under the lens), with the shot's distance and lens. Then,
+ * per screen shape: how far the camera would like to back away (half of what
+ * keeps the desktop shot's width in view), cut to the free distance, and the
+ * lower envelope of that smoothed (an erosion wider than the blur, so it never
+ * passes the free distance): a tree crossing the line behind never makes the
+ * camera jump.
+ */
+export const BACK_STEP = 0.02;
+const BACK_MAX = 18;
+export type BackBase = { free: Float32Array; d: Float32Array; fov: Float32Array };
+/** Something in the air the camera keeps clear of (a card), from film time `from` on. */
+export type Air = { c: THREE.Vector3; r: number; from: number };
+export function phoneBackBase(c: Ctx, end: number, field: { get: (x: number, z: number) => number }, air: Air[] = []): BackBase {
+  const n = Math.ceil(end / BACK_STEP) + 1;
+  const base = { free: new Float32Array(n), d: new Float32Array(n), fov: new Float32Array(n) };
+  const o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0 };
+  const dir = new THREE.Vector3();
+  const p = new THREE.Vector3();
+  const q = new THREE.Vector3();
+  const fwd = new THREE.Vector3();
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
+  const low = new THREE.Vector3();
+  const rad = THREE.MathUtils.degToRad;
+  for (let i = 0; i < n; i++) {
+    const P = Math.min(end, i * BACK_STEP);
+    cameraSmooth(P, c, o, end);
+    base.d[i] = o.eye.distanceTo(o.at);
+    base.fov[i] = o.fov;
+    if (indoors(o.eye)) continue;
+    backDir(o, dir);
+    // The ray to the bottom of the phone's frame (its lens widened, the subject lifted to 0.36).
+    fwd.subVectors(o.at, o.eye).normalize();
+    right.crossVectors(fwd, _up);
+    const level = right.lengthSq() > 1e-6;
+    if (level) {
+      right.normalize();
+      up.crossVectors(right, fwd);
+      low.copy(fwd).addScaledVector(up, -1.28 * Math.tan(rad(Math.min(64, o.fov * 1.35)) / 2)).normalize();
+    }
+    let go = 0;
+    let hit = false;
+    for (let s = 0.5; s <= BACK_MAX + 1e-6 && !hit; s += 0.5) {
+      p.copy(o.eye).addScaledVector(dir, s);
+      if (indoors(p) || field.get(p.x, p.z) + 0.7 > p.y) hit = true;
+      for (const a of air) if (P >= a.from && p.distanceTo(a.c) < a.r) hit = true;
+      if (level && !hit) {
+        // Nothing standing in the near part of the frame's bottom edge.
+        const reach = Math.min(10, p.distanceTo(o.at) * 0.5);
+        for (let t = 0.5; t <= reach; t += 0.5) {
+          q.copy(p).addScaledVector(low, t);
+          if (q.y > 0 && q.y < field.get(q.x, q.z) - 0.6) {
+            hit = true;
+            break;
+          }
+        }
+      }
+      if (!hit) go = s;
+    }
+    base.free[i] = hit ? Math.max(0, go - 0.5) : BACK_MAX;
+  }
+  return base;
+}
+export function phoneBackTable(base: BackBase, aspect: number) {
+  const n = base.free.length;
+  const w = Math.min(1, (1 - aspect) / 0.45);
+  const rad = THREE.MathUtils.degToRad;
+  const raw = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const d = base.d[i];
+    const hDesk = 2 * Math.atan(Math.tan(rad(base.fov[i]) / 2) * 1.6);
+    const vPhone = Math.min(64, base.fov[i] * 1.35);
+    const hPhone = 2 * Math.atan(Math.tan(rad(vPhone) / 2) * aspect);
+    const need = (d * Math.tan(hDesk / 2)) / Math.tan(hPhone / 2);
+    raw[i] = Math.min(base.free[i], Math.min(BACK_MAX, Math.max(0, need - d) * 0.5) * w);
+  }
+  const rE = Math.round(0.2 / BACK_STEP);
+  const rG = Math.round(0.18 / BACK_STEP);
+  const sg = 0.06 / BACK_STEP;
+  const ero = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    let m = Infinity;
+    for (let j = Math.max(0, i - rE); j <= Math.min(n - 1, i + rE); j++) m = Math.min(m, raw[j]);
+    ero[i] = m;
+  }
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    let sum = 0;
+    let ws = 0;
+    for (let j = -rG; j <= rG; j++) {
+      const w = Math.exp(-0.5 * (j / sg) * (j / sg));
+      sum += ero[Math.min(n - 1, Math.max(0, i + j))] * w;
+      ws += w;
+    }
+    out[i] = sum / ws;
+  }
+  return out;
+}
+
+/**
+ * On a portrait screen the words take the lower part: the subject moves to
+ * the middle of the upper part, the lens widens, and the camera backs away by
+ * `back` (phoneBackTable).
+ */
+export function phoneAdjust(c: CamOut, aspect: number, back = 0) {
   if (aspect >= 1) return c;
   const w = Math.min(1, (1 - aspect) / 0.45);
-  const vfov = THREE.MathUtils.degToRad(c.fov);
-  // Keep the horizontal field near what the desktop shot had.
-  const hWide = 2 * Math.atan(Math.tan(vfov / 2) * 1.6);
-  const vNeed = 2 * Math.atan(Math.tan(hWide / 2) / aspect);
-  c.fov = THREE.MathUtils.lerp(c.fov, Math.min(78, THREE.MathUtils.radToDeg(vNeed) * 0.62), w);
-  c.ppx = THREE.MathUtils.lerp(c.ppx, 0.5 + (c.ppx - 0.5) * 0.25, w);
-  c.ppy = THREE.MathUtils.lerp(c.ppy, c.ppy + 0.06, w);
+  const vPhone = Math.min(64, c.fov * 1.35);
+  if (back > 0) c.eye.addScaledVector(backDir(c, _dir), back);
+  c.fov = THREE.MathUtils.lerp(c.fov, vPhone, w);
+  c.ppx = THREE.MathUtils.lerp(c.ppx, 0.5, w * 0.85);
+  c.ppy = THREE.MathUtils.lerp(c.ppy, 0.36, w);
   return c;
 }
 

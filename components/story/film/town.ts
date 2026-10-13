@@ -388,6 +388,52 @@ function chunked(group: THREE.Group, geo: THREE.BufferGeometry, mat: THREE.Mater
   return where;
 }
 
+/**
+ * A height field of the town: the top of whatever stands in each 1 m cell
+ * (houses, trees, cars, fences, lamps). The camera reads it to back away on a
+ * phone without backing into anything (camera.ts phoneAdjust).
+ */
+export class HeightField {
+  readonly x0 = -170;
+  readonly z0 = -150;
+  readonly n = 340;
+  readonly m = 300;
+  readonly h = new Float32Array(340 * 300);
+  get(x: number, z: number) {
+    const i = Math.floor(x - this.x0);
+    const j = Math.floor(z - this.z0);
+    if (i < 0 || j < 0 || i >= this.n || j >= this.m) return 0;
+    return this.h[j * this.n + i];
+  }
+  /** A rotated box (centre, size, turn about y) up to height top. */
+  box(cx: number, cz: number, w: number, d: number, yaw: number, top: number) {
+    const c = Math.cos(yaw);
+    const sn = Math.sin(yaw);
+    const r = Math.hypot(w, d) / 2 + 1;
+    for (let z = Math.floor(cz - r); z <= Math.ceil(cz + r); z++)
+      for (let x = Math.floor(cx - r); x <= Math.ceil(cx + r); x++) {
+        // The cell's centre, in the box's frame.
+        const dx = x + 0.5 - cx;
+        const dz = z + 0.5 - cz;
+        const u = dx * c - dz * sn;
+        const v = dx * sn + dz * c;
+        if (Math.abs(u) <= w / 2 + 0.6 && Math.abs(v) <= d / 2 + 0.6) this.set(x, z, top);
+      }
+  }
+  /** A disc (a tree's canopy) up to height top. */
+  disc(cx: number, cz: number, r: number, top: number) {
+    for (let z = Math.floor(cz - r - 1); z <= Math.ceil(cz + r + 1); z++)
+      for (let x = Math.floor(cx - r - 1); x <= Math.ceil(cx + r + 1); x++) if (Math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r + 0.6) this.set(x, z, top);
+  }
+  private set(x: number, z: number, top: number) {
+    const i = x - this.x0;
+    const j = z - this.z0;
+    if (i < 0 || j < 0 || i >= this.n || j >= this.m) return;
+    const k = j * this.n + i;
+    if (top > this.h[k]) this.h[k] = top;
+  }
+}
+
 export type Town = {
   group: THREE.Group;
   houses: House[];
@@ -401,6 +447,7 @@ export type Town = {
   /** Pools of light beyond the streetlights (rooms of the story), index from `lamps.length`. */
   pool: (i: number, x: number, z: number, r: number, power: number, col: THREE.Color) => void;
   mats: THREE.Material[];
+  field: HeightField;
 };
 
 export function buildTown(scene: THREE.Scene, quality: number): Town {
@@ -799,5 +846,17 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
     });
   };
 
-  return { group, houses, setWindow, setGlass, ground: gm.u, lamps, setLamps, pool, mats };
+  // What stands where, for the camera.
+  const field = new HeightField();
+  for (const p of placed) field.box(p.x, p.z, kinds[p.kind].w, kinds[p.kind].d, p.yaw, kinds[p.kind].h + 0.6);
+  for (const t of trees) field.disc(t.x, t.z, (t.kind === 2 ? 4.0 : t.kind === 1 ? 1.4 : 2.9) * t.s, (t.kind === 1 ? 9.4 : t.kind === 2 ? 5.1 : 6.8) * t.s * 1.1);
+  for (const c of cars) field.box(c.x, c.z, 1.9, 4.4, c.yaw, 1.6);
+  for (const l of lampAt) field.disc(l.x + Math.sin(l.yaw) * 0.7, l.z + Math.cos(l.yaw) * 0.7, 0.9, 6.6);
+  for (const p of placed) {
+    const l = p.lot;
+    const front = l.yaw === 0 ? 1 : -1;
+    field.box(l.x, l.z + front * (l.d / 2 - 0.3), l.w, 0.8, 0, 1.0);
+    field.box(l.x, l.z - front * (l.d / 2 - 0.1), l.w, 0.2, 0, 1.8);
+  }
+  return { group, houses, setWindow, setGlass, ground: gm.u, lamps, setLamps, pool, mats, field };
 }

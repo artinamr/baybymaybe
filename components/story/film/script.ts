@@ -94,7 +94,7 @@ export const B = {
   nRemind: [25.0, 25.34] as W,
   nVan: [25.36, 25.56] as W,
   // NEW YOU.
-  nToday: [25.84, 26.42] as W,
+  nToday: [26.12, 26.42] as W,
   nClose: [26.46, 26.6] as W,
   nLamp: [26.62, 26.7] as W,
   nStand: [26.7, 26.84] as W,

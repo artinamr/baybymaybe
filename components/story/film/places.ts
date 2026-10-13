@@ -665,7 +665,7 @@ export function buildShop(scene: THREE.Scene): Shop {
   const screenLight = new THREE.PointLight(0xbfd2ff, 0, 2.6, 1.6);
   screenLight.position.set(lx, DY + 0.16, lz - 0.05);
   g.add(screenLight);
-  const ceiling = new THREE.PointLight(0xfff1de, 0, 9, 1.4);
+  const ceiling = new THREE.PointLight(0xffe9cf, 0, 10, 1.3);
   ceiling.position.set(-3.9, F + 2.15, 3.6);
   g.add(ceiling);
   // The wall light over the roller door: a hood, its glow, a spot down onto the drive.
