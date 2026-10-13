@@ -223,7 +223,7 @@ export function FaqLd() {
 }
 
 /** How a project runs: the five stages as steps, matching the methodology page. */
-export function HowToLd() {
+export function HowToLd({ stages = STAGES }: { stages?: typeof STAGES } = {}) {
   return (
     <Ld
       data={{
@@ -234,7 +234,7 @@ export function HowToLd() {
         description:
           "Five stages: discover, define, design, build, and launch and care. The days are typical for a website; a platform or an automation is planned stage by stage in its own quote.",
         inLanguage: "en-NZ",
-        step: STAGES.map((s, i) => ({
+        step: stages.map((s, i) => ({
           "@type": "HowToStep",
           position: i + 1,
           name: s.title,

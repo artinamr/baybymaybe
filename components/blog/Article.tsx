@@ -121,8 +121,8 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
                 Sources
               </h2>
               <p className="ar-sources-note">
-                Every fact above that isn’t our own experience was checked against these pages on the date shown. They are
-                numbered in the order the article first cites them.
+                These are the pages behind the advice, with the date we checked each one. The numbers match the
+                references in the article.
               </p>
               <ol>
                 {a.sources.map((s, i) => (
@@ -157,8 +157,8 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
             <aside className="ar-about" aria-label="About this article">
               <p className="ar-about-h">About this article</p>
               <p>
-                Written by the Nerodyn studio in Auckland and checked against the sources above on {longDate(checked)}. Nothing
-                here is sponsored, and no one paid to be mentioned. <a href={PAGES.standards}>How we write and check our articles</a>.
+                Written by the Nerodyn studio in Auckland. Sources last checked on {longDate(checked)}. We don’t accept
+                payment for articles or product mentions. <a href={PAGES.standards}>Read our writing standards</a>.
               </p>
               <p>
                 Spotted something wrong or out of date? <a href={fix}>Tell us</a>, and we’ll fix it and mark the article as
@@ -207,8 +207,8 @@ export function Article({ a, toc, children }: { a: ArticleMeta; toc: TocItem[]; 
       </section>
 
       <Closing
-        title="Want a straight answer about your own site?"
-        line="Start with the free audit: what is working, what is costing you enquiries, and what we would build instead, within two days."
+        title="Let’s look at your website."
+        line="Send us the link for a free audit. We’ll reply within two days with what we would fix first."
         more={{ label: "More from the blog", href: PAGES.blog }}
       />
     </Page>

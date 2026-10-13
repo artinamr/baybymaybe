@@ -1,3 +1,4 @@
+import { PAGES } from "@/lib/content";
 import { H2, Callout, Check, Steps, Cite } from "@/components/blog/Prose";
 import { Term } from "@/components/blog/Term";
 
@@ -18,23 +19,22 @@ export default function Body() {
       <p>
         When someone searches for a plumber, a physio or a café “near me”, the map and the business cards beside the
         results come from <Term id="google-business-profile">Google Business Profile</Term>. Setting one up costs
-        nothing and takes an afternoon; the verification wait is the longest part. Here is what it is, how to get it,
-        and what to fill in so it earns its place.
+        nothing. Check that your business is eligible, claim or add the profile, then work through verification and
+        the details customers need.
       </p>
 
       <H2 id="what-it-is">What a Business Profile is</H2>
       <p>
-        A Business Profile is the listing you control that decides how your business appears on Google Search and
-        Maps: your name, hours, address or service area, phone, web address, photos, services and reviews. Google’s
-        own description is blunt about the price: “you can manage how your business shows up on Maps and Search at no
-        charge.”
+        A Business Profile lets you manage information about your business on Google Search and Maps: your name,
+        hours, address or service area, phone, web address, photos and services. It also brings customer reviews
+        together. Managing a profile is free, though Google can use other sources to update its information.
         <Cite n={1} />
       </p>
       <p>
-        Not every business can have one. Google’s rule is that the profile is for businesses that “make face-to-face
-        contact with customers”: a shop, a clinic, a workshop customers visit, or a trade that travels to them.
+        Not every business can have one. Eligible businesses generally meet customers in person: a shop, a clinic,
+        a workshop customers visit, or a trade that travels to them.
         <Cite n={1} /> A business that sells only online, with no premises and no visits, doesn’t qualify; its place
-        is earned in the ordinary search results instead (see <a href="/blog/what-is-seo/">what SEO involves</a>).
+        is earned in the ordinary search results instead (see <a href={PAGES.article("what-is-seo")}>what SEO involves</a>).
       </p>
       <Callout title="It is not an ad, and it is not automatic">
         <p>
@@ -90,8 +90,8 @@ export default function Body() {
             t: "Fill in everything, then keep it true",
             b: (
               <p>
-                Hours, services, photos, a link to your site. Google ranks complete profiles better, and customers
-                use them to decide whether to visit.
+                Add your hours, services, photos and a link to your site. Complete, accurate information helps
+                Google understand the business and helps customers decide whether to visit.
                 <Cite n={3} />
               </p>
             ),
@@ -100,11 +100,10 @@ export default function Body() {
       />
       <p>
         Two rules catch people out. There should be only one profile per business, so don’t create a second because
-        the first one is in an old staff member’s name: request ownership instead, which starts with the current
-        owner adding you.
+        the first one is in an old staff member’s name. Use Google’s ownership request process instead.
         <Cite n={4} /> And if you work from home and travel to customers, set the profile up as a service-area
         business rather than showing your street address.
-        <Cite n={2} />
+        <Cite n={4} />
       </p>
 
       <H2 id="verification">Getting verified</H2>
@@ -115,7 +114,7 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>Video is the common one now.</strong> Google recommends it where it is offered. You record the
+          <strong>Video, when offered.</strong> Google recommends this option when it is available. You record the
           outside of the premises, anything that shows the business is what it claims (the sign, the van, the
           equipment), and proof that you run it, such as access to areas only staff reach.
           <Cite n={5} />
@@ -126,8 +125,8 @@ export default function Body() {
           <Cite n={5} />
         </li>
         <li>
-          <strong>Touch nothing while you wait.</strong> Editing the business name, address or category during
-          verification invalidates the code. Requesting a second code invalidates the first.
+          <strong>Waiting for a postcard code.</strong> Don’t change the business name, address or category while
+          waiting for it: those changes invalidate the code. Requesting a second code invalidates the first.
           <Cite n={5} />
         </li>
         <li>
@@ -139,9 +138,7 @@ export default function Body() {
 
       <H2 id="fill-in">What to fill in first</H2>
       <p>
-        An empty profile is a missed one. Google’s advice on local ranking says to “provide complete and detailed
-        business info”, and it states the reward plainly: “Businesses with complete and accurate info are more likely
-        to show up in local search results.”
+        Google says complete and accurate information makes a business more likely to appear in local results.
         <Cite n={3} /> Work through these before you polish anything else:
       </p>
       <ul>
@@ -155,7 +152,7 @@ export default function Body() {
         </li>
         <li>
           <strong>Photographs that look like today.</strong> The front of the premises, the team at work, the
-          vehicles. Ten real photos beat one polished render.
+          vehicles. Use clear, recent photographs that show customers what to expect.
         </li>
         <li>
           <strong>A link to the page that helps next,</strong> usually your booking or contact page, and a phone
@@ -168,37 +165,34 @@ export default function Body() {
 
       <H2 id="local-ranking">How local ranking works</H2>
       <p>
-        Google sums up its local ranking in three words: “Local results are mainly based on relevance, distance, and
-        popularity.”
-        <Cite n={3} /> Relevance is how well the profile matches the search, which is what the details above fix.
-        Distance is how far the business sits from the person searching, which you can’t change and don’t need to.
+        Google says local results depend mainly on relevance, distance and popularity.
+        <Cite n={3} /> Relevance is how well the profile matches the search, which clear business details can help.
+        Distance is how far the business is from the person searching.
         Popularity is how well known the business is, and Google counts the reviews it has and the websites that link
         to it.
       </p>
       <p>
-        One thing is off the table: “There’s no way to request or pay for a better local ranking on Google.”
-        <Cite n={3} /> Anyone selling a better map position is selling something Google doesn’t sell.
+        You cannot pay Google for a better local ranking.
+        <Cite n={3} /> If someone promises a particular map position, ask what work they will do and how they can
+        support that promise.
       </p>
 
       <H2 id="reviews">Reviews: asking and replying</H2>
       <p>
-        Reviews are the part of a profile most owners leave to chance, and the part customers read first. Google’s
-        guidance is to ask: share the review link, or a code customers can scan, while the job is still fresh.
+        Make asking for a review part of finishing a job. Google lets you share a review link or a QR code
+        customers can scan.
         <Cite n={6} /> Asking everyone is fine. Paying, discounting or gifting in exchange for reviews is not:
-        “Offering incentives, like free or discounted goods or services, in exchange for customers to post reviews,
-        change reviews, or remove negative reviews is considered fake &amp; misleading content and is strictly
-        prohibited.”
+        Google prohibits offering incentives for posting or changing a review, or removing a negative one.
         <Cite n={6} />
       </p>
       <p>
-        Replying is the other half. Google says “Positive reviews and helpful replies can help your business stand
-        out”, and it counts reviews towards prominence as well.
-        <Cite n={3} /> A calm, specific reply to a critical review does more for the next customer than the review
-        itself did.
+        Replying matters too. Google encourages helpful replies, and reviews contribute to how well known it
+        considers a business.
+        <Cite n={3} /> For a critical review, address the issue calmly and offer a way to resolve it privately.
       </p>
 
       <H2 id="keep-it-working">Keeping it working</H2>
-      <p>Once the profile is live, this is the whole maintenance list:</p>
+      <p>Once the profile is live, use this list for a regular check:</p>
       <Check
         items={[
           <>
@@ -206,8 +200,8 @@ export default function Body() {
             the profile the day something changes.
           </>,
           <>
-            <strong>One profile, one owner.</strong> The profile sits in an account the business owns, with managers
-            added under it, so nothing depends on one person’s phone.
+            <strong>One primary owner.</strong> Keep primary ownership with an account the business controls. Add
+            other owners or managers through their own accounts, so access does not depend on one person’s phone.
             <Cite n={4} />
           </>,
           <>
@@ -235,11 +229,10 @@ export default function Body() {
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        A profile is a small system, and it is at its best when it agrees with your website: the same hours, the same
-        services, the same words. In the free audit we look at the pair together, the profile and the pages it points
-        to, and tell you plainly what is helping and what is missing. Send us your web address and we’ll include it.
-        Where the website itself is the weaker half, fixing it is our{" "}
-        <a href="/services/websites/">websites service</a>.
+        Your profile and your website should agree on hours, services and contact details. Send us your web address
+        for the free audit and we’ll look at the two together, including the pages visitors reach from the profile.
+        If those pages need work, that falls within our{" "}
+        <a href={PAGES.service("websites")}>websites service</a>.
       </p>
     </>
   );

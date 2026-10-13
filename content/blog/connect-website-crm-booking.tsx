@@ -1,3 +1,4 @@
+import { PAGES } from "@/lib/content";
 import { H2, Callout, Check, Compare, Figure, Cite } from "@/components/blog/Prose";
 import { Routes } from "@/components/blog/Diagrams";
 import { Term } from "@/components/blog/Term";
@@ -18,18 +19,17 @@ export default function Body() {
   return (
     <>
       <p>
-        A website, a <Term id="crm">CRM</Term>, a booking tool and an accounting package can each be good at their job and still make a lot of
-        work, if a person has to carry information between them by hand. Connecting them means each detail is entered
-        once (usually by the customer) and arrives everywhere it is needed. This article covers what to connect, the ways
-        to do it, and the parts that are easy to forget: consent, and knowing when a connection has quietly stopped
-        working.
+        Start with the details your team types more than once. An enquiry can go from the website into your{" "}
+        <Term id="crm">CRM</Term>, or a confirmed booking into the calendar, without someone copying it across. The
+        work is deciding which information goes where, what consent you need, and who gets told when a connection
+        stops working.
       </p>
 
       <H2 id="what-it-saves">What “connected” saves</H2>
       <ul>
         <li>
           <strong>Double entry.</strong> Every time someone retypes a name, an email address or a booking time, it costs
-          minutes and invites mistakes. Across a year, the minutes add up to weeks.
+          time and invites mistakes. Check how often it happens in your own business before estimating the saving.
         </li>
         <li>
           <strong>Lost leads.</strong> An enquiry that sits in an inbox until someone copies it into the CRM can wait days
@@ -100,7 +100,7 @@ export default function Body() {
         caption="An example field map: a website enquiry form into a CRM"
         head={["On the form", "In the CRM", "Notes"]}
         rows={[
-          ["Your name", "First name + last name", "Split on the first space; keep the original too."],
+          ["Your name", "Full name", "Keep the name as entered; ask separately if the CRM needs other fields."],
           ["Email", "Email (the match key)", "If the email exists, update that contact; don’t create a second."],
           ["Phone", "Mobile", "Stored as typed; formatted for display."],
           ["What do you need?", "Enquiry type", "The form’s choices match the CRM’s list exactly."],
@@ -155,7 +155,8 @@ export default function Body() {
           <strong>Tell people what happens to their details.</strong> Under the <Term id="privacy-act">Privacy Act 2020</Term>, information privacy
           principle 3 expects people to be made aware, when you collect their information, of the fact it is being
           collected, why, who will receive it, and their rights to access and correct it.
-          <Cite n={1} /> A short line next to the form, linking to your privacy policy, covers most of this.
+          <Cite n={1} /> Put a clear privacy notice next to the form and link to the full details. Check that it explains
+          who collects and holds the information, whether providing it is required, and what happens if it is not provided.
         </li>
         <li>
           <strong>Marketing needs consent.</strong> The Department of Internal Affairs sums up the{" "}
@@ -236,9 +237,9 @@ export default function Body() {
       <H2 id="yours">How we’d look at yours</H2>
       <p>
         Joining a website to the systems behind it is the everyday work of our{" "}
-        <a href="/services/platforms/">platforms service</a>: one field map, one connection at a time, each one
-        watched. The free audit finds the places where the same details are typed twice, and prices the fix before you
-        commit to anything.
+        <a href={PAGES.service("platforms")}>platforms service</a>. For the free audit, tell us which tools you use and where
+        your team copies information between them. We’ll suggest the first connection to investigate and what it
+        needs to handle.
       </p>
     </>
   );

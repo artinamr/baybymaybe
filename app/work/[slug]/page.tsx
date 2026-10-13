@@ -82,9 +82,16 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
 
       <section className="cs-stage" aria-label="The working demonstration" data-rv>
         <Stage p={p} />
-        <p className="cs-note">This is the working thing, not a picture of it. Click around: it runs on this page and sends nothing.</p>
+        <p className="cs-note">Try the demonstration in this frame. It uses fictional data and sends nothing you enter.</p>
         <p className="cs-note cs-touch-hint">Scroll inside the frame to see more.</p>
       </section>
+
+      <nav className="cs-guide" aria-label="In this study" data-rv>
+        <a href="#ctx-h"><span className="mono">01</span> The brief</a>
+        <a href="#scope-h"><span className="mono">02</span> Live scope</a>
+        <a href="#approach-h"><span className="mono">03</span> The decisions</a>
+        <a href="#story-h"><span className="mono">04</span> Up close</a>
+      </nav>
 
       <section className="sp-block split" aria-labelledby="ctx-h">
         <header className="split-head">
@@ -133,7 +140,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
         <header className="split-head">
           <Kicker>Approach</Kicker>
           <h2 id="approach-h" className="sp-h2" data-rv>
-            The decisions that matter.
+            The decisions behind the design.
           </h2>
         </header>
         <ol className="flow">
@@ -165,7 +172,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
           </ul>
         </div>
         <div className="cs-limits" data-rv>
-          <h3>{p.kind === "demo" ? "What it doesn’t" : "Results"}</h3>
+          <h3>{p.kind === "demo" ? "Before a live launch" : "Results"}</h3>
           <ul>
             {p.limits.map((x) => (
               <li key={x}>{x}</li>
@@ -199,8 +206,8 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
       </nav>
 
       <Closing
-        title="Want something like this?"
-        line="Tell us what you have and what’s slowing you down. You’ll get a straight answer within two days."
+        title="Let’s look at your workflow."
+        line="Tell us how the job runs today and where it gets held up. We’ll reply with a clear place to start, within two days."
         more={{ label: "Or see all the work", href: PAGES.work }}
       />
     </Page>

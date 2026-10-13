@@ -40,7 +40,7 @@ export const STORY_TITLE = "The quiet leak";
 export const DOOR = {
   kicker: "A short film by Nerodyn",
   title: STORY_TITLE,
-  line: "One customer. One machine. The evening it takes from you.",
+  line: "Follow one customer through the gaps, then see a better route take shape.",
   sound: "Start with sound",
   silent: "Start in silence",
   how: "Scroll, drag or use the arrow keys. Or press play and sit back.",
@@ -111,7 +111,7 @@ export const CHAPTERS: StoryChapter[] = [
     id: "inbox",
     name: "Your inbox",
     kicker: "02 Your inbox",
-    title: "Their message arrives. You don’t.",
+    title: "They send a message. Then wait.",
     line: "7:40pm. The form says sent. Your inbox says nothing back.",
     beat: "The night moves. They’re still waiting.",
     scene:
@@ -173,7 +173,7 @@ export const CHAPTERS: StoryChapter[] = [
     id: "new-ai",
     name: "AI automation",
     kicker: "AI automation",
-    title: "This time, someone answers.",
+    title: "This time, they get a reply.",
     line: "The assistant handles the first questions. It gathers the job details and leaves the judgement with your team.",
     scene:
       "The moon crosses the same space where the inbox once waited. A glass turbine catches our customer and sends the light into the next channel. The light keeps its warmth. The route continues while the desk below is quiet.",
@@ -222,7 +222,7 @@ export const chapterById = (id: ChapterId) => CHAPTERS.find((c) => c.id === id)!
 export const ENDING = {
   title: "Find your leaks.",
   line: "Free audit in two days.",
-  body: "Send us your website. In two days, get a plain answer about the way in, the handovers and the gaps worth fixing first.",
+  body: "Send us your website. Within two days, we’ll reply with the gaps we found and a clear order for fixing them.",
   cta: "Get your free audit",
   again: "Watch it again",
   watch: "Watch the film",
@@ -280,8 +280,8 @@ export const PARTS: Record<PartId, { name: string; line: string }> = {
 /** The transcript's opening, and the controls' words. */
 export const TRANSCRIPT = {
   title: "The story, in words",
-  intro: "One customer enters a business built from separate parts. Follow the losses, the rebuild and the evening the owner gets back.",
-  note: "This is an illustrative story, not a real client or a forecast. Its lights and counters belong to the film. The research finding below comes from a global study published in 2016; it is not a measurement of your business.",
+  intro: "A customer arrives, an enquiry waits and the same details are copied between tools. The business takes another evening to keep running. Then the route changes.",
+  note: "The business, timings and outcomes are illustrative. The lights and counters describe this film. The cited finding comes from Google’s global research in 2016; it does not measure your website or predict your results.",
   sources: "Sources",
 };
 

@@ -6,14 +6,15 @@ import { Photo, BANNER_SIZES } from "@/components/site/Photo";
 import { StageSpy } from "@/components/site/StageSpy";
 import { Plan } from "./Plan";
 import { Artefact } from "./Artefact";
-import { FAQ_ALL, PAGES, PRINCIPLES, STAGES, ogCard } from "@/lib/content";
+import { FAQ_ALL, PAGES, ogCard } from "@/lib/content";
+import { METHOD_PRINCIPLES as PRINCIPLES, METHOD_STAGES as STAGES } from "./stages";
 import { pageMeta } from "@/lib/meta";
 import { PHOTOS } from "@/content/images";
 // Its own stylesheet: the stages, the sticky photograph, your part. No other page loads it.
 import "./methodology.css";
 
 const DESCRIPTION =
-  "How a Nerodyn project runs in five stages: what happens in each, what you bring, what we produce, where you decide, and what is yours at the end.";
+  "How we take a project from first conversation to launch: five clear stages, useful deliverables and your decisions at the right points.";
 
 export const metadata: Metadata = pageMeta({
   title: "Methodology: five stages from first call to launch",
@@ -22,32 +23,32 @@ export const metadata: Metadata = pageMeta({
   image: ogCard("methodology", "How a Nerodyn project runs, in five stages."),
 });
 
-const YOURS = ["The code", "The domain", "The content, and every asset", "Every account, in your name", "Plain notes on how it all works"];
+const YOURS = ["The project code", "Your domain and hosting accounts", "Your content and project assets", "Access to the tools we set up", "Training and written handover notes"];
 
 /** The three moments the client decides (from the stages: the scope is signed, the prototype approved, the review link tried). */
 const DECIDE = [
   {
     stage: "Define",
     title: "You sign the scope",
-    body: "The written scope, the fixed quote and the launch date. Nothing is built until you agree to it.",
+    body: "Review what’s included, what it costs and when it launches. We start once you approve the written scope.",
   },
   {
     stage: "Design",
     title: "You approve the prototype",
-    body: "Click through every page with your real words in it. Production code waits for your yes.",
+    body: "Try the main tasks with your own content. We resolve your feedback before building the approved design.",
   },
   {
     stage: "Build",
     title: "You try it before it launches",
-    body: "The working site on its review link, on your own phone and computer. It goes live once you’ve tried it.",
+    body: "Use the private review link on your own devices. Your team checks the work and gives the go-ahead to launch.",
   },
 ];
 
 /** What to have to hand before the first call (the first stages' "you bring", in one list). */
 const READY = [
   "Half an hour for the call",
-  "Access to the current site, its analytics and the tools you use",
-  "A few real enquiries, good and bad",
+  "Your website address and the tools you use",
+  "A few real enquiries or examples of the problem",
   "Your brand files, if you have them",
   "The name of the person who signs off",
   "Any dates that can’t move",
@@ -56,15 +57,15 @@ const READY = [
 const GOOD = [
   {
     title: "If something changes",
-    body: "Changes are normal. If you want something new along the way, we price it and tell you what it does to the date, and you decide before any work on it starts.",
+    body: "If the brief changes, we explain the effect on the price and timing. You approve the change in writing before we do the extra work.",
   },
   {
     title: "Platforms and automation",
-    body: "The same five stages. A platform is released in stages, the smallest useful version first; an automation is tried on your own past examples before it goes live. Each has its dates in the quote, and each service page shows how its stages run.",
+    body: "The same five stages, with a timetable suited to the work. We plan the smallest useful platform release first and test automation against real examples. The scope sets out the dates and checks for your project.",
   },
   {
     title: "After launch",
-    body: "Fixes, updates and improvements, as much or as little as you want. Everything is in your name, so you can also take it elsewhere.",
+    body: "We agree the support you need, including updates and future improvements. The handover gives you the access and information to keep working with us or choose another team.",
   },
 ];
 
@@ -94,20 +95,24 @@ export default function Methodology() {
   return (
     <Page here="methodology" crumbs={crumbs}>
       <PageLd href={PAGES.methodology} name="Methodology" description={DESCRIPTION} image={PHOTOS["method-hero"]} />
-      <HowToLd />
+      <HowToLd stages={STAGES} />
       <QaLd items={QA} />
 
       <section className="sp-hero">
         <Kicker>Methodology</Kicker>
         <h1 className="sp-h1" data-rv>
-          From first call to live,
+          Good work starts
           <br />
-          <em>in about fourteen days.</em>
+          <em>with a clear plan.</em>
         </h1>
         <p className="sp-lede" data-rv>
-          One team takes it from the first call to the launch: designers and engineers together, with no hand-offs and no
-          subcontractors. It is done in weeks, not months, and nothing is lost on the way.
+          You work directly with the Auckland team designing and building your project. We agree the scope, show you the
+          design and give you a working version to try. You know what comes next and where we need your decision.
         </p>
+        <div className="mf-intro" data-rv>
+          <p><span className="mono">01 to 05</span> Five stages, with a clear deliverable at each.</p>
+          <a className="text-link" href="#mp-h">See the project plan <span aria-hidden>↓</span></a>
+        </div>
       </section>
 
       {/* The fourteen days as a plan; each stage opens its own section below. */}
@@ -121,7 +126,7 @@ export default function Methodology() {
         <header className="ms-head">
           <Kicker>Five stages</Kicker>
           <h2 id="ms-title" className="sp-h2" data-rv>
-            The same way, every time.
+            From a first look to a finished build.
           </h2>
         </header>
         <div className="mf" data-active="0">
@@ -202,10 +207,11 @@ export default function Methodology() {
         <header className="split-head">
           <Kicker>Your part</Kicker>
           <h2 id="decide-h" className="sp-h2" data-rv>
-            Three moments you decide.
+            Your decisions, at the right points.
           </h2>
           <p className="sp-lede mf-decide-note" data-rv>
-            Between them, the work is ours. You see progress as it happens and can ask anything at any point.
+            We handle the day-to-day work and keep you informed. These approvals give you a proper chance to review it
+            before the next stage begins.
           </p>
         </header>
         <div className="mf-part">
@@ -220,7 +226,7 @@ export default function Methodology() {
             ))}
           </ol>
           <div className="mf-ready" data-rv>
-            <p className="mf-ready-h">Before the first call, have these to hand</p>
+            <p className="mf-ready-h">Useful for the first conversation</p>
             <ul>
               {READY.map((r) => (
                 <li key={r}>
@@ -271,10 +277,11 @@ export default function Methodology() {
         <div className="own-head">
           <Kicker>At the end</Kicker>
           <h2 id="own-title" className="sp-h2" data-rv>
-            What is yours on day fourteen.
+            A proper handover, with everything you need.
           </h2>
           <p className="sp-lede" data-rv>
-            No licence to keep paying, and nothing that locks you to us. If you ever want to move it, it moves with you.
+            You receive the code, access and practical notes to run the work. Hosting and any third-party subscriptions
+            are listed in your scope, so the ongoing costs are clear too.
           </p>
         </div>
         <ul className="own-list" data-rv>
@@ -306,7 +313,7 @@ export default function Methodology() {
 
       <section className="sp-block sp-more" aria-label="More">
         <p className="sp-more-line" data-rv>
-          Ready when you are.
+          Start with a clear view of what needs work.
         </p>
         <div className="sp-more-links" data-rv>
           <a className="text-link" href={PAGES.services}>
@@ -320,6 +327,17 @@ export default function Methodology() {
           </a>
         </div>
       </section>
+      <details className="mf-credits">
+        <summary>Photographs and sources</summary>
+        <ul>
+          {[PHOTOS["method-hero"], ...STAGES.map((s) => s.photo)].map((p) => (
+            <li key={p.src}>
+              <a href={p.credit.page} target="_blank" rel="noopener noreferrer">{p.credit.title}</a>{" "}
+              by {p.credit.author}. {p.credit.source}, {p.credit.licence}.
+            </li>
+          ))}
+        </ul>
+      </details>
     </Page>
   );
 }

@@ -56,11 +56,11 @@ export const SERVICES: Service[] = [
     slug: "websites",
     n: "01",
     name: "Websites",
-    h1: ["Websites that turn visits", "into enquiries."],
-    line: "Custom-designed, fast on every phone, found in search, and yours.",
-    lede: "Designed around your customers, fast on every phone and built on clean code you own. Clear about what you do, easy to find in search, and simple for your team to keep up to date.",
+    h1: ["Your business,", "properly presented."],
+    line: "A clear presence for your business, with an easy next step for your customers.",
+    lede: "We design websites that give your business a clear presence and make the next step easy. From the wording to the enquiry form, every part is built around the people using it. Your team gets a site it can keep up to date.",
     description:
-      "Custom website design and development for New Zealand businesses: fast on every phone, built for search and accessibility, easy to edit, and yours.",
+      "Website design and development in Auckland. Distinctive design, clear content and a careful build, with the code and accounts in your name.",
     seoTitle: "Website design and development, Auckland",
     photo: PHOTOS["svc-websites"],
     cardPhoto: PHOTOS["svc-websites-card"],
@@ -70,8 +70,8 @@ export const SERVICES: Service[] = [
         body: "The business has moved on and the website hasn’t. A visitor can’t tell in a few seconds what you offer, who it is for and how to start.",
       },
       {
-        title: "It looks fine, but brings in little",
-        body: "People visit and leave. Enquiries are few, or they arrive by phone because the site gives no easy way in.",
+        title: "The right people aren’t getting in touch",
+        body: "The site attracts visitors, but the enquiry route is hard to find, the message is unclear or the questions people need answered are missing.",
       },
       {
         title: "Every change needs a developer",
@@ -80,16 +80,16 @@ export const SERVICES: Service[] = [
     ],
     deliver: [
       {
-        title: "Custom design, no templates",
-        body: "Designed for your business and your customers from the first sketch, not a theme adjusted to fit.",
+        title: "Design with a point of view",
+        body: "Layout, type and interaction developed around your business. Enough character to be remembered, with a clear path through each page.",
       },
       {
-        title: "Fast on every phone and screen",
-        body: "Built mobile-first with lean code, so pages load quickly on a phone signal as well as office broadband.",
+        title: "A careful build for small screens",
+        body: "We design for phones from the start, size the images properly and test the pages on a slow connection.",
       },
       {
         title: "Search foundations built in",
-        body: "Clean structure, titles and descriptions, structured data, a sitemap and fast pages: the groundwork search engines look for.",
+        body: "A clear page structure, considered titles and descriptions, structured data and a sitemap. We set up search tools and check the move from your current site.",
       },
       {
         title: "Content your team edits itself",
@@ -97,11 +97,11 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Accessible by design",
-        body: "Readable type, sound contrast, keyboard navigation and proper labels, so the site works for everyone who needs it.",
+        body: "Readable type, checked contrast, keyboard navigation and labelled forms. We test these as part of the build.",
       },
       {
         title: "Enquiries that reach you",
-        body: "Forms, booking and contact routes that land in the right inbox or system, with nothing lost on the way.",
+        body: "Contact forms and booking routes connected to the right inbox or system, with confirmation for the customer and a tested handover to you.",
       },
     ],
     approach: [
@@ -119,7 +119,7 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Launch with the groundwork done",
-        body: "Old addresses redirected, analytics and search set up and every page checked, so you keep what your old site had earned.",
+        body: "We map old addresses, set up redirects and check the pages, forms and search settings before the site goes live.",
       },
     ],
     bring: [
@@ -132,7 +132,7 @@ export const SERVICES: Service[] = [
     price: [
       { title: "How many kinds of page", body: "Many pages built from a few layouts cost less than pages that each need a design of their own." },
       { title: "Who writes the words", body: "Finished words and photos from you, or writing and shaping them together with us." },
-      { title: "What it connects to", body: "Booking, payments, a CRM or a newsletter each add design, building and testing." },
+      { title: "What it connects to", body: "Booking, payments, customer records or a newsletter each need their own design and testing." },
       { title: "What moves across", body: "Pages and posts brought over from the current site, and its old addresses redirected." },
     ],
     faq: [
@@ -146,7 +146,7 @@ export const SERVICES: Service[] = [
       },
       {
         q: "Will a new site lose our search rankings?",
-        a: "Not when the move is handled properly: we map every old address to its new page, keep the content that works and check it all at launch.",
+        a: "We can’t promise that rankings will stay the same. We map old addresses to the right new pages, keep useful content and check the search setup at launch. Your scope includes the migration work your site needs.",
       },
       {
         q: "How long does it take?",
@@ -169,7 +169,7 @@ export const SERVICES: Service[] = [
           "A plan of every page, built around your customers’ questions",
           "Copy written with you, or your own words edited",
           "The words your customers search with, worked into the pages",
-          "A map of every old address, so nothing breaks",
+          "A map of old addresses and the redirects they need",
         ],
       },
       {
@@ -194,7 +194,7 @@ export const SERVICES: Service[] = [
         group: "Checked before launch",
         items: [
           "Tried on real phones, tablets and computers",
-          "Accessibility checked against WCAG at level AA",
+          "Keyboard use, contrast, labels and screen-reader structure checked",
           "Speed tested on a slow phone connection",
           "Every link, form and redirect tried by hand",
         ],
@@ -211,7 +211,7 @@ export const SERVICES: Service[] = [
     ],
     runs: {
       title: "From first call to live.",
-      lede: "The days are typical for most websites. Your quote gives the real dates, and we hold to them.",
+      lede: "About fourteen days is a typical programme for a focused website, once the scope and content are ready. Your quote sets the dates for your project.",
       steps: [
         { when: "Days 1–2", title: "Discover", body: "A call and the free audit: what you have, and what your customers need from it." },
         { when: "By day 3", title: "Define", body: "The written scope, the fixed price and the launch date. Nothing is built until you sign it." },
@@ -222,21 +222,21 @@ export const SERVICES: Service[] = [
     },
     built: [
       {
-        title: "Tools chosen for your site, not for us",
+        title: "Tools chosen for the job",
         body: "A five-page brochure, a site with hundreds of articles and a site that takes bookings need different tools. We choose them in the scope and tell you why.",
       },
       {
         title: "Code any good developer can pick up",
-        body: "Mainstream, well-documented tools and plain notes, so you are never tied to us or to anyone else.",
+        body: "We use well-documented tools and hand over the code with plain notes. Another capable team can pick up the work.",
       },
       {
         title: "Light by default",
-        body: "Images sized for each screen, very little JavaScript and nothing loaded that a page doesn’t use. Our concept websites show the measurements.",
+        body: "Images sized for the screen and scripts added when they do a useful job. We check performance on the finished pages.",
       },
     ],
     care: [
       "Updates and security fixes, applied and checked",
-      "The site and its forms watched, so a problem is found before a customer finds it",
+      "Site and form checks, with an agreed response when something fails",
       "Changes when you need them, quoted before we start",
       "A regular look at what visitors do, and what to improve next",
     ],
@@ -245,9 +245,9 @@ export const SERVICES: Service[] = [
     slug: "platforms",
     n: "02",
     name: "Platforms",
-    h1: ["Platforms your team", "and your clients run on."],
-    line: "Portals, bookings, dashboards and internal tools, built around how you work.",
-    lede: "Client portals, booking and payment flows, dashboards and internal tools, built around the way your business actually works and connected to the software you already use.",
+    h1: ["Your everyday work,", "better organised."],
+    line: "Client portals and internal tools that give the work a clear place to happen.",
+    lede: "We build client portals and internal tools around the way your business runs. Give clients a place to check progress. Give your team a clear view of the work, connected to the software they already use.",
     description:
       "Client portals, booking systems, dashboards and internal tools for New Zealand businesses, connected to the software you already use and owned by you.",
     seoTitle: "Client portals, booking and web platforms",
@@ -260,11 +260,11 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Clients keep asking for updates",
-        body: "Where is it, what’s next, what do I owe? The same questions take up hours that a portal would answer for them.",
+        body: "Progress, documents and approvals live with your team. Clients need to call or email to find out what is happening.",
       },
       {
         title: "Off-the-shelf software almost fits",
-        body: "You pay for a tool and work around it. The part it doesn’t fit is exactly where your business is different.",
+        body: "Your team has settled into workarounds because the system doesn’t match an important part of the job.",
       },
     ],
     deliver: [
@@ -282,25 +282,25 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Connected to the software you use",
-        body: "Linked to your accounting, CRM, calendar and email through their official integrations, so data is entered once.",
+        body: "Connections to your accounting, customer records, calendar or email, with clear rules for where each record lives and how it is shared.",
       },
       {
         title: "Roles and permissions",
         body: "Everyone sees what they need and nothing more: staff, clients, contractors and administrators.",
       },
       {
-        title: "Looked after after launch",
-        body: "Monitoring, updates and improvements as your business changes, for as long as you want us.",
+        title: "A handover your team can use",
+        body: "Training on the real tasks, clear notes and an agreed support plan. Your team knows how to run it and where to get help.",
       },
     ],
     approach: [
       {
         title: "Map the work first",
-        body: "We follow a job, booking or client from start to finish and write down every step, system and hand-over.",
+        body: "We follow a job, booking or client from start to finish and write down every step, system and handover.",
       },
       {
         title: "Build the smallest useful version",
-        body: "Launch the part that removes the most friction first, then add to it, rather than running a year-long project.",
+        body: "Choose a useful first release, test it with the team and add the next part when the need is clear.",
       },
       {
         title: "Connect, don’t duplicate",
@@ -321,7 +321,7 @@ export const SERVICES: Service[] = [
     price: [
       { title: "Who uses it", body: "Each role (staff, clients, contractors, administrators) needs its own screens and permissions." },
       { title: "The steps it runs", body: "A job, booking or approval with more stages and more rules takes more to build and test." },
-      { title: "What it connects to", body: "Every system (accounting, CRM, calendar, payments) is mapped, built and tested against real data." },
+      { title: "What it connects to", body: "Accounting, customer records, calendar and payment connections each need mapping and testing." },
       { title: "What moves in", body: "Clients, jobs and records brought over from spreadsheets or an old system." },
     ],
     faq: [
@@ -331,7 +331,7 @@ export const SERVICES: Service[] = [
       },
       {
         q: "Can it connect to our accounting software?",
-        a: "Usually, yes. Most modern accounting, CRM and booking tools offer official integrations. We confirm what is possible during scoping, before you commit.",
+        a: "We check your software’s supported connections during scoping. You’ll know what can be shared, how often it updates and any limits before you commit.",
       },
       {
         q: "Who owns the platform and the data?",
@@ -339,11 +339,11 @@ export const SERVICES: Service[] = [
       },
       {
         q: "Can we start small?",
-        a: "Yes, and we recommend it. The first release solves the most expensive problem, and the rest follows when you are ready.",
+        a: "Yes. We define a first release around one useful piece of work, then test it with the people using it. Later releases are scoped and priced separately.",
       },
       {
         q: "How is client information kept safe?",
-        a: "Each person sees only what their role allows, sign-in is protected, data is backed up and changes are recorded. How personal information is handled is agreed in the scope, in line with the Privacy Act 2020.",
+        a: "We define access for each role, protect sign-in and agree the backup and record-keeping plan. Before the build, we document what personal information the platform holds and how it will be handled.",
       },
       {
         q: "What happens to our spreadsheets?",
@@ -372,7 +372,7 @@ export const SERVICES: Service[] = [
       {
         group: "Connections",
         items: [
-          "Official integrations with your accounting, CRM, calendar or email",
+          "Supported connections to your accounting, customer records, calendar or email",
           "Each piece of data entered once, then shared where it is needed",
           "Your spreadsheets or old system brought across, and checked with you",
         ],
@@ -397,7 +397,7 @@ export const SERVICES: Service[] = [
     ],
     runs: {
       title: "In stages, the useful part first.",
-      lede: "No year-long project. The first release solves the most expensive problem; each later one is quoted and dated before it starts.",
+      lede: "We agree a useful first release and build from there. Each stage has its own scope, price and review, so you can decide what should come next.",
       steps: [
         { when: "First", title: "Map", body: "We follow the work from start to finish with the people who do it, and write down every step and system." },
         { when: "Then", title: "Scope", body: "The first release defined: what it does, who uses it, what it connects to, the price and the date." },
@@ -409,7 +409,7 @@ export const SERVICES: Service[] = [
     built: [
       {
         title: "Built on tools that last",
-        body: "Mainstream technology with long support lives, chosen in the scope, so the platform outlives any one developer.",
+        body: "Well-documented technology, with the choice explained in your scope and the code handed over to you.",
       },
       {
         title: "Your data, where you can reach it",
@@ -417,12 +417,12 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Connected properly",
-        body: "Official integrations and documented connections, never copied passwords or screens read by a robot.",
+        body: "Supported connections, documented field mappings and checks for failed updates. We make the handovers between systems visible.",
       },
     ],
     care: [
       "Security updates and monitoring",
-      "Backups tested, not just taken",
+      "Backups taken and restoration checked",
       "New features as the business changes, quoted before we start",
       "Help for your team when they need it",
     ],
@@ -431,9 +431,9 @@ export const SERVICES: Service[] = [
     slug: "ai-automation",
     n: "03",
     name: "AI automation",
-    h1: ["AI that does the work,", "and knows when to ask."],
-    line: "Assistants and automations in your website and your team’s tools, with a person in the loop.",
-    lede: "Assistants and automations that take repetitive work off your team: answering and booking on your website, sorting the inbox, reading documents, moving data between systems. A person stays in the loop wherever it matters.",
+    h1: ["Less repetitive work.", "More room to think."],
+    line: "Assistants and automations for repeat tasks, with clear limits and human review.",
+    lede: "We build assistants and automations for the tasks your team keeps repeating. They read enquiries, prepare replies or move records between tools, within limits you approve. We trial them on your own work before they touch a live process.",
     description:
       "AI automation for New Zealand businesses: website assistants, inbox and document work, and agents in your tools, tested on real work, with a person in charge.",
     seoTitle: "AI automation for New Zealand businesses",
@@ -456,15 +456,15 @@ export const SERVICES: Service[] = [
     deliver: [
       {
         title: "Site assistants that answer and book",
-        body: "An assistant on your website that answers from your own information, collects details and books the next step, and hands over to a person when it should.",
+        body: "An assistant using your approved information to answer questions, gather details and help with bookings, with a clear route to your team.",
       },
       {
         title: "Inbox, document and data work",
         body: "Incoming email sorted and summarised, details read from forms and PDFs, records updated in the systems you use.",
       },
       {
-        title: "Agents inside your team’s tools",
-        body: "Automations that run where your team already works (email, shared drives, your CRM) rather than in yet another app.",
+        title: "Work inside your existing tools",
+        body: "Automations connected to email, shared drives and customer records, so the output reaches the people and systems that need it.",
       },
       {
         title: "A person in the loop where it matters",
@@ -490,11 +490,11 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Keep people in control",
-        body: "Approval steps, clear hand-overs and logs, so the automation supports your team instead of surprising them.",
+        body: "Approval steps, clear handovers and logs, so the automation supports your team instead of surprising them.",
       },
       {
         title: "Protect the data",
-        body: "We agree with you what the system may see, where it is processed and how long anything is kept, in line with New Zealand’s Privacy Act 2020.",
+        body: "We agree what the system may read, where that information is processed and how long it is kept before the trial starts.",
       },
     ],
     bring: [
@@ -508,16 +508,16 @@ export const SERVICES: Service[] = [
       { title: "How many steps and systems", body: "Reading one inbox is a smaller job than reading, deciding and updating three systems." },
       { title: "How much review it needs", body: "Work with more at stake needs more approval steps, more logging and more testing." },
       { title: "How varied the work is", body: "The more kinds of enquiry or document it handles, the more real examples it is tested on." },
-      { title: "How much it processes", body: "AI services charge by volume, so running costs follow yours. We estimate them from your numbers." },
+      { title: "How much it processes", body: "We estimate service fees from your expected volumes and show the assumptions in the quote." },
     ],
     faq: [
       {
         q: "Is it safe to put AI in front of customers?",
-        a: "With limits, yes. The assistant answers from information you have approved, says when it doesn’t know and hands over to a person. We test it on real questions before it goes live.",
+        a: "It depends on the task and the cost of a wrong answer. We test common and difficult questions, restrict what the assistant can do and give customers a clear route to a person. Some tasks should stay with your team.",
       },
       {
         q: "What does it cost to run?",
-        a: "Besides the build, AI services charge for what they process. We estimate the running cost from your real volumes during scoping, and set limits and alerts so there are no surprises.",
+        a: "The quote separates the build from ongoing service fees. We estimate those fees from your expected workload and agree limits and alerts before launch.",
       },
       {
         q: "Will it replace our staff?",
@@ -525,11 +525,11 @@ export const SERVICES: Service[] = [
       },
       {
         q: "What happens when it gets something wrong?",
-        a: "Sometimes it will, which is why it starts with a person approving its work and a record of every step. A mistake is found in review, fixed in its rules and tested again before it runs on.",
+        a: "Human review can miss mistakes too. We keep a record of the work, limit the actions it can take and agree how to pause it. When an error appears, we investigate the cause and test the change before restarting that task.",
       },
       {
         q: "Where does our data go?",
-        a: "We agree it with you before anything is built: which service processes it, where, and what is kept. Where it matters, we choose services that don’t use your data to train their models.",
+        a: "We document the services involved, where they process information and what they retain before the trial. We check the chosen account settings and terms with you, including whether the information can be used for training.",
       },
       {
         q: "Do we need a lot of data to start?",
@@ -551,7 +551,7 @@ export const SERVICES: Service[] = [
         items: [
           "Emails, forms and documents read and sorted",
           "Replies drafted in your approved wording",
-          "Your CRM, calendar or job system updated",
+          "Your customer records, calendar or job system updated",
           "An assistant on your website that answers from your own information",
         ],
       },
@@ -561,7 +561,7 @@ export const SERVICES: Service[] = [
           "An approval step wherever it matters",
           "A record of every step it takes",
           "Limits on what it can read, change and send",
-          "A clear hand-over to a person for anything uncertain",
+          "A clear handover to a person for anything uncertain",
         ],
       },
       {
@@ -576,34 +576,34 @@ export const SERVICES: Service[] = [
         group: "Privacy and cost",
         items: [
           "What it may see, where it runs and what it keeps, agreed in writing",
-          "Handled in line with the Privacy Act 2020",
+          "The chosen providers, account settings and retention terms documented",
           "Running costs estimated from your volumes, with limits and alerts",
         ],
       },
     ],
     runs: {
       title: "Tried on your own work first.",
-      lede: "Nothing goes in front of a customer until it has done the job well on your past examples, and a person stays in charge after that.",
+      lede: "We start with one task and a trial using your own examples. The results decide what goes live, what needs review and what should stay with a person.",
       steps: [
         { when: "First", title: "Choose", body: "One task that is frequent, follows rules and can be checked." },
         { when: "Then", title: "Trial", body: "It runs on your past examples, and we review every result with you before anything is live." },
         { when: "Live", title: "Approve", body: "It works on real enquiries, and a person approves what goes out." },
-        { when: "When it has earned it", title: "Widen", body: "Approval steps relax where it has proved itself, and new tasks join one at a time." },
+        { when: "After review", title: "Extend", body: "Review the results before changing permissions or adding another task." },
         { when: "Ongoing", title: "Look after", body: "Checked, tuned and updated as your business and the models change." },
       ],
     },
     built: [
       {
         title: "The right model for the task",
-        body: "Different tasks suit different AI models. We choose for accuracy, privacy and running cost, and can change later without starting again.",
+        body: "We compare accuracy, data handling and cost using your examples. Model choices and account settings are recorded in the scope.",
       },
       {
         title: "Inside the tools you already use",
-        body: "Email, shared drives, your CRM: the automation works there, so nobody has to learn a new app.",
+        body: "We connect the automation to the systems your team uses and make its output easy to review. Any new screen has a clear purpose.",
       },
       {
         title: "Every step on the record",
-        body: "What came in, what it decided and what it did, logged, so you can always see why something happened.",
+        body: "Inputs, outputs and actions recorded to support review and investigation, with a retention period agreed before launch.",
       },
     ],
     care: [

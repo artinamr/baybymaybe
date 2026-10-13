@@ -88,14 +88,14 @@ const DEMOS: Project[] = [
     client: "Tarn & Wick",
     title: "A website for an owner-run accounting practice",
     summary:
-      "A fictional practice, and a website built around the questions its customers ask: who it is for, how fees work, and how to book a first conversation.",
+      "A website demonstration for a fictional accounting practice. Clear services, fees explained and a first conversation booked in three steps.",
     services: ["websites"],
     url: "tarnandwick.example",
     year: "2026",
     cover: `${BASE}/work/practice-website.webp`,
     coverAlt: "The Tarn & Wick home page: a deep green and cream accounting practice website with a booking call to action.",
     context: {
-      lede: "Small practices win clients by referral, then lose some of them at the website: a list of services, a phone number and a contact form that goes quiet. People choosing an accountant want three answers quickly. Do you work with businesses like mine, roughly what will it cost, and how do I start?",
+      lede: "The brief for this fictional accounting practice was to make a referral easy to act on. A visitor should be able to see who the practice works with, understand how fees are charged and book a first conversation without waiting for an email reply.",
       audience: "Owners of small businesses choosing or switching accountants, often reading on a phone, often in the evening.",
     },
     scope: [
@@ -116,11 +116,11 @@ const DEMOS: Project[] = [
         body: "A fixed monthly fee is the practice’s advantage over hourly billing, so the home page says it before anyone has to ask.",
       },
       {
-        title: "A booking flow, not a contact form",
-        body: "Three steps (topic, time, name) replace a form that waits for a reply. Only open times are offered, in New Zealand time.",
+        title: "Book a conversation in three steps",
+        body: "Choose a topic, choose a time, then leave your name. The demonstration uses sample availability and shows every time in New Zealand time.",
       },
       {
-        title: "Components, so it grows cleanly",
+        title: "Layouts ready for more pages",
         body: "Cards, lists and the booking widget share reusable components, so new pages can follow the same design.",
       },
     ],
@@ -143,7 +143,7 @@ const DEMOS: Project[] = [
     client: "Kerrow",
     title: "A client and operations portal for a maintenance company",
     summary:
-      "A fictional building-maintenance firm, and the portal we would build to replace its spreadsheets and phone calls: one job board for the team, and one place for clients to approve quotes, follow their jobs and pay.",
+      "A portal demonstration for a fictional maintenance firm: a team job board, client quote approvals and sample invoices, connected by one job record.",
     services: ["platforms"],
     url: "portal.kerrow.example",
     year: "2026",
@@ -151,7 +151,7 @@ const DEMOS: Project[] = [
     coverTall: `${BASE}/work/operations-portal-tall.webp`,
     coverAlt: "The Kerrow portal: a navy sidebar and a board of maintenance jobs with their status.",
     context: {
-      lede: "A maintenance company runs dozens of small jobs across many sites. Jobs arrive by phone and email, quotes go out as PDFs, approvals come back days later, and the office spends its afternoons answering one question: when is someone coming?",
+      lede: "For this concept, the maintenance team takes requests by phone and email, sends quotes as PDFs and tracks jobs in spreadsheets. We set a brief for one shared job record, so the office, technician and client can each see what needs to happen next.",
       audience: "The office team and the technicians in the field; property and facility managers as clients.",
     },
     scope: [
@@ -168,12 +168,12 @@ const DEMOS: Project[] = [
         body: "Every call, quote, photo and invoice hangs off the same job, so anyone can say where things are.",
       },
       {
-        title: "Clients see their jobs, not the system",
+        title: "A clear view for each client",
         body: "A short, plain view: what’s waiting for them, what’s happening, what they owe, and one button for each.",
       },
       {
         title: "Colour only where it means something",
-        body: "Status colours mark the states that need action (waiting for approval, waiting for parts), so a busy board still reads at a glance.",
+        body: "Colour marks jobs waiting for approval or parts. Written labels carry the same information, so status remains clear without relying on colour.",
       },
       {
         title: "Built for the phone in the van",
@@ -197,16 +197,16 @@ const DEMOS: Project[] = [
     slug: "enquiry-desk",
     kind: "demo",
     client: "Pellow",
-    title: "An enquiry desk that drafts its own replies, and knows when not to",
+    title: "An enquiry desk with drafts your team can check",
     summary:
-      "A fictional physiotherapy clinic, and the automation we would build for its inbox: enquiries read and organised, the diary checked, replies drafted in the clinic’s own words, and a person approving every one.",
+      "An enquiry desk demonstration for a fictional physio clinic. Sample messages become organised details and editable drafts, with reception in control.",
     services: ["ai-automation"],
     url: "desk.pellow.example",
     year: "2026",
     cover: `${BASE}/work/enquiry-desk.webp`,
     coverAlt: "The Pellow enquiry desk: an inbox of sample emails, a step-by-step view of one being organised, and a log.",
     context: {
-      lede: "A clinic’s reception spends much of the day on email: booking requests, changes, questions about cover and cost. Most need the same few steps: read, find the details, check the diary, reply. A few need a clinician straight away.",
+      lede: "The brief was an enquiry desk for a fictional physio clinic. Reception needs the booking details and a useful draft in one place. Messages that could need clinical judgement must be handed to a person, with no reply drafted.",
       audience: "The reception team, and the patients who write in.",
     },
     scope: [
@@ -220,10 +220,10 @@ const DEMOS: Project[] = [
     approach: [
       {
         title: "Organise first, write second",
-        body: "The system pulls out who, what and when before it drafts a word, and shows its working, so a person can check it in seconds.",
+        body: "The enquiry’s name, request and preferred time appear before the draft, so reception can check the details against the original message.",
       },
       {
-        title: "The clinic’s words, not the model’s",
+        title: "Approved wording for routine questions",
         body: "Replies are built from approved wording for bookings, changes and cover, then fitted to the enquiry.",
       },
       {
@@ -244,7 +244,8 @@ const DEMOS: Project[] = [
     limits: [
       "Pellow and its patients are fictional; the emails, names and times are samples.",
       "This page runs locally and sends nothing. A live system connects to the clinic’s email and diary, with access agreed in writing.",
-      "AI can misread a message. That is why a person approves every reply and every step is logged.",
+      "The examples are scripted; this demonstration does not connect to an AI model, a live diary or an email account.",
+      "A live version would need tests against the clinic’s enquiries, agreed handover rules and a person approving replies.",
     ],
   },
 ];

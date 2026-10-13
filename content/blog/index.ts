@@ -70,20 +70,17 @@ export type ArticleMeta = {
   status: "published" | "draft";
 };
 
-const ACCESSED = "2026-10-04";
-/** The three October articles: their sources were fetched and checked on this day. */
-const CHECKED_1007 = "2026-10-07";
-/** The two October articles on being hacked and on chat assistants. */
-const CHECKED_1008 = "2026-10-08";
+/** Sources fetched and read during the editorial revision, including primary-source checks. */
+const CHECKED_1012 = "2026-10-12";
 
 export const ARTICLES: ArticleMeta[] = [
   {
     slug: "redesign-or-improve",
-    title: "Website redesign or targeted improvements: how to decide",
+    title: "Should you rebuild your website or improve it?",
     description:
-      "When a website needs rebuilding and when it only needs fixing: the signs, a one-week diagnosis you can do yourself, and what to protect if you rebuild.",
+      "Check what needs fixing before paying for a rebuild. A one-week diagnosis, a decision path and the parts of your website worth keeping.",
     short:
-      "Rebuild when the foundations are wrong: what the site says, how it is organised, a platform you can’t change, or speed and accessibility you can’t fix in place. When the foundations are sound and particular pages underperform, improve those pages instead. It is faster and cheaper, and it keeps what the site has already earned.",
+      "Rebuild when the message, structure or platform needs to change, or speed and accessibility cannot be fixed in place. If the foundations are sound, improve the pages that underperform. Start with a diagnosis so you keep what already works.",
     situation: "Our website isn’t bringing in the enquiries it should.",
     audience: {
       for: "Businesses with a website that works, but not well enough, wondering whether to start again.",
@@ -96,6 +93,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website redesign", "website improvements", "rebuild or refresh a website", "Core Web Vitals", "301 redirects", "New Zealand small business website"],
     published: "2026-10-04",
+    updated: CHECKED_1012,
     minutes: 8,
     cover: PHOTOS["cover-redesign"],
     faq: [
@@ -114,20 +112,20 @@ export const ARTICLES: ArticleMeta[] = [
     ],
     related: { services: ["websites"], work: ["practice-website"], articles: ["website-quote-checklist", "after-launch-ownership", "what-is-seo"] },
     sources: [
-      { title: "About PageSpeed Insights", publisher: "Google for Developers", url: "https://developers.google.com/speed/docs/insights/v5/about", accessed: ACCESSED },
-      { title: "Web Vitals", publisher: "web.dev (Google)", url: "https://web.dev/articles/vitals", accessed: ACCESSED },
+      { title: "About PageSpeed Insights", publisher: "Google for Developers", url: "https://developers.google.com/speed/docs/insights/v5/about", accessed: CHECKED_1012 },
+      { title: "Web Vitals", publisher: "web.dev (Google)", url: "https://web.dev/articles/vitals", accessed: CHECKED_1012 },
       {
         title: "Influencing your title links in search results",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/appearance/title-link",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
-      { title: "Control your snippets in search results", publisher: "Google Search Central", url: "https://developers.google.com/search/docs/appearance/snippet", accessed: ACCESSED },
+      { title: "Control your snippets in search results", publisher: "Google Search Central", url: "https://developers.google.com/search/docs/appearance/snippet", accessed: CHECKED_1012 },
       {
         title: "Site moves with URL changes",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -136,9 +134,9 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "website-quote-checklist",
     title: "What a business website quote should include",
     description:
-      "The lines a good website quote has (scope, content, standards, launch, ownership, running costs and changes), plus red flags and how to compare quotes.",
+      "A checklist for comparing website quotes: scope, content, design, launch, ownership and ongoing costs, with questions to ask before signing.",
     short:
-      "A good quote says exactly what will be built, who supplies the words and pictures, how designs are approved, what it connects to, the accessibility and speed standard, what happens at launch, who owns what afterwards, what it costs to run, how support works, when you pay, and how changes are handled. If a line is missing, ask for it in writing before you sign.",
+      "A good quote sets out the work, the content you must supply and how you approve the design. It also covers build standards, connections, launch, ownership, ongoing costs, support and the payment schedule. Get missing details and the process for changes in writing before signing.",
     situation: "We’re comparing quotes for a new website.",
     audience: {
       for: "Anyone about to ask for, or choose between, quotes for a business website.",
@@ -152,6 +150,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website quote", "web design quote", "website proposal checklist", "website cost", "website ownership", "New Zealand"],
     published: "2026-10-04",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-quote"],
     faq: [
@@ -170,13 +169,13 @@ export const ARTICLES: ArticleMeta[] = [
     ],
     related: { services: ["websites"], work: ["practice-website"], articles: ["redesign-or-improve", "after-launch-ownership", "diy-website-or-hire"] },
     sources: [
-      { title: "WCAG 2 Overview", publisher: "W3C Web Accessibility Initiative", url: "https://www.w3.org/WAI/standards-guidelines/wcag/", accessed: ACCESSED },
-      { title: "Web Vitals", publisher: "web.dev (Google)", url: "https://web.dev/articles/vitals", accessed: ACCESSED },
+      { title: "WCAG 2 Overview", publisher: "W3C Web Accessibility Initiative", url: "https://www.w3.org/WAI/standards-guidelines/wcag/", accessed: CHECKED_1012 },
+      { title: "Web Vitals", publisher: "web.dev (Google)", url: "https://web.dev/articles/vitals", accessed: CHECKED_1012 },
       {
         title: "Site moves with URL changes",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -185,9 +184,9 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "when-you-need-a-client-portal",
     title: "When your business needs a client portal",
     description:
-      "Five signs email has become the bottleneck, when an off-the-shelf portal is the right answer, what the first version should do, and the security basics.",
+      "Work out when client email needs a better home, compare existing software with a custom portal, and plan a useful first version.",
     short:
-      "When the same questions, documents and approvals pass between you and your clients so often that email has become the bottleneck, and your clients would rather look things up themselves. An off-the-shelf tool is often the right first step. A custom portal earns its cost when your work doesn’t fit one.",
+      "Consider a portal when routine updates, documents and approvals create too much email, and clients need to find information themselves. Try an off-the-shelf tool first if one fits. A custom portal earns its cost when existing software cannot support the way you work.",
     situation: "Client work is buried in email and spreadsheets.",
     audience: {
       for: "Service businesses whose clients send documents, approvals and questions back and forth by email.",
@@ -200,6 +199,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "platforms",
     keywords: ["client portal", "customer portal", "client portal for small business", "multi-factor authentication", "Privacy Act 2020", "custom portal vs off-the-shelf"],
     published: "2026-10-04",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-portal"],
     faq: [
@@ -222,31 +222,31 @@ export const ARTICLES: ArticleMeta[] = [
         title: "Principle 5: Storage and security of personal information",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/5/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
-      { title: "Critical Controls: Summary", publisher: "National Cyber Security Centre", url: "https://www.ncsc.govt.nz/protect-your-organisation/summary/", accessed: ACCESSED },
+      { title: "Critical Controls: Summary", publisher: "National Cyber Security Centre", url: "https://www.ncsc.govt.nz/protect-your-organisation/summary/", accessed: CHECKED_1012 },
       {
         title: "Protect your business with two-factor authentication (2FA)",
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-with-2fa/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
       {
         title: "Privacy breaches: notify us",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
   },
   {
     slug: "connect-website-crm-booking",
-    title: "Connecting your website to your CRM and booking tools",
+    title: "Connect your website to your CRM and booking tools",
     description:
-      "Connect forms, bookings, your CRM and accounts so each detail is entered once: the options, a field map, consent, and knowing when a connection fails.",
+      "Plan where enquiries and booking details go, compare the ways to connect your tools, and check consent, errors and handover.",
     short:
-      "Connect them so each piece of information is entered once: an enquiry form goes into the CRM, a booking goes into the calendar and the CRM, a payment goes into the accounts. Use each tool’s official integration where it does the job, write down which field goes where, record consent properly, and make sure someone is told when a connection fails.",
+      "Connect the repeated work first: enquiries into the CRM, bookings into the calendar or payments into the accounts. Use an official integration where it fits, and write down which field goes where. Record consent and give someone responsibility for connection failures.",
     situation: "We type the same details into three different systems.",
     audience: {
       for: "Businesses that take enquiries, bookings or payments online and then enter them again somewhere else.",
@@ -259,6 +259,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "platforms",
     keywords: ["CRM integration", "website booking system", "connect website to CRM", "field mapping", "Unsolicited Electronic Messages Act", "New Zealand"],
     published: "2026-10-04",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-connect"],
     faq: [
@@ -281,14 +282,14 @@ export const ARTICLES: ArticleMeta[] = [
         title: "Principle 3: Collection of information from the individual",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/3/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
-      { title: "Spam: three steps", publisher: "Department of Internal Affairs", url: "https://www.dia.govt.nz/Spam-Three-Steps", accessed: ACCESSED },
+      { title: "Spam: three steps", publisher: "Department of Internal Affairs", url: "https://www.dia.govt.nz/Spam-Three-Steps", accessed: CHECKED_1012 },
       {
         title: "Principle 5: Storage and security of personal information",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/5/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -297,9 +298,9 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "ai-automation-workflows",
     title: "Five practical AI automation workflows for NZ businesses",
     description:
-      "Where AI automation earns its keep in a small or medium business: five workflows, where a person stays in the loop, what can go wrong, and privacy.",
+      "Five practical workflows for AI, with the input each needs, the checks a person makes and the privacy questions to answer first.",
     short:
-      "Start with work that is frequent, follows rules and can be checked: sorting and drafting replies to enquiries, reading details out of documents, turning call notes into CRM records, a website assistant that answers only from approved information, and searching your own documents. Keep a person approving anything that matters.",
+      "Start with frequent work that follows rules and can be checked: sorting enquiries, drafting replies, reading documents or updating records. These five workflows show what each needs and where it can fail. Keep a person approving decisions that matter.",
     situation: "We want to know where AI could actually help.",
     audience: {
       for: "Small and medium businesses curious about AI, and wary of the hype.",
@@ -312,6 +313,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "automation",
     keywords: ["AI automation", "AI for small business", "workflow automation", "ai tools for business", "human in the loop", "Privacy Act 2020 and AI"],
     published: "2026-10-04",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-ai"],
     faq: [
@@ -334,19 +336,19 @@ export const ARTICLES: ArticleMeta[] = [
         title: "Generative Artificial Intelligence",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/resources-and-learning/a-z-topics/ai/generative-artificial-intelligence/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
       {
         title: "Principle 12: Disclosure of personal information outside New Zealand",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/12/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
       {
         title: "Privacy breaches: notify us",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -355,7 +357,7 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "after-launch-ownership",
     title: "Who owns your website? Domain, hosting, code and support",
     description:
-      "What owning your website means (domain, code, content and accounts in your name), plus a handover checklist, backups, security and support options.",
+      "Check who controls your domain, hosting, content and code. Use the handover checklist and compare the options for care after launch.",
     short:
       "Own the domain, the code, the content and every account in your own name. Know where the site is hosted, how it is backed up and who fixes what when something breaks. Then decide how much ongoing care you want: a monthly arrangement, or help when you ask for it.",
     situation: "We’re launching a website, or taking one over.",
@@ -371,6 +373,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website ownership", "who owns my website", "website hosting", ".nz domain", "website handover", "website support"],
     published: "2026-10-04",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-ownership"],
     faq: [
@@ -393,26 +396,26 @@ export const ARTICLES: ArticleMeta[] = [
         title: "A ready reference for registrants",
         publisher: "Domain Name Commission",
         url: "https://dnc.org.nz/assets/DocumentLibrary/a_ready_reference_for_registrants.pdf",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
       {
         title: "Protect your business against ransomware",
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-against-ransomware/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
-      { title: "Critical Controls: Summary", publisher: "National Cyber Security Centre", url: "https://www.ncsc.govt.nz/protect-your-organisation/summary/", accessed: ACCESSED },
+      { title: "Critical Controls: Summary", publisher: "National Cyber Security Centre", url: "https://www.ncsc.govt.nz/protect-your-organisation/summary/", accessed: CHECKED_1012 },
       {
         title: "Protect your business with two-factor authentication (2FA)",
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-with-2fa/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
       {
         title: "Secure your website’s domain name",
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/secure-your-domain-name/",
-        accessed: ACCESSED,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -421,7 +424,7 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "what-is-seo",
     title: "What is SEO, and what should a small business do first?",
     description:
-      "Search engine optimisation in plain words: how Google decides what to show, five jobs worth doing first, how long it takes, and when it pays to hire help.",
+      "Understand SEO before paying for it. Start with five useful jobs, check your pages and learn what a provider should explain.",
     short:
       "SEO (search engine optimisation) is the work of making your website easy for search engines to find, understand and recommend. Most of it is plain work you can do yourself: one clear page per service, the words customers actually type, honest titles and descriptions, a fast site, and being known. Google never charges to appear, results take weeks to months, and no one can guarantee a number-one ranking.",
     situation: "We want more people to find us on Google.",
@@ -436,6 +439,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["what is seo", "search engine optimisation", "seo for small business", "seo new zealand", "how to rank on google", "how does google search work"],
     published: "2026-10-07",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-seo"],
     faq: [
@@ -458,37 +462,37 @@ export const ARTICLES: ArticleMeta[] = [
         title: "Doing business online",
         publisher: "Business.govt.nz",
         url: "https://www.business.govt.nz/strategy-and-performance/doing-business-online",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Do you need an SEO?",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/fundamentals/do-i-need-seo",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Search Engine Optimization (SEO) Starter Guide",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Google Search Essentials",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/essentials",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Creating helpful, reliable, people-first content",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "About Search Console",
         publisher: "Search Console Help (Google)",
         url: "https://support.google.com/webmasters/answer/9128668",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -497,7 +501,7 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "google-business-profile",
     title: "How to get your business on Google Search and Maps",
     description:
-      "Add or claim a Google Business Profile, pass verification, fill in what matters, earn reviews the right way, and keep it working: all of it free.",
+      "Set up a Google Business Profile, check your eligibility, complete verification and keep the details customers rely on up to date.",
     short:
       "A Google Business Profile is the free listing that controls how your business appears on Google Search and Maps. Add or claim it, verify it, keep its hours, services and photos complete and accurate, and reply to every review. Google ranks local results on relevance, distance and prominence, and there is no way to pay for a better place.",
     audience: {
@@ -511,6 +515,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["google business profile", "google my business", "add business to google maps", "get on google maps", "google maps listing", "local search new zealand"],
     published: "2026-10-07",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-gbp"],
     faq: [
@@ -533,43 +538,43 @@ export const ARTICLES: ArticleMeta[] = [
         title: "Get started with Google Business Profile",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/7039811",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Add or claim your Business Profile",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/2911778",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Tips to improve your local ranking on Google",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/7091",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Business Profile guidelines",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/3038177",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Verify your business on Google",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/7107242",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Tips to get more reviews",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/3474122",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Protect your business with two-factor authentication (2FA)",
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-with-2fa/",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -578,7 +583,7 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "diy-website-or-hire",
     title: "Build your own website or hire someone: how to decide",
     description:
-      "When a site builder is the right answer and when a professional earns their fee, what each path really costs, and what to protect either way.",
+      "Compare a site builder with hiring a professional, including your time after launch and the ownership details to protect either way.",
     short:
       "Build it yourself when the site’s job is to show what you do and take enquiries, the words and photos exist, and someone enjoys the work: a site builder is then a good answer. Hire when the site must book, take payments or connect to your systems, or when nobody has the hours. Either way, keep the domain and every account in your business’s name.",
     situation: "We need a website and haven’t decided how to build it.",
@@ -593,20 +598,21 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["build your own website", "diy website vs professional", "website builder", "how much to build a website", "hire a web designer", "website builder vs web designer"],
     published: "2026-10-07",
+    updated: CHECKED_1012,
     minutes: 6,
     cover: PHOTOS["cover-diy"],
     faq: [
       {
         q: "Is it cheaper to build your own website?",
-        a: "In money, usually; in hours, never. A builder’s subscription is small and a professional build is a real invoice, but the hours you spend building and then tending the site are the hidden cost, and they repeat every month the site lives.",
+        a: "Compare the subscription and domain with the quoted build, then count your own setup and maintenance time. DIY can cost less upfront when a suitable tool covers the job, but it still needs someone to write, build and look after it.",
       },
       {
         q: "What does a site builder include?",
-        a: "Ready-made templates, a browser editor and the hosting, for one subscription; on Squarespace, trying multiple templates is included with the subscription. The trade is that the tool’s limits are yours, and moving a site out of one takes planning.",
+        a: "Typically templates, a browser editor and hosting under one subscription. Check the plan’s features and limits, including bookings, payments and export options. On Squarespace, template switching depends on the version you use.",
       },
       {
         q: "When should we hire a professional?",
-        a: "When the site must take bookings or payments, or connect to your CRM, calendar or accounting; when the words and design have to carry the brand; or when nobody in the business has the hours. Then pay for the build and keep the ownership in writing.",
+        a: "When the available tools do not cover your process, the words or design need professional work, or your team does not have time to build and maintain it. Agree the scope, ownership and handover in writing before starting.",
       },
     ],
     related: { services: ["websites"], work: ["practice-website"], articles: ["website-quote-checklist", "after-launch-ownership"] },
@@ -615,25 +621,25 @@ export const ARTICLES: ArticleMeta[] = [
         title: "Doing business online",
         publisher: "Business.govt.nz",
         url: "https://www.business.govt.nz/strategy-and-performance/doing-business-online",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Switching templates in version 7.0 FAQ",
         publisher: "Squarespace Help",
         url: "https://support.squarespace.com/hc/en-us/articles/206545367",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "Search Engine Optimization (SEO) Starter Guide",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
       {
         title: "A ready reference for registrants",
         publisher: "Domain Name Commission",
         url: "https://dnc.org.nz/assets/DocumentLibrary/a_ready_reference_for_registrants.pdf",
-        accessed: CHECKED_1007,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -642,12 +648,12 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "website-hacked",
     title: "What to do if your website is hacked",
     description:
-      "Hacked website? The first hour, reporting it to the NCSC, restoring from a clean backup, telling affected people under the Privacy Act, and stopping the next one.",
+      "The first steps after a break-in, recovery with your host, reporting to the NCSC and assessing whether a privacy breach needs notification.",
     short:
-      "Contain it first: write down what you are seeing, call your hosting provider, change the important passwords from another device, and take the site offline if it puts visitors at risk. Report it to the National Cyber Security Centre, restore from a backup that is older than the break-in, notify affected people if personal information was reached, then close the way in and test your backups.",
+      "Contact your host, record what you’re seeing and contain the problem before restoring from a clean backup. Report the incident to the NCSC and assess any personal information breach: serious harm, or the risk of it, can trigger notification duties. Investigate how the attacker got in and check your recovery plan.",
     audience: {
-      for: "Any business whose website has been broken into, or that wants to know what the bad day looks like before it arrives.",
-      skip: "You are in the middle of an active incident right now. Call your hosting provider first; read this on the other side.",
+      for: "Business owners preparing for a website incident or working through one with their hosting provider.",
+      skip: "You need immediate technical help. Contact your hosting or IT provider first, then use this as a checklist with them.",
     },
     tools: [
       { title: "If your website is hacked today", kind: "Steps", id: "first" },
@@ -656,6 +662,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website hacked", "what to do if website is hacked", "hacked website fix", "report cyber attack nz", "malware on website", "website security new zealand"],
     published: "2026-10-08",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-hacked"],
     faq: [
@@ -669,7 +676,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "Do we have to tell customers if our website was hacked?",
-        a: "If the breach reached personal information and has caused or might cause serious harm, notifying is “a legal obligation under the Privacy Act”. The Privacy Commissioner says to notify ideally within 72 hours of becoming aware, and to tell affected people as soon as you can, in plain language.",
+        a: "Assess whether the personal information breach has caused or might cause serious harm. The Privacy Commissioner says a breach at that threshold must be notified, ideally within 72 hours of becoming aware. Tell affected people as soon as you can, unless an exception applies; get specialist help if you are unsure.",
       },
     ],
     related: { services: ["websites"], work: ["practice-website"], articles: ["after-launch-ownership", "diy-website-or-hire"] },
@@ -678,31 +685,31 @@ export const ARTICLES: ArticleMeta[] = [
         title: "IT risks and scams",
         publisher: "Business.govt.nz",
         url: "https://www.business.govt.nz/operations/it-risks-and-scams",
-        accessed: CHECKED_1008,
+        accessed: CHECKED_1012,
       },
       {
-        title: "Report an incident: individuals and small business",
+        title: "Report a cyber security issue",
         publisher: "National Cyber Security Centre",
-        url: "https://www.ncsc.govt.nz/report/business-and-individuals/",
-        accessed: CHECKED_1008,
+        url: "https://www.ncsc.govt.nz/report/",
+        accessed: CHECKED_1012,
       },
       {
         title: "Protect your business against ransomware",
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-against-ransomware/",
-        accessed: CHECKED_1008,
+        accessed: CHECKED_1012,
       },
       {
         title: "Privacy breaches: notify us",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
-        accessed: CHECKED_1008,
+        accessed: CHECKED_1012,
       },
       {
         title: "Protect your business with two-factor authentication (2FA)",
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/protect-your-business-with-2fa/",
-        accessed: CHECKED_1008,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",
@@ -711,9 +718,9 @@ export const ARTICLES: ArticleMeta[] = [
     slug: "website-chat-assistant",
     title: "Should our website have a chat assistant?",
     description:
-      "When a website chat assistant earns its place, where they disappoint, what the Privacy Commissioner expects, and a four-question test to run before you build one.",
+      "Check whether a chat assistant would help your visitors, what it needs to answer safely and who will look after it once it is live.",
     short:
-      "Yes, when the same ten questions arrive every week, the answers are written down, and someone will own it after launch. No, when the questions are varied or the pages are thin: then a good contact page and better pages beat an assistant that improvises. If you build one, it should answer only from words you approved, tell visitors what it is, keep personal information out, and hand over to a person the moment it is unsure.",
+      "Consider a chat assistant when routine questions keep arriving, you have approved written answers and someone will review it after launch. Improve missing or unclear pages first. A trial needs privacy checks, tests of its answers and an easy route to a person.",
     audience: {
       for: "Owners hearing “you need a chatbot” and wanting an honest test before spending on one.",
       skip: "You want an assistant that takes bookings or changes orders. That is automation with higher stakes, and needs more than this article covers.",
@@ -725,6 +732,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "automation",
     keywords: ["chatbot for website", "should i add a chatbot", "ai chat assistant for business", "website live chat", "ai assistant small business nz", "chatbot privacy"],
     published: "2026-10-08",
+    updated: CHECKED_1012,
     minutes: 7,
     cover: PHOTOS["cover-chat"],
     faq: [
@@ -747,13 +755,13 @@ export const ARTICLES: ArticleMeta[] = [
         title: "Generative Artificial Intelligence",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/resources-and-learning/a-z-topics/ai/generative-artificial-intelligence/",
-        accessed: CHECKED_1008,
+        accessed: CHECKED_1012,
       },
       {
         title: "Privacy Act 2020: the privacy principles",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/",
-        accessed: CHECKED_1008,
+        accessed: CHECKED_1012,
       },
     ],
     status: "published",

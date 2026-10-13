@@ -32,7 +32,7 @@ const SECTIONS: { id: string; title: string; body: ReactNode }[] = [
       <p>
         The Nerodyn studio in Auckland: the designers and engineers who build websites, platforms and automation for
         New Zealand businesses. We write about the decisions our clients ask us about, for owners and managers who want
-        to understand a choice before they make it.
+        to understand the work before committing to it.
       </p>
     ),
   },
@@ -149,8 +149,8 @@ export default function HowWeWrite() {
           <em>and check our articles.</em>
         </h1>
         <p className="sp-lede" data-rv>
-          The blog is here to help you decide, whether or not you ever work with us. These are the rules every article
-          follows.
+          Useful advice needs a source, a date and someone prepared to correct it. These are the standards behind
+          every article we publish.
         </p>
       </section>
       <div className="doc">

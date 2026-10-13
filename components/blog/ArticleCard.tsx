@@ -12,16 +12,18 @@ export function ArticleCard({
   a,
   level = "h2",
   delay = 0,
+  featured = false,
   sizes = "(min-width: 1100px) 26vw, (min-width: 700px) 45vw, 92vw",
 }: {
   a: ArticleMeta;
   level?: "h2" | "h3";
   delay?: number;
+  featured?: boolean;
   sizes?: string;
 }) {
   const H = level;
   return (
-    <a className="bl-card" href={PAGES.article(a.slug)} data-slug={a.slug} data-topic={a.topic} data-rv style={delay ? { transitionDelay: `${delay}ms` } : undefined}>
+    <a className={`bl-card${featured ? " bl-featured" : ""}`} href={PAGES.article(a.slug)} data-slug={a.slug} data-topic={a.topic} data-rv style={delay ? { transitionDelay: `${delay}ms` } : undefined}>
       <span className="bl-card-img">
         <Photo p={a.cover} sizes={sizes} decorative />
       </span>

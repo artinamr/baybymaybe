@@ -1,3 +1,4 @@
+import { PAGES } from "@/lib/content";
 import { H2, Callout, Check, Steps, Cite } from "@/components/blog/Prose";
 import { Term } from "@/components/blog/Term";
 
@@ -17,9 +18,9 @@ export default function Body() {
   return (
     <>
       <p>
-        <Term id="seo">Search engine optimisation</Term> (SEO) is the work of making your website easy for search
-        engines to find, understand and recommend when someone searches for what you do. It is mostly plain work on
-        your pages, and much of it you can start this week.
+        Start with pages that clearly explain your services and are easy for people and search engines to use.
+        That is the foundation of <Term id="seo">search engine optimisation</Term> (SEO). Before paying for it, learn
+        what the work involves and how you will judge progress.
       </p>
 
       <H2 id="what-it-is">What SEO is</H2>
@@ -46,9 +47,9 @@ export default function Body() {
 
       <H2 id="how-google-decides">How Google decides</H2>
       <p>
-        Google runs automated programs that read pages across the web and file them in an index. Its starter guide is
-        reassuring on the first step: most sites are found on their own, and “you usually don’t need to do anything
-        except publish your site on the web”. Links from other sites are how new pages are discovered, and a{" "}
+        Google runs automated programs that read pages across the web and file them in an index. Its starter guide
+        says most sites are discovered automatically after they are published. Links from other sites help Google
+        discover new pages, and a{" "}
         <Term id="sitemap">sitemap</Term> can help, though Google says submitting one isn’t required.
         <Cite n={3} />
       </p>
@@ -79,9 +80,10 @@ export default function Body() {
           <Cite n={3} />
         </li>
         <li>
-          <strong>An honest title and description for every page.</strong> A page’s title should be “unique to the
-          page, clear and concise”.
-          <Cite n={3} /> The description is your one line under the headline in the results.
+          <strong>An accurate title and description for every page.</strong> Write a distinct title that clearly
+          describes the page. Google can use your description for the summary beneath it in results, though it
+          often creates that summary from the page itself.
+          <Cite n={3} />
         </li>
         <li>
           <strong>Originality.</strong> Don’t copy what competitors or suppliers have written, in part or whole.
@@ -154,7 +156,7 @@ export default function Body() {
       />
 
       <H2 id="page-check">A page, checked before it goes live</H2>
-      <p>Run any page, new or old, past this list. It takes ten minutes and catches most of what matters.</p>
+      <p>Use this list to review a page before publishing it or planning changes.</p>
       <Check
         items={[
           <>
@@ -191,10 +193,10 @@ export default function Body() {
 
       <H2 id="how-long">How long it takes</H2>
       <p>
-        Longer than anyone wants, and Google says so plainly: “Some changes might take effect in a few hours, others
-        could take several months.”
-        <Cite n={3} /> Judge a change over weeks, not days. Search Console shows whether the pages are being read and
-        which searches they appear in, and a fair test is a month or two, not a fortnight.
+        Google says changes can take anywhere from hours to several months to affect search results, and recommends
+        waiting a few weeks before judging their effect.
+        <Cite n={3} /> Use Search Console to check impressions, clicks and the searches your pages appear for. Compare
+        those figures over time, allowing for seasonal changes in demand.
         <Cite n={6} />
       </p>
       <p>
@@ -245,17 +247,16 @@ export default function Body() {
       <p>
         And if the site itself is confusing, slow or out of date, fixing those pages comes before any search work.
         There is no point bringing more people to a page that loses them. If you’re deciding between fixing and
-        rebuilding, that decision has its own article: <a href="/blog/redesign-or-improve/#fixes">the fixes that pay
+        rebuilding, that decision has its own article: <a href={`${PAGES.article("redesign-or-improve")}#fixes`}>the fixes that pay
         first</a>.
       </p>
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        When we audit a site we start where this article does: can Google read it, does each page answer one thing in
-        the customer’s words, and does the page give a searcher a reason to stop. The free audit covers that in plain
-        language, with the five jobs above marked done, half-done or missing. Send us your web address and we’ll walk
-        you through it, whether or not you ever hire us. Where the work is bigger than an afternoon, it becomes a page
-        or a rebuild in our <a href="/services/websites/">websites service</a>, priced from the audit’s list.
+        For the free audit, send us your site and tell us which services you want people to find. We’ll review how
+        clearly the pages answer those searches and the obvious gaps to address first. If the pages need rebuilding,
+        our <a href={PAGES.service("websites")}>websites service</a> starts from that list. You can also give it to your
+        current provider.
       </p>
     </>
   );

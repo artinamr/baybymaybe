@@ -1260,6 +1260,51 @@ ol.dg {
   font-size: 13px;
   color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
+/* A larger opening article gives the library an editorial rhythm. */
+.bl-index .bl-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 64px 44px;
+}
+.bl-index .bl-card-title {
+  font-size: clamp(24px, 2.5vw, 35px);
+  max-width: 25ch;
+}
+.bl-index .bl-card-desc {
+  font-size: 16px;
+  max-width: 52ch;
+}
+.bl-index .bl-featured {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-rows: auto auto auto 1fr;
+  column-gap: clamp(28px, 5vw, 72px);
+  row-gap: 18px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+}
+.bl-index .bl-featured > :not(.bl-card-img) {
+  grid-column: 2;
+}
+.bl-index .bl-featured .bl-card-img {
+  grid-column: 1;
+  grid-row: 1 / 5;
+  min-height: 360px;
+  aspect-ratio: auto;
+  margin: 0;
+}
+.bl-index .bl-featured .bl-kind {
+  margin-top: 24px;
+}
+.bl-index .bl-featured .bl-card-title {
+  font-size: clamp(30px, 3.3vw, 48px);
+  max-width: 18ch;
+}
+.bl-index .bl-featured .bl-card-go {
+  align-self: end;
+  padding-bottom: 24px;
+}
 .bl-hits {
   display: flex;
   flex-wrap: wrap;
@@ -1529,6 +1574,39 @@ ol.dg {
 @media (max-width: 900px) {
   .bl-kit-list {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .bl-index .bl-featured {
+    column-gap: 28px;
+  }
+  .bl-index .bl-featured .bl-card-img {
+    min-height: 320px;
+  }
+}
+@media (max-width: 700px) {
+  .bl-index .bl-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+  .bl-index .bl-featured {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 34px;
+  }
+  .bl-index .bl-featured .bl-card-img {
+    min-height: 0;
+    aspect-ratio: 3 / 2;
+    margin-bottom: 8px;
+  }
+  .bl-index .bl-featured .bl-kind {
+    margin-top: 0;
+  }
+  .bl-index .bl-featured .bl-card-title {
+    font-size: 30px;
+    max-width: 25ch;
+  }
+  .bl-index .bl-featured .bl-card-go {
+    align-self: auto;
+    padding-bottom: 0;
   }
 }
 @media (max-width: 560px) {

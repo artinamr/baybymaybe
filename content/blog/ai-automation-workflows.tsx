@@ -43,11 +43,9 @@ export default function Body() {
   return (
     <>
       <p>
-        AI automation is most useful in a small or medium business where it is least exciting: taking the repetitive,
-        rule-following parts of everyday work off people, and leaving the judgement with them. This article describes
-        five workflows where that tends to hold, what each needs, and the privacy obligations that come with them in New
-        Zealand. It deliberately leaves out productivity figures. The only numbers worth trusting are the ones you
-        measure on your own work.
+        Start with repetitive work your team can check: sorting enquiries, reading documents or drafting a reply.
+        These five workflows show where AI can help, what can go wrong and where a person needs to stay involved.
+        Judge the saving on your own work, including the time spent reviewing the output.
       </p>
 
       <H2 id="good-fit">What makes a task a good fit</H2>
@@ -219,10 +217,9 @@ export default function Body() {
       </p>
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        Choosing the task, building it with a person in the loop, and proving it on your own numbers before it touches
-        a customer: that is our <a href={PAGES.service("ai-automation")}>AI automation service</a> in a sentence. The
-        free audit scores your repeated work against the good-fit test and names the one workflow worth piloting
-        first, or tells you that none of them is yet.
+        Our <a href={PAGES.service("ai-automation")}>AI automation service</a> starts with a task and a way to test it
+        on your own material. Tell us about the repeated work in your team for the free audit. We’ll suggest a
+        workflow worth investigating, or explain why a simpler change would do more.
       </p>
     </>
   );

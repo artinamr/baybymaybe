@@ -8,7 +8,7 @@ import { service } from "@/content/services";
 export const metadata = pageMeta({
   title: "Work",
   description:
-    "Three complete websites you can click through, and working demonstrations of a client portal and an AI enquiry desk, each with the brief and the decisions.",
+    "Explore complete concept websites and working studio demonstrations. Try the interactions, read the decisions and see what a live version would need.",
   path: "work/",
 });
 
@@ -30,17 +30,22 @@ export default function Work() {
     <Page here="work" crumbs={[{ name: "Work", href: PAGES.work }]}>
       <section className="sp-hero">
         <Kicker>Work</Kicker>
-        <Title lines={["Don’t take our word for it.", "Click through it."]} />
+        <Title lines={["Work you can", "put to the test."]} />
         <p className="sp-lede" data-rv>
-          Three complete websites, and working pieces of a platform and an automation. The businesses are fictional; the
-          work is real, built the way we would build yours, and every one of them runs here for you to try. Client projects
-          join them as they launch.
+          Open a website. Approve a sample quote. Review a sample enquiry reply. These concept projects show how
+          we think and what we build. The businesses are fictional, and each study explains what works here and what a
+          live version would need.
         </p>
+        <div className="wk-reading" data-rv>
+          <p className="mono">A closer look</p>
+          <p>Start with the live work, then read the brief and the decisions behind it.</p>
+          <a href="#work-index" className="text-link">Explore the projects <span aria-hidden>↓</span></a>
+        </div>
       </section>
       <WorkIndex items={items} />
       <Closing
-        title="Your project, next."
-        line="Start with the free audit: a straight answer on what you have, within two days."
+        title="Bring us your brief."
+        line="Send us your website or the job you need it to do. We’ll give you a clear place to start, within two days."
         more={{ label: "See the services", href: PAGES.services }}
       />
     </Page>

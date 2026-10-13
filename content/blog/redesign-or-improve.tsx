@@ -1,3 +1,4 @@
+import { PAGES } from "@/lib/content";
 import { H2, Callout, Steps, Compare, Figure, Cite } from "@/components/blog/Prose";
 import { DecisionTree } from "@/components/blog/Diagrams";
 import { Term } from "@/components/blog/Term";
@@ -17,10 +18,9 @@ export default function Body() {
   return (
     <>
       <p>
-        Most business owners who ask for a new website don’t really want a new website. They want more of the right
-        enquiries, a site they’re happy to send people to, and less time spent working around it. Sometimes a rebuild
-        is the honest way to get there. Often it isn’t: the site underneath is sound, and a handful of pages are doing
-        the damage.
+        Rebuild when the problems run through the whole site: the message, the structure, the platform or the way it
+        works. If those foundations are sound, start with the pages that are losing enquiries. You may get the result
+        you need without replacing everything.
       </p>
       <p>This is how to tell the difference before you spend anything.</p>
 
@@ -273,12 +273,10 @@ export default function Body() {
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        This is what our free audit is for. We look at your site the way your customers do (on a phone, on a laptop, in
-        search) and within two days you get a short, plain write-up: what is working, what is costing you enquiries, and
-        what we would build instead. Sometimes the answer is “change three pages”. If it is, we’ll say
-        so. If it says rebuild, that is our <a href="/services/websites/">websites service</a>: the plan, the pages and
-        the handover, everything in your name. If it says improve, you can hand the list to whoever looks after your
-        site, us included.
+        Send us your site for the free audit. We’ll look at the pages, the enquiry route and the way they work on a
+        phone, then reply within two days with the changes we would make first. If a rebuild is warranted, our{" "}
+        <a href={PAGES.service("websites")}>websites service</a> covers the plan through to handover. If a few changes will
+        do, you can take the list to whoever looks after your site.
       </p>
     </>
   );

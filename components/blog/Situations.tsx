@@ -11,7 +11,7 @@ export type Situation = {
   short: string;
   minutes: number;
   /** Only what the panel draws (the photo is decorative here: the row says it all). */
-  cover: Pick<PhotoData, "src" | "srcSet" | "width" | "height">;
+  cover: Pick<PhotoData, "src" | "srcSet" | "width" | "height" | "position">;
 };
 
 /**
@@ -57,6 +57,7 @@ export function Situations({ items }: { items: Situation[] }) {
                 sizes="(min-width: 1360px) 520px, 40vw"
                 width={s.cover.width}
                 height={s.cover.height}
+                style={s.cover.position ? { objectPosition: s.cover.position } : undefined}
                 alt=""
                 loading="lazy"
                 decoding="async"

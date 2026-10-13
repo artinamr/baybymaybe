@@ -18,10 +18,9 @@ export default function Body() {
   return (
     <>
       <p>
-        Two quotes for “a new website” can differ by several times, and both can be honest. They are usually
-        pricing different things: different amounts of work, different standards and different assumptions about who
-        does what. The trouble is that a quote rarely says so. This article lists what a good one should spell out, so
-        you can see what you are actually being offered, and compare two offers fairly.
+        Compare website quotes by what they include, before you compare the totals. A useful quote sets out the
+        pages, the design work, who supplies content, the standard of the build and what happens after launch. This
+        checklist helps you spot the gaps and ask for them in writing.
       </p>
       <p>
         It is written from the side of the business buying the website. It isn’t legal advice; for the contract
@@ -33,7 +32,8 @@ export default function Body() {
       <ul>
         <li>
           <strong>How much is designed.</strong> A site built from a few layouts reused across many pages costs less than
-          one where each page is designed on its own. A theme adjusted to fit costs less again, and looks it.
+          one where each page is designed on its own. Adjusting an existing theme can cost less again, provided it
+          suits the content and the work the site needs to do.
         </li>
         <li>
           <strong>Who writes the words.</strong> Writing, gathering and shaping content is often the largest hidden job in
@@ -244,8 +244,8 @@ export default function Body() {
         quote includes design and a clickable prototype you approve, building and testing on real devices, launch with
         redirects and analytics, everything handed over in your name with plain notes, training, and the support set out
         in writing. It lists the running costs to plan for. The <a href={PAGES.pricing}>investment page</a> explains how a
-        quote comes together and what moves the price. Not ready for a quote? The free audit is the smaller first
-        step: your site read by us, and the list of what we would change, at no cost.
+        quote comes together and what affects the price. If you’re still working out what the site needs, the free
+        audit gives you a starting point: a review of your current site and the changes we would make first.
       </p>
     </>
   );

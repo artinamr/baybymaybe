@@ -1,4 +1,4 @@
-import { H2, Callout, Check, Steps, Cite } from "@/components/blog/Prose";
+import { H2, Check, Steps, Cite } from "@/components/blog/Prose";
 import { Term } from "@/components/blog/Term";
 
 export const toc = [
@@ -16,17 +16,16 @@ export default function Body() {
   return (
     <>
       <p>
-        A hacked website is a shock, and it is also a situation with a known shape: contain it, report it, restore from
-        a clean copy, tell the people affected, then close the way in. Business.govt.nz puts the timing plainly: “You’ll
-        need to act quickly to protect your business.”
-        <Cite n={1} /> This article walks through each step as it applies to a New Zealand business website, with the
-        government guidance linked as it goes.
+        Contact your hosting provider as soon as you suspect a break-in. Record what you’re seeing, contain the
+        problem, then work through recovery and reporting. Business.govt.nz advises acting quickly and taking steps
+        to prevent a repeat.
+        <Cite n={1} /> This guide gives you a sequence to discuss with your provider.
       </p>
 
       <H2 id="first">The first hour</H2>
       <p>
-        Speed matters, and so does not making it worse. The steps below are the ones that hold up in practice; your
-        hosting provider is your fastest source of help, because they deal with this every week.
+        Your host can investigate the site and help contain the problem. Contact them before making major changes,
+        and keep a record of the advice and actions.
       </p>
       <Steps
         items={[
@@ -62,8 +61,7 @@ export default function Body() {
             b: (
               <p>
                 If browsers are warning people, or the site is serving things you didn’t publish, a plain maintenance
-                page is the better day than another hour online. A closed shop loses less than one that harms its
-                customers.
+                page can prevent further exposure while your host investigates.
               </p>
             ),
           },
@@ -81,7 +79,7 @@ export default function Body() {
 
       <H2 id="signs">How you’ll know</H2>
       <p>
-        Sometimes it is obvious (a defaced home page) and sometimes it whispers. Business.govt.nz lists the general
+        Some signs are obvious, such as a defaced home page. Others need investigation. Business.govt.nz lists the general
         signs of a cyber attack: “Slow computers, warning messages and password issues are all signs of a possible
         cyber attack.”
         <Cite n={1} /> On a website, the usual tells are:
@@ -105,21 +103,20 @@ export default function Body() {
         </li>
       </ul>
       <p>
-        Leaving it doesn’t keep it quiet. Business.govt.nz warns that a hack “could even put your whole business on
-        hold until it’s fixed”, and the longer it runs, the more customers it touches.
+        Business.govt.nz warns that a hack can disrupt the business until it is fixed. Treat unexpected changes as
+        a reason to investigate promptly.
         <Cite n={1} />
       </p>
 
       <H2 id="report">Report it</H2>
       <p>
-        New Zealand’s National Cyber Security Centre runs a reporting tool that is “for individuals and small businesses
-        to report an online security issue in New Zealand”. It “will help you identify what’s happening and let you know
-        what the next steps are to resolve it”.
+        The National Cyber Security Centre has a reporting route for individuals and small businesses. It can help
+        identify the issue and explain the next steps.
         <Cite n={2} />
       </p>
       <p>
-        Reporting is not compulsory: “You’re not legally required to report a problem, but doing so may be the best
-        thing for your business,” says Business.govt.nz, which also notes the NCSC “can provide official support”.
+        Business.govt.nz recommends reporting cyber incidents to the NCSC, even though reporting to the NCSC is not
+        generally compulsory.
         <Cite n={1} /> A report also helps the next business: what you describe is part of the picture the NCSC uses to
         warn others.
       </p>
@@ -155,30 +152,28 @@ export default function Body() {
 
       <H2 id="tell">Telling your customers</H2>
       <p>
-        If the hack reached personal information your business holds (customer names, emails, orders, anything from a
-        breached email account), New Zealand’s Privacy Act has a duty for exactly this. A breach that has caused, or
-        might cause, serious harm is notifiable, and the Privacy Commissioner calls it “a legal obligation under the
-        Privacy Act”.
+        If personal information was affected, assess whether the breach has caused or might cause serious harm.
+        The Privacy Commissioner says a breach at that threshold must be notified. Its NotifyUs self-assessment
+        tool can help you work through the decision.
         <Cite n={4} />
       </p>
       <p>
-        Two timings matter. Notify the Commissioner “ideally... within 72 hours after you’re aware that you have a
-        notifiable breach, even if you’re still investigating it”, and tell the affected people “as soon as you can”.
-        <Cite n={4} /> Say plainly what happened, what information was involved, what you have done, and what you would
-        like them to do (usually: watch for odd messages and change a password). Customers forgive a bad day told
-        honestly; they forgive silence much less.
+        The Commissioner asks for notification ideally within 72 hours of becoming aware of a notifiable breach,
+        even while the investigation continues. Tell affected people as soon as you can, unless an exception applies.
+        <Cite n={4} /> Explain what happened, what information was involved, what you have done and what the affected
+        people should do next. Get specialist help if you are unsure about the assessment or an exception.
       </p>
 
       <H2 id="how">Find the way in</H2>
       <p>
-        Cleaning up without finding the door means cleaning up again next month. Own Your Online puts it in the
+        Recovery should include investigating how the attacker got in. Own Your Online puts it in the
         recovery list: “work out how the malware got in so it doesn’t happen again.”
-        <Cite n={3} /> For a website, the doors are usually one of these:
+        <Cite n={3} /> Ask your provider to investigate:
       </p>
       <ul>
         <li>
-          <strong>An out-of-date plug-in or theme.</strong> The single most common way a small business site is broken
-          into. Anything you don’t use should come out, not just be switched off.
+          <strong>An out-of-date plug-in or theme.</strong> Check for known weaknesses in the software the site uses.
+          Remove anything you no longer need.
         </li>
         <li>
           <strong>A reused or shared password.</strong> One leaked password from another service unlocks everything it
@@ -190,12 +185,12 @@ export default function Body() {
         </li>
       </ul>
       <p>
-        Your host’s logs answer most of this if you ask soon enough. Write down what you find; it becomes the checklist
+        Your host’s logs can help with the investigation. Write down what you find; it becomes the checklist
         in the next section.
       </p>
 
       <H2 id="next">Stopping the next one</H2>
-      <p>After the clean-up, this is the whole list:</p>
+      <p>After recovery, check these basics with the person responsible for the site:</p>
       <Check
         items={[
           <>
@@ -207,7 +202,7 @@ export default function Body() {
           <>
             <strong>Backups on the government’s pattern:</strong> Business.govt.nz describes the 3-2-1-1 method, “3
             copies of back up data” on “2 types of storage media”, 1 off-site and 1 offline.
-            <Cite n={1} /> A <Term id="backup">backup</Term> nobody has restored is a hope, not a backup.
+            <Cite n={1} /> Test that you can restore from a <Term id="backup">backup</Term> before relying on it.
           </>,
           <>
             <strong>Updates on a rhythm,</strong> with someone named to do them and check the site afterwards.
@@ -218,18 +213,17 @@ export default function Body() {
           </>,
           <>
             <strong>One page of notes:</strong> who hosts it, who to call, where the backups are, how sign-in works. On
-            the bad day, that page is worth more than anything else here.
+            an incident, your team needs those details readily available.
           </>,
         ]}
       />
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        Looking after a website after launch is our everyday work: the updates on a rhythm, the backups that are
-        actually restored and tested now and then, the accounts in your name, and a plan for the bad day. If your host
-        already does all of that and it has been tested, you don’t need us, and it’s worth saying so. If you’re not
-        sure, the free audit checks it: we’ll tell you what would happen today if your site were hit, and what it would
-        take to make the answer boring.
+        If an incident is happening now, contact your host or IT provider first. Once it is contained, the free audit
+        can help review who looks after the site, the handover records and the questions still unanswered. We’ll
+        point out what needs further investigation. A site review is a starting point; it does not replace a
+        security assessment.
       </p>
     </>
   );

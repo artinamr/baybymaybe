@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { STAGES } from "@/lib/content";
+import { METHOD_STAGES as STAGES } from "./stages";
 
 /**
  * THE FOURTEEN DAYS, AS A PLAN: a typical website's five stages laid out day
@@ -22,7 +22,7 @@ const SPANS: [number, number][] = [
 const PINS = [
   { day: 3, label: "You sign the scope" },
   { day: 6, label: "You approve the prototype" },
-  { day: 11, label: "You try it" },
+  { day: 11, label: "You approve the build" },
   { day: 14, label: "Live" },
 ];
 
@@ -30,7 +30,7 @@ const DAYS = Array.from({ length: 14 }, (_, i) => i + 1);
 
 export function Plan() {
   return (
-    <section className="mp" aria-labelledby="mp-h" data-rv>
+    <section className="mp" id="project-plan" aria-labelledby="mp-h" data-rv>
       <div className="mp-top">
         <h2 id="mp-h" className="mp-h">
           A typical website, day by day
@@ -69,13 +69,14 @@ export function Plan() {
             <li key={p.day} style={{ gridColumn: `${p.day + 1} / span 1`, "--i": i } as CSSProperties}>
               <span className="mp-pin" aria-hidden />
               <span className="mp-pin-t">
-                <span className="sr-only">Day {p.day}: </span>
+                <span className="mp-pin-day">Day {p.day}: </span>
                 {p.label}
               </span>
             </li>
           ))}
         </ol>
       </div>
+      <p className="mp-note">An example of a website project over about fourteen days. We confirm your timetable in the scope, including time for content and approvals.</p>
     </section>
   );
 }

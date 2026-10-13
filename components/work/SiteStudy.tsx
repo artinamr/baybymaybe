@@ -102,7 +102,7 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
       <section className="cs-stage ss-stage" aria-label="The website" data-rv>
         <LiveSite live={s.live} domain={p.url} name={p.client} poster={s.home} phone={s.phones[0]} />
         <p className="cs-note">
-          The real site, not a picture of it: try it here, or{" "}
+          Try the website in this frame, or{" "}
           <a href={s.live} target="_blank" rel="noopener">
             open it in its own tab
           </a>
@@ -110,11 +110,18 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
         </p>
       </section>
 
+      <nav className="cs-guide" aria-label="In this study" data-rv>
+        <a href="#brief-h"><span className="mono">01</span> The brief</a>
+        <a href="#pages-h"><span className="mono">02</span> The pages</a>
+        <a href="#features-h"><span className="mono">03</span> The tools</a>
+        <a href="#built-h"><span className="mono">04</span> The build</a>
+      </nav>
+
       <section className="sp-block split" aria-labelledby="brief-h">
         <header className="split-head">
           <Kicker>The brief</Kicker>
           <h2 id="brief-h" className="sp-h2" data-rv>
-            The brief we set ourselves.
+            What the website needed to do.
           </h2>
         </header>
         <div>
@@ -140,13 +147,12 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
 
       <section className="sp-block ss-pages" aria-labelledby="pages-h">
         <header className="ss-head">
-          <Kicker>Every page</Kicker>
+          <Kicker>The pages</Kicker>
           <h2 id="pages-h" className="sp-h2" data-rv>
             {NUM[s.pageCount] ?? s.pageCount} pages, one system.
           </h2>
           <p className="sp-lede" data-rv>
-            Each page has one job. They share a handful of parts, so the site reads as one place and grows without
-            redesigning.
+            The main pages are shown below. Shared layouts keep the site consistent as new content is added.
           </p>
         </header>
         <ul className="ss-page-grid">
@@ -177,7 +183,7 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
         <header className="split-head">
           <Kicker>Approach</Kicker>
           <h2 id="approach-h" className="sp-h2" data-rv>
-            The decisions that matter.
+            The decisions behind the design.
           </h2>
         </header>
         <ol className="flow">
@@ -195,10 +201,11 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
         <header className="ss-head">
           <Kicker>Up close</Kicker>
           <h2 id="features-h" className="sp-h2" data-rv>
-            The parts that do a job.
+            Useful details, built in.
           </h2>
           <p className="sp-lede" data-rv>
-            Nothing here is decoration. Each part answers a question a customer has, or saves the business a reply.
+            These are the details to try: the tools that help a visitor choose, ask a better question or find what they
+            came for.
           </p>
         </header>
         {s.features.map((f, n) => (
@@ -234,10 +241,11 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
         <header className="ss-head">
           <Kicker>On a phone</Kicker>
           <h2 id="phones-h" className="sp-h2" data-rv>
-            Designed for the phone first.
+            The same care on a smaller screen.
           </h2>
           <p className="sp-lede" data-rv>
-            Most visitors arrive on a phone, so every page was laid out for one before it was widened for a desk.
+            Menus, forms and project pages adapt to a phone. The information stays in order and the controls remain
+            easy to reach.
           </p>
         </header>
         <div className="ss-phone-row" tabIndex={0} aria-label="Phone views of the site">
@@ -284,9 +292,9 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
 
       <section className="sp-block ss-built" aria-labelledby="built-h">
         <header className="ss-head">
-          <Kicker>Built properly</Kicker>
+          <Kicker>Inside the build</Kicker>
           <h2 id="built-h" className="sp-h2" data-rv>
-            Measured, not claimed.
+            The figures behind this version.
           </h2>
           <p className="sp-lede" data-rv>
             Measured on the copy you can try above, on 6 October 2026: a first visit on a desktop, sizes as they travel
@@ -318,8 +326,8 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
             What we built.
           </h2>
           <p className="sp-lede" data-rv>
-            Designed, written and engineered by one team, from a blank page. Most websites like this go live in about
-            fourteen days; the quote gives the date.
+            The scope below belongs to this concept project. For your website, we agree the pages, tools and delivery
+            date before the build starts.
           </p>
         </div>
         <ul className="own-list own-list-s" data-rv>
@@ -342,7 +350,7 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
           </ul>
         </div>
         <div className="cs-limits" data-rv>
-          <h3>What’s real, and what isn’t</h3>
+          <h3>Before a live launch</h3>
           <ul>
             {p.limits.map((x) => (
               <li key={x}>{x}</li>
@@ -376,8 +384,8 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
       </nav>
 
       <Closing
-        title="Want a site like this?"
-        line="Send us the one you have, or tell us about the business. You’ll get a straight answer within two days."
+        title="Put this care into your website."
+        line="Send us your current site or tell us what you need to build. We’ll reply with a clear place to start, within two days."
         more={{ label: "Or see all the work", href: PAGES.work }}
       />
     </>

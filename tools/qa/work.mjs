@@ -283,16 +283,17 @@ async function filters(phone) {
   try {
     await go(page, "");
     for (const [label, slugs] of [
-      ["All", ["practice-website", "operations-portal", "enquiry-desk"]],
-      ["Websites", ["practice-website"]],
+      ["All", ["butter-days", "blackridge", "outbound", "operations-portal", "enquiry-desk", "practice-website"]],
+      ["Websites", ["butter-days", "blackridge", "outbound", "practice-website"]],
       ["Platforms", ["operations-portal"]],
       ["AI automation", ["enquiry-desk"]],
-      ["All", ["practice-website", "operations-portal", "enquiry-desk"]],
+      ["All", ["butter-days", "blackridge", "outbound", "operations-portal", "enquiry-desk", "practice-website"]],
     ]) {
       await click(page, label, ".wk-filter");
       await page.waitForFunction((wanted) => document.querySelector('.wk-filter button[aria-pressed="true"]')?.textContent.trim() === wanted, { timeout: 2500 }, label);
       const visible = await page.$$eval(".wk-card", (cards) => cards.filter((card) => getComputedStyle(card).display !== "none").map((card) => card.querySelector(".wk-title a").pathname.split("/").filter(Boolean).at(-1)));
       assert.deepEqual(visible, slugs, `${label} should show the intended projects`);
+      assert.equal(await page.$eval(".wk-count", (node) => node.textContent.trim()), `${slugs.length} ${slugs.length === 1 ? "project" : "projects"}`, "The announced count should match the visible projects");
       assert.equal(await page.$$eval('.wk-filter button[aria-pressed="true"]', (buttons) => buttons.length), 1, "Only one work filter should be selected");
       if (!phone && label === "Platforms") await shot(page, "work-desktop-platform-filter", ".wk-grid");
     }

@@ -21,14 +21,21 @@ export function Transcript() {
             {TRANSCRIPT.intro}
           </p>
         </header>
+        <p className="st-tr-note st-tr-note-first" data-rv>{TRANSCRIPT.note}</p>
+        <nav className="st-tr-nav" aria-label="In the written story" data-rv>
+          <a href="#st-chapter-open">One customer</a>
+          <a href="#st-chapter-website">Where it slows down</a>
+          <a href="#st-chapter-turn">The rebuild</a>
+          <a href="#st-chapter-new-you">The evening</a>
+        </nav>
         <ol className="st-tr-list">
           {story.map((c) => (
-            <li key={c.id} className="st-tr-ch" data-rv>
+            <li key={c.id} id={`st-chapter-${c.id}`} className="st-tr-ch" data-rv>
               <h3 className="st-tr-name">
                 {c.kicker ? <span className="st-tr-k">{c.kicker}</span> : <span className="st-tr-k">{c.name}</span>}
                 <span className="st-tr-t">{c.title}</span>
               </h3>
-              <p className="st-tr-scene">{c.scene}</p>
+              <div className="st-tr-copy">
               {c.line ? <p className="st-tr-line">{c.line}</p> : null}
               {c.fact ? (
                 <p className="st-tr-fact">
@@ -39,12 +46,14 @@ export function Transcript() {
                 </p>
               ) : null}
               {c.beat ? <p className="st-tr-line">{c.beat}</p> : null}
+              <details className="st-tr-description">
+                <summary>Scene description</summary>
+                <p className="st-tr-scene">{c.scene}</p>
+              </details>
+              </div>
             </li>
           ))}
         </ol>
-        <p className="st-tr-note" data-rv>
-          {TRANSCRIPT.note}
-        </p>
         <section className="st-tr-sources" aria-labelledby="st-src-h" data-rv>
           <h3 id="st-src-h" className="st-tr-sh">
             {TRANSCRIPT.sources}

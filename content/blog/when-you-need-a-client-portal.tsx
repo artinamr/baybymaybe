@@ -18,10 +18,9 @@ export default function Body() {
   return (
     <>
       <p>
-        Most businesses don’t decide to build a client portal. They drift towards one: the inbox fills with
-        “any update?”, documents go back and forth as attachments, approvals hide in long threads, and someone
-        on the team spends part of every day copying details from one place to another. At some point the question stops
-        being whether you need a better way to share work with clients, and becomes what that way should be.
+        A client portal is worth considering when routine updates, documents and approvals take up too much of the
+        working day. It gives clients a place to find their own information, and your team a shared record of the
+        work. Start by checking whether existing software can do that before commissioning a custom build.
       </p>
 
       <H2 id="what-it-is">What a portal is (and isn’t)</H2>
@@ -223,10 +222,9 @@ export default function Body() {
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        A portal like Kerrow is most of what our <a href={PAGES.service("platforms")}>platforms work</a> is: one place
-        your team and your clients both trust, built on the way you already run jobs. The free audit looks at where the
-        hours go today and tells you honestly whether an off-the-shelf tool would do the job before anyone builds
-        anything.
+        Our <a href={PAGES.service("platforms")}>platforms work</a> starts with the way your team runs jobs and what
+        clients need to see. In the free audit, tell us where the email traffic and double entry happen. We’ll suggest
+        what to change first, including an off-the-shelf tool when one fits.
       </p>
     </>
   );

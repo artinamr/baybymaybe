@@ -4,14 +4,14 @@ import { PageLd, QaLd } from "@/components/site/JsonLd";
 import { Photo } from "@/components/site/Photo";
 import { Journey } from "@/components/site/Journey";
 import { ArticleCard } from "@/components/blog/ArticleCard";
-import { DELIVERABLES, FAQ_ALL, PAGES, ogCard } from "@/lib/content";
+import { FAQ_ALL, PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { SERVICES, service, type Service } from "@/content/services";
 import { FEATURED, KIND_LABEL, project } from "@/content/work";
 import { PUBLISHED, TOPICS } from "@/content/blog";
 
 const DESCRIPTION =
-  "Websites, platforms and AI automation for New Zealand businesses, designed and built by one Auckland team so they work as one, and owned by you.";
+  "Website design, web platforms and AI automation from an Auckland studio. Clear thinking, distinctive design and systems built around your business.";
 
 export const metadata = pageMeta({
   title: "Services: websites, platforms and AI automation",
@@ -21,47 +21,79 @@ export const metadata = pageMeta({
 });
 
 const POINTS: Record<Service["slug"], string[]> = {
-  websites: DELIVERABLES.websites,
-  platforms: DELIVERABLES.platforms,
-  "ai-automation": DELIVERABLES.ai,
+  websites: ["Business and service websites", "Content your team can update", "Enquiries, bookings and payments"],
+  platforms: ["Client portals and job tracking", "Bookings, approvals and accounts", "Connections between your systems"],
+  "ai-automation": ["Website and enquiry assistants", "Inbox and document tasks", "Drafts, review and recorded actions"],
 };
+
+/** Small, plainly labelled examples of the work beside the photographs. */
+function ServiceSpecimen({ slug }: { slug: Service["slug"] }) {
+  if (slug === "websites") {
+    return (
+      <span className="svc-example svc-example-web">
+        <span className="svc-example-label">Illustrative enquiry form</span>
+        <span className="svc-example-title">Tell us what you’re planning.</span>
+        <span className="svc-example-fields"><span>Your name</span><span>How can we help?</span></span>
+        <span className="svc-example-action">Send enquiry <span aria-hidden>↗</span></span>
+      </span>
+    );
+  }
+  if (slug === "platforms") {
+    return (
+      <span className="svc-example svc-example-platform">
+        <span className="svc-example-label">Illustrative client portal</span>
+        <span className="svc-example-title">Your project, at a glance.</span>
+        <span className="svc-example-status">Ready for your review <span aria-hidden>↗</span></span>
+        <span className="svc-example-tabs"><span>Progress</span><span>Files</span><span>Approvals</span></span>
+      </span>
+    );
+  }
+  return (
+    <span className="svc-example svc-example-ai">
+      <span className="svc-example-label">Illustrative enquiry assistant</span>
+      <span className="svc-example-title">A draft, ready to review.</span>
+      <span className="svc-example-draft"><span /><span /><span /></span>
+      <span className="svc-example-review"><span className="svc-example-dot" aria-hidden />Waiting for a person’s approval</span>
+    </span>
+  );
+}
 
 /** "Which do you need?": what an owner notices, and the discipline that answers it. */
 const CHOOSE: { if: string; to: Service["slug"] | "audit" }[] = [
-  { if: "People visit, but few get in touch.", to: "websites" },
+  { if: "The website doesn’t show the business at its best.", to: "websites" },
   { if: "Every change to the site waits on a developer.", to: "websites" },
   { if: "Clients keep asking where their job is up to.", to: "platforms" },
   { if: "Bookings, jobs and payments live in different places.", to: "platforms" },
   { if: "Someone spends hours sorting, copying and drafting the same things.", to: "ai-automation" },
-  { if: "Enquiries arrive after hours and wait until morning.", to: "ai-automation" },
+  { if: "Useful information is buried in emails and documents.", to: "ai-automation" },
   { if: "A bit of all of it, and you’re not sure where to start.", to: "audit" },
 ];
 
 const EVERY = [
-  { title: "Yours to keep", body: "The code, the domain, the data and every account are in your name. Nothing locks you to us." },
+  { title: "Ownership from the start", body: "Your code, content and data belong to you. We set up the domain, hosting and service accounts in your name." },
   { title: "Designed for your customers", body: "Every screen starts from what the people using it need to find out or do." },
-  { title: "Fast and accessible", body: "Lean pages that load quickly on a phone, readable and usable by everyone who needs them." },
+  { title: "Care in the small details", body: "We check speed on a slow connection, keyboard use and form labels, alongside the layout and wording." },
   { title: "Secure from the start", body: "Sensible accounts and permissions, backups and updates are part of the first version." },
   { title: "A written scope and a fixed quote", body: "You know what is included, what it costs and when it goes live before anything starts." },
-  { title: "Looked after after launch", body: "Fixes, updates and improvements for as long as you want us. You decide how much." },
+  { title: "A proper handover", body: "Your team gets training, documentation and a clear support arrangement. You can keep working with us or take it from there." },
 ];
 
 const START = [
   {
     title: "The free audit",
-    body: "We look at what you have the way your customers do. Within two days you get a short, plain write-up: what works, what is costing you enquiries, and what we would build.",
+    body: "We look at your site or the process you want to improve. Within two days, you get a short write-up of what is working, where the problems are and what we would tackle first.",
   },
   {
     title: "A written scope and a fixed quote",
-    body: "What’s included and what isn’t, what we need from you, the price and the date it goes live. What is in the quote is what you pay.",
+    body: "The work, price, dates and anything we need from you, agreed before we start. Changes are discussed and priced before we make them.",
   },
   {
     title: "Design, build, launch",
-    body: "You approve a prototype before it is built and try it on a review link before it launches. Most websites take about fourteen days; platforms and automation go by the dates in their quote.",
+    body: "Review the direction before we build, then try the finished work before launch. Websites, platforms and automation each have a programme suited to their scope.",
   },
   {
-    title: "Looked after, as long as you want",
-    body: "Fixes, updates and improvements, as much or as little as you choose. Everything stays in your name either way.",
+    title: "Handover and care",
+    body: "We show your team how it works and agree what happens after launch. Ongoing support is a choice, with the work and cost made clear.",
   },
 ];
 
@@ -89,32 +121,33 @@ export default function Services() {
       <QaLd items={QA} />
       <section className="sp-hero">
         <Kicker>Services</Kicker>
-        <Title lines={["Three disciplines.", "One system."]} />
+        <Title lines={["Better websites.", "Better ways to work."]} />
         <p className="sp-lede" data-rv>
-          Most businesses need more than a website: the systems behind it, and more and more the automation that joins them up.
-          We design and build all three, as one team, so they work as one.
+          We design websites, build the systems behind them and automate the work that slows your team down.
+          One Auckland studio, from the first conversation through to the details of the build.
         </p>
       </section>
 
-      <section className="svc-cards" aria-label="The three disciplines">
+      <section className="svc-cards svc-catalogue" aria-label="Our services">
         {SERVICES.map((s, i) => (
           <a key={s.slug} className="svc-card" href={PAGES.service(s.slug)} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
             <span className="svc-img">
-              <Photo p={s.cardPhoto} sizes="(min-width: 900px) 30vw, 92vw" eager={i === 0} decorative />
+              <Photo p={s.cardPhoto} sizes="(min-width: 1360px) 620px, (min-width: 900px) 46vw, 92vw" eager={i === 0} decorative />
             </span>
-            <span className="svc-meta">
-              <span className="svc-n mono">{s.n}</span>
-              <span className="svc-name">{s.name}</span>
+            <div className="svc-meta">
+              <span className="svc-n mono">Service {s.n}</span>
+              <h2 className="svc-name">{s.name}</h2>
               <span className="svc-line">{s.line}</span>
               <span className="svc-points">
                 {POINTS[s.slug].map((p) => (
                   <span key={p}>{p}</span>
                 ))}
               </span>
+              <ServiceSpecimen slug={s.slug} />
               <span className="svc-go">
                 Explore {s.name.replace(/^[A-Z](?=[a-z])/, (c) => c.toLowerCase())} <span aria-hidden>→</span>
               </span>
-            </span>
+            </div>
           </a>
         ))}
       </section>
@@ -123,10 +156,10 @@ export default function Services() {
         <header className="split-head">
           <Kicker>Which do you need?</Kicker>
           <h2 id="choose-h" className="sp-h2" data-rv>
-            Start from what you’re noticing.
+            Start with the problem.
           </h2>
           <p className="sp-lede svc-choose-note" data-rv>
-            Most businesses recognise one or two of these. Each leads to the part of the work that fixes it.
+            You don’t need to choose a technical approach before talking to us. Start with the part of the business you want to improve.
           </p>
         </header>
         <ul className="svc-choose">
@@ -153,8 +186,8 @@ export default function Services() {
             One enquiry, start to finish.
           </h2>
           <p className="sp-lede" data-rv>
-            The website brings people in, the platform runs the work, and automation keeps it moving, with a person approving
-            what matters. Built by one team, so nothing falls between them.
+            A customer finds you, gets in touch and becomes a job for the team. This example shows where a website,
+            a platform and automation can help. We connect the parts your business needs.
           </p>
         </header>
         <div data-rv>
@@ -166,7 +199,7 @@ export default function Services() {
         <header className="split-head bl-related-head">
           <Kicker>See them working</Kicker>
           <h2 id="demos-h" className="sp-h2" data-rv>
-            One of each, to try.
+            Explore the work yourself.
           </h2>
           <p className="split-more" data-rv>
             <a className="text-link" href={PAGES.work}>
@@ -197,7 +230,7 @@ export default function Services() {
         <header className="split-head">
           <Kicker>In every project</Kicker>
           <h2 id="every-h" className="sp-h2" data-rv>
-            What you can count on.
+            The standard we work to.
           </h2>
         </header>
         <ul className="items">
@@ -214,7 +247,7 @@ export default function Services() {
         <header className="split-head">
           <Kicker>How it starts</Kicker>
           <h2 id="start-h" className="sp-h2" data-rv>
-            From a first look to looked after.
+            Clear at every stage.
           </h2>
           <p className="split-more svc-start-links" data-rv>
             <a className="text-link" href={PAGES.methodology}>
@@ -258,7 +291,7 @@ export default function Services() {
           <header className="split-head bl-related-head">
             <Kicker>From the blog</Kicker>
             <h2 id="read-h" className="sp-h2" data-rv>
-              Plain answers, one for each.
+              Read before you decide.
             </h2>
             <p className="split-more" data-rv>
               <a className="text-link" href={PAGES.blog}>
@@ -275,9 +308,9 @@ export default function Services() {
       ) : null}
 
       <Closing
-        title="Not sure which you need?"
-        line="Most projects start with the free audit: we look at what you have and tell you plainly what would help most."
-        more={{ label: "See what it costs, and why", href: PAGES.pricing }}
+        title="Let’s look at what would help."
+        line="Send us your website or tell us about a process that needs work. We’ll give you a clear starting point in the free audit."
+        more={{ label: "How pricing works", href: PAGES.pricing }}
       />
     </Page>
   );

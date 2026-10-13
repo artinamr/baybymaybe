@@ -1,3 +1,4 @@
+import { PAGES } from "@/lib/content";
 import { H2, Callout, Compare, Cite } from "@/components/blog/Prose";
 import { DecisionTree } from "@/components/blog/Diagrams";
 import { Term } from "@/components/blog/Term";
@@ -18,10 +19,9 @@ export default function Body() {
   return (
     <>
       <p>
-        Nearly every business starts here, and the honest answer is that both paths work. A website you build yourself
-        with a site builder is a fine answer for plenty of businesses. So is engaging someone. What decides it is what
-        the site has to do, who has the hours, and what each path will ask of you after launch. Here is how to tell
-        which one you are.
+        Build your own site if a suitable template covers the job and someone has the time to write, set up and
+        maintain it. Hire help when the design or the systems need more than you can manage, or when that time is
+        better spent elsewhere. Compare the work each path asks of you, including after launch.
       </p>
 
       <H2 id="the-question">The question behind the question</H2>
@@ -47,9 +47,9 @@ export default function Body() {
       </p>
       <p>
         A <Term id="website-builder">site builder</Term> is the usual tool for this: ready-made templates, an editor
-        in the browser, and the hosting handled for one subscription. The templates come with the subscription
-        (Squarespace’s help puts it that way: “The ability to try multiple templates is included with your
-        Squarespace site subscription”).
+        in the browser, and the hosting handled for one subscription. Templates are included in a Squarespace
+        subscription. Check which version you are using before choosing one: version 7.0 lets you switch templates;
+        version 7.1 uses a common set of features and does not let you switch templates.
         <Cite n={2} />
       </p>
       <p>
@@ -57,7 +57,7 @@ export default function Body() {
         it: most sites are found automatically, and “you usually don’t need to do anything except publish your site on
         the web”.
         <Cite n={3} /> Getting found well, for the searches you actually want, is more work (that is the territory of{" "}
-        <a href="/blog/what-is-seo/">SEO</a>), but a small, clear site starts on the right side of it.
+        <a href={PAGES.article("what-is-seo")}>SEO</a>), but a small, clear site starts on the right side of it.
       </p>
       <Callout title="Selling things? Consider a marketplace first">
         <p>
@@ -70,16 +70,16 @@ export default function Body() {
 
       <H2 id="hire">When hiring earns its cost</H2>
       <p>
-        Hire when the site has to do things a template can’t, or when the hours aren’t there. The honest signals: it
-        must take bookings or payments, or connect to your CRM, calendar or accounting. The brand carries the
-        business, so the words and the design have to be right, and writing them is not your strength. Nobody in the
-        business wants to own the tooling. Or you have outgrown a builder and its limits are costing you work.
+        Hire when the available tools do not cover your process, or when you need help with the words, design or
+        technical work. Check any booking, payment or CRM connection against what the business actually needs.
+        If a suitable tool covers it, you may only need help setting it up. A custom build makes sense when the
+        limits of those tools would leave your team doing extra work.
       </p>
       <p>
         A professional build buys judgement as much as labour: what to leave out, what the pages must say, what the
-        site has to connect to, and what it means for the site to be genuinely finished. It also buys speed. What it
-        doesn’t buy automatically is ownership; that is a matter of the contract, and there is a whole article on what
-        a good <a href="/blog/website-quote-checklist/#the-lines">website quote should include</a>.
+        site has to connect to, and how to check the result before launch. Agree ownership and handover in the
+        contract; the <a href={`${PAGES.article("website-quote-checklist")}#the-lines`}>website quote checklist</a> covers
+        what to put in writing.
       </p>
 
       <H2 id="costs">What each path really costs</H2>
@@ -93,22 +93,22 @@ export default function Body() {
         rows={[
           ["Money to start", "The builder’s subscription, the domain, your time", "A quoted build; writing and photography if you buy them"],
           ["Money to keep going", "Subscription and domain renewal, rising as you add features", "Hosting and domain, plus updates and support on whatever arrangement you agree"],
-          ["Your hours", "Large at the start, and recurring: content, changes, renewals", "Small: decisions, content, review"],
+          ["Your hours", "Setup and recurring content, changes and renewals", "Decisions, content and review, with the build handled for you"],
           ["Skills you supply", "Writing, pictures, patience with tools", "Knowing your business and saying what you want"],
-          ["Suits", "A handful of information pages, enquiries by email or phone", "Bookings, payments, connections to your systems, a brand that carries weight"],
+          ["Suits", "A site within the chosen tool’s features, with someone to maintain it", "A distinct design, unusual processes or work you need someone else to handle"],
           ["The catch", "Everything depends on you staying on it", "You live with the quote, so it has to be a good one"],
         ]}
       />
 
       <H2 id="deciding">A short decision path</H2>
-      <p>Four questions, in order. Answer honestly; the questions are about your week, not your ambition.</p>
+      <p>Four questions about the work, the content and the time you can give it.</p>
       <DecisionTree
         steps={[
           {
-            q: "Is the site’s whole job to show what you do and take enquiries?",
+            q: "Does a builder or specialist tool cover the job without workarounds?",
             no: {
-              t: "It has to book, sell or connect",
-              b: "That is platform work. Engage someone, or run a specialist product behind the site; a template editor won’t carry it.",
+              t: "Scope the work it cannot handle",
+              b: "Write down the missing features or connections, then ask someone to price them before committing to a tool.",
             },
           },
           {
@@ -159,7 +159,7 @@ export default function Body() {
         </li>
         <li>
           <strong>The basics that make pages good:</strong> fast photos, honest titles, one clear page per service.
-          The <a href="/blog/what-is-seo/#page-check">page checklist</a> is short and applies to a builder site as
+          The <a href={`${PAGES.article("what-is-seo")}#page-check`}>page checklist</a> is short and applies to a builder site as
           much as a custom one.
         </li>
       </ul>
@@ -168,12 +168,12 @@ export default function Body() {
       <ul>
         <li>
           <strong>Ownership in writing before work starts:</strong> the domain, the code, the content and every
-          account in your business’s name. The <a href="/blog/website-quote-checklist/#the-lines">quote checklist</a>{" "}
+          account in your business’s name. The <a href={`${PAGES.article("website-quote-checklist")}#the-lines`}>quote checklist</a>{" "}
           lists the lines to ask for.
         </li>
         <li>
           <strong>A handover, not just a launch.</strong> Your own logins, a copy of everything, and plain notes on
-          how it works; the <a href="/blog/after-launch-ownership/#handover">handover checklist</a> is the one to
+          how it works; the <a href={`${PAGES.article("after-launch-ownership")}#handover`}>handover checklist</a> is the one to
           send.
         </li>
         <li>
@@ -196,14 +196,14 @@ export default function Body() {
           <strong>From DIY to hired.</strong> What carries over: the domain (a .nz name moves with its UDAI, which
           your registrar must give you promptly and at no cost, and which is valid for 30 days).
           <Cite n={4} /> The words and photos carry over if you have kept copies out of the tool. What doesn’t: the
-          pages themselves. Moving to a fresh site means starting the design again (Squarespace’s help is explicit
-          that a new site means “you’ll have to recreate all your site’s existing content”).
+          pages themselves may need rebuilding. For example, Squarespace says creating a new trial site means
+          recreating the existing content there.
           <Cite n={2} />
         </li>
         <li>
           <strong>From hired to in-house.</strong> If everything is in your name with your own logins, this is an
-          afternoon’s work, and the <a href="/blog/after-launch-ownership/#handover">handover checklist</a> lists
-          what to have in hand before you start.
+          practical handover. The <a href={`${PAGES.article("after-launch-ownership")}#handover`}>handover checklist</a> lists
+          the access, notes and training to arrange before you start.
         </li>
         <li>
           <strong>A middle path.</strong> Have someone set the site up properly, then run it yourselves: your team
@@ -214,12 +214,10 @@ export default function Body() {
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        <a href="/services/websites/">We build websites</a>, so you would expect us to say “hire someone”. The honest
-        version: for a simple site and a
-        willing owner, a builder is the better deal, and this article tells you how to start well. Where we earn our
-        place is the rest: sites that must book, sell or connect, and businesses that would rather spend their hours
-        on the work. The free audit is a good first step either way: send us your web address, or your plan for one,
-        and we’ll tell you plainly which path we’d take and why.
+        For a straightforward site and an owner with time to spend on it, a site builder can be a good choice. Our{" "}
+        <a href={PAGES.service("websites")}>website work</a> suits businesses that need a more considered design, connected
+        systems or someone to carry the build. Send us your current site or your plans for the free audit. We’ll
+        explain which path we would take and why.
       </p>
     </>
   );

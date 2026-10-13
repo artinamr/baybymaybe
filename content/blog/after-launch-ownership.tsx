@@ -1,3 +1,4 @@
+import { PAGES } from "@/lib/content";
 import { H2, Callout, Check, Compare, Figure, Steps, Cite } from "@/components/blog/Prose";
 import { Layers } from "@/components/blog/Diagrams";
 import { Term } from "@/components/blog/Term";
@@ -17,10 +18,9 @@ export default function Body() {
   return (
     <>
       <p>
-        Launch day is the day a website starts working for you. It is also the day the questions start that nobody asked
-        during the build. Who renews the domain? Where are the backups? Who do you call when the form stops sending? Can
-        you move it if you want to? The answers are easy to set up at launch and painful to discover later. This is what
-        to have in place.
+        Before launch, confirm who controls the domain, the hosting, the content and the code. Your team should have
+        access to the accounts and know who handles renewals, backups and faults. A clear handover makes those
+        responsibilities visible while the people who built the site are still there to explain them.
       </p>
 
       <H2 id="owning">What owning your website really means</H2>
@@ -248,10 +248,10 @@ export default function Body() {
       </ul>
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        Every Nerodyn project ends with the domain, the code, the content and every account in your name, and plain
-        notes on how it all works; keeping it that way afterwards is part of our{" "}
-        <a href="/services/websites/">website care</a>. If you’re not sure what you own today, the free audit is the
-        place to find out: one afternoon, a list of every account, and the fix for whatever is wrong first.
+        We hand over the project’s code and content with access to the accounts and notes on how they work. Ongoing
+        care is set out in our <a href={PAGES.service("websites")}>website service</a>. If you’re unsure who controls your
+        current site, bring the records you have to the free audit. We’ll help identify the gaps and what to ask
+        your provider for.
       </p>
     </>
   );

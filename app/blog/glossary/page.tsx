@@ -55,8 +55,8 @@ export default function Glossary() {
           <em>in plain English.</em>
         </h1>
         <p className="sp-lede" data-rv>
-          The words that come up when you plan a website, a platform or automation, each explained in a sentence or two.
-          Where New Zealand’s rules apply, they’re here too, with the source.
+          Look up a term from a quote, a meeting or an article. Each explanation is short, with links to the advice
+          behind it and New Zealand’s rules where they apply.
         </p>
       </section>
 
@@ -147,8 +147,8 @@ export default function Glossary() {
       </div>
 
       <Closing
-        title="Rather we explained it on your own site?"
-        line="Start with the free audit: what is working, what is costing you enquiries, and what we would build instead, in plain words, within two days."
+        title="Let’s look at your website."
+        line="Send us the link for a free audit. We’ll reply within two days with what we would fix first."
         more={{ label: "Back to the blog", href: PAGES.blog }}
       />
     </Page>

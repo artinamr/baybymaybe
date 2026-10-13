@@ -44,7 +44,7 @@ export const SITE_PROJECTS: Project[] = [
     coverTall: `${W}/butter-days-tall.webp`,
     coverAlt: "The Butter Days home page: the name set large in a warm serif, a photograph of croissants in an arch, and the opening facts.",
     context: {
-      lede: "A good bakery sells out by eleven and lives on word of mouth. Its website has three jobs: show what’s in the cabinet, make the big orders (a birthday cake, a dessert table, a box for the office) easy to ask for, and get people through the door while it’s open. A PDF menu and a phone number do none of them well.",
+      lede: "The brief was a website for a fictional neighbourhood bakery in Kelburn. People should be able to check the menu and opening hours quickly. Larger orders, from birthday cakes to office pastry boxes, should arrive with enough detail for the bakery to give a useful reply.",
       audience:
         "Neighbours deciding where to get coffee, people planning a birthday or a wedding, and visitors looking for somewhere good near the cable car. Most of them on a phone.",
     },
@@ -78,7 +78,7 @@ export const SITE_PROJECTS: Project[] = [
       "A menu people can read on a phone, link to and find in search",
       "Enquiry tools that gather what a business needs to reply with a quote",
       "Opening hours that are right whenever someone looks",
-      "An identity that belongs to one shop, not a theme",
+      "A visual identity made for this bakery",
     ],
     limits: [
       "Butter Days is fictional: the people, prices, address and phone number are samples.",
@@ -193,9 +193,9 @@ export const SITE_PROJECTS: Project[] = [
     coverTall: `${W}/blackridge-tall.webp`,
     coverAlt: "The Blackridge home page: the studio’s name in large pale capitals over a modern house lit at dusk.",
     context: {
-      lede: "An architecture practice is judged on its buildings, and most future clients meet those buildings on a screen first. The site has to show each project the way the studio would walk you round it (the site, the idea, the materials, the rooms), explain how the studio works, and start a conversation with the few clients a small practice can take each year.",
+      lede: "The brief was a website for a fictional Auckland architecture studio. Each project needed room for the site, the idea, the materials and the spaces. The website also needed to explain how the studio works and help a prospective client describe what they want to build.",
       audience:
-        "People planning a house, a guesthouse or a small commercial building, and the people advising them. They read slowly, often on a large screen, and they notice details.",
+        "People planning a house, a guesthouse or a small commercial building, and the advisers helping them choose an architect.",
     },
     scope: [
       "Thirteen pages: projects, studio, approach, journal, contact and credits",
@@ -216,16 +216,16 @@ export const SITE_PROJECTS: Project[] = [
       },
       {
         title: "A study you can take apart",
-        body: "The home page’s pavilion study shows a building the way architects present a scheme: the site, the structure lifted apart, and the building in low sun. It explains how the studio thinks, rather than decorating the page.",
+        body: "The home page’s pavilion study presents the site, the structure lifted apart, and the building in low sun. Each view explains a different part of the design.",
       },
       {
-        title: "Nothing from anywhere else",
-        body: "Fonts and photographs are served by the site itself. It makes no requests to other servers, sets no cookies and does no tracking, which keeps it fast and keeps visitors’ browsing their own.",
+        title: "A self-contained website",
+        body: "Fonts and photographs are served by the site itself. This version makes no requests to other servers and uses no cookies or tracking.",
       },
     ],
     demonstrates: [
       "A way to present projects that grows with the practice",
-      "An interactive study that explains an idea, not decoration",
+      "An interactive study that explains the site, structure and light",
       "Project sheets that print properly from the same pages",
       "A fast, private site: no third-party requests and no cookies",
     ],
@@ -241,7 +241,7 @@ export const SITE_PROJECTS: Project[] = [
       place: "Eden Terrace, Auckland",
       home: shot("blackridge", "home", 2400, 1500, "The Blackridge home page on a desktop."),
       jobs: [
-        "Tell each project as a walk round the building, not a slideshow",
+        "Present each project as a walk through the building",
         "Show how the studio thinks before anyone calls",
         "Invite an enquiry that starts with the site",
       ],
@@ -341,7 +341,7 @@ export const SITE_PROJECTS: Project[] = [
     coverTall: `${W}/outbound-tall.webp`,
     coverAlt: "The Outbound home page: bold condensed capitals over a mountain sea of cloud at dawn, with an acid-yellow button.",
     context: {
-      lede: "Adventure trips sell on feeling and are booked on facts. People want to picture themselves on the ridge, then they want to know how hard it is, what to bring, what happens if the weather turns, and what it costs. If the facts are buried in a PDF, the feeling leaves with them.",
+      lede: "For this fictional adventure company, the landscape is the invitation. The practical details need to follow: difficulty, kit, weather plans and cost. We set a brief that puts those answers on each trip page and helps a visitor choose a route that suits them.",
       audience: "Friends and couples planning a weekend away, some new to the outdoors, usually comparing trips on a phone.",
     },
     scope: [
@@ -367,7 +367,7 @@ export const SITE_PROJECTS: Project[] = [
       },
       {
         title: "Straight about the weather",
-        body: "Every trip says when it runs, how and when the go or no-go call is made, and what happens if it is called off. That is the question that decides most bookings.",
+        body: "Each sample trip explains its season, how the go or no-go call is made and what happens if it is called off. Those details sit on the trip page, where someone choosing a date can find them.",
       },
     ],
     demonstrates: [

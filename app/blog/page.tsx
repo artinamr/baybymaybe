@@ -53,11 +53,11 @@ export default function Blog() {
 
       <section className="sp-hero bl-hero">
         <Kicker>Blog</Kicker>
-        <Title lines={["Questions owners ask,", "answered properly."]} />
+        <Title lines={["Know what you’re", "saying yes to."]} />
         <div className="bl-hero-row">
           <p className="sp-lede" data-rv>
-            Plain answers for New Zealand businesses about websites, platforms and AI automation. The answer comes first, the
-            facts are checked against the source, and you can decide for yourself, whether or not you ever work with us.
+            Work out what your website needs, what a quote should cover, and where AI can help with the daily work.
+            Written in Auckland, with practical checks and sources you can read for yourself.
           </p>
           <div className="bl-stats" data-rv>
             <dl>
@@ -85,7 +85,7 @@ export default function Blog() {
       {situations.length ? (
         <section className="sp-block bl-start" aria-labelledby="bl-start-h">
           <header className="bl-start-head">
-            <Kicker>Start where you are</Kicker>
+            <Kicker>A place to start</Kicker>
             <h2 id="bl-start-h" className="sp-h2" data-rv>
               What are you deciding?
             </h2>
@@ -98,7 +98,7 @@ export default function Blog() {
               title: a.title,
               short: a.short,
               minutes: a.minutes,
-              cover: { src: a.cover.src, srcSet: a.cover.srcSet, width: a.cover.width, height: a.cover.height },
+              cover: { src: a.cover.src, srcSet: a.cover.srcSet, width: a.cover.width, height: a.cover.height, position: a.cover.position },
             }))}
           />
         </section>
@@ -108,7 +108,7 @@ export default function Blog() {
         <header className="bl-all-head">
           <Kicker>Every article</Kicker>
           <h2 id="bl-all-h" className="sp-h2" data-rv>
-            Newest first.
+            Read up before you commit.
           </h2>
         </header>
         <BlogIndex
@@ -119,7 +119,7 @@ export default function Blog() {
         >
           <div className="bl-grid">
             {PUBLISHED.map((a, i) => (
-              <ArticleCard key={a.slug} a={a} delay={(i % 3) * 90} />
+              <ArticleCard key={a.slug} a={a} featured={i === 0} delay={(i % 2) * 90} sizes={i === 0 ? "(min-width: 900px) 48vw, 92vw" : "(min-width: 700px) 42vw, 92vw"} />
             ))}
           </div>
         </BlogIndex>
@@ -129,11 +129,11 @@ export default function Blog() {
         <header className="split-head">
           <Kicker>The toolkit</Kicker>
           <h2 id="bl-kit-h" className="sp-h2" data-rv>
-            Checklists and tools you can use today.
+            Take something useful to the meeting.
           </h2>
           <p className="sp-lede bl-kit-note" data-rv>
-            Each sits inside its article, with the reasoning around it. Every article prints cleanly, or saves as a PDF, to
-            take into a meeting.
+            Compare quotes, check a handover or map a connection between your tools. These sections open straight to
+            the practical part. Print the article or save it as a PDF when you need a copy.
           </p>
         </header>
         <ul className="bl-kit-list">
@@ -179,7 +179,7 @@ export default function Blog() {
         <div className="bl-pair-card" data-rv style={{ transitionDelay: "90ms" }}>
           <p className="bl-pair-k">How we write</p>
           <h2 className="bl-pair-h">
-            <a href={PAGES.standards}>Checked, dated, and corrected in the open.</a>
+            <a href={PAGES.standards}>Advice you can check.</a>
           </h2>
           <ul className="bl-pair-list">
             <li>Every fact checked against a primary source, with the date</li>
@@ -199,8 +199,8 @@ export default function Blog() {
         </h2>
         <div className="bl-ask-side" data-rv>
           <p>
-            Send it to us. We’ll reply, and if the answer would help other owners too, we’ll write it up here, without your
-            name.
+            Send it through. We’ll reply. If the answer would help other business owners, we may turn it into an article
+            without using your name.
           </p>
           <div className="bl-ask-actions">
             <a className="ghost" href={ASK}>
@@ -215,8 +215,8 @@ export default function Blog() {
       </section>
 
       <Closing
-        title="Rather ask about your own?"
-        line="Start with the free audit: a straight answer on what you have, within two days."
+        title="Let’s look at your website."
+        line="Send us the link for a free audit. We’ll reply within two days with what we would fix first."
         more={{ label: "See the services", href: PAGES.services }}
       />
     </Page>

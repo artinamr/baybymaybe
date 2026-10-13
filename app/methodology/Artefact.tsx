@@ -31,18 +31,18 @@ function Card({ kind, title, children, foot }: { kind: string; title: string; ch
 export function Artefact({ i }: { i: number }) {
   if (i === 0)
     return (
-      <Card kind="the audit" title="Your website, the way your customers meet it" foot="Within two days of the first call. Free, and yours to keep.">
+      <Card kind="the audit" title="A practical view of what needs work" foot="Within two days of the first call. Free, and yours to keep.">
         <dl className="ma-rows">
           <div>
             <dt>Working</dt>
             <dd>What to keep: the pages and words that already bring people in.</dd>
           </div>
           <div>
-            <dt>Costing you</dt>
-            <dd>What loses enquiries: slow pages, buried contact details, dead ends on a phone.</dd>
+            <dt>Needs attention</dt>
+            <dd>Slow pages, buried contact details and tasks that stop halfway through.</dd>
           </div>
           <div>
-            <dt>We’d build</dt>
+            <dt>Next steps</dt>
             <dd>What we would change, in order, and roughly how long it would take.</dd>
           </div>
         </dl>
@@ -50,7 +50,7 @@ export function Artefact({ i }: { i: number }) {
     );
   if (i === 1)
     return (
-      <Card kind="the scope" title="One document, signed before anything is built">
+      <Card kind="the scope" title="The scope, price and timetable in writing">
         <dl className="ma-rows ma-rows-tight">
           <div>
             <dt>Pages and screens</dt>
@@ -62,7 +62,7 @@ export function Artefact({ i }: { i: number }) {
           </div>
           <div>
             <dt>Connects to</dt>
-            <dd>Your calendar, CRM, payments or email</dd>
+            <dd>Your calendar, customer records, payments or email</dd>
           </div>
           <div>
             <dt>From you</dt>
@@ -89,7 +89,7 @@ export function Artefact({ i }: { i: number }) {
     );
   if (i === 2)
     return (
-      <Card kind="the prototype" title="Every page, clickable, with your real words" foot="A page from Butter Days, one of our concept websites. A prototype looks and clicks like the finished site.">
+      <Card kind="the prototype" title="A design you can click through" foot="An example from Butter Days, a studio concept. Your prototype uses your own content and shows the main tasks before the build.">
         <div className="ma-browser">
           <div className="dev-bar" aria-hidden>
             <span className="dev-dots">
@@ -106,14 +106,14 @@ export function Artefact({ i }: { i: number }) {
     );
   if (i === 3)
     return (
-      <Card kind="the review link" title="The real thing, to try before it launches">
+      <Card kind="the review link" title="A working build for your team to try">
         <p className="ma-url">
           <span className="ma-lock" aria-hidden /> review link, private to you
         </p>
         <ul className="ma-checks">
           {[
             "Real phones, tablets and computers",
-            "Accessibility, checked against WCAG at level AA",
+            "Accessibility: keyboard, focus, labels and contrast",
             "Speed on a slow phone connection",
             "Every form, link and redirect",
             "Search basics: titles, descriptions, sitemap",
@@ -127,7 +127,7 @@ export function Artefact({ i }: { i: number }) {
       </Card>
     );
   return (
-    <Card kind="the keys" title="Everything handed over, in your name">
+    <Card kind="the handover" title="The access and notes to run it">
       <ul className="ma-keys">
         {["The domain", "The hosting", "The code", "The editor’s logins", "Analytics and search tools"].map((x) => (
           <li key={x}>

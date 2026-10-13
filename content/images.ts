@@ -100,31 +100,21 @@ const iso = (title: string, author: string, authorSlug: string, pageSlug: string
   source: "ISO Republic",
 });
 
-const LIGHTHOUSE = unsplash("California lighthouse", "DesignCue", "designcue", "California_lighthouse_(Unsplash).jpg", "11 June 2016");
-const OCULUS = unsplash(
-  "Commuters in terminal station",
-  "Luca Bravo",
-  "lucabravo",
-  "Commuters_in_terminal_station_(Unsplash).jpg",
-  "31 May 2017"
-);
-const LAPTOP = iso("Laptop Close up Computer", "Birch Landing Home", "birch-landing-home", "laptop-close-up-computer");
-const CLEANROOM: CreditIn = {
-  title: "Reinraum BBS Automation Blaichach",
-  author: "Clemenspool",
-  authorUrl: "https://commons.wikimedia.org/wiki/User:Clemenspool",
-  page: "https://commons.wikimedia.org/wiki/File:Reinraum_BBS_Automation_Blaichach.jpg",
-  source: "Wikimedia Commons",
+const FOLDERS: CreditIn = {
+  ...unsplash("Folder stack", "Beatriz Pérez Moya", "beatriz_perez", "Folder_stack_(Unsplash).jpg", "17 July 2016"),
+  checked: "2026-10-12",
 };
+const WEBSITE_DESK: CreditIn = { ...iso("Keyboard Desk", "Birch Landing Home", "birch-landing-home", "keyboard-desk"), checked: "2026-10-12" };
+const MAIL: CreditIn = { ...iso("Envelope Invites", "Photo AC", "photo-ac", "envelope-invites"), checked: "2026-10-12", org: true };
 
 export const PHOTOS = {
   // The blog's covers (24:11).
   "cover-redesign": cover("redesign-or-improve", "A building under construction, wrapped in scaffolding, with a crane’s jib crossing the blue sky above it.", iso("Construction Cranes", "U Leone", "u-leone", "construction-cranes-2")),
   "cover-quote": cover(
     "website-quote-checklist",
-    "A hand ticking off a handwritten checklist in a squared notebook.",
-    unsplash("Plan a lifetime adventure", "Glenn Carstens-Peters", "glenncarstenspeters", "Plan_a_lifetime_adventure_(Unsplash).jpg", "15 January 2017"),
-    "72% 50%"
+    "A blank checklist beside a white keyboard and mouse on a pale desk.",
+    { ...iso("Computer Office Keyboard", "Lenharth Systems", "lenharth-systems", "computer-office-keyboard-keys"), checked: "2026-10-12", org: true },
+    "68% 50%"
   ),
   "cover-portal": cover(
     "when-you-need-a-client-portal",
@@ -152,20 +142,21 @@ export const PHOTOS = {
   ),
   "cover-seo": cover(
     "what-is-seo",
-    "A weathered wooden trail sign burned with the words Humphreys Peak, lit by the setting sun.",
+    "Rows of wooden library catalogue drawers with printed alphabetical index labels.",
     {
-      ...unsplash("Humphreys Peak signpost", "Todd Diemer", "todd_diemer", "Humphreys_Peak_signpost_(Unsplash).jpg", "30 December 2016"),
-      checked: "2026-10-07",
+      ...unsplash("Boston Public Library, Boston, United States", "Sanwal Deen", "sanwaldeen", "Boston_Public_Library,_Boston,_United_States_(Unsplash).jpg", "17 May 2016"),
+      checked: "2026-10-12",
     },
-    "50% 45%"
+    "50% 50%"
   ),
   "cover-gbp": cover(
     "google-business-profile",
-    "A pale world map studded with coloured pins, each one a place somebody chose.",
+    "A green OPEN sign hanging on a dark wooden shop door.",
     {
-      ...unsplash("Map with colorful pins", "delfi de la Rua", "delfidelarua7", "Map_with_colorful_pins_(Unsplash).jpg", "20 October 2016"),
-      checked: "2026-10-07",
-    }
+      ...unsplash("Open", "Tim Mossholder", "timmossholder", "Open_(Unsplash).jpg", "13 December 2016"),
+      checked: "2026-10-12",
+    },
+    "50% 52%"
   ),
   "cover-diy": cover(
     "diy-website-or-hire",
@@ -178,28 +169,29 @@ export const PHOTOS = {
   ),
   "cover-hacked": cover(
     "website-hacked",
-    "A red fire extinguisher on a teal wall, its shadow behind it.",
+    "Red network cables connected to a black patch panel, with empty ports beside them.",
     {
-      title: "Fire Extinguisher",
-      author: "Piotr Chrobot",
-      authorUrl: "https://isorepublic.com/media-author/piotr-chrobot/",
-      page: "https://isorepublic.com/photo/fire-extinguisher/",
+      title: "Server Network",
+      author: "Chris Ciapala",
+      authorUrl: "https://isorepublic.com/media-author/chris-ciapala/",
+      page: "https://isorepublic.com/photo/server-network/",
       source: "ISO Republic",
-      checked: "2026-10-08",
-    }
+      checked: "2026-10-12",
+    },
+    "50% 65%"
   ),
   "cover-chat": cover(
     "website-chat-assistant",
-    "A cream rotary telephone on a plain white desk, its cord curled beside it.",
+    "Matte black headphones with a red lead, resting on a plain white surface.",
     {
-      title: "Rotary dial telephone in Rio de Janeiro, Brazil",
-      author: "Wilfredor",
-      authorUrl: "https://commons.wikimedia.org/wiki/User:Wilfredor",
-      page: "https://commons.wikimedia.org/wiki/File:Rotary_dial_telephone_in_Rio_de_Janeiro,_Brazil.jpg",
-      source: "Wikimedia Commons",
-      checked: "2026-10-08",
+      title: "Headphones Headset",
+      author: "Matthew Henry",
+      authorUrl: "https://stocksnap.io/author/200",
+      page: "https://stocksnap.io/photo/headphones-headset-NV7H1CLTC2",
+      source: "StockSnap",
+      checked: "2026-10-12",
     },
-    "50% 42%"
+    "50% 55%"
   ),
 
   // The methodology: its banner (24:11) and the five stages (4:5).
@@ -213,13 +205,13 @@ export const PHOTOS = {
   ),
   "method-discover": stage(
     "discover",
-    "A brass and steel viewing telescope looking out over a hazy town.",
-    iso("Telescope", "Michael Schwarzenberger", "michael-schwarzenberger", "telescope")
+    "An open blank notebook and a black pen, ready for the first conversation.",
+    { ...iso("Notebook Desk Above", "Artsy Crafty", "artsy-crafty", "notebook-desk-above"), checked: "2026-10-12" }
   ),
   "method-define": stage(
     "define",
-    "A hand holding up a compass against wooded hills.",
-    unsplash("Photograph of a compass being held upright", "Heidi Sandstrom", "sandstromfilm", "Photograph_of_a_compass_being_held_upright.jpg", "6 August 2016")
+    "Page structures sketched in a notebook, with blank orange tabs marking the sections.",
+    { ...iso("Sketch Wireframe Notes", "Jeffrey Betts", "jeffrey-betts", "sketch-wireframe-notes-2"), checked: "2026-10-12" }
   ),
   "method-design": stage(
     "design",
@@ -228,25 +220,25 @@ export const PHOTOS = {
   ),
   "method-build": stage(
     "build",
-    "A spiral staircase seen from above, its steps turning down into the centre.",
-    unsplash("Infinite spiral stairs", "Ludde Lorentz", "luddelorentz", "Infinite_spiral_stairs_(Unsplash).jpg", "25 November 2015")
+    "A close view of black keyboard keys and their aluminium edges.",
+    { ...iso("Laptop Keyboard Buttons", "One Idea LLC", "one-idea-llc", "laptop-keyboard-buttons"), checked: "2026-10-12", org: true }
   ),
-  "method-live": stage("live", "A white lighthouse on a rocky headland above the surf.", LIGHTHOUSE),
+  "method-live": stage("live", "A wireless mouse beside a closed silver laptop on a wooden desk.", { ...iso("Mouse Laptop and Desk", "50Fish", "50fish", "mouse-laptop-and-desk"), checked: "2026-10-12" }),
 
   // The services: banners (24:11) and their cards (4:5).
-  "svc-websites": photo("services/websites-wide", 2400, 1100, "The keyboard and trackpad of an open laptop resting on a soft white blanket.", LAPTOP, "56% 50%"),
-  "svc-websites-card": photo("services/websites", 1200, 1500, "An open laptop’s keyboard on a soft white blanket.", LAPTOP),
-  "svc-platforms": photo("services/platforms-wide", 2400, 1100, "The white ribbed hall of a transport hub, people crossing its floor far below.", OCULUS),
-  "svc-platforms-card": photo("services/platforms", 1200, 1500, "White ribs rising above the busy floor of a transport hub.", OCULUS),
+  "svc-websites": photo("services/websites-wide", 2400, 1100, "A white keyboard on a wooden work desk, photographed from above.", WEBSITE_DESK, "50% 42%"),
+  "svc-websites-card": photo("services/websites", 1200, 1500, "White keyboard keys on a warm wooden desk.", WEBSITE_DESK),
+  "svc-platforms": photo("services/platforms-wide", 2400, 1100, "A neatly organised stack of white folders, each holding a separate set of records.", FOLDERS, "76% 50%"),
+  "svc-platforms-card": photo("services/platforms", 1200, 1500, "White folders stacked in an orderly row.", FOLDERS),
   "svc-ai": photo(
     "services/ai-automation-wide",
     2400,
     1100,
-    "A white industrial robot arm in a clean room, a technician in protective clothing checking a tablet beside it.",
-    CLEANROOM,
-    "62% 50%"
+    "Blank coral, yellow and pale green envelopes arranged on a white surface.",
+    MAIL,
+    "50% 50%"
   ),
-  "svc-ai-card": photo("services/ai-automation", 1200, 1500, "A white industrial robot arm in a clean room.", CLEANROOM),
+  "svc-ai-card": photo("services/ai-automation", 1200, 1500, "Overlapping blank envelopes in coral, yellow and pale green.", MAIL),
 } satisfies Record<string, Photo>;
 
 export type PhotoKey = keyof typeof PHOTOS;
