@@ -151,8 +151,9 @@ export const KEYS: Key[] = [
   { P: 25.4, eye: fix(-40.5, 10.5, 16.0), at: fix(-43.5, 1.0, 6.0), fov: 42, ppx: 0.6 },
   ...hold(25.64, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.04),
   // NEW YOU: across the town at roof height; the office at six; the lid, the lamp; out the door; the van away.
-  { P: 25.76, eye: fix(-28, 13, -10), at: fix(-24, 3, 14), fov: 44, ppx: 0.56 },
-  { P: 25.86, eye: fix(8, 18, 6), at: fix(34, 4, -8), fov: 44, ppx: 0.56 },
+  // (Up over the new route, not through it: its line runs at 12 to 19 m, its labels up to 23.)
+  { P: 25.76, eye: fix(-28, 34, -12), at: fix(-6, 6, 4), fov: 44, ppx: 0.56 },
+  { P: 25.87, eye: fix(14, 30, 12), at: fix(38, 4, -8), fov: 44, ppx: 0.56 },
   { P: 25.98, eye: S(-3.3, 2.0, 10.4), at: S(-3.9, 1.4, 3.8), fov: 36, ppx: 0.6 },
   // In through the glass between two mullions and round by the side wall (the day's card hangs over the desk).
   { P: 26.08, eye: S(-5.82, 1.9, 5.55), at: S(-4.6, 1.5, 2.6), fov: 46, ppx: 0.56 },

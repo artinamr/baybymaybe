@@ -160,7 +160,9 @@ export class System {
       const s = (0.4 + 0.6 * e) * this.labelScale;
       card.group.scale.setScalar(s);
       const on = lit[i] ?? 0;
-      card.show(Math.min(1, kk * 3) * show, 1.04 + on * 0.1);
+      // A label the camera passes close to steps aside (fades), rather than filling the frame.
+      const near = THREE.MathUtils.smoothstep(camera.position.distanceTo(card.group.position), 6, 11);
+      card.show(Math.min(1, kk * 3) * show * near, 1.04 + on * 0.1);
       // A flash as it locks, and a glow while it works.
       const lock = kk >= 1 ? Math.exp(-Math.max(0, (build - (t0 + 2 / (NODES.length + 1))) * 30)) : 0;
       const fl = this.flash[i];

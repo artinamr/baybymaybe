@@ -115,14 +115,16 @@ export class Crowd {
       const leave = d >= 0 ? THREE.MathUtils.clamp((dropK - d * 0.85) / 0.15, 0, 1) : 0;
       if (leave > 0.5) lost++;
       const loaded = fresh ? Math.min(1, t / 0.35) : t > 5.6 ? Math.min(1, (t - 5.6) / 0.3) : 0;
-      const on = (1 - leave) * show;
+      // Coming and going with the chapter, they grow out of the roofs and shrink back (the red is for giving up only).
+      const on = 1 - leave;
+      const grow = show * show * (3 - 2 * show);
       this.state.setXYZW(i, leave > 0 ? loaded * (1 - leave) : loaded, Math.max(0.0, on), ph.seed, fresh ? 1 : 0);
       const p = ph.house.top;
       toCam.set(camera.position.x - p.x, 0, camera.position.z - p.z).normalize();
       const yaw = Math.atan2(toCam.x, toCam.z);
       this.q.setFromEuler(new THREE.Euler(-0.12 - leave * 1.35, yaw, 0, "YXZ"));
       const bob = Math.sin(time * 1.3 + ph.seed * 20) * 0.08;
-      const s = (0.55 + 0.45 * show) * (1 - leave * 0.35);
+      const s = grow * (1 - leave * 0.35);
       this.m.compose(new THREE.Vector3(p.x, p.y + 1.2 + bob - leave * 3.2 + (1 - show) * 1.5, p.z), this.q, new THREE.Vector3(s, s, s));
       this.mesh.setMatrixAt(i, this.m);
     });
