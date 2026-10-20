@@ -43,7 +43,7 @@ function Director() {
   // The render scale, adapted to the machine: frame gaps are watched in
   // windows of a second and a half; slow (a median past 19 ms) steps the
   // scale down, fast for a while steps it back up toward the ceiling.
-  const adapt = useRef({ scale: 0, ceiling: 0, gaps: [] as number[], last: 0, up: 0 });
+  const adapt = useRef({ scale: 0, ceiling: 0, gaps: [] as number[], last: 0, up: 0, windows: 0 });
   const rig = useRef<Rig | null>(null);
   const pointer = useRef({ x: 0, y: 0, cx: 0, cy: 0, has: false, moved: 0 });
   const frames = useRef(0);
@@ -231,11 +231,13 @@ function Director() {
         const sorted = a.gaps.slice().sort((x, y) => x - y);
         const median = sorted[Math.floor(sorted.length / 2)];
         a.gaps.length = 0;
+        // (The first windows are the start's own hitches: programs, the settle.)
+        if (++a.windows <= 2) return;
         if (median > 19 && a.scale > 0.7) {
           a.scale = Math.max(0.7, +(a.scale * 0.85).toFixed(2));
           a.up = 0;
           setDpr(a.scale);
-        } else if (median < 12.5 && a.scale < a.ceiling && ++a.up >= 4) {
+        } else if (median < 14 && a.scale < a.ceiling && ++a.up >= 4) {
           a.scale = Math.min(a.ceiling, +(a.scale * 1.1).toFixed(2));
           a.up = 0;
           setDpr(a.scale);

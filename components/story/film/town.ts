@@ -856,8 +856,11 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
     if (Math.abs(k - lampK) < 0.005) return;
     lampK = k;
     gm.u.uLampK.value = k;
+    // Each lamp comes on at its own moment through the dusk (the pools under them follow the whole).
     lamps.forEach((l, i) => {
-      heads[i].mesh.setColorAt(heads[i].slot, new THREE.Color(1.0, 0.78, 0.5).multiplyScalar(6 * k + 0.02));
+      const own = 0.08 + (((i * 7919) % 97) / 97) * 0.84;
+      const on = THREE.MathUtils.smoothstep(k, own - 0.07, own + 0.07);
+      heads[i].mesh.setColorAt(heads[i].slot, new THREE.Color(1.0, 0.78, 0.5).multiplyScalar(6 * on + 0.02));
       if (heads[i].mesh.instanceColor) heads[i].mesh.instanceColor.needsUpdate = true;
     });
   };

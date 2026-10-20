@@ -21,7 +21,7 @@ export function clockText(hours: number) {
 const CLOCK_ON: [number, number][] = [
   [4.62, 7.36],
   [12.84, 15.42],
-  [16.24, 16.72],
+  [16.24, 16.82],
   [19.84, 21.5],
   [25.84, 27.3],
 ];
@@ -165,7 +165,7 @@ export class Dom {
     // The counter: the film's own customers.
     const sim = w.sim;
     const lost = sim.lost.website + sim.lost.inbox + sim.lost.admin + sim.lost.followup;
-    const mode = P >= 16.66 ? "kept" : "lost";
+    const mode = P >= 16.76 ? "kept" : "lost";
     const show = (P > 3.16 && P < 15.2) || (P > 18.56 && P < 27.8);
     const full = (P > 13.9 && P < 15.2) || (P > 26.9 && P < 27.8);
     this.set("cmode", mode, () => this.count?.setAttribute("data-mode", mode));

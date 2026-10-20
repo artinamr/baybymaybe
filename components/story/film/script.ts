@@ -66,8 +66,8 @@ export const B = {
   fall: [15.62, 16.12] as W,
   black: [16.0, 16.34] as W,
   /** THE REWIND: the whole old half runs backward under a camera high over the town (world.ts). */
-  rewind: [16.26, 16.66] as W,
-  assemble: [16.66, 17.44] as W,
+  rewind: [16.26, 16.76] as W,
+  assemble: [16.76, 17.44] as W,
   // NEW WEBSITE.
   nLift: [18.04, 18.2] as W,
   nTap: 19.16,
@@ -167,7 +167,7 @@ const CLOCK: [number, number][] = [
   [16.26, 380 * D + 23 + 48 / 60],
   // The rewind (16.26 to 16.66) runs the hours backward itself (world.ts); the clock lands on the first evening.
   [16.26, 19 + 37 / 60],
-  [16.66, 19 + 37 / 60],
+  [16.76, 19 + 37 / 60],
   [18.0, 19 + 38 / 60],
   [19.6, 19 + 40 / 60],
   [20.0, 19 + 41 / 60],

@@ -92,7 +92,7 @@ export function dwellAt(P: number): number {
 export function paceAt(P: number): number {
   return P > 5.0 && P < 5.7 ? 6.2
     : P > 5.7 && P < 7.0 ? 7.0
-    : P > 16.2 && P < 16.7 ? 11.0
+    : P > 16.2 && P < 16.8 ? 11.0
     : P > 15.0 && P < 17.4 ? 7.4
     : P > 9.0 && P < 9.6 ? 6.4
     : P > 11.0 && P < 12.0 ? 6.4
