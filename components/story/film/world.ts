@@ -6,13 +6,14 @@ import { buildHome, buildShop, inFrame, type Home, type Shop } from "./places";
 import { Figure } from "./figure";
 import { apply, blend, carryPhone, deskType, makePhone, newPose, placePhone, sofaPhone, stand, standPhone, walk, pathLength, copyPose, type Pose } from "./people";
 import { Card, Screen, Strips, carry, uiScale } from "./cards";
+import { MIST, WIND, hookMist } from "./mats";
 import { Crowd } from "./crowd";
 import { Envelope, type Flight } from "./mail";
 import { NODES, System } from "./system";
 import { ContactShade } from "./shade";
 import { BACK_STEP, cameraSmooth, phoneAdjust, phoneBackBase, phoneBackTable, type BackBase, type CamOut, type Ctx as CamCtx } from "./camera";
 import { B, bump, clockAt, inW, isNew, k, ke, lapseHours, weathered, type W } from "./script";
-import { clamp01, lerp, range, smooth, smoother } from "./ease";
+import { clamp01, lerp, range, settle, smooth, smoother } from "./ease";
 import { FILM_LEN } from "../timeline";
 import * as UI from "./ui";
 import type { Quality } from "../store";
@@ -118,6 +119,11 @@ export class World {
   private rival: THREE.Group;
   private ourVan: THREE.Group;
   private phoneLight: THREE.PointLight;
+  private mailLight: THREE.PointLight;
+  private pulseLight: THREE.PointLight;
+  /** The last impact (the paper hitting the floor, the landing after the rewind): its moment. */
+  private impactT = -1e9;
+  private impactK = 0;
   private shadeG = new ContactShade(24, 0);
   private cam: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0 };
   private camCtx: CamCtx;
@@ -154,6 +160,10 @@ export class World {
     this.scene.add(this.sam.root, this.owner.root, this.samPhone.group, this.shadeG.mesh);
     this.phoneLight = new THREE.PointLight(0xcfe0ff, 0, 1.6, 1.5);
     this.scene.add(this.phoneLight);
+    // The enquiry's own light: it lights the roofs it flies over, and the town under the route's pulse.
+    this.mailLight = new THREE.PointLight(0xffc18a, 0, 22, 1.6);
+    this.pulseLight = new THREE.PointLight(0xffd2a8, 0, 30, 1.5);
+    this.scene.add(this.mailLight, this.pulseLight);
 
     // The other customers, and the new route over the town.
     this.crowd = new Crowd(this.scene, this.town.houses, V(-30, 0, 8));
@@ -204,6 +214,12 @@ export class World {
     });
     this.scene.add(this.rival);
 
+    // The mist's uniforms, bound into every material the world drew (before any compiles).
+    this.scene.traverse((o) => {
+      const m = (o as THREE.Mesh).material;
+      if (!m) return;
+      for (const x of Array.isArray(m) ? m : [m]) hookMist(x);
+    });
     this.camCtx = {
       flight: (P) => this.flightNear(P),
       van: (P) => this.vanAt(P).p,
@@ -396,7 +412,32 @@ export class World {
       this.cam.dof = 0;
     }
     const br = this.reduced ? 0 : 1;
+    WIND.value = t * br;
+    // Mist on the ground: the mornings (thickest about half past six), a breath at dusk and in the night; none in a room.
+    {
+      const hod = ((hours % 24) + 24) % 24;
+      const dawn = bump(hod, 5.0, 8.8, 1.3);
+      const dusk = bump(hod, 18.9, 21.4, 0.9);
+      const night = hod > 21.4 || hod < 5.0 ? 1 : 0;
+      const e = this.cam.eye;
+      const inRoom = (e.x > -49.2 && e.x < -38.8 && e.z > 10.8 && e.z < 20.2 && e.y < 3.3) || (e.x > 36.8 && e.x < 51.2 && e.z > -23.2 && e.z < -10.8 && e.y < 4.6);
+      MIST.value = (0.03 * dawn + 0.009 * dusk + 0.006 * night) * (inRoom ? 0 : 1);
+    }
+    // An impact shakes the camera: the paper hitting the floor; the landing after the rewind.
+    if (this.prevP < B.fall[0] + 0.03 && P >= B.fall[0] + 0.03) {
+      this.impactT = t;
+      this.impactK = 1;
+    } else if (this.prevP < B.rewind[1] && P >= B.rewind[1]) {
+      this.impactT = t;
+      this.impactK = 0.4;
+    }
     cam.position.copy(this.cam.eye);
+    const since = t - this.impactT;
+    if (since >= 0 && since < 0.9 && br > 0) {
+      const d = Math.exp(-since * 5.5) * this.impactK;
+      cam.position.x += Math.sin(since * 150) * 0.022 * d;
+      cam.position.y += Math.sin(since * 123 + 1.3) * 0.03 * d;
+    }
     // A living camera: never quite still. A slow push toward the subject and
     // back (a hair over a percent of its distance, a dozen seconds a cycle),
     // a breath beside it.
@@ -425,9 +466,11 @@ export class World {
     this.town.setLamps(sky.lights > 0.3 ? smooth((sky.lights - 0.3) / 0.3) : 0);
     const glass = new THREE.Color(0.16, 0.19, 0.24).lerp(new THREE.Color(0.03, 0.035, 0.05), sky.night);
     this.town.setGlass(glass, 2.4);
+    // Windows: lit by the hour; and every customer who gave up is a window gone dark.
+    const dropK = nw ? k(Pw, [B.nOver[0] + 0.2, B.nOver[1] - 0.08]) : k(Pw, B.drop);
     for (const h of this.town.houses) {
       const r = ((h.id * 7919) % 101) / 101;
-      this.town.setWindow(h.id, r < sky.lights * 0.82 ? 1 : 0);
+      this.town.setWindow(h.id, r < sky.lights * 0.82 && !this.crowd.gone(h.id, dropK, nw) ? 1 : 0);
     }
 
     this.look(P, sky.night);
@@ -576,6 +619,7 @@ export class World {
     const v = this.vanAt(P);
     this.ourVan.position.copy(v.p);
     this.ourVan.rotation.set(0, v.yaw, 0);
+    this.roll(this.ourVan);
     this.ourVan.visible = !(nw && P >= 25.78 && P < 26.0);
     // The driver's door: open for the owner, shut behind them.
     this.shop.van.door.rotation.y = nw ? 1.2 * smooth(range(P, B.nIn[0] - 0.08, B.nIn[0])) * (1 - smooth(range(P, B.nIn[1] - 0.03, B.nIn[1] + 0.05))) : 0;
@@ -584,6 +628,7 @@ export class World {
     this.rival.visible = rivalK > 0;
     this.rival.position.set(lerp(-12, -44, rivalK), 0, 3.4);
     this.rival.rotation.set(0, -Math.PI / 2, 0);
+    this.roll(this.rival);
   }
 
   /**
@@ -608,6 +653,21 @@ export class World {
     c.lerp(new THREE.Color(1.55, 0.74, 0.3), amber);
     c.lerp(new THREE.Color(0.6, 0.58, 0.5), winter);
     c.lerp(new THREE.Color(0.92, 1.12, 0.78), spring);
+  }
+
+  /** A van's wheels turn with the road it covers, and its body rides on its springs. */
+  private roll(van: THREE.Group) {
+    const ud = van.userData as { last?: THREE.Vector3; odo?: number };
+    const last = (ud.last ??= van.position.clone());
+    const fwd = V(Math.sin(van.rotation.y), 0, Math.cos(van.rotation.y));
+    const d = van.position.clone().sub(last).dot(fwd);
+    last.copy(van.position);
+    if (Math.abs(d) > 3) return; // (a jump of the film, not a drive)
+    ud.odo = (ud.odo ?? 0) + d;
+    for (const c of van.children) {
+      if (c.name === "wheel") c.rotateY(-d / 0.36);
+      else if (c.name === "vanBody") c.position.y = Math.abs(d) > 0.0005 ? Math.sin((ud.odo ?? 0) * 5.3) * 0.012 : 0;
+    }
   }
 
   /** The laptop's lid: 0 shut … 1 open. */
@@ -665,8 +725,8 @@ export class World {
       const u = clamp01((kb - t0) / 0.06);
       if (u <= 0) m.makeScale(0, 0, 0);
       else {
-        // Drops in from above and settles.
-        const fall = (1 - u) * (1 - u) * 1.2;
+        // Drops in from above and settles with a little weight.
+        const fall = (1 - settle(1 - (1 - u) * (1 - u), 0.3)) * 1.2;
         m.copy(d.rest[i]).premultiply(new THREE.Matrix4().makeTranslation(0, fall, 0));
       }
       d.mesh.setMatrixAt(i, m);
@@ -1036,7 +1096,7 @@ export class World {
     // The old enquiry folds into the envelope as it leaves.
     const fold = !nw && P < B.fold[1] + 0.06 ? ke(P, B.fold) : 0;
     if (show && phoneG.visible) {
-      carry(pc.group, dev, air, lift);
+      carry(pc.group, dev, air, settle(lift, 0.35));
       // Turn toward the camera about the vertical as it lifts.
       const camYaw = Math.atan2(this.camera.position.x - pc.group.position.x, this.camera.position.z - pc.group.position.z);
       const cur = new THREE.Euler().setFromQuaternion(pc.group.quaternion, "YXZ");
@@ -1055,7 +1115,7 @@ export class World {
         return;
       }
       const kk = smoother(range(P, at, at + 0.14));
-      carry(card.group, lid, to, kk, 0.15);
+      carry(card.group, lid, to, settle(kk, 0.45), 0.15);
       card.show(Math.min(1, kk * 3), 1.05);
     };
     this.sheetDraw(this.sheetCard.screen, P);
@@ -1091,7 +1151,7 @@ export class World {
       const [x, y, z, yaw, roll] = spots[i];
       const kk = smoother(range(P, B.late[0] + 0.05 + i * 0.05, B.late[0] + 0.2 + i * 0.05));
       const to = { p: S(x, y + Math.sin(t * 0.6 + i) * 0.01, z), q: Q(0, Math.PI + yaw, roll), s: 1 };
-      carry(card.group, { p: to.p.clone().add(V(0, 0.4, 0.6)), q: to.q, s: 0.6 }, to, kk);
+      carry(card.group, { p: to.p.clone().add(V(0, 0.4, 0.6)), q: to.q, s: 0.6 }, to, settle(kk, 0.45));
       card.show(kk, 1.0);
     });
 
@@ -1132,7 +1192,7 @@ export class World {
     if (tk > 0) {
       const n = ke(P, B.nToday) * 5;
       this.todayCard.screen.draw(`today|${n.toFixed(1)}`, (c) => UI.today(c, { n }));
-      carry(this.todayCard.group, lid, slot(-3.9, 1.98, 5.2, 0), smoother(range(P, B.nToday[0], B.nToday[0] + 0.12)));
+      carry(this.todayCard.group, lid, slot(-3.9, 1.98, 5.2, 0), settle(smoother(range(P, B.nToday[0], B.nToday[0] + 0.12)), 0.4));
       this.todayCard.show(tk, 1.05);
     } else this.todayCard.show(0);
   }
@@ -1173,7 +1233,12 @@ export class World {
       // It leaves at the size of the card it was folded from and grows as it climbs.
       const size = (old ? lerp(0.62, 1.6, smooth(range(fl.t, 0, 0.35))) : lerp(0.6, 1.2, smooth(range(fl.t, 0, 0.3)) * (1 - smooth(range(fl.t, 0.75, 1))) + 0.0));
       this.mailA.update(fl.f, fl.t, vis, cam, size);
-    } else this.mailA.update(null, 0, 0, cam);
+      this.mailLight.position.copy(this.mailA.pos);
+      this.mailLight.intensity = 26 * vis;
+    } else {
+      this.mailA.update(null, 0, 0, cam);
+      this.mailLight.intensity = 0;
+    }
     // 3AM: another house's enquiry goes out and its answer comes back; at 7:12pm, another.
     const other = (w: [number, number], house: number, env: Envelope) => {
       if (P < w[0] || P >= w[1]) return false;
@@ -1241,7 +1306,7 @@ export class World {
       let below = 0;
       for (let j = 0; j < i; j++) below += presence(j);
       const arr = smoother(range(P, pa, pa + 0.05));
-      const y = base.y + below * SP + (1 - arr) * 2.4;
+      const y = base.y + below * SP + (1 - settle(arr, 0.3)) * 2.4;
       // Gone cold: it slides out to the side and falls away.
       const leave = range(P, this.coldP[i] + 0.06, this.coldP[i] + 0.2);
       const p = V(base.x + leave * 3.2, y - leave * leave * 5, base.z + leave * 0.6);
@@ -1326,6 +1391,11 @@ export class World {
       return clamp01(bump(P, B.nReview[0], B.nReview[1], 0.05) + bump(P, B.nRemind[0], B.nRemind[1], 0.05));
     });
     sys.update(show, draw, build, pulse, lit, t, this.camera, this.reduced);
+    // The customer's pulse lights the town it passes over.
+    if (pulse >= 0 && show > 0) {
+      sys.at(pulse, this.pulseLight.position);
+      this.pulseLight.intensity = 60 * show;
+    } else this.pulseLight.intensity = 0;
     // Each part's lock is a click.
     if (P > this.prevP && P - this.prevP < 0.3)
       this.lockTimes().forEach((lt, i) => {

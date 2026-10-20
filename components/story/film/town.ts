@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { at, Batch, block, footAO, gableEnd, gableRoof, hipRoof, ridgeOf, rod, ball, hull, turned, ROOF, LEAF } from "./model";
-import { aoTexture, glowMat, groundMat, modelMat, POOLS, type GroundUniforms } from "./mats";
+import { aoTexture, foliageMat, glowMat, groundMat, modelMat, POOLS, type GroundUniforms } from "./mats";
 
 /**
  * THE TOWN: a suburb at the scale of an architect's model. Streets on a
@@ -471,7 +471,7 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   const group = new THREE.Group();
   scene.add(group);
   const white = modelMat(0.84);
-  const foliage = modelMat(0.95, 0.5);
+  const foliage = foliageMat();
   const glass = glowMat();
   const dark = new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: 0.45, metalness: 0.1 });
   const mats: THREE.Material[] = [white, foliage, glass, dark];

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Card, Screen } from "./cards";
+import { settle } from "./ease";
 import { nodeLabel } from "./ui";
 import { halo } from "./mail";
 
@@ -151,7 +152,7 @@ export class System {
     NODES.forEach((n, i) => {
       const t0 = i / (NODES.length + 1);
       const kk = THREE.MathUtils.clamp((build - t0) / (2 / (NODES.length + 1)), 0, 1);
-      const e = 1 - Math.pow(1 - kk, 3);
+      const e = settle(kk, 0.5);
       const card = this.cards[i];
       card.group.position.lerpVectors(this.from[i], n.pos, e);
       card.group.position.y += 2.6;

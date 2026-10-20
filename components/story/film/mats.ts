@@ -51,6 +51,99 @@ reflectedLight.directDiffuse *= mix(1.0, vAO, ${direct.toFixed(2)});`
   return m;
 }
 
+/**
+ * MIST ON THE GROUND. three's fog is one density everywhere; the model's
+ * mornings want a mist that lies low (thick at the lawns, gone at the
+ * roofs). The fog chunks are patched for every material: the vertex keeps
+ * its world height, the fragment adds an extinction that falls off with
+ * height, by the distance looked through. The strength and the height
+ * scale are two uniforms shared by every material the world hooks
+ * (`hookMist`); a material left unhooked reads them as zero.
+ */
+export const MIST = { value: 0 };
+export const MIST_H = { value: 6 };
+if (!THREE.ShaderChunk.fog_fragment.includes("fogMist")) {
+  THREE.ShaderChunk.fog_pars_vertex += `
+#ifdef USE_FOG
+	varying float vFogY;
+#endif`;
+  THREE.ShaderChunk.fog_vertex = `#ifdef USE_FOG
+	vFogDepth = - mvPosition.z;
+	{
+		vec4 fogWorld = vec4( transformed, 1.0 );
+		#ifdef USE_INSTANCING
+			fogWorld = instanceMatrix * fogWorld;
+		#endif
+		vFogY = ( modelMatrix * fogWorld ).y;
+	}
+#endif`;
+  THREE.ShaderChunk.fog_pars_fragment += `
+#ifdef USE_FOG
+	varying float vFogY;
+	uniform float fogMist;
+	uniform float fogMistH;
+#endif`;
+  THREE.ShaderChunk.fog_fragment = `#ifdef USE_FOG
+	#ifdef FOG_EXP2
+		float fogFactor = 1.0 - exp( - fogDensity * fogDensity * vFogDepth * vFogDepth );
+	#else
+		float fogFactor = smoothstep( fogNear, fogFar, vFogDepth );
+	#endif
+	float mist = 1.0 - exp( - fogMist * exp( - max( vFogY, 0.0 ) / max( fogMistH, 0.1 ) ) * vFogDepth );
+	fogFactor = max( fogFactor, mist );
+	gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+#endif`;
+}
+/** Bind the mist's uniforms into a material (once, before it compiles). */
+export function hookMist(m: THREE.Material) {
+  if ((m as { fog?: boolean }).fog === false || (m.userData as { mist?: boolean }).mist) return;
+  (m.userData as { mist?: boolean }).mist = true;
+  const prev = m.onBeforeCompile;
+  m.onBeforeCompile = (sh, r) => {
+    prev.call(m, sh, r);
+    sh.uniforms.fogMist = MIST;
+    sh.uniforms.fogMistH = MIST_H;
+  };
+  const key = m.customProgramCacheKey;
+  m.customProgramCacheKey = () => `${key.call(m)}-mist`;
+}
+
+/** The wind's clock (seconds), set by the world each frame. */
+export const WIND = { value: 0 };
+
+/**
+ * Foliage: the model's card, and a slow wind in it. Every leaf above the
+ * trunk sways on its own phase (the tree's place in the town, its height),
+ * the crown most, a few centimetres, so no outdoor shot is ever still.
+ */
+export function foliageMat() {
+  const m = withAO(new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: 0.95, metalness: 0 }), 0.5);
+  const ao = m.onBeforeCompile;
+  m.onBeforeCompile = (s, r) => {
+    ao(s, r);
+    s.uniforms.uWind = WIND;
+    s.vertexShader = s.vertexShader
+      .replace("#include <common>", "#include <common>\nuniform float uWind;")
+      .replace(
+        "#include <begin_vertex>",
+        `#include <begin_vertex>
+{
+  vec3 seat = vec3(0.0);
+  #ifdef USE_INSTANCING
+  seat = vec3(instanceMatrix[3]);
+  #endif
+  float h = max(0.0, transformed.y - 1.6);
+  float ph = seat.x * 0.21 + seat.z * 0.17;
+  float sway = h * 0.014;
+  transformed.x += (sin(uWind * 0.9 + ph) + 0.5 * sin(uWind * 2.3 + ph * 1.7 + transformed.y)) * sway;
+  transformed.z += (cos(uWind * 0.7 + ph * 1.3) + 0.5 * sin(uWind * 1.9 + ph + transformed.x)) * sway;
+}`
+      );
+  };
+  m.customProgramCacheKey = () => "model-ao-0.50-wind";
+  return m;
+}
+
 /** The model's white card (walls, roofs, furniture, figures' clothes of card). */
 export function modelMat(rough = 0.82, direct = 0.35) {
   return withAO(new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: rough, metalness: 0 }), direct);

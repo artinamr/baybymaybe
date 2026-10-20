@@ -625,13 +625,6 @@ export function buildShop(scene: THREE.Scene): Shop {
   vb.add(block(1.95, 1.75, 4.2, 0.1), at(0, 1.25, -0.4), (p) => (p.y < 0.6 ? 0.7 : 1));
   vb.add(hull([V(-0.97, 0.45, 1.7), V(0.97, 0.45, 1.7), V(-0.97, 0.45, 2.55), V(0.97, 0.45, 2.55), V(-0.95, 1.6, 1.7), V(0.95, 1.6, 1.7), V(-0.93, 1.45, 2.25), V(0.93, 1.45, 2.25), V(-0.97, 1.0, 2.6), V(0.97, 1.0, 2.6)]), null, 1);
   const vanDark = new Batch();
-  for (const [x, z] of [
-    [-0.86, -1.6],
-    [0.86, -1.6],
-    [-0.86, 1.75],
-    [0.86, 1.75],
-  ])
-    vanDark.add(new THREE.CylinderGeometry(0.36, 0.36, 0.26, 18), at(x, 0.36, z, 0, 0, Math.PI / 2), 1, [0.08, 0.08, 0.09]);
   vanDark.add(hull([V(-0.94, 1.08, 2.28), V(0.94, 1.08, 2.28), V(-0.92, 1.55, 1.78), V(0.92, 1.55, 1.78), V(-0.94, 1.08, 2.32), V(0.94, 1.08, 2.32), V(-0.92, 1.56, 1.74), V(0.92, 1.56, 1.74)]), null, 1, [0.06, 0.07, 0.09]);
   vb.add(block(0.012, 0.1, 4.0), at(0.985, 1.05, -0.4), 1, [0.36, 0.24, 0.94]);
   vb.add(block(0.012, 0.1, 4.0), at(-0.985, 1.05, -0.4), 1, [0.36, 0.24, 0.94]);
@@ -640,6 +633,26 @@ export function buildShop(scene: THREE.Scene): Shop {
   vanG.add(vanBody);
   const vanWheels = new THREE.Mesh(vanDark.build(), new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: 0.4, metalness: 0.2 }));
   vanG.add(vanWheels);
+  // The wheels, each its own (they turn with the road; a hub and a tyre's tread line).
+  const wheelGeo = new Batch()
+    .add(new THREE.CylinderGeometry(0.36, 0.36, 0.26, 20), null, 1, [0.08, 0.08, 0.09])
+    .add(new THREE.CylinderGeometry(0.2, 0.2, 0.27, 16), null, 1, [0.5, 0.5, 0.52])
+    .add(block(0.3, 0.28, 0.03), at(0, 0, 0), 1, [0.3, 0.3, 0.32])
+    .build();
+  for (const [x, z] of [
+    [-0.86, -1.6],
+    [0.86, -1.6],
+    [-0.86, 1.75],
+    [0.86, 1.75],
+  ]) {
+    const w = new THREE.Mesh(wheelGeo, vanWheels.material);
+    w.name = "wheel";
+    w.position.set(x, 0.36, z);
+    w.rotation.set(0, 0, Math.PI / 2);
+    w.castShadow = true;
+    vanG.add(w);
+  }
+  vanBody.name = "vanBody";
   const vanLights = new THREE.Mesh(
     new Batch()
       .add(block(0.32, 0.12, 0.03), at(-0.62, 0.92, 2.6), 1, [1, 1, 1])

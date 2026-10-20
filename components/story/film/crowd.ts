@@ -104,6 +104,16 @@ export class Crowd {
     scene.add(this.mesh);
   }
 
+  /** The house whose customer has given up by now (its window goes dark): by house id. */
+  private byHouse = new Map<number, Phone>();
+  gone(houseId: number, dropK: number, fresh: boolean): boolean {
+    if (!this.byHouse.size) for (const ph of this.phones) this.byHouse.set(ph.house.id, ph);
+    const ph = this.byHouse.get(houseId);
+    if (!ph) return false;
+    const d = fresh ? ph.nDrop : ph.drop;
+    return d >= 0 && (dropK - d * 0.85) / 0.15 > 0.5;
+  }
+
   /**
    * `show` 0..1; `t` seconds since the tap (the old site loads at 5.6 s);
    * `dropK` 0..1 through the leaving; `fresh` the new site; `camera` for facing.

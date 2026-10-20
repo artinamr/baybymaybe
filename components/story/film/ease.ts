@@ -18,6 +18,11 @@ export const ease = (x: number, p = 2) => {
 };
 export const expoOut = (x: number) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * clamp01(x)));
 export const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
+/** An arrival with weight: eases out, overshoots a little (s: 0.3 about 1.5%, 0.6 about 3%) and settles. */
+export const settle = (x: number, s = 0.5) => {
+  const k = clamp01(x) - 1;
+  return 1 + (s + 1) * k * k * k + s * k * k;
+};
 /** A bump: 0 → 1 → 0 over [a, b], flat-topped between the fades. */
 export const bump = (x: number, a: number, b: number, fade = 0.15) => range(x, a, a + fade) * (1 - range(x, b - fade, b));
 
