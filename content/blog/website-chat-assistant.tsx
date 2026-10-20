@@ -99,8 +99,9 @@ export default function Body() {
           <Cite n={4} />
         </li>
         <li>
-          <strong>Getting in the way.</strong> An open chat window can hide the link a keyboard user is on, the very
-          example the guidance on <Term id="wcag">WCAG</Term> 2.2 uses.
+          <strong>Getting in the way.</strong> An open chat window can cover the link a keyboard user has moved to. The
+          guidance on <Term id="wcag">WCAG</Term> 2.2 uses that very example, and the page passes because pressing
+          Escape closes the window and brings the link back.
           <Cite n={5} />
         </li>
         <li>
@@ -136,9 +137,10 @@ export default function Body() {
         <Cite n={8} />
       </p>
       <p>
-        In one of MBIE’s scenarios, a fictional shop’s chatbot gave customers incorrect refund information, with no
-        option to speak to a human. Without fixes, including a way to reach a person, the business risked breaching the
-        Act.
+        In one of MBIE’s scenarios, a fictional skincare shop’s AI tools posted fake reviews and false stock claims, and
+        its chatbot gave customers incorrect refund information, with no option to speak to a human. The shop fixed all
+        of it, retraining the chatbot and adding a way to reach a person; otherwise, MBIE says, it risked breaching the
+        Fair Trading Act for misleading consumers.
         <Cite n={2} />
       </p>
       <H3>What this means for you</H3>
@@ -273,8 +275,10 @@ export default function Body() {
           <strong>Assess it first.</strong> The Commissioner says to use a generative AI tool only after a privacy impact
           assessment.
           <Cite n={1} /> If you’re unsure you need a full one, its brief privacy analysis template helps you decide.
-          <Cite n={13} /> Every business must have at least one privacy officer,
-          <Cite n={14} /> the person to sign it off.
+          <Cite n={13} /> Every business must have at least one privacy officer.
+          <Cite n={14} /> The Commissioner also expects senior leadership to approve the tool’s use explicitly, having
+          weighed its risks.
+          <Cite n={1} />
         </li>
       </ul>
       <H3>A notice for the chat box</H3>
@@ -371,7 +375,8 @@ export default function Body() {
             t: "Keyboard and phone",
             b: (
               <p>
-                Open it, tab out and close it with Escape, keyboard only; nothing you move to should hide behind it.
+                Open it, then tab away from it, keyboard only. If the open window covers what you’ve moved to, pressing
+                Escape should close it and bring that back into view.
                 <Cite n={5} /> On a phone, check it doesn’t cover your main button.
               </p>
             ),
