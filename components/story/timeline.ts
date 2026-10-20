@@ -88,18 +88,31 @@ export function dwellAt(P: number): number {
   return 3.4;
 }
 
-/** The film's pace follows the action: the slow page, the long night, the flight, the turn. */
+/** The film's own pace at P, in seconds a screen: slower for the slow page, the long night, the flight, the turn. */
+export function paceAt(P: number): number {
+  return P > 5.0 && P < 5.7 ? 6.2
+    : P > 5.7 && P < 7.0 ? 7.0
+    : P > 16.2 && P < 16.7 ? 11.0
+    : P > 15.0 && P < 17.4 ? 7.4
+    : P > 9.0 && P < 9.6 ? 6.4
+    : P > 11.0 && P < 12.0 ? 6.4
+    : P > 26.4 && P < 27.6 ? 6.6
+    : 5.4;
+}
+
+/**
+ * THE SCROLL'S CEILING: however hard the wheel is thrown, the film runs no
+ * faster than this many screens a second (about 2.6 times its own playing
+ * pace: brisk, never a blur). Scrolling is steering, not teleporting.
+ */
+export function capAt(P: number): number {
+  return 2.6 / paceAt(P);
+}
+
+/** Autoplay's travel between two rests. */
 export function travelDuration(from: number, to: number): number {
   const distance = to - from;
-  const middle = (from + to) * 0.5;
-  const seconds =
-    middle > 5.0 && middle < 5.7 ? 6.2
-    : middle > 5.7 && middle < 7.0 ? 7.0
-    : middle > 15.4 && middle < 17.2 ? 7.4
-    : middle > 9.0 && middle < 9.6 ? 6.4
-    : middle > 11.0 && middle < 12.0 ? 6.4
-    : middle > 26.4 && middle < 27.6 ? 6.6
-    : 5.4;
+  const seconds = paceAt((from + to) * 0.5);
   return Math.max(1200, distance * seconds * 1000 - Math.max(0, distance - 1) * 900);
 }
 

@@ -431,6 +431,39 @@ export class Score {
   }
 
   /** The rise into the flash. */
+  /** Time running backward: a tone winding down and down, wobbling, under the riser. */
+  private unwind(seconds: number) {
+    const c = this.ctx!;
+    const t = c.currentTime;
+    const o = c.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(1400, t);
+    o.frequency.exponentialRampToValueAtTime(70, t + seconds);
+    const w = c.createOscillator();
+    w.type = "sine";
+    w.frequency.value = 6.5;
+    const wg = c.createGain();
+    wg.gain.value = 40;
+    w.connect(wg).connect(o.frequency);
+    const lp = c.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(3000, t);
+    lp.frequency.exponentialRampToValueAtTime(300, t + seconds);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.09, t + 0.3);
+    g.gain.setValueAtTime(0.09, t + seconds - 0.25);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + seconds + 0.05);
+    o.connect(lp).connect(g).connect(this.pan(-0.15)).connect(this.bus);
+    const s = c.createGain();
+    s.gain.value = 0.5;
+    g.connect(s).connect(this.rev);
+    o.start(t);
+    w.start(t);
+    o.stop(t + seconds + 0.1);
+    w.stop(t + seconds + 0.1);
+  }
+
   private riser(seconds: number) {
     const c = this.ctx!;
     const t = c.currentTime;
@@ -693,7 +726,11 @@ export class Score {
       this.clangs = Array.from({ length: 14 }, (_, i) => B.fall[0] + 0.02 + i * 0.045 + Math.random() * 0.04);
     }
     for (const k of this.clangs) if (crossed(k)) this.click(700 + Math.random() * 1600, 0.8, 0.08, 0.18 + Math.random() * 0.2, (Math.random() - 0.5) * 1.4, 0, 0.6);
-    if (crossed(B.rewind[0])) this.riser(Math.max(0.8, (B.rewind[1] - B.rewind[0]) * 4));
+    if (crossed(B.rewind[0])) {
+      const secs = Math.max(1.2, (B.rewind[1] - B.rewind[0]) * 8);
+      this.riser(secs);
+      this.unwind(secs);
+    }
     if (crossed(B.rewind[1])) {
       this.hit();
       this.theme(true);

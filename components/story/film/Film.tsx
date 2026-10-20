@@ -39,6 +39,11 @@ function Director() {
   const gl = useThree((s) => s.gl);
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
+  const setDpr = useThree((s) => s.setDpr);
+  // The render scale, adapted to the machine: frame gaps are watched in
+  // windows of a second and a half; slow (a median past 19 ms) steps the
+  // scale down, fast for a while steps it back up toward the ceiling.
+  const adapt = useRef({ scale: 0, ceiling: 0, gaps: [] as number[], last: 0, up: 0 });
   const rig = useRef<Rig | null>(null);
   const pointer = useRef({ x: 0, y: 0, cx: 0, cy: 0, has: false, moved: 0 });
   const frames = useRef(0);
@@ -213,6 +218,30 @@ function Director() {
     r.world.update({ dt, time, P, pointer: p });
     r.world.render(time);
     frames.current++;
+    if (!FREEZE && !PERF) {
+      const a = adapt.current;
+      const now = performance.now();
+      if (!a.ceiling) {
+        a.ceiling = a.scale = gl.getPixelRatio();
+        a.last = now;
+      }
+      if (a.last) a.gaps.push(Math.min(100, now - a.last));
+      a.last = now;
+      if (a.gaps.length >= 90) {
+        const sorted = a.gaps.slice().sort((x, y) => x - y);
+        const median = sorted[Math.floor(sorted.length / 2)];
+        a.gaps.length = 0;
+        if (median > 19 && a.scale > 0.7) {
+          a.scale = Math.max(0.7, +(a.scale * 0.85).toFixed(2));
+          a.up = 0;
+          setDpr(a.scale);
+        } else if (median < 12.5 && a.scale < a.ceiling && ++a.up >= 4) {
+          a.scale = Math.min(a.ceiling, +(a.scale * 1.1).toFixed(2));
+          a.up = 0;
+          setDpr(a.scale);
+        }
+      }
+    }
     if (r.dom.update(P, r.world, p)) r.score.land();
     r.score.update(P, r.world, dt);
 
@@ -223,9 +252,10 @@ function Director() {
 
 /** THE FILM: its own canvas. Loaded on /story/ only, behind the door. */
 export default function Film() {
-  // Hold image quality steady. Changing resolution with frame time made
-  // rail edges visibly soften and pop during the most demanding shots.
-  const start = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, DETECT.phone ? 1.75 : 2);
+  // The ceiling: the screen's own ratio up to 1.5 (the type is DOM, so the
+  // picture need not be sharper than that); the Director steps it down on a
+  // machine that cannot hold the frame (phones: 1.75, their screens are small).
+  const start = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, DETECT.phone ? 1.75 : 1.5);
   return (
     <Canvas
       gl={{ antialias: false, alpha: false, depth: true, stencil: false, powerPreference: "high-performance" }}

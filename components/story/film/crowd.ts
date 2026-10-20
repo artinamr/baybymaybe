@@ -83,9 +83,16 @@ export class Crowd {
     let s = 7;
     const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
     const order = near.map((_, i) => i).sort(() => rnd() - 0.5);
+    // Who leaves is chance; when they leave is a wave across the town (the far
+    // side first, Sam's street last), each a little early or late.
+    const far = near.reduce((m, h) => Math.max(m, Math.hypot(h.x - centre.x, h.z - centre.z)), 1);
+    const leavers = near.map((h, i) => ({ i, t: 1 - Math.hypot(h.x - centre.x, h.z - centre.z) / far + (rnd() - 0.5) * 0.3 })).filter((e) => order.indexOf(e.i) < 53);
+    const lo = Math.min(...leavers.map((e) => e.t));
+    const hi = Math.max(...leavers.map((e) => e.t));
+    const when = new Map(leavers.map((e) => [e.i, (e.t - lo) / Math.max(1e-6, hi - lo)]));
     this.phones = near.map((house, i) => {
       const rank = order.indexOf(i);
-      return { house, drop: rank < 53 ? rank / 53 : -1, seed: rnd(), stay: rank >= 53, nDrop: rank < 6 ? rank / 6 : -1 };
+      return { house, drop: rank < 53 ? when.get(i)! * 0.96 : -1, seed: rnd(), stay: rank >= 53, nDrop: rank < 6 ? rank / 6 : -1 };
     });
     const g = faceGeometry(1.5, 3.0, 0.24);
     this.state = new THREE.InstancedBufferAttribute(new Float32Array(n * 4), 4);

@@ -77,9 +77,11 @@ export class Envelope {
     // A soft light round it.
     this.glowMat = new THREE.MeshBasicMaterial({ map: halo(), color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false });
     this.glow = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 4.2), this.glowMat);
+    this.glow.layers.set(1);
     this.group.add(this.glow);
     this.trailMat = new THREE.MeshBasicMaterial({ map: halo(), color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false });
     this.trail = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), this.trailMat, TRAIL);
+    this.trail.layers.set(1);
     this.trail.frustumCulled = false;
     this.trail.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(TRAIL * 3), 3);
     scene.add(this.group, this.trail);

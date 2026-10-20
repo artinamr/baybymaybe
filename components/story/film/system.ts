@@ -109,6 +109,7 @@ export class System {
       this.group.add(card.group);
       const fm = new THREE.MeshBasicMaterial({ map: halo(), color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false });
       const fl = new THREE.Mesh(new THREE.PlaneGeometry(9, 9), fm);
+      fl.layers.set(1);
       this.flash.push(fl);
       this.flashMat.push(fm);
       this.group.add(fl);

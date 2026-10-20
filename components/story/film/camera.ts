@@ -21,7 +21,8 @@ export type Ctx = {
   van: (P: number) => THREE.Vector3;
 };
 type Pt = (c: Ctx, P: number) => THREE.Vector3;
-export type Key = { P: number; eye: Pt; at: Pt; fov: number; ppx?: number; ppy?: number; roll?: number };
+/** `dof`: the aperture, 0 (everything sharp) … 1 (the subject alone sharp); left out, a third. */
+export type Key = { P: number; eye: Pt; at: Pt; fov: number; ppx?: number; ppy?: number; roll?: number; dof?: number };
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 const fix = (x: number, y: number, z: number): Pt => () => V(x, y, z);
@@ -52,28 +53,28 @@ const DECK_AT = H(-1.0, 1.45, -6.2);
 const node = (x: number, y: number, z: number): Pt => () => V(x, y, z);
 
 /** A composed frame held for a moment either side of P (a rest sits still). */
-function hold(P: number, eye: Pt, at: Pt, fov: number, ppx = 0.6, half = 0.05, ppy?: number): Key[] {
+function hold(P: number, eye: Pt, at: Pt, fov: number, ppx = 0.6, half = 0.05, ppy?: number, dof?: number): Key[] {
   return [
-    { P: P - half, eye, at, fov, ppx, ppy },
-    { P: P + half, eye, at, fov, ppx, ppy },
+    { P: P - half, eye, at, fov, ppx, ppy, dof },
+    { P: P + half, eye, at, fov, ppx, ppy, dof },
   ];
 }
 
 export const KEYS: Key[] = [
   // OPEN: the town at dusk, then down to one lit room.
-  { P: 0, eye: fix(-112, 56, 94), at: fix(-38, 0, 8), fov: 36, ppx: 0.6 },
-  ...hold(0.62, fix(-94, 40, 77), fix(-41, 1, 13), 34),
+  { P: 0, eye: fix(-112, 56, 94), at: fix(-38, 0, 8), fov: 36, ppx: 0.6, dof: 0.6 },
+  ...hold(0.62, fix(-94, 40, 77), fix(-41, 1, 13), 34, 0.6, 0.05, undefined, 0.6),
   { P: 1.22, eye: fix(-66, 19, 52), at: fix(-42.5, 2.0, 17), fov: 34, ppx: 0.6 },
   ...hold(1.66, fix(-48, 8, 38), fix(-43.5, 2.0, 18), 34, 0.55, 0.06),
   { P: 1.88, eye: fix(-42.1, 6.9, 27.6), at: fix(-42.2, 1.5, 16.9), fov: 34, ppx: 0.6 },
   { P: 2.06, eye: H(-2.6, 1.85, -7.6), at: H(-2.9, 1.4, -1.8), fov: 33, ppx: 0.6 },
-  ...hold(2.3, READ_EYE, READ_AT, 33, 0.6, 0.06),
+  ...hold(2.3, READ_EYE, READ_AT, 33, 0.6, 0.06, undefined, 0.14),
   // WEBSITE: the page loading; up over the town's phones; back to the form.
   ...hold(2.9, H(-3.05, 1.6, -6.0), READ_AT, 32, 0.6, 0.05),
   { P: 3.2, eye: fix(-50, 17, 34), at: fix(-36, 7, 9), fov: 44, ppx: 0.6 },
-  ...hold(3.5, fix(-52, 19, 37), fix(-35, 7, 8), 44, 0.6, 0.08),
+  ...hold(3.5, fix(-52, 19, 37), fix(-35, 7, 8), 44, 0.6, 0.08, undefined, 0.5),
   { P: 3.92, eye: H(-2.4, 3.0, -10.5), at: H(-2.9, 1.4, -1.8), fov: 34, ppx: 0.6 },
-  ...hold(4.3, READ_EYE, READ_AT, 32, 0.6, 0.06),
+  ...hold(4.3, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
   ...hold(4.74, H(-2.2, 2.0, -8.4), H(-2.7, 1.6, -1.8), 35, 0.6, 0.04),
   // INBOX: up after the envelope, across the town, to the workshop; the pile grows all night.
   { P: 4.98, eye: H(-2.4, 2.6, -8.0), at: H(-2.9, 3.0, -2.6), fov: 38, ppx: 0.58 },
@@ -103,57 +104,58 @@ export const KEYS: Key[] = [
   { P: 10.84, eye: fix(-24, 16, 36), at: fix(-42, 2, 22), fov: 40, ppx: 0.58 },
   ...hold(11.0, H(1.6, 4.2, -15.0), H(-1.6, 0.9, -6.0), 36, 0.6, 0.06),
   ...hold(11.6, H(4.0, 7.0, -19.5), H(-1.4, 1.2, -5.0), 38, 0.6, 0.08),
-  ...hold(12.1, DECK_EYE, DECK_AT, 34, 0.6, 0.05),
+  ...hold(12.1, DECK_EYE, DECK_AT, 34, 0.6, 0.05, undefined, 0.14),
   { P: 12.32, eye: fix(-40.5, 10.5, 16.0), at: fix(-43.5, 1.0, 6.0), fov: 42, ppx: 0.6 },
-  ...hold(12.56, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.06),
+  ...hold(12.56, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.06, undefined, 0.45),
   // YOU: night; across to the office window; the owner in the clutter; out over the town; back.
   { P: 12.75, eye: fix(-12, 18, 0), at: fix(-6, 4, 20), fov: 42, ppx: 0.6 },
   { P: 12.9, eye: fix(30, 26, 26), at: fix(40, 2, -13), fov: 40, ppx: 0.6 },
   ...hold(13.3, S(-3.9, 1.8, 11.0), S(-3.9, 1.6, 3.6), 36, 0.6, 0.06, 0.46),
   { P: 13.8, eye: S(-3.4, 2.1, 14.5), at: S(-3.9, 1.7, 3.6), fov: 38, ppx: 0.58 },
-  ...hold(14.4, fix(16, 34, 48), fix(40, 2, -13), 28, 0.56, 0.06),
+  ...hold(14.4, fix(16, 34, 48), fix(40, 2, -13), 28, 0.56, 0.06, undefined, 0.45),
   { P: 14.78, eye: S(-2.6, 1.15, 9.2), at: S(-3.9, 1.0, 3.8), fov: 40, ppx: 0.5 },
   { P: 15.04, eye: S(-2.85, 1.1, 5.3), at: S(-3.9, 1.0, 3.7), fov: 40, ppx: 0.5, ppy: 0.53 },
   // THE TURN: the hands; the paper coming apart round them; black; the town at dusk; the new route.
   ...hold(15.4, S(-2.62, 1.22, 4.1), S(-3.9, 1.0, 3.68), 40, 0.5, 0.06, 0.52),
   { P: 15.66, eye: S(-2.3, 1.75, 2.25), at: S(-4.1, 1.55, 4.4), fov: 54, ppx: 0.5 },
-  { P: 16.22, eye: S(-2.1, 1.95, 2.2), at: S(-4.2, 1.35, 4.5), fov: 58, ppx: 0.5 },
-  { P: 16.34, eye: S(-3.95, 1.9, 8.2), at: S(-3.9, 3.0, 20.0), fov: 50, ppx: 0.5 },
-  { P: 16.5, eye: fix(-30, 80, 110), at: fix(0, 6, 0), fov: 40, ppx: 0.5 },
-  ...hold(16.9, fix(-24, 72, 100), fix(0, 8, 0), 40, 0.5, 0.08),
-  ...hold(17.7, fix(-20, 34, 58), fix(0, 14, 2), 46, 0.56, 0.08),
+  { P: 16.08, eye: S(-2.1, 1.95, 2.2), at: S(-4.2, 1.35, 4.5), fov: 58, ppx: 0.5 },
+  // (In the black: the cut to high over the town, where the whole old half runs backward.)
+  { P: 16.2, eye: fix(-4, 52, 74), at: fix(0, 5, 0), fov: 42, ppx: 0.5 },
+  { P: 16.3, eye: fix(-4, 52, 74), at: fix(0, 5, 0), fov: 42, ppx: 0.5 },
+  ...hold(16.9, fix(-24, 72, 100), fix(0, 8, 0), 40, 0.5, 0.08, undefined, 0),
+  ...hold(17.7, fix(-20, 34, 58), fix(0, 14, 2), 46, 0.56, 0.08, undefined, 0),
   // NEW WEBSITE.
   { P: 18.06, eye: H(-2.4, 3.0, -10.5), at: H(-2.9, 1.4, -1.8), fov: 34, ppx: 0.6 },
-  ...hold(18.4, READ_EYE, READ_AT, 32, 0.6, 0.06),
+  ...hold(18.4, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
   { P: 18.7, eye: fix(-50, 17, 34), at: fix(-36, 7, 9), fov: 44, ppx: 0.6 },
-  ...hold(19.0, fix(-52, 19, 37), fix(-35, 7, 8), 44, 0.6, 0.05),
-  ...hold(19.4, READ_EYE, READ_AT, 32, 0.6, 0.06),
+  ...hold(19.0, fix(-52, 19, 37), fix(-35, 7, 8), 44, 0.6, 0.05, undefined, 0.5),
+  ...hold(19.4, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
   // NEW AI: along the line to the reply and back; the reply read; the booking; 3am.
   { P: 19.72, eye: H(-2.2, 3.0, -9.0), at: H(-2.8, 3.0, -2.4), fov: 40, ppx: 0.58 },
   { P: 19.92, eye: env(-8, 6, 13), at: env(6, -1, -4), fov: 44, ppx: 0.56 },
   { P: 20.08, eye: env(8, 6, -5), at: env(-6, -2, 5), fov: 46, ppx: 0.56 },
   { P: 20.26, eye: fix(-38.0, 7.2, 26.5), at: fix(-41.0, 1.6, 18.0), fov: 38, ppx: 0.6 },
-  ...hold(20.5, READ_EYE, READ_AT, 32, 0.6, 0.06),
+  ...hold(20.5, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
   { P: 20.62, eye: fix(-37.5, 9.0, 25.0), at: fix(-20, 12, 6), fov: 42, ppx: 0.58 },
-  ...hold(20.76, node(1.67, 17.4, 6.79), node(4, 17.4, -6), 40, 0.7, 0.04),
+  ...hold(20.76, node(1.67, 17.4, 6.79), node(4, 17.4, -6), 40, 0.7, 0.04, undefined, 0),
   { P: 20.98, eye: fix(-28, 24, 26), at: fix(-12, 15, -1), fov: 44, ppx: 0.6 },
-  ...hold(21.3, node(-17.57, 15.9, 11.5), node(-14, 15.9, -1), 40, 0.7, 0.08),
+  ...hold(21.3, node(-17.57, 15.9, 11.5), node(-14, 15.9, -1), 40, 0.7, 0.08, undefined, 0),
   // NEW PLATFORM: the quote, filled in by itself; it flies to Sam; accepted; the deck; paid.
-  ...hold(22.1, node(17.43, 15.9, 2.5), node(21, 15.9, -10), 40, 0.7, 0.12),
+  ...hold(22.1, node(17.43, 15.9, 2.5), node(21, 15.9, -10), 40, 0.7, 0.12, undefined, 0),
   { P: 22.38, eye: env(-8, 3, 12), at: env(-6, -1, 4), fov: 46, ppx: 0.56 },
-  ...hold(22.52, READ_EYE, READ_AT, 32, 0.6, 0.04),
+  ...hold(22.52, READ_EYE, READ_AT, 32, 0.6, 0.04, undefined, 0.14),
   ...hold(22.9, H(4.0, 5.5, -15.5), H(-1.2, 0.8, -6.5), 38, 0.6, 0.06),
-  ...hold(23.4, DECK_EYE, DECK_AT, 34, 0.64, 0.08),
+  ...hold(23.4, DECK_EYE, DECK_AT, 34, 0.64, 0.08, undefined, 0.14),
   // NEW FOLLOW-UP: the review; a year; the reminder; our van.
-  ...hold(24.2, DECK_EYE, DECK_AT, 34, 0.64, 0.1),
+  ...hold(24.2, DECK_EYE, DECK_AT, 34, 0.64, 0.1, undefined, 0.14),
   ...hold(24.7, H(4.0, 7.0, -19.5), H(-1.4, 1.2, -5.0), 38, 0.6, 0.12),
-  ...hold(25.2, DECK_EYE, DECK_AT, 34, 0.64, 0.08),
+  ...hold(25.2, DECK_EYE, DECK_AT, 34, 0.64, 0.08, undefined, 0.14),
   { P: 25.4, eye: fix(-40.5, 10.5, 16.0), at: fix(-43.5, 1.0, 6.0), fov: 42, ppx: 0.6 },
   ...hold(25.64, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.04),
   // NEW YOU: across the town at roof height; the office at six; the lid, the lamp; out the door; the van away.
   // (Up over the new route, not through it: its line runs at 12 to 19 m, its labels up to 23.)
-  { P: 25.76, eye: fix(-28, 34, -12), at: fix(-6, 6, 4), fov: 44, ppx: 0.56 },
-  { P: 25.87, eye: fix(14, 30, 12), at: fix(38, 4, -8), fov: 44, ppx: 0.56 },
+  { P: 25.76, eye: fix(-28, 34, -12), at: fix(-6, 6, 4), fov: 44, ppx: 0.56, dof: 0 },
+  { P: 25.87, eye: fix(14, 30, 12), at: fix(38, 4, -8), fov: 44, ppx: 0.56, dof: 0 },
   { P: 25.98, eye: S(-3.3, 2.0, 10.4), at: S(-3.9, 1.4, 3.8), fov: 36, ppx: 0.6 },
   // In through the glass between two mullions and round by the side wall (the day's card hangs over the desk).
   { P: 26.08, eye: S(-5.82, 1.9, 5.55), at: S(-4.6, 1.5, 2.6), fov: 46, ppx: 0.56 },
@@ -165,13 +167,13 @@ export const KEYS: Key[] = [
   { P: 26.84, eye: S(-2.6, 1.6, 8.0), at: S(-3.0, 1.2, 4.0), fov: 44, ppx: 0.56 },
   { P: 27.0, eye: S(-0.5, 2.0, 13.0), at: S(-1.6, 1.2, 6.5), fov: 40, ppx: 0.56 },
   { P: 27.3, eye: S(4.0, 2.6, 17.0), at: S(3.0, 1.2, 9.0), fov: 40, ppx: 0.56 },
-  ...hold(27.7, van(-14, 9, 16), van(0, 1, 0), 40, 0.56, 0.06),
+  ...hold(27.7, van(-14, 9, 16), van(0, 1, 0), 40, 0.56, 0.06, undefined, 0.45),
   // END: up over the town at dusk; the light fills it.
-  { P: 28.4, eye: fix(30, 40, 70), at: fix(4, 8, -4), fov: 44, ppx: 0.5 },
-  { P: 29.6, eye: fix(24, 64, 96), at: fix(0, 8, -4), fov: 46, ppx: 0.5 },
+  { P: 28.4, eye: fix(30, 40, 70), at: fix(4, 8, -4), fov: 44, ppx: 0.5, dof: 0 },
+  { P: 29.6, eye: fix(24, 64, 96), at: fix(0, 8, -4), fov: 46, ppx: 0.5, dof: 0 },
 ];
 
-export type CamOut = { eye: THREE.Vector3; at: THREE.Vector3; fov: number; ppx: number; ppy: number; roll: number };
+export type CamOut = { eye: THREE.Vector3; at: THREE.Vector3; fov: number; ppx: number; ppy: number; roll: number; dof: number };
 
 function hermite(p0: number, p1: number, m0: number, m1: number, t: number) {
   const t2 = t * t;
@@ -192,6 +194,7 @@ function shotCurve(p0: number, p1: number, p2: number, p3: number, h0: number, h
   return hermite(p1, p2, m0 * h1, m1 * h1, t);
 }
 
+const DOF_DEFAULT = 0.34;
 const cache = KEYS.map(() => ({ eye: new THREE.Vector3(), at: new THREE.Vector3() }));
 
 /** The camera at film time P. */
@@ -214,8 +217,8 @@ export function cameraAt(P: number, c: Ctx, out: CamOut) {
   const h2 = KEYS[i3].P - KEYS[i2].P;
   for (const f of ["eye", "at"] as const)
     for (const ax of ["x", "y", "z"] as const) out[f][ax] = shotCurve(cache[i0][f][ax], cache[i1][f][ax], cache[i2][f][ax], cache[i3][f][ax], h0, span, h2, t);
-  for (const field of ["fov", "ppx", "ppy", "roll"] as const) {
-    const fb = field === "roll" ? 0 : field === "fov" ? 40 : 0.5;
+  for (const field of ["fov", "ppx", "ppy", "roll", "dof"] as const) {
+    const fb = field === "roll" ? 0 : field === "fov" ? 40 : field === "dof" ? DOF_DEFAULT : 0.5;
     out[field] = shotCurve(KEYS[i0][field] ?? fb, A[field] ?? fb, Bk[field] ?? fb, KEYS[i3][field] ?? fb, h0, span, h2, t);
   }
 }
@@ -229,11 +232,11 @@ const SM_N = 4;
 const SM_STEP = 0.0175;
 const SM_W = Array.from({ length: SM_N * 2 + 1 }, (_, i) => Math.exp(-0.5 * Math.pow(((i - SM_N) * SM_STEP) / 0.034, 2)));
 const SM_SUM = SM_W.reduce((a, b) => a + b, 0);
-const _o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0 };
+const _o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0 };
 export function cameraSmooth(P: number, c: Ctx, out: CamOut, end: number) {
   out.eye.set(0, 0, 0);
   out.at.set(0, 0, 0);
-  out.fov = out.ppx = out.ppy = out.roll = 0;
+  out.fov = out.ppx = out.ppy = out.roll = out.dof = 0;
   for (let i = 0; i < SM_W.length; i++) {
     const Pk = Math.min(end, Math.max(0, P + (i - SM_N) * SM_STEP));
     const w = SM_W[i] / SM_SUM;
@@ -244,6 +247,7 @@ export function cameraSmooth(P: number, c: Ctx, out: CamOut, end: number) {
     out.ppx += _o.ppx * w;
     out.ppy += _o.ppy * w;
     out.roll += _o.roll * w;
+    out.dof += _o.dof * w;
   }
 }
 
@@ -284,7 +288,7 @@ export type Air = { c: THREE.Vector3; r: number; from: number };
 export function phoneBackBase(c: Ctx, end: number, field: { get: (x: number, z: number) => number; bld: (x: number, z: number) => number }, air: Air[] = []): BackBase {
   const n = Math.ceil(end / BACK_STEP) + 1;
   const base = { free: new Float32Array(n), d: new Float32Array(n), fov: new Float32Array(n) };
-  const o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0 };
+  const o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0 };
   const dir = new THREE.Vector3();
   const p = new THREE.Vector3();
   const q = new THREE.Vector3();

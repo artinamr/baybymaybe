@@ -1,5 +1,5 @@
 import Lenis from "lenis";
-import { FILM_LEN, RESTS, dwellAt, travelDuration } from "../timeline";
+import { FILM_LEN, RESTS, capAt, dwellAt, travelDuration } from "../timeline";
 import { events, film } from "../store";
 import { spring } from "./ease";
 
@@ -7,7 +7,11 @@ import { spring } from "./ease";
  * THE FILM'S CLOCK. The page scrolls (Lenis smooths the wheel); P is how many
  * screens down the film's track you are, and the film runs on Ps, which
  * follows P with a little weight of its own, so a flick of the wheel is a
- * glide, never a jolt. Rest a moment and it settles on the nearest composed
+ * glide, never a jolt. The film has a ceiling speed (timeline.ts capAt): a
+ * hard flick runs it briskly, never past what can be seen, and the page is
+ * kept no more than a short lead ahead of the film, so when you stop, the
+ * film coasts a moment and stops too (you steer it; it keeps its pace).
+ * Rest a moment and it settles on the nearest composed
  * frame (biased the way you were going). Press play and it runs like a film:
  * it travels from one composed frame to the next and holds on each long
  * enough to read. The arrow keys, space and page keys step between frames;
@@ -23,6 +27,7 @@ export class Clock {
   private auto: { phase: "hold" | "move"; t0: number; from: number; to: number; dur: number; until: number } | null = null;
   private gliding = false;
   private drag: { y: number; t: number; moved: boolean } | null = null;
+  private touching = false;
   private offs: (() => void)[] = [];
   private top = 0;
   onTap: ((x: number, y: number) => void) | null = null;
@@ -40,7 +45,13 @@ export class Clock {
       if (Math.abs(e.deltaY) > 0.5) this.dir = Math.sign(e.deltaY);
       touched();
     };
-    const touch = () => touched();
+    const touch = () => {
+      this.touching = true;
+      touched();
+    };
+    const touchEnd = () => {
+      this.touching = false;
+    };
     const key = (e: KeyboardEvent) => {
       if (!film.started || this.P > FILM_LEN + 0.2) return;
       const t = e.target as HTMLElement | null;
@@ -89,6 +100,8 @@ export class Clock {
     const resize = () => this.measure();
     window.addEventListener("wheel", wheel, { passive: true });
     window.addEventListener("touchstart", touch, { passive: true });
+    window.addEventListener("touchend", touchEnd, { passive: true });
+    window.addEventListener("touchcancel", touchEnd, { passive: true });
     window.addEventListener("keydown", key);
     canvas.addEventListener("pointerdown", down);
     window.addEventListener("pointermove", move, { passive: true });
@@ -97,6 +110,8 @@ export class Clock {
     this.offs.push(() => {
       window.removeEventListener("wheel", wheel);
       window.removeEventListener("touchstart", touch);
+      window.removeEventListener("touchend", touchEnd);
+      window.removeEventListener("touchcancel", touchEnd);
       window.removeEventListener("keydown", key);
       canvas.removeEventListener("pointerdown", down);
       window.removeEventListener("pointermove", move);
@@ -155,13 +170,36 @@ export class Clock {
       }
     }
 
-    // The film follows the scroll with weight; a big jump cuts.
+    // The film follows the scroll with weight, no faster than its ceiling; a big jump cuts.
     const target = Math.min(this.P, FILM_LEN + 0.5);
     if (film.reduced || Math.abs(target - this.sp.x) > 2.5) {
       this.sp.x = target;
       this.sp.v = 0;
-    } else spring(this.sp, target, 4.2, dt);
+    } else {
+      const x0 = this.sp.x;
+      spring(this.sp, target, 4.2, dt);
+      const vmax = capAt(x0);
+      const dx = this.sp.x - x0;
+      if (Math.abs(dx) > vmax * dt) {
+        const sg = Math.sign(dx);
+        this.sp.x = x0 + sg * vmax * dt;
+        this.sp.v = sg * vmax;
+      }
+    }
     this.Ps = this.sp.x;
+    // The page keeps a short lead on the film: scroll on past it and the page
+    // is held there, so the film never has a long way to catch up when you
+    // stop (a finger on the screen scrolls natively; the lead is kept after).
+    if (lenis && !this.gliding && !film.playing && !this.touching) {
+      const lead = Math.min(1.0, Math.max(0.12, FILM_LEN - 0.7 - this.Ps));
+      if (this.P > this.Ps + lead) {
+        this.P = this.Ps + lead;
+        lenis.scrollTo(this.y(this.P), { immediate: true, force: true });
+      } else if (this.P < this.Ps - lead) {
+        this.P = this.Ps - lead;
+        lenis.scrollTo(this.y(this.P), { immediate: true, force: true });
+      }
+    }
     film.P = this.P;
     film.Ps = this.Ps;
   }

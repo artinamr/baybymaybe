@@ -134,7 +134,59 @@ burning their own faces out.
   jumps and stopping short of a roof under the lens; the route's labels are
   smaller.
 
+## Set pieces (round 24)
+
+- **One real dusk to open.** The clock starts at 6:33pm in golden light
+  with long shadows across the town and runs, continuously, into the blue
+  hour as the camera finds Sam's house; the windows come on one by one.
+  By the time Sam is on the sofa it is 7:22pm, and the enquiry goes at 7:40.
+- **The rewind.** After the black, the camera hangs high over the town and
+  the whole old half runs backward (`world.ts`: world time `Pw` sweeps from
+  the desk at 11:48pm back to the evening the enquiry was sent, over 0.4
+  screens, eased) while the hours spin back through two days (the sun
+  wheels backward, the windows blink through two nights, the inbox tower
+  unbuilds, the vans reverse, the deck unweathers, the enquiry flies home).
+  The lens strains (fringe and grain up), the clock on screen runs
+  backward, a tone winds down under the riser. It lands on 7:37pm the first
+  evening and the new route draws itself. The camera's cut from the desk to
+  the sky happens inside the black.
+- **A year as a time-lapse** (both halves, `script.ts` `lapseHours`): three
+  days with their nights shortened (seven tenths of each turn is daylight),
+  so the sun sweeps and the shadows wheel; the town's foliage turns amber,
+  thins and greys for the winter, then comes back fresh (`world.ts`
+  `seasons`, a tint on the one foliage material); the deck greys on the old
+  route and stays sound on the new.
+- **A wave of giving up.** The 53 phones that leave the slow site go as a
+  wave across the town, the far side first and Sam's street last, each a
+  little early or late (`crowd.ts`).
+- **Depth of field** (`post.ts`; off on phones): a depth pass at half size,
+  a gather, a mix by the circle of confusion. The focus is the shot's
+  subject; the aperture is a channel on the camera keys (`dof`): the
+  opening and the wide town shots have a model's shallow focus, the lifted
+  screens are read nearly all-sharp, the route over the town is all sharp.
+  About 1.2 to 1.9 ms a frame at 1080p on an integrated GPU.
+- **A living camera.** Never quite still: a slow push toward the subject
+  and back (a hair over a percent of its distance, a dozen seconds a
+  cycle) with the breath beside it.
+
 ## Reading and control
+
+**You steer, it keeps its pace** (`clock.ts`, `timeline.ts` `capAt`): the
+film runs no faster than about 2.6 times its own playing pace whatever the
+wheel does (the rewind slower still), and the page is held no more than a
+screen ahead of the film, so a hard flick runs it briskly, never past what
+can be seen, and when you stop it coasts for a moment and settles on a
+composed frame. A full flick-through takes about seventy seconds. Measured
+with a synthetic wheel: a hard flick that used to carry 1.8 screens at 1.5
+screens a second now runs at 0.5 and lands on the next rest.
+
+**The render scale adapts** (`Film.tsx`): the ceiling is the screen's own
+ratio up to 1.5; frame gaps are watched in windows of a second and a half,
+a slow median (past 19 ms) steps the scale down by 15% (to 0.7 at the
+least), a fast one for six seconds steps it back up. The scene pass alone is
+about 12 ms at 1080p on an integrated GPU (shadows, the environment and the
+MSAA each about 2 ms of it; nothing dominates), so the scale is the lever.
+
 
 The film must make sense with sound off. The full words and scene
 descriptions are server-rendered in `Transcript.tsx`, in the order they

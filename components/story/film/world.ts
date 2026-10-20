@@ -11,7 +11,7 @@ import { Envelope, type Flight } from "./mail";
 import { NODES, System } from "./system";
 import { ContactShade } from "./shade";
 import { BACK_STEP, cameraSmooth, phoneAdjust, phoneBackBase, phoneBackTable, type BackBase, type CamOut, type Ctx as CamCtx } from "./camera";
-import { B, bump, clockAt, inW, isNew, k, ke, weathered, type W } from "./script";
+import { B, bump, clockAt, inW, isNew, k, ke, lapseHours, weathered, type W } from "./script";
 import { clamp01, lerp, range, smooth, smoother } from "./ease";
 import { FILM_LEN } from "../timeline";
 import * as UI from "./ui";
@@ -119,7 +119,7 @@ export class World {
   private ourVan: THREE.Group;
   private phoneLight: THREE.PointLight;
   private shadeG = new ContactShade(24, 0);
-  private cam: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0 };
+  private cam: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0 };
   private camCtx: CamCtx;
   private w = 1;
   private h = 1;
@@ -135,7 +135,9 @@ export class World {
     gl.shadowMap.enabled = true;
     gl.shadowMap.type = THREE.PCFShadowMap;
     this.camera = new THREE.PerspectiveCamera(40, 16 / 9, 0.05, 2400);
-    this.post = new Post(4, 6);
+    // Layer 1: light that is not a surface (halos, trails); the depth pass leaves it out.
+    this.camera.layers.enable(1);
+    this.post = new Post(4, 6, opts.quality > 0);
     this.sky = new Sky(this.scene, opts.quality === 0 ? 1024 : 2048);
     this.town = buildTown(this.scene, opts.quality);
     this.home = buildHome(this.scene);
@@ -367,7 +369,14 @@ export class World {
     const t = f.time;
     this.lastTime = t;
     this.events.length = 0;
-    const hours = clockAt(P);
+    // THE REWIND: between the black and the new route, the camera hangs high
+    // over the town while the whole old half runs backward (world time Pw,
+    // from the desk at 11:48pm back to the evening the enquiry was sent) and
+    // the hours spin back through two days to the first evening.
+    const rw = inW(P, B.rewind) ? smoother(k(P, B.rewind)) : -1;
+    const Pw = rw >= 0 ? lerp(B.freeze[1] - 0.02, B.send - 0.1, rw) : P;
+    // (Hours: the rewind spins them back through two days; a year window runs its lapse.)
+    const hours = rw >= 0 ? 19 + 37 / 60 + (23 + 48 / 60 + 48 - (19 + 37 / 60)) * (1 - rw) : (lapseHours(Pw) ?? clockAt(Pw));
     this.info.hours = hours;
     const nw = isNew(P);
 
@@ -384,9 +393,15 @@ export class World {
       this.cam.ppx = 0.5;
       this.cam.ppy = 0.5;
       this.cam.roll = 0;
+      this.cam.dof = 0;
     }
     const br = this.reduced ? 0 : 1;
     cam.position.copy(this.cam.eye);
+    // A living camera: never quite still. A slow push toward the subject and
+    // back (a hair over a percent of its distance, a dozen seconds a cycle),
+    // a breath beside it.
+    const push = (0.5 - 0.5 * Math.cos(t * 0.5)) * 0.013 * br;
+    cam.position.lerp(this.cam.at, push);
     cam.position.x += Math.sin(t * 0.37) * 0.01 * br;
     cam.position.y += Math.sin(t * 0.29 + 1) * 0.008 * br;
     cam.up.set(Math.sin(this.cam.roll), Math.cos(this.cam.roll), 0);
@@ -402,8 +417,11 @@ export class World {
 
     // THE SKY. The shadow map covers what the camera looks at.
     const dist = cam.position.distanceTo(this.cam.at);
+    // Depth of field: the subject in focus, the aperture the shot's.
+    this.grade.focus = dist;
+    this.grade.aperture = this.camOverride ? 0 : this.cam.dof;
     const radius = Math.min(150, Math.max(3, dist * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
-    const sky = this.sky.update(hours, t, this.cam.at, radius, dist < 10 ? 1.4 : dist < 40 ? 1.0 : 0.8);
+    const sky = this.sky.update(hours, t, this.cam.at, radius, dist < 10 ? 1.4 : dist < 40 ? 1.0 : dist < 60 ? 0.8 : 0.45);
     this.town.setLamps(sky.lights > 0.3 ? smooth((sky.lights - 0.3) / 0.3) : 0);
     const glass = new THREE.Color(0.16, 0.19, 0.24).lerp(new THREE.Color(0.03, 0.035, 0.05), sky.night);
     this.town.setGlass(glass, 2.4);
@@ -414,13 +432,14 @@ export class World {
 
     this.look(P, sky.night);
     uiScale.k = 1 / this.grade.exposure;
-    this.places(P, hours, sky.night, nw);
-    this.people(P, t, nw);
-    this.screens(P, t, hours, nw);
-    this.cards(P, t, nw);
-    this.mail(P, t);
-    this.column(P);
-    this.crowdAndCounts(P, t, nw);
+    this.places(Pw, hours, sky.night, nw);
+    this.people(Pw, t, nw);
+    this.screens(Pw, t, hours, nw);
+    this.cards(Pw, t, nw);
+    this.mail(Pw, t);
+    this.column(Pw);
+    this.crowdAndCounts(Pw, t, nw);
+    this.seasons(Pw);
     this.route(P, t);
     this.keepClear(f.dt);
     this.pointer(f.pointer);
@@ -565,6 +584,30 @@ export class World {
     this.rival.visible = rivalK > 0;
     this.rival.position.set(lerp(-12, -44, rivalK), 0, 3.4);
     this.rival.rotation.set(0, -Math.PI / 2, 0);
+  }
+
+  /**
+   * THE SEASONS: as a year goes by (both halves), the town's foliage turns:
+   * amber, then thin and dull through the winter, then fresh green again.
+   */
+  private seasons(P: number) {
+    const foliage = this.town.mats[1] as THREE.MeshStandardMaterial;
+    let yr = -1;
+    if (inW(P, B.year)) yr = k(P, B.year);
+    else if (inW(P, B.nYear)) yr = k(P, B.nYear);
+    const c = foliage.color;
+    if (yr < 0) {
+      c.setScalar(1);
+      return;
+    }
+    // Late summer (green) → autumn (amber) → winter (thin, grey-green) → spring (fresh) → summer.
+    const amber = smooth(range(yr, 0.08, 0.3)) * (1 - smooth(range(yr, 0.38, 0.56)));
+    const winter = smooth(range(yr, 0.4, 0.58)) * (1 - smooth(range(yr, 0.7, 0.86)));
+    const spring = smooth(range(yr, 0.78, 0.9)) * (1 - smooth(range(yr, 0.94, 1)));
+    c.setScalar(1);
+    c.lerp(new THREE.Color(1.55, 0.74, 0.3), amber);
+    c.lerp(new THREE.Color(0.6, 0.58, 0.5), winter);
+    c.lerp(new THREE.Color(0.92, 1.12, 0.78), spring);
   }
 
   /** The laptop's lid: 0 shut … 1 open. */
@@ -1304,8 +1347,10 @@ export class World {
     g.bloom = 0.6;
     g.threshold = 1.35;
     g.vignette = 0.32;
-    g.grain = 0.03;
-    g.aberration = 0.35;
+    // The rewind: the lens strains (more fringe, more grain) while time runs back.
+    const rw = inW(P, B.rewind) ? Math.sin(Math.PI * k(P, B.rewind)) : 0;
+    g.grain = 0.03 + 0.05 * rw;
+    g.aberration = 0.35 + 1.6 * rw;
     g.split = 0;
     g.lift.set(0, 0, 0);
     g.gamma.set(1, 1, 1);
@@ -1320,7 +1365,7 @@ export class World {
       g.gain.set(1.03, 1.0, 0.97);
     }
     // The turn: the dark takes the room; then the town at dusk again.
-    g.black = smooth(range(P, B.black[0], B.black[0] + 0.14)) * (1 - smooth(range(P, B.rewind[1] - 0.08, B.rewind[1] + 0.12)));
+    g.black = smooth(range(P, B.black[0], B.black[0] + 0.1)) * (1 - smooth(range(P, B.black[1] - 0.1, B.black[1])));
     // The end: light out of the brights, then paper.
     g.fill = smooth(range(P, B.end[0], B.end[1])) * 0.9;
     g.flashColor.set(0.965, 0.961, 0.949);

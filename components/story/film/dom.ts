@@ -21,7 +21,7 @@ export function clockText(hours: number) {
 const CLOCK_ON: [number, number][] = [
   [4.62, 7.36],
   [12.84, 15.42],
-  [16.34, 16.72],
+  [16.24, 16.72],
   [19.84, 21.5],
   [25.84, 27.3],
 ];

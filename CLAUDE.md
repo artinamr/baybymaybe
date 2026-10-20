@@ -557,6 +557,19 @@ not longer, but the bar really raised").**
   over 25 ms.
 - **Tone mapping**: Khronos PBR Neutral in the composite (was ACES): UI
   white and the brand's colours stay true.
+- **ROUND 24 (2026-10-20, "much more impressive … crazier … much more
+  smooth … the illusion of control … Apple engineered, not hand-built")**:
+  the scroll's ceiling (the film runs no faster than ~2.6x its playing pace,
+  the page held a screen ahead at most: `capAt`, clock.ts); the rewind
+  (the old half runs backward under a high camera while the hours spin
+  back two days: world time `Pw`, world.ts); one continuous dusk to open
+  (the clock starts at 6:33pm); the year as a lapse with short nights
+  (`lapseHours`) and seasons on the foliage; the 53 give up as a wave;
+  depth of field (post.ts, a `dof` channel on the camera keys; phones off);
+  a living camera (a slow push); the render scale adapts to frame gaps
+  (ceiling 1.5, floor 0.7). Everything is in docs/STORY.md "Set pieces".
+  The scene pass is ~12 ms at 1080p on the integrated AMD; measure with
+  the scratchpad's gpu.mjs-style script (`?perf=1`, `window.__perf.gpu`).
 - **Second pass (same day)**: the words come first (cards fade behind the
   words, `keepClear`; the route's parts framed whole on the right; the
   admin, turn and opening words leave before the 3D crosses them); nothing

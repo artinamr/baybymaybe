@@ -9,7 +9,17 @@ import type { GpuTimer } from "@/components/stage/gpuTimer";
  * exposure, the filmic curve, the chapter's grade, a slow vignette, a hair of
  * chromatic aberration at the edges, grain, the flash, black and paper.
  *
- * Cost at 1600x900: the scene, 6 small downsamples, 5 upsamples, 1 composite.
+ * DEPTH OF FIELD (not on phones): the scene's depth drawn once more at half
+ * size (one depth material over everything), a half-size copy of the colour
+ * with each pixel's circle of confusion from that depth and the shot's focus
+ * and aperture, one gather pass (a disc of taps, each weighted by whether its
+ * own circle reaches the pixel, so a sharp edge never smears into the soft
+ * behind it), and the composite mixes the soft copy in by the circle's size.
+ * The focus is the shot's subject; the aperture is a channel on the camera
+ * keys (camera.ts `dof`).
+ *
+ * Cost at 1600x900: the scene, 6 small downsamples, 5 upsamples, 1 composite,
+ * and with depth of field the depth pass and two half-size passes.
  */
 
 export type Grade = {
@@ -38,6 +48,9 @@ export type Grade = {
   paper: number;
   /** The bloom's threshold in linear light. */
   threshold: number;
+  /** Depth of field: the subject's distance (m) and the aperture (0 none … 1 the widest). */
+  focus: number;
+  aperture: number;
 };
 
 export function makeGrade(): Grade {
@@ -61,6 +74,8 @@ export function makeGrade(): Grade {
     fill: 0,
     paper: 0,
     threshold: 0.9,
+    focus: 5,
+    aperture: 0,
   };
 }
 
@@ -144,6 +159,63 @@ void main() {
   gl_FragColor = vec4(s * (uWeight / 16.0), 1.0);
 }`;
 
+// The half-size colour with its circle of confusion in the alpha (0.5 = sharp).
+const DOF_DOWN = /* glsl */ `
+precision highp float;
+#include <packing>
+uniform sampler2D tScene;
+uniform sampler2D tDepth;
+uniform float uNear;
+uniform float uFar;
+uniform float uFocus;
+uniform float uAperture;
+uniform float uMaxCoc;
+in vec2 vUv;
+vec3 fin(vec3 c) {
+  bvec3 bad = equal(floatBitsToUint(c) & uvec3(0x7f800000u), uvec3(0x7f800000u));
+  return clamp(mix(c, vec3(0.0), bad), 0.0, 64.0);
+}
+void main() {
+  // At half size a bilinear tap between four texels is their box average.
+  vec3 c = fin(texture(tScene, vUv).rgb);
+  float d = unpackRGBAToDepth(texture(tDepth, vUv));
+  float z = -perspectiveDepthToViewZ(d, uNear, uFar);
+  float coc = clamp(uAperture * uMaxCoc * (1.0 - uFocus / max(z, 0.02)), -uMaxCoc, uMaxCoc);
+  gl_FragColor = vec4(c, coc / uMaxCoc * 0.5 + 0.5);
+}`;
+
+// The gather: a disc of taps the size of the pixel's own circle; a tap counts
+// only as far as its own circle reaches (a sharp thing never bleeds).
+const DOF_GATHER = /* glsl */ `
+precision highp float;
+uniform sampler2D tSrc;
+uniform vec2 uTexel;
+uniform float uMaxCoc;
+in vec2 vUv;
+const vec2 K[16] = vec2[16](
+  vec2(0.0, 0.0), vec2(0.54, 0.0), vec2(0.27, 0.47), vec2(-0.27, 0.47), vec2(-0.54, 0.0), vec2(-0.27, -0.47), vec2(0.27, -0.47),
+  vec2(1.0, 0.0), vec2(0.71, 0.71), vec2(0.0, 1.0), vec2(-0.71, 0.71), vec2(-1.0, 0.0), vec2(-0.71, -0.71), vec2(0.0, -1.0), vec2(0.71, -0.71),
+  vec2(0.92, 0.38)
+);
+void main() {
+  vec4 c0 = texture(tSrc, vUv);
+  float r = abs(c0.a * 2.0 - 1.0) * uMaxCoc;
+  // The disc reaches a little past the pixel's own circle, so a soft thing beside a sharp one still spreads.
+  float reach = max(r, 1.5);
+  vec3 sum = vec3(0.0);
+  float wsum = 0.0;
+  for (int i = 0; i < 16; i++) {
+    vec2 o = K[i] * reach;
+    vec4 s = texture(tSrc, vUv + o * uTexel);
+    float cs = abs(s.a * 2.0 - 1.0) * uMaxCoc;
+    float dist = length(o);
+    float w = clamp(cs - dist + 1.0, 0.0, 1.0);
+    sum += s.rgb * w;
+    wsum += w;
+  }
+  gl_FragColor = vec4(wsum > 0.0 ? sum / wsum : c0.rgb, c0.a);
+}`;
+
 const COMPOSITE = /* glsl */ `
 precision highp float;
 uniform sampler2D tScene;
@@ -169,6 +241,9 @@ uniform float uBlack;
 uniform float uFill;
 uniform float uPaper;
 uniform float uFXAA;
+uniform sampler2D tSoft;
+uniform float uDof;
+uniform float uMaxCoc;
 in vec2 vUv;
 
 // Khronos PBR Neutral: linear through the mid-tones (screens and paper keep
@@ -253,6 +328,12 @@ void main() {
   hdr.g = sceneSample(uv).g;
   hdr.b = sceneSample(uv + off).b;
   hdr = fin(hdr);
+  // Depth of field: the soft copy, in by the size of the circle of confusion.
+  if (uDof > 0.5) {
+    vec4 sf = texture(tSoft, uv);
+    float rc = abs(sf.a * 2.0 - 1.0) * uMaxCoc;
+    hdr = mix(hdr, fin(sf.rgb), smoothstep(0.4, 1.8, rc));
+  }
   vec3 bloom = fin(texture(tBloom, uv).rgb);
   // Give luminous customers a short lens trail. It comes from the light
   // itself, follows its colour, and never adds a white veil over the room.
@@ -333,6 +414,15 @@ export class Post {
   private down: THREE.ShaderMaterial;
   private up: THREE.ShaderMaterial;
   private comp: THREE.ShaderMaterial;
+  // Depth of field.
+  private dofOn: boolean;
+  private depthRT: THREE.WebGLRenderTarget;
+  private softA: THREE.WebGLRenderTarget;
+  private softB: THREE.WebGLRenderTarget;
+  private depthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+  private depthCam = new THREE.PerspectiveCamera();
+  private dofDown: THREE.ShaderMaterial;
+  private dofGather: THREE.ShaderMaterial;
   private levels: number;
   private w = 1;
   private h = 1;
@@ -341,8 +431,27 @@ export class Post {
   /** Look-dev (`?perf=1`): the GPU time of each pass. */
   timer: GpuTimer | null = null;
 
-  constructor(samples: number, levels: number) {
+  constructor(samples: number, levels: number, dof = true) {
     this.levels = levels;
+    this.dofOn = dof;
+    const half = (type: THREE.TextureDataType, filter: THREE.MagnificationTextureFilter) =>
+      new THREE.WebGLRenderTarget(1, 1, { type, format: THREE.RGBAFormat, depthBuffer: false, stencilBuffer: false, minFilter: filter, magFilter: filter, generateMipmaps: false });
+    this.depthRT = half(THREE.UnsignedByteType, THREE.NearestFilter);
+    this.depthRT.depthBuffer = true;
+    this.softA = half(THREE.HalfFloatType, THREE.LinearFilter);
+    this.softB = half(THREE.HalfFloatType, THREE.LinearFilter);
+    this.depthCam.matrixAutoUpdate = false;
+    this.depthCam.layers.set(0);
+    this.dofDown = pass(DOF_DOWN, {
+      tScene: { value: null },
+      tDepth: { value: this.depthRT.texture },
+      uNear: { value: 0.05 },
+      uFar: { value: 2400 },
+      uFocus: { value: 5 },
+      uAperture: { value: 0 },
+      uMaxCoc: { value: 7 },
+    });
+    this.dofGather = pass(DOF_GATHER, { tSrc: { value: this.softA.texture }, uTexel: { value: new THREE.Vector2() }, uMaxCoc: { value: 7 } });
     // Thin rails need real coverage samples on phones as well as desktops.
     this.requestedSamples = Math.max(4, samples);
     this.scene = new THREE.WebGLRenderTarget(1, 1, {
@@ -409,6 +518,9 @@ export class Post {
       uFill: { value: 0 },
       uPaper: { value: 0 },
       uFXAA: { value: 0 },
+      tSoft: { value: this.softB.texture },
+      uDof: { value: 0 },
+      uMaxCoc: { value: 7 },
     });
     this.quad = new THREE.Mesh(fullscreenTriangle(), this.comp);
     this.quad.frustumCulled = false;
@@ -416,7 +528,7 @@ export class Post {
 
   /** The programs, compiled before the film is shown. */
   materials(): THREE.Material[] {
-    return [this.down, this.up, this.comp];
+    return [this.down, this.up, this.comp, this.dofDown, this.dofGather];
   }
 
   setSize(w: number, h: number) {
@@ -434,6 +546,17 @@ export class Post {
       m.setSize(mw, mh);
     }
     (this.comp.uniforms.uRes.value as THREE.Vector2).set(w, h);
+    const hw = Math.max(1, Math.round(w / 2));
+    const hh = Math.max(1, Math.round(h / 2));
+    this.depthRT.setSize(hw, hh);
+    this.softA.setSize(hw, hh);
+    this.softB.setSize(hw, hh);
+    (this.dofGather.uniforms.uTexel.value as THREE.Vector2).set(1 / hw, 1 / hh);
+    // The widest circle: seven half-size pixels at 1920 wide, the same share of the frame at any size.
+    const maxCoc = 7 * (hw / 960);
+    this.dofGather.uniforms.uMaxCoc.value = maxCoc;
+    this.dofDown.uniforms.uMaxCoc.value = maxCoc;
+    this.comp.uniforms.uMaxCoc.value = maxCoc;
   }
 
   private blit(r: THREE.WebGLRenderer, mat: THREE.ShaderMaterial, target: THREE.WebGLRenderTarget | null) {
@@ -488,6 +611,44 @@ export class Post {
     } else r.render(scene, camera);
     T?.end();
     r.autoClear = false;
+
+    // Depth of field: the depth at half size, the soft copy, the gather.
+    const dof = this.dofOn && g.aperture > 0.01 && (camera as THREE.PerspectiveCamera).isPerspectiveCamera;
+    this.comp.uniforms.uDof.value = dof ? 1 : 0;
+    if (dof) {
+      T?.begin("dof");
+      const pc = camera as THREE.PerspectiveCamera;
+      const dc = this.depthCam;
+      dc.near = pc.near;
+      dc.far = pc.far;
+      dc.projectionMatrix.copy(pc.projectionMatrix);
+      dc.projectionMatrixInverse.copy(pc.projectionMatrixInverse);
+      dc.matrixWorld.copy(pc.matrixWorld);
+      dc.matrixWorldInverse.copy(pc.matrixWorldInverse);
+      const clear = r.getClearColor(new THREE.Color());
+      const alpha = r.getClearAlpha();
+      r.setClearColor(0xffffff, 1);
+      r.autoClear = true;
+      r.setRenderTarget(this.depthRT);
+      const override = scene.overrideMaterial;
+      const bg = scene.background;
+      scene.background = null;
+      scene.overrideMaterial = this.depthMat;
+      r.render(scene, dc);
+      scene.overrideMaterial = override;
+      scene.background = bg;
+      r.setClearColor(clear, alpha);
+      r.autoClear = false;
+      const dd = this.dofDown.uniforms;
+      dd.tScene.value = this.scene.texture;
+      dd.uNear.value = pc.near;
+      dd.uFar.value = pc.far;
+      dd.uFocus.value = g.focus;
+      dd.uAperture.value = g.aperture;
+      this.blit(r, this.dofDown, this.softA);
+      this.blit(r, this.dofGather, this.softB);
+      T?.end();
+    }
     T?.begin("bloom");
 
     // Bloom: down the chain…
@@ -546,6 +707,12 @@ export class Post {
   dispose() {
     this.scene.dispose();
     this.mips.forEach((m) => m.dispose());
+    this.depthRT.dispose();
+    this.softA.dispose();
+    this.softB.dispose();
+    this.depthMat.dispose();
+    this.dofDown.dispose();
+    this.dofGather.dispose();
     this.down.dispose();
     this.up.dispose();
     this.comp.dispose();

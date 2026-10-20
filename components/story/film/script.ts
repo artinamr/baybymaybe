@@ -63,9 +63,10 @@ export const B = {
   // THE TURN: hands off; the paper comes apart; black; the evening again; the new route.
   handsOff: [15.24, 15.42] as W,
   freeze: [15.42, 15.62] as W,
-  fall: [15.62, 16.3] as W,
-  black: [16.16, 16.5] as W,
-  rewind: [16.36, 16.66] as W,
+  fall: [15.62, 16.12] as W,
+  black: [16.0, 16.34] as W,
+  /** THE REWIND: the whole old half runs backward under a camera high over the town (world.ts). */
+  rewind: [16.26, 16.66] as W,
   assemble: [16.66, 17.44] as W,
   // NEW WEBSITE.
   nLift: [18.04, 18.2] as W,
@@ -123,7 +124,10 @@ export const bump = (P: number, a: number, b: number, f = 0.08) => range(P, a, a
  */
 const D = 24;
 const CLOCK: [number, number][] = [
-  [0, 19 + 38 / 60],
+  [0, 18.55],
+  [1.0, 18.95],
+  [1.66, 19.2],
+  [2.3, 19.36],
   [4.6, 19 + 39 / 60],
   [4.72, 19 + 40 / 60],
   [5.66, 19 + 40.5 / 60],
@@ -160,9 +164,9 @@ const CLOCK: [number, number][] = [
   // The day goes as we cross the town: 11:47pm, any night.
   [12.84, 380 * D + 23 + 47 / 60],
   [15.4, 380 * D + 23 + 48 / 60],
-  [16.36, 380 * D + 23 + 48 / 60],
-  // The rewind: the same night, back to the first evening (whole days), then the hours run backward.
-  [16.36, 23 + 48 / 60],
+  [16.26, 380 * D + 23 + 48 / 60],
+  // The rewind (16.26 to 16.66) runs the hours backward itself (world.ts); the clock lands on the first evening.
+  [16.26, 19 + 37 / 60],
   [16.66, 19 + 37 / 60],
   [18.0, 19 + 38 / 60],
   [19.6, 19 + 40 / 60],
@@ -213,6 +217,29 @@ export function clockAt(P: number): number {
     }
   }
   return c[c.length - 1][1];
+}
+
+/**
+ * A YEAR AS A TIME-LAPSE: the hours over a year window, with the nights
+ * short (seven tenths of each day's turn is daylight, half past six to half
+ * past seven), so the sun sweeps and the shadows wheel and the dark is a
+ * blink. Starts and ends on the clock's own hours either side of the window.
+ */
+export function lapseHours(P: number): number | null {
+  const run = (w: W, day0: number, h0: number, h1: number, cycles: number) => {
+    const u = (h: number) => (h >= 6.5 && h <= 19.5 ? ((h - 6.5) / 13) * 0.7 : h > 19.5 ? 0.7 + ((h - 19.5) / 11) * 0.3 : 0.7 + ((h + 4.5) / 11) * 0.3);
+    const warp = (v: number) => (v < 0.7 ? 6.5 + (v / 0.7) * 13 : 19.5 + ((v - 0.7) / 0.3) * 11);
+    const u0 = u(h0);
+    const u1 = u(h1);
+    const total = cycles - 1 + (1 + u1 - u0);
+    const phase = u0 + total * smooth(k(P, w));
+    const d = Math.floor(phase);
+    const hod = warp(phase - d);
+    return (day0 + d) * 24 + (hod >= 24 ? hod - 24 : hod);
+  };
+  if (inW(P, B.year)) return run(B.year, 14, 16.5, 9.5, 3);
+  if (inW(P, B.nYear)) return run(B.nYear, 11, 17.0, 9.0, 3);
+  return null;
 }
 
 /** 0 the old way, 1 the new (after the turn's rewind). */
