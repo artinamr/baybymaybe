@@ -10,7 +10,7 @@ const browser = await puppeteer.launch({
 });
 const page = await browser.newPage();
 const Ps = list.split(",").map(Number);
-await page.goto(`${base}/story/?at=${Ps[0]}&perf=1&hud=0`, { waitUntil: "load", timeout: 300000 });
+await page.goto(`${base}/story/?at=${Ps[0]}&perf=1&hud=0${process.env.EXTRA || ""}`, { waitUntil: "load", timeout: 300000 });
 await page.waitForFunction(() => !!window.__story, { timeout: 300000, polling: 500 });
 await new Promise((r) => setTimeout(r, 4000));
 for (const P of Ps) {

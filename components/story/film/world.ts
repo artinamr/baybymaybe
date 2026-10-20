@@ -87,8 +87,7 @@ const JOB_SPOTS: [number, number, number, number, number][] = [
 /** When each job's card burns away at the turn. */
 const burnAt = (i: number): [number, number] => [B.fall[0] + 0.02 + i * 0.04, B.fall[0] + 0.3 + i * 0.04];
 
-/** How far each pane can see into the town (m): Sam's garden opens over the fence; the office is a closed room. */
-const PANE_REACH = [70, 26];
+const SHADOW_ONCE = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("shadow1") === "1";
 
 /** THE OFFICE'S MOMENTS (the new way): when the office's screen is up, what it shows, and what the pointer calls it. */
 const OFFICE: { a: number; b: number; id: string; part: string }[] = [
@@ -202,8 +201,6 @@ export class World {
     }) as [THREE.PerspectiveCamera, THREE.PerspectiveCamera];
     this.post = new Post(4, 6, opts.quality > 0);
     this.sky = new Sky(this.scene, opts.quality === 0 ? 1024 : 2048);
-    this.shadowFull = opts.quality === 0 ? 1024 : 2048;
-    this.shadowSmall = opts.quality === 0 ? 512 : 1024;
     this.town = buildTown(this.scene, opts.quality);
     this.land = buildLand(this.scene);
     this.home = buildHome(this.scene);
@@ -1601,9 +1598,6 @@ export class World {
     this.hover = best;
   }
 
-  private chunks: THREE.InstancedMesh[] | null = null;
-  private shadowFull = 2048;
-  private shadowSmall = 1024;
   private views: View[] = [
     { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
     { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
@@ -1652,14 +1646,6 @@ export class World {
     const env = this.sky.env(this.gl, time);
     if (env && this.scene.environment !== env) this.scene.environment = env;
     const g = this.grade;
-    // A pane's shadows cover a few metres round its subject: a smaller map draws twice for the cost of one.
-    const want = this.split.on ? this.shadowSmall : this.shadowFull;
-    const ks = this.sky.key.shadow;
-    if (ks.mapSize.x !== want) {
-      ks.mapSize.set(want, want);
-      ks.map?.dispose();
-      ks.map = null;
-    }
     if (!this.split.on) {
       const v = this.views[0];
       v.camera = this.camera;
@@ -1670,17 +1656,6 @@ export class World {
       this.post.render(this.gl, this.scene, this.views.slice(0, 1), g, time);
       return;
     }
-    // Each pane looks into a room: the town far beyond what it can see is left out of its draw (its own pass only).
-    this.chunks ??= this.town.group.children.filter((o) => (o as THREE.InstancedMesh).isInstancedMesh) as THREE.InstancedMesh[];
-    const was = this.chunks.map((m) => m.visible);
-    const cull = (i: number) => {
-      const cam = this.panes[i];
-      const far = this.paneCam[i].sub > 0.05 ? Infinity : PANE_REACH[i];
-      this.chunks!.forEach((m, j) => {
-        const b = m.boundingSphere;
-        m.visible = was[j] && (!b || cam.position.distanceTo(b.center) - b.radius < far);
-      });
-    };
     for (let i = 0; i < 2; i++) {
       const v = this.views[i];
       const cam = this.panes[i];
@@ -1691,13 +1666,14 @@ export class World {
       v.aperture = this.camOverride ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
       // Each pane's shadows are spent on its own subject.
       const r = Math.min(150, Math.max(3, v.focus * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
+      // (Experiment: SHADOW_ONCE draws the sun's shadow map for pane A only.)
       v.before = () => {
         this.sky.aimShadow(c.at, r);
-        cull(i);
+        if (SHADOW_ONCE) this.gl.shadowMap.autoUpdate = i === 0;
       };
     }
     this.post.render(this.gl, this.scene, this.views, g, time);
-    this.chunks.forEach((m, j) => (m.visible = was[j]));
+    this.gl.shadowMap.autoUpdate = true;
   }
 }
 
