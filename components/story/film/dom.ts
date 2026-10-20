@@ -169,7 +169,8 @@ export class Dom {
     const sim = w.sim;
     const lost = sim.lost.website + sim.lost.inbox + sim.lost.admin + sim.lost.followup;
     const mode = P >= 16.88 ? "kept" : "lost";
-    const show = (P > 3.16 && P < 15.2) || (P > 18.56 && P < 27.8);
+    // (While the picture is in two the counter would sit on the panes' cards: it shows before the split and after.)
+    const show = (P > 3.16 && P < 15.2) || (P > 18.56 && P < 18.94) || (P > 27.62 && P < 27.86);
     const full = (P > 13.9 && P < 15.2) || (P > 26.9 && P < 27.8);
     this.set("cmode", mode, () => this.count?.setAttribute("data-mode", mode));
     this.set("cshow", show, () => this.count?.toggleAttribute("data-show", show));
