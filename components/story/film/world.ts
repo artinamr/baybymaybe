@@ -1622,6 +1622,31 @@ export class World {
   }
 
   private lastP = 0;
+  /** The surfaces of each place (lights left out), with whether each was shown, for the panes' own draws. */
+  private _paneParts: Record<string, { o: THREE.Object3D[]; was: boolean[]; hidden: boolean }> | null = null;
+  private get paneParts() {
+    if (!this._paneParts) {
+      const of = (g: THREE.Object3D) => {
+        const o: THREE.Object3D[] = [];
+        g.traverse((x) => {
+          if (x !== g && ((x as THREE.Mesh).isMesh || (x as THREE.Points).isPoints || (x as THREE.Line).isLine)) o.push(x);
+        });
+        return { o, was: o.map(() => true), hidden: false };
+      };
+      this._paneParts = { town: of(this.town.group), land: of(this.land.group), home: of(this.home.group), shop: of(this.shop.group) };
+    }
+    return this._paneParts;
+  }
+  private showPart(p: { o: THREE.Object3D[]; was: boolean[]; hidden: boolean }, show: boolean) {
+    if (show === !p.hidden) return;
+    if (!show) {
+      p.o.forEach((x, j) => {
+        p.was[j] = x.visible;
+        x.visible = false;
+      });
+    } else p.o.forEach((x, j) => (x.visible = p.was[j]));
+    p.hidden = !show;
+  }
   private views: View[] = [
     { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
     { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
@@ -1702,17 +1727,19 @@ export class World {
         this.scene.environmentIntensity = this.sky.out.envI * (inside ? 0.42 : 1);
         // Each pane draws only the place it can see (the office pane looks into a closed room;
         // Sam's garden never sees the workshop): two views for little more than the cost of one.
+        // Only surfaces are left out, never a light: a different set of lights is a new program for
+        // every material, compiled the first time (seconds on D3D).
         const own = c.sub < 0.05;
-        this.town.group.visible = !room;
-        this.land.group.visible = !room;
-        this.home.group.visible = !(room && i === 1);
-        this.shop.group.visible = !own || i === 1;
+        this.showPart(this.paneParts.town, !room);
+        this.showPart(this.paneParts.land, !room);
+        this.showPart(this.paneParts.home, !(room && i === 1));
+        this.showPart(this.paneParts.shop, !own || i === 1);
       };
     }
     this.post.render(this.gl, this.scene, this.views, g, time);
     this.sky.dome.visible = true;
     this.scene.environmentIntensity = this.sky.out.envI;
-    this.town.group.visible = this.land.group.visible = this.home.group.visible = this.shop.group.visible = true;
+    for (const part of Object.values(this.paneParts)) this.showPart(part, true);
   }
 }
 
