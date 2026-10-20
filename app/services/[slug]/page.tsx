@@ -195,7 +195,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           <ul className="items">
             {s.deliver.map((it, i) => (
               <li key={it.title} data-rv style={{ transitionDelay: `${(i % 2) * 90}ms` }}>
-                <span className="item-n mono">{String(i + 1).padStart(2, "0")}</span>
+                <span className="item-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                 <h3 className="item-t">{it.title}</h3>
                 <p className="item-b">{it.body}</p>
               </li>
@@ -220,7 +220,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                 <details key={g.group} className="svc-spec-group" open={i === 0}>
                   <summary>
                     <h3 className="svc-spec-summary">
-                      <span className="svc-spec-n mono">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="svc-spec-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                       <span className="svc-spec-t">{g.group}</span>
                       <span className="svc-spec-toggle" aria-hidden>+</span>
                     </h3>
@@ -280,7 +280,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           <ol className="flow">
             {s.built.map((it, i) => (
               <li key={it.title} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
-                <span className="flow-n mono">{String(i + 1).padStart(2, "0")}</span>
+                <span className="flow-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                 <h3 className="item-t">{it.title}</h3>
                 <p className="item-b">{it.body}</p>
               </li>

@@ -51,7 +51,7 @@ export default function Contact() {
           <ol className="ct-next" data-rv>
             {NEXT.map((n, i) => (
               <li key={n.title}>
-                <span className="mono">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                 <div>
                   <p className="item-t">{n.title}</p>
                   <p className="item-b">{n.body}</p>

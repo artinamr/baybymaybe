@@ -56,7 +56,7 @@ export function LegalPage({
             {sections.map((s, i) => (
               <section key={s.id} id={s.id} className="lg-sec" aria-labelledby={`${s.id}-h`}>
                 <h2 id={`${s.id}-h`} className="lg-h">
-                  <span className="mono">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                   {s.title}
                 </h2>
                 {s.body}

@@ -66,7 +66,7 @@ export default function Audit() {
           <ol className="ct-next" data-rv>
             {GET.map((g, i) => (
               <li key={g}>
-                <span className="mono">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                 <div>
                   <p className="item-t">{g}</p>
                 </div>
@@ -92,7 +92,7 @@ export default function Audit() {
         <ul className="items">
           {LOOK.map((it, i) => (
             <li key={it.title} data-rv style={{ transitionDelay: `${(i % 2) * 90}ms` }}>
-              <span className="item-n mono">{String(i + 1).padStart(2, "0")}</span>
+              <span className="item-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
               <h3 className="item-t">{it.title}</h3>
               <p className="item-b">{it.body}</p>
             </li>

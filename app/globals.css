@@ -2867,6 +2867,10 @@ html[data-nowebgl] .pot-fill {
 .qa-n::before {
   content: attr(data-n);
 }
+/* Every list number set in mono the same way (sections, steps, groups). */
+.mono[data-n]::before {
+  content: attr(data-n);
+}
 .qa-text {
   transition: color 300ms ease;
 }
