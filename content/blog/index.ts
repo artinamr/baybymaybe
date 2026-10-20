@@ -680,10 +680,10 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
-        title: "Switching templates in version 7.0 FAQ",
-        publisher: "Squarespace Help",
-        url: "https://support.squarespace.com/hc/en-us/articles/206545367",
-        accessed: CHECKED_1012,
+        title: "Exporting or Embedding Your Wix Site Elsewhere",
+        publisher: "Wix Help Center",
+        url: "https://support.wix.com/en/article/exporting-or-embedding-your-wix-site-elsewhere",
+        accessed: "2026-10-20",
       },
       {
         title: "Search Engine Optimization (SEO) Starter Guide",
@@ -695,6 +695,12 @@ export const ARTICLES: ArticleMeta[] = [
         title: "Manage my domain name?",
         publisher: "Domain Name Commission",
         url: "https://dnc.org.nz/tools-and-services/how-do-i-2/manage-my-domain-name/",
+        accessed: "2026-10-20",
+      },
+      {
+        title: "Export your site content",
+        publisher: "Squarespace Help",
+        url: "https://support.squarespace.com/hc/en-us/articles/206566687-Exporting-your-site",
         accessed: "2026-10-20",
       },
       {
