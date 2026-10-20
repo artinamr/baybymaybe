@@ -1687,8 +1687,7 @@ export class World {
       v.camera = cam;
       v.rect = this.rects[i];
       v.focus = cam.position.distanceTo(c.at);
-      // (The office pane is sharp through: its depth pass is not drawn.)
-      v.aperture = this.camOverride || (i === 1 && c.sub < 0.05) ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
+      v.aperture = this.camOverride ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
       // Each pane's shadows are spent on its own subject.
       const r = Math.min(150, Math.max(3, v.focus * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
       // A pane inside a closed room (the office once the camera is in; Sam on the sofa) has no sky behind it, and
@@ -1704,8 +1703,8 @@ export class World {
         // Each pane draws only the place it can see (the office pane looks into a closed room;
         // Sam's garden never sees the workshop): two views for little more than the cost of one.
         const own = c.sub < 0.05;
-        this.town.group.visible = !(room && i === 1);
-        this.land.group.visible = !(room && i === 1);
+        this.town.group.visible = !room;
+        this.land.group.visible = !room;
         this.home.group.visible = !(room && i === 1);
         this.shop.group.visible = !own || i === 1;
       };

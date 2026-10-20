@@ -178,7 +178,7 @@ const A_NIGHT_AT = fix(-33.5, 1.5, 17.5);
 
 /** The shopfront: the office through the glass, its desk, its chair, the laptop's light. */
 const B_WIN_EYE = S(-2.4, 1.25, 6.2);
-const B_WIN_AT = S(-4.0, 1.2, 3.4);
+const B_WIN_AT = S(-3.98, 1.3, 3.75);
 const B_WIN = { dof: 0.3 };
 
 const A = (P: number, eye: Pt, at: Pt, fov: number, o: { ppx?: number; ppy?: number; dof?: number; sub?: number } = {}): Key => ({ P, eye, at, fov, ppx: o.ppx ?? 0.5, ppy: o.ppy, dof: o.dof, sub: o.sub ?? 0 });
