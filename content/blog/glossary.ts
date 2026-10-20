@@ -69,7 +69,7 @@ export const GLOSSARY_SOURCES = {
     accessed: CHECKED,
   },
   moves: {
-    title: "Site moves with URL changes",
+    title: "How to move a site",
     publisher: "Google Search Central",
     url: "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
     accessed: CHECKED,

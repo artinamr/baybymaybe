@@ -126,7 +126,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       { title: "Control your snippets in search results", publisher: "Google Search Central", url: "https://developers.google.com/search/docs/appearance/snippet", accessed: CHECKED_1012 },
       {
-        title: "Site moves with URL changes",
+        title: "How to move a site",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
         accessed: CHECKED_1012,
