@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { B, k } from "./script";
 import { flightAt, type Flight } from "./mail";
+import { NODES } from "./system";
 
 /**
  * THE CAMERA: one unbroken flight through the film, keyed on the film's
@@ -50,7 +51,8 @@ const READ_AT = H(-3.1, 1.45, -2.2);
 const DECK_EYE = H(0.9, 1.85, -11.2);
 const DECK_AT = H(-1.0, 1.45, -6.2);
 /** The new route's cards (under their parts). */
-const node = (x: number, y: number, z: number): Pt => () => V(x, y, z);
+/** A station of the system (its ring), offset. */
+const station = (i: number, dx: number, dy: number, dz: number): Pt => () => NODES[i].pos.clone().add(V(dx, dy, dz));
 
 /** A composed frame held for a moment either side of P (a rest sits still). */
 function hold(P: number, eye: Pt, at: Pt, fov: number, ppx = 0.6, half = 0.05, ppy?: number, dof?: number): Key[] {
@@ -137,11 +139,11 @@ export const KEYS: Key[] = [
   { P: 20.26, eye: fix(-38.0, 7.2, 26.5), at: fix(-41.0, 1.6, 18.0), fov: 38, ppx: 0.6 },
   ...hold(20.5, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
   { P: 20.62, eye: fix(-37.5, 9.0, 25.0), at: fix(-20, 12, 6), fov: 42, ppx: 0.58 },
-  ...hold(20.76, node(1.67, 17.4, 6.79), node(4, 17.4, -6), 40, 0.7, 0.04, undefined, 0),
+  ...hold(20.76, station(2, -2.4, -1.0, 14.0), station(2, 0, -2.3, 0), 40, 0.68, 0.04, undefined, 0),
   { P: 20.98, eye: fix(-28, 24, 26), at: fix(-12, 15, -1), fov: 44, ppx: 0.6 },
-  ...hold(21.3, node(-17.57, 15.9, 11.5), node(-14, 15.9, -1), 40, 0.7, 0.08, undefined, 0),
+  ...hold(21.3, station(1, -2.4, -1.0, 14.0), station(1, 0, -2.3, 0), 40, 0.68, 0.08, undefined, 0),
   // NEW PLATFORM: the quote, filled in by itself; it flies to Sam; accepted; the deck; paid.
-  ...hold(22.1, node(17.43, 15.9, 2.5), node(21, 15.9, -10), 40, 0.7, 0.12, undefined, 0),
+  ...hold(22.1, station(3, -2.4, -1.0, 14.0), station(3, 0, -2.3, 0), 40, 0.68, 0.12, undefined, 0),
   { P: 22.38, eye: env(-8, 3, 12), at: env(-6, -1, 4), fov: 46, ppx: 0.56 },
   ...hold(22.52, READ_EYE, READ_AT, 32, 0.6, 0.04, undefined, 0.14),
   // The build: a slow arc round the deck as its pieces drop in.

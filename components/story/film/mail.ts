@@ -93,11 +93,17 @@ export class Envelope {
    * Fly along `f` at t (0..1), the camera's position for the trail's facing.
    * `k` its visibility; `size` its scale.
    */
-  update(f: Flight | null, t: number, k: number, camera: THREE.Camera, size = 1) {
+  /**
+   * ... `spark`: the new way's message is light alone (no paper): a brighter,
+   * wider core and a longer trail.
+   */
+  update(f: Flight | null, t: number, k: number, camera: THREE.Camera, size = 1, spark = false) {
     const on = !!f && k > 0.005;
     this.group.visible = on;
     this.trail.visible = on && t > 0.01 && t < 0.995;
     if (!on || !f) return;
+    this.mesh.visible = !spark;
+    this.glow.scale.setScalar(spark ? 1.7 : 1);
     flightAt(f, t, this.pos);
     const ahead = flightAt(f, t + 0.01, new THREE.Vector3());
     const dir = ahead.sub(this.pos).normalize();
@@ -110,7 +116,7 @@ export class Envelope {
     this.mat.opacity = k;
     // Paper, faintly warm or cool, a touch brighter than a screen (it carries its own light).
     this.mat.color.copy(f.color).lerp(new THREE.Color(1, 1, 1), 0.7).multiplyScalar(1.25 * uiScale.k);
-    this.glowMat.color.copy(f.color).multiplyScalar(0.7 * k * Math.min(1, uiScale.k * 1.9));
+    this.glowMat.color.copy(f.color).multiplyScalar((spark ? 1.6 : 0.7) * k * Math.min(1, uiScale.k * 1.9));
     // The trail: the way it came, fading.
     const cq = camera.quaternion;
     const col = new THREE.Color();
@@ -118,7 +124,7 @@ export class Envelope {
       const tt = t - (i + 1) * 0.012;
       const p = flightAt(f, Math.max(0, tt), new THREE.Vector3());
       const fade = (1 - i / TRAIL) * (tt > 0 ? 1 : 0) * k;
-      const s = (1.6 - i * 0.05) * size;
+      const s = (1.6 - i * 0.05) * size * (spark ? 1.35 : 1);
       this.m.compose(p, cq, new THREE.Vector3(s, s, s));
       this.trail.setMatrixAt(i, this.m);
       col.copy(f.color).multiplyScalar(0.55 * fade * fade);

@@ -157,7 +157,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "Take your hands off the keyboard.",
     beat: "Same customer. Same evening. A different route.",
     scene:
-      "Your hands stop and lift off the keys. Silence. The cards around the desk hold still, then let go and fall like paper into the dark. The clock runs backward to 7:38pm and the town lights up again at dusk. Over it, a single line of indigo light draws itself from Sam’s house to your workshop and back, and six parts lock onto it: website, instant reply, booking, quote, invoice, follow-up.",
+      "Your hands stop and lift off the keys. Silence. The cards around the desk hold still, then let go and fall like paper into the dark. The clock runs backward to 7:38pm and the town lights up again at dusk. A scan of light sweeps out from your workshop across the town, and where it passes, six stations rise on threads of light: website, instant reply, booking, quote, invoice, follow-up. Then one clean arc of light draws itself from Sam’s roof over the town to your workshop and back.",
     machine: "none",
   },
   {
@@ -187,7 +187,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "Typed once. Used everywhere.",
     line: "The enquiry fills in the booking, the quote and the invoice. Sam accepts and pays from their phone.",
     scene:
-      "At the quote, the details are already filled in from Sam’s enquiry; you add the price and send it. The quote flies to Sam’s phone and Sam accepts it. The new deck goes in, board by board. The invoice is made from the quote and Sam pays it online, standing on the new deck.",
+      "At the quote, Sam’s three answers fly in as light from the website station and drop into their lines: the details are already filled in; you add the price and send it. The quote flies to Sam’s phone and Sam accepts it. The new deck goes in, board by board. The invoice is made from the quote and Sam pays it online, standing on the new deck.",
     machine: "new",
   },
   {

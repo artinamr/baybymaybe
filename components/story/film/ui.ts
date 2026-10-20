@@ -15,6 +15,8 @@ export type Ctx = CanvasRenderingContext2D;
 export const C = {
   paper: "#f6f5f2",
   white: "#ffffff",
+  /** A screen's own background (white on a device; dark glass on a hologram). */
+  surface: "#ffffff",
   ink: "#0a0b10",
   ink2: "#3a3c44",
   mute: "#80838b",
@@ -189,6 +191,34 @@ export function typed(s: string, n: number, caret: boolean) {
 /* ------------------------------------------------------------------ */
 /* PHONE (390 x 844 points, drawn at 2x)                                */
 /* ------------------------------------------------------------------ */
+
+/**
+ * Draw a screen as a hologram: the palette turns to dark glass and light for
+ * the call, then back (the draw functions read C as they go).
+ */
+const PAPER = { ...C };
+const HOLO = {
+  paper: "rgba(255,255,255,0.07)",
+  surface: "rgba(12,13,24,0.9)",
+  ink: "#f3f2fa",
+  ink2: "#cfcede",
+  mute: "#9796b0",
+  line: "rgba(255,255,255,0.14)",
+  line2: "rgba(255,255,255,0.22)",
+  wash: "rgba(255,255,255,0.06)",
+  indigoL: "rgba(91,61,240,0.32)",
+  amberL: "rgba(228,129,47,0.26)",
+  redL: "rgba(208,69,59,0.26)",
+  greenL: "rgba(47,143,91,0.26)",
+};
+export function holo(draw: () => void) {
+  Object.assign(C, HOLO);
+  try {
+    draw();
+  } finally {
+    Object.assign(C, PAPER);
+  }
+}
 
 export const PHONE = { w: 390, h: 844, s: 1.3 };
 
@@ -846,7 +876,7 @@ export function pending(ctx: Ctx, s: { tag: string; title: string; line: string;
 export function docCard(ctx: Ctx, s: { kind: "quote" | "invoice"; typed: number; stamp: number; auto: boolean; sent: number }) {
   const W = DESK.w;
   const H = DESK.h;
-  ctx.fillStyle = C.white;
+  ctx.fillStyle = C.surface;
   ctx.fillRect(0, 0, W, H);
   const q = s.kind === "quote";
   text(ctx, q ? "QUOTE" : "INVOICE", 64, 96, { size: 40, weight: 700, color: C.ink, track: 3 });
@@ -930,7 +960,7 @@ export type Booking = { day: number; h: number; len: number; label: string; who:
 export function calendar(ctx: Ctx, s: { bookings: Booking[]; now: number; week: string }) {
   const W = DESK.w;
   const H = DESK.h;
-  ctx.fillStyle = C.white;
+  ctx.fillStyle = C.surface;
   ctx.fillRect(0, 0, W, H);
   text(ctx, s.week, 40, 64, { size: 26, weight: 700, color: C.ink });
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
@@ -964,7 +994,7 @@ export function calendar(ctx: Ctx, s: { bookings: Booking[]; now: number; week: 
 export function handover(ctx: Ctx, s: { show: number }) {
   const W = DESK.w;
   const H = DESK.h;
-  ctx.fillStyle = C.white;
+  ctx.fillStyle = C.surface;
   ctx.fillRect(0, 0, W, H);
   rr(ctx, 48, 48, 260, 46, 23, C.amberL);
   text(ctx, "Over to you", 178, 79, { size: 19, weight: 700, color: C.amber, align: "center" });
@@ -981,7 +1011,7 @@ export function handover(ctx: Ctx, s: { show: number }) {
 export function today(ctx: Ctx, s: { n: number }) {
   const W = DESK.w;
   const H = DESK.h;
-  ctx.fillStyle = C.white;
+  ctx.fillStyle = C.surface;
   ctx.fillRect(0, 0, W, H);
   text(ctx, "Today", 56, 92, { size: 40, weight: 700, color: C.ink });
   text(ctx, "Nothing is waiting on you.", 56, 136, { size: 22, color: C.green });
@@ -1005,14 +1035,20 @@ export function today(ctx: Ctx, s: { n: number }) {
 }
 
 /** A label on a node of the new system (Website, Reply, Booking, Quote, Invoice, Follow-up). */
-export function nodeLabel(ctx: Ctx, w: number, h: number, title: string, line: string, icon: number) {
+export function nodeLabel(ctx: Ctx, w: number, h: number, title: string, line: string, icon: number, dark = false) {
   ctx.clearRect(0, 0, w, h);
-  rr(ctx, 4, 4, w - 8, h - 8, 28, "rgba(255,255,255,0.96)");
-  rr(ctx, 26, 26, h - 52, h - 52, 18, C.indigoL);
+  if (dark) {
+    rr(ctx, 4, 4, w - 8, h - 8, 28, "rgba(10,11,22,0.86)", "rgba(154,134,255,0.45)", 3);
+    rr(ctx, 26, 26, h - 52, h - 52, 18, "rgba(91,61,240,0.32)");
+  } else {
+    rr(ctx, 4, 4, w - 8, h - 8, 28, "rgba(255,255,255,0.96)");
+    rr(ctx, 26, 26, h - 52, h - 52, 18, C.indigoL);
+  }
   const cx = 26 + (h - 52) / 2;
   const cy = h / 2;
-  ctx.strokeStyle = C.indigo;
-  ctx.fillStyle = C.indigo;
+  const ic = dark ? "#b7a8ff" : C.indigo;
+  ctx.strokeStyle = ic;
+  ctx.fillStyle = ic;
   ctx.lineWidth = 4;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -1064,6 +1100,6 @@ export function nodeLabel(ctx: Ctx, w: number, h: number, title: string, line: s
     ctx.lineTo(cx + r * 0.45, cy - r * 0.15);
     ctx.stroke();
   }
-  text(ctx, title, h + 6, h / 2 - 4, { size: h * 0.25, weight: 700, color: C.ink, max: w - h - 46 });
-  text(ctx, line, h + 6, h / 2 + h * 0.22, { size: h * 0.16, color: C.mute, max: w - h - 46 });
+  text(ctx, title, h + 6, h / 2 - 4, { size: h * 0.25, weight: 700, color: dark ? "#f3f2fa" : C.ink, max: w - h - 46 });
+  text(ctx, line, h + 6, h / 2 + h * 0.22, { size: h * 0.16, color: dark ? "rgba(255,255,255,0.62)" : C.mute, max: w - h - 46 });
 }

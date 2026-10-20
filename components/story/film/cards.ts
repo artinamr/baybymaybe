@@ -69,6 +69,38 @@ export function faceMat(tex: THREE.Texture) {
   return new THREE.MeshBasicMaterial({ map: tex, color: 0xffffff, toneMapped: false, transparent: true, depthWrite: true, fog: false });
 }
 
+// A hologram's face: the screen, built top-down behind a line of light.
+const HOLO_VERT = /* glsl */ `
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`;
+const HOLO_FRAG = /* glsl */ `
+precision highp float;
+uniform sampler2D map;
+uniform float uBuild;
+uniform float uGlow;
+uniform float uOpacity;
+varying vec2 vUv;
+void main() {
+  vec4 c = texture2D(map, vUv);
+  float edge = 1.0 - uBuild;
+  float on = step(edge, vUv.y);
+  float line = exp(-pow((vUv.y - edge) * 70.0, 2.0)) * step(0.001, uBuild) * step(uBuild, 0.999);
+  vec3 col = c.rgb * uGlow * on + vec3(0.62, 0.52, 1.0) * line * 3.0;
+  float a = (c.a * on + line) * uOpacity;
+  if (a < 0.003) discard;
+  gl_FragColor = vec4(col, a);
+}`;
+
+/** The edge of a hologram: a band of light just outside the face. */
+function edgeGeometry(w: number, h: number, r: number, band = 0.05) {
+  const outer = new THREE.Shape(roundRect(w + band * 2, h + band * 2, r + band, 10).map(([x, y]) => new THREE.Vector2(x, y)));
+  outer.holes.push(new THREE.Path(roundRect(w - 0.01, h - 0.01, Math.max(0.002, r - 0.005), 10).map(([x, y]) => new THREE.Vector2(x, y))));
+  return new THREE.ShapeGeometry(outer, 10);
+}
+
 /**
  * The screens' light against the film's exposure: a screen is drawn at the
  * same brightness whatever the exposure (the world sets k = 1 / exposure),
@@ -90,22 +122,57 @@ export class Card {
     readonly h: number,
     radius = 0.06,
     thick = 0.03,
-    look: { bezel?: number; body?: THREE.ColorRepresentation; metal?: number } = {}
+    look: { bezel?: number; body?: THREE.ColorRepresentation; metal?: number; holo?: boolean } = {}
   ) {
+    this.holo = !!look.holo;
     this.bodyMat = new THREE.MeshStandardMaterial({ color: look.body ?? 0xf2f1ee, roughness: look.body ? 0.28 : 0.35, metalness: look.metal ?? 0, transparent: true });
     this.body = new THREE.Mesh(tablet(w, h, thick, radius, Math.min(0.01, thick * 0.3)), this.bodyMat);
     this.body.castShadow = true;
     this.faceMat = faceMat(screen.tex);
     const inset = look.bezel ?? radius * 0.175;
-    this.face = new THREE.Mesh(faceGeometry(w - inset * 2, h - inset * 2, Math.max(0.005, radius - inset * 0.7)), this.faceMat);
+    const fg = faceGeometry(w - inset * 2, h - inset * 2, Math.max(0.005, radius - inset * 0.7));
+    if (this.holo) {
+      // Dark glass, the screen built behind a line of light, an edge of light round it.
+      this.bodyMat.opacity = 0.8;
+      this.bodyMat.roughness = 0.18;
+      this.holoMat = new THREE.ShaderMaterial({
+        vertexShader: HOLO_VERT,
+        fragmentShader: HOLO_FRAG,
+        uniforms: { map: { value: screen.tex }, uBuild: { value: 1 }, uGlow: { value: 1 }, uOpacity: { value: 1 } },
+        transparent: true,
+        depthWrite: true,
+        toneMapped: false,
+        fog: false,
+      });
+      this.edgeMat = new THREE.MeshBasicMaterial({ color: 0x7a66ff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false });
+      this.edge = new THREE.Mesh(edgeGeometry(w - inset * 2, h - inset * 2, Math.max(0.005, radius - inset * 0.7)), this.edgeMat);
+      this.edge.position.z = thick / 2 + 0.004;
+      this.edge.layers.set(1);
+      this.group.add(this.edge);
+    }
+    this.face = new THREE.Mesh(fg, this.holoMat ?? this.faceMat);
     this.face.position.z = thick / 2 + 0.002;
     const bg = faceGeometry(w - inset * 2, h - inset * 2, Math.max(0.005, radius - inset * 0.7));
     // Turned to face the other way, its UVs as they were: from behind it reads left to right too.
     bg.rotateY(Math.PI);
-    this.back = new THREE.Mesh(bg, this.faceMat);
+    this.back = new THREE.Mesh(bg, this.holoMat ?? this.faceMat);
     this.back.position.z = -thick / 2 - 0.002;
     this.group.add(this.body, this.face, this.back);
     this.group.visible = false;
+  }
+  /** A hologram (dark glass, an edge of light, built top-down), or a card of paper. */
+  readonly holo: boolean;
+  private holoMat: THREE.ShaderMaterial | null = null;
+  private edge: THREE.Mesh | null = null;
+  private edgeMat: THREE.MeshBasicMaterial | null = null;
+  /** 0..1 how much of a hologram's face is built (top-down, behind a line of light). */
+  private built = 1;
+  get build() {
+    return this.built;
+  }
+  set build(v: number) {
+    this.built = v;
+    if (this.holoMat) this.holoMat.uniforms.uBuild.value = v;
   }
   private k = 0;
   private glow = 1;
@@ -125,10 +192,18 @@ export class Card {
     const k = this.k * this.clear;
     this.group.visible = k > 0.002;
     this.faceMat.opacity = k;
-    this.bodyMat.opacity = k;
-    this.body.visible = k > 0.98 ? true : k > 0.02;
     this.faceMat.color.setScalar(this.glow * uiScale.k);
-    this.bodyMat.depthWrite = k > 0.98;
+    if (this.holoMat) {
+      this.holoMat.uniforms.uOpacity.value = k;
+      this.holoMat.uniforms.uGlow.value = this.glow * uiScale.k;
+      this.bodyMat.opacity = 0.8 * k;
+      this.bodyMat.depthWrite = false;
+      if (this.edgeMat) this.edgeMat.color.setRGB(0.48, 0.4, 1.0).multiplyScalar(k * (0.35 + 0.65 * this.built) * (0.6 + 0.4 * this.glow));
+    } else {
+      this.bodyMat.opacity = k;
+      this.bodyMat.depthWrite = k > 0.98;
+    }
+    this.body.visible = k > 0.98 ? true : k > 0.02;
   }
 }
 

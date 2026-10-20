@@ -177,6 +177,9 @@ export type GroundUniforms = {
   uPools: { value: THREE.Vector4[] };
   uPoolCol: { value: THREE.Vector3[] };
   uPoolOn: { value: number };
+  /** The scan: a ring of light crossing the town (x, z, radius, width) and its strength. */
+  uScan: { value: THREE.Vector4 };
+  uScanK: { value: number };
 };
 
 /** Pools of light that move or change one by one (lit rooms); the streetlights are baked (uLamps). */
@@ -192,6 +195,8 @@ export function groundMat(plan: THREE.Texture, ao: THREE.Texture, lamps: THREE.T
     uPools: { value: Array.from({ length: POOLS }, () => new THREE.Vector4(0, 0, 1, 0)) },
     uPoolCol: { value: Array.from({ length: POOLS }, () => new THREE.Vector3(1, 0.7, 0.4)) },
     uPoolOn: { value: 1 },
+    uScan: { value: new THREE.Vector4(0, 0, 0, 1) },
+    uScanK: { value: 0 },
   };
   m.onBeforeCompile = (s) => {
     Object.assign(s.uniforms, u);
@@ -209,7 +214,9 @@ uniform float uLampK;
 uniform vec4 uPlanBox;
 uniform vec4 uPools[${POOLS}];
 uniform vec3 uPoolCol[${POOLS}];
-uniform float uPoolOn;`
+uniform float uPoolOn;
+uniform vec4 uScan;
+uniform float uScanK;`
       )
       .replace(
         "#include <aomap_fragment>",
@@ -233,7 +240,14 @@ for (int i = 0; i < ${POOLS}; i++) {
   float f = exp(-r2 * 2.2) + 0.25 * exp(-r2 * 0.55);
   pool += uPoolCol[i] * (p.w * f);
 }
-totalEmissiveRadiance += pool * uPoolOn * diffuseColor.rgb;`
+totalEmissiveRadiance += pool * uPoolOn * diffuseColor.rgb;
+// The scan: a ring crossing the town, a faint wake behind it.
+if (uScanK > 0.0) {
+  float sd = length(vWorld.xz - uScan.xy);
+  float ring = exp(-pow((sd - uScan.z) / max(uScan.w, 0.1), 2.0));
+  float wake = smoothstep(uScan.z, uScan.z - 36.0, sd) * 0.05;
+  totalEmissiveRadiance += vec3(0.45, 0.36, 1.0) * (ring * 1.8 + wake) * uScanK * (0.35 + 0.65 * diffuseColor.g);
+}`
       );
   };
   m.customProgramCacheKey = () => "ground";

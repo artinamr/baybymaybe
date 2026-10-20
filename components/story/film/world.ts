@@ -9,7 +9,7 @@ import { Card, Screen, Strips, carry, uiScale } from "./cards";
 import { MIST, WIND, hookMist } from "./mats";
 import { Crowd } from "./crowd";
 import { Envelope, type Flight } from "./mail";
-import { NODES, System } from "./system";
+import { CARD_DROP, Fields, NODES, System, TAG_DROP } from "./system";
 import { ContactShade } from "./shade";
 import { BACK_STEP, cameraSmooth, phoneAdjust, phoneBackBase, phoneBackTable, type BackBase, type CamOut, type Ctx as CamCtx } from "./camera";
 import { B, bump, clockAt, inW, isNew, k, ke, lapseHours, weathered, type W } from "./script";
@@ -101,6 +101,7 @@ export class World {
   private ownerPose = newPose();
   private crowd: Crowd;
   private system: System;
+  private fields: Fields;
   private mailA: Envelope;
   private mailB: Envelope;
   private mailC: Envelope;
@@ -179,6 +180,7 @@ export class World {
     this.traffic.body.frustumCulled = this.traffic.dark.frustumCulled = false;
     this.scene.add(this.traffic.body, this.traffic.dark);
     this.system = new System(this.scene, H(-2, 0, -1), S(-4, 0, 4));
+    this.fields = new Fields(this.scene);
     this.mailA = new Envelope(this.scene);
     this.mailB = new Envelope(this.scene);
     this.mailC = new Envelope(this.scene);
@@ -201,10 +203,11 @@ export class World {
     this.quoteCard = deskCard(1.4, 0.875, false);
     this.invoiceCard = deskCard(1.4, 0.875, false);
     for (let i = 0; i < 5; i++) this.pend.push(deskCard(1.0, 0.625));
-    this.calCard = deskCard(4.8, 3.0);
-    this.handCard = deskCard(4.8, 3.0);
-    this.nQuoteCard = deskCard(4.8, 3.0);
-    this.todayCard = deskCard(1.4, 0.875);
+    const holoCard = (w: number, h: number) => new Card(new Screen(UI.DESK.w, UI.DESK.h, UI.DESK.s), w, h, 0.05, 0.02, { bezel: 0, body: 0x0b0c16, metal: 0.4, holo: true });
+    this.calCard = holoCard(4.8, 3.0);
+    this.handCard = holoCard(4.8, 3.0);
+    this.nQuoteCard = holoCard(4.8, 3.0);
+    this.todayCard = holoCard(1.4, 0.875);
     for (const c of this.allCards()) this.scene.add(c.group);
 
     // The vans: ours (taken from the workshop so it can drive), and the other business's.
@@ -260,7 +263,7 @@ export class World {
     box("admin", S(-3.9, 1.9, 5.15), V(4.6, 1.2, 0.8));
     box("deck", H(-1.3, 0.6, -7.0), V(7.4, 1.2, 5.2));
     box("van", H(0, 1.2, 12.5), V(2.4, 2.4, 5));
-    NODES.forEach((n) => box(n.id === "website" ? "site" : n.id, n.pos.clone().setY(n.pos.y + 2.2), V(5.2, 1.8, 1.2)));
+    NODES.forEach((n) => box(n.id === "website" ? "site" : n.id, n.pos.clone().setY(n.pos.y - TAG_DROP), V(5.2, 1.8, 1.2)));
 
     UI.initFonts().then(() => {
       for (const c of this.allCards()) c.screen.dirty();
@@ -296,7 +299,7 @@ export class World {
         this.camCtx,
         FILM_LEN,
         this.town.field,
-        NODES.map((n) => ({ c: n.pos.clone().setY(n.pos.y + 2.6), r: 5, from: B.assemble[0] }))
+        NODES.map((n) => ({ c: n.pos.clone().setY(n.pos.y - 1.6), r: 5, from: B.assemble[0] }))
       );
       this.backTables.set(key, (t = phoneBackTable(this.backBase, key)));
     }
@@ -311,10 +314,21 @@ export class World {
   }
 
   lockTimes(): number[] {
-    const b = B.assemble;
-    const build0 = b[0] + 0.05;
-    const span = b[1] - build0;
-    return NODES.map((_, i) => build0 + span * ((i + 2) / (NODES.length + 1)));
+    const out = NODES.map(() => B.assemble[1]);
+    NODES.forEach((_, i) => {
+      for (let P = B.assemble[0]; P <= B.assemble[1]; P += 0.002)
+        if (this.system.rise(i, this.scanRadius(P)) >= 0.72) {
+          out[i] = P;
+          break;
+        }
+    });
+    return out;
+  }
+
+  /** The scan's radius from the workshop at P (it sweeps out over the first third of the assembly). */
+  private scanRadius(P: number) {
+    const a = B.assemble;
+    return 165 * smooth(range(P, a[0] + 0.02, a[0] + 0.38));
   }
 
   /* ---------------------------------------------------------------- */
@@ -326,13 +340,13 @@ export class World {
     const indigo = new THREE.Color(0.55, 0.45, 1.0);
     const samCard = H(-3.1, 2.1, -2.4);
     const column = COLUMN_BASE.clone().setY(3.4);
-    const reply = NODES[1].pos.clone().setY(NODES[1].pos.y + 1.2);
+    const reply = NODES[1].pos.clone();
     return {
       old: { from: samCard, to: column, lift: 26, color: amber } as Flight,
       newOut: { from: samCard, to: reply, lift: 4, color: amber } as Flight,
       newBack: { from: reply.clone(), to: samCard.clone(), lift: 3, color: indigo } as Flight,
-      remind: { from: NODES[5].pos.clone().setY(NODES[5].pos.y + 1.2), to: H(-1.6, 2.2, -5.4), lift: 3, color: indigo } as Flight,
-      quote: { from: NODES[3].pos.clone().setY(NODES[3].pos.y - 1.4), to: samCard.clone(), lift: 6, color: indigo } as Flight,
+      remind: { from: NODES[5].pos.clone(), to: H(-1.6, 2.2, -5.4), lift: 3, color: indigo } as Flight,
+      quote: { from: NODES[3].pos.clone().setY(NODES[3].pos.y - CARD_DROP), to: samCard.clone(), lift: 6, color: indigo } as Flight,
     };
   })();
 
@@ -1213,11 +1227,12 @@ export class World {
       draw();
       const n = NODES[node].pos;
       const yaw = Math.atan2(this.camera.position.x - n.x, this.camera.position.z - n.z);
-      // Under its part of the route, a step toward the camera (the line passes behind it).
-      card.group.position.set(n.x + Math.sin(yaw) * 1.6, n.y - 1.4 - (1 - on) * 1.2, n.z + Math.cos(yaw) * 1.6);
-      card.group.rotation.set(0, yaw, 0);
-      card.group.scale.setScalar(0.6 + 0.4 * on);
-      card.show(on, 1.05);
+      // Hung under its station's tag, built top-down as it arrives.
+      card.group.position.set(n.x, n.y - CARD_DROP - (1 - on) * 0.5, n.z);
+      card.group.rotation.set(-0.04, yaw, 0);
+      card.group.scale.setScalar(0.85 + 0.15 * on);
+      card.build = smooth(on);
+      card.show(Math.min(1, on * 2.5), 1.0);
     };
     const bookings: UI.Booking[] = [
       { day: 0, h: 9, len: 3, label: "Fence", who: "Aroha", at: 0 },
@@ -1228,21 +1243,25 @@ export class World {
     ];
     const calNow = P < B.n3am[0] ? 1 + range(P, B.nBook[0], B.nBook[1]) * 0.2 : 2 + range(P, 21.2, 21.36) * 0.2;
     under(this.calCard, 2, nw ? clamp01(bump(P, B.nBook[0] - 0.02, B.n3am[0] + 0.02, 0.06) + bump(P, 21.12, 21.5, 0.06)) : 0, () =>
-      this.calCard.screen.draw(`cal|${calNow.toFixed(2)}`, (c) => UI.calendar(c, { bookings, now: calNow, week: "This week" }))
+      this.calCard.screen.draw(`cal|${calNow.toFixed(2)}`, (c) => UI.holo(() => UI.calendar(c, { bookings, now: calNow, week: "This week" })))
     );
-    under(this.handCard, 1, nw ? bump(P, B.nHand[0], B.nHand[1] + 0.02, 0.06) : 0, () => this.handCard.screen.draw("hand", (c) => UI.handover(c, { show: 1 })));
+    under(this.handCard, 1, nw ? bump(P, B.nHand[0], B.nHand[1] + 0.02, 0.06) : 0, () => this.handCard.screen.draw("hand", (c) => UI.holo(() => UI.handover(c, { show: 1 }))));
     const qk = nw ? bump(P, B.nQuote[0], B.nQuoteSent + 0.12, 0.08) : 0;
+    // Typed once: Sam's details fly from the website station into the quote as it builds.
+    this.fields.update(this.system, this.system.nodeU[0], this.system.nodeU[3], nw ? range(P, B.nQuote[0] - 0.04, B.nQuote[0] + 0.2) : 0, this.nQuoteCard.group, qk > 0 ? 1 : 0, this.camera);
     under(this.nQuoteCard, 3, qk, () => {
       const sent = P >= B.nQuoteSent ? 1 : 0;
-      this.nQuoteCard.screen.draw(`nquote|${sent}`, (c) => UI.docCard(c, { kind: "quote", typed: 999, stamp: 0, auto: true, sent }));
+      this.nQuoteCard.screen.draw(`nquote|${sent}`, (c) => UI.holo(() => UI.docCard(c, { kind: "quote", typed: 999, stamp: 0, auto: true, sent })));
     });
     // Six o'clock: the day, on a card over the desk.
     const tk = nw ? bump(P, B.nToday[0], B.nClose[0] + 0.02, 0.06) : 0;
     if (tk > 0) {
       const n = ke(P, B.nToday) * 5;
-      this.todayCard.screen.draw(`today|${n.toFixed(1)}`, (c) => UI.today(c, { n }));
-      carry(this.todayCard.group, lid, slot(-3.9, 1.98, 5.2, 0), settle(smoother(range(P, B.nToday[0], B.nToday[0] + 0.12)), 0.4));
-      this.todayCard.show(tk, 1.05);
+      this.todayCard.screen.draw(`today|${n.toFixed(1)}`, (c) => UI.holo(() => UI.today(c, { n })));
+      const arrive = smoother(range(P, B.nToday[0], B.nToday[0] + 0.12));
+      carry(this.todayCard.group, lid, slot(-3.9, 1.98, 5.2, 0), settle(arrive, 0.4));
+      this.todayCard.build = arrive;
+      this.todayCard.show(tk, 1.0);
     } else this.todayCard.show(0);
   }
 
@@ -1281,7 +1300,7 @@ export class World {
       const vis = old ? range(P, B.fold[0] + 0.06, B.fold[1]) * (1 - range(P, B.land - 0.02, B.land + 0.02)) : range(fl.t, 0, 0.05) * (1 - range(fl.t, 0.95, 1));
       // It leaves at the size of the card it was folded from and grows as it climbs.
       const size = (old ? lerp(0.62, 1.6, smooth(range(fl.t, 0, 0.35))) : lerp(0.6, 1.2, smooth(range(fl.t, 0, 0.3)) * (1 - smooth(range(fl.t, 0.75, 1))) + 0.0));
-      this.mailA.update(fl.f, fl.t, vis, cam, size);
+      this.mailA.update(fl.f, fl.t, vis, cam, size, !old);
       this.mailLight.position.copy(this.mailA.pos);
       this.mailLight.intensity = 26 * vis;
     } else {
@@ -1293,12 +1312,12 @@ export class World {
       if (P < w[0] || P >= w[1]) return false;
       const hh = this.town.houses[house];
       const from = hh.top.clone();
-      const to = NODES[1].pos.clone().setY(NODES[1].pos.y + 1.2);
+      const to = NODES[1].pos.clone();
       const u = k(P, w);
       const out = u < 0.5;
       const f: Flight = out ? { from, to, lift: 6, color: new THREE.Color(1.0, 0.62, 0.3) } : { from: to, to: from, lift: 5, color: new THREE.Color(0.55, 0.45, 1.0) };
       const tt = smoother(out ? u * 2 : u * 2 - 1);
-      env.update(f, tt, range(tt, 0, 0.05) * (1 - range(tt, 0.95, 1)), cam, 1.0);
+      env.update(f, tt, range(tt, 0, 0.05) * (1 - range(tt, 0.95, 1)), cam, 1.0, true);
       return true;
     };
     if (!other([20.86, 21.06], 41, this.mailB) && !other(B.nLater, 77, this.mailB)) this.mailB.update(null, 0, 0, cam);
@@ -1318,11 +1337,11 @@ export class World {
       if (used) continue;
       used = true;
       const hh = this.town.houses[d.house];
-      const target = d.stage === "new" ? NODES[1].pos.clone().setY(NODES[1].pos.y + 1.2) : COLUMN_BASE.clone().setY(8);
+      const target = d.stage === "new" ? NODES[1].pos.clone() : COLUMN_BASE.clone().setY(8);
       const f: Flight = { from: hh.top.clone(), to: target, lift: 10, color: d.lost ? new THREE.Color(1, 0.5, 0.3) : new THREE.Color(0.6, 0.5, 1) };
       const u = Math.min(1, age / 3.2);
       const vis = d.lost ? 1 - range(u, 0.4, 0.62) : 1 - range(u, 0.94, 1);
-      this.mailC.update(f, d.lost ? u * 0.7 : u, vis, cam, 1.0);
+      this.mailC.update(f, d.lost ? u * 0.7 : u, vis, cam, 1.0, d.stage === "new");
     }
     if (!used) this.mailC.update(null, 0, 0, cam);
   }
@@ -1416,36 +1435,53 @@ export class World {
   /* The new route                                                     */
   /* ---------------------------------------------------------------- */
 
+  private pulseV = [new THREE.Vector4(), new THREE.Vector4(), new THREE.Vector4()];
   private route(P: number, t: number) {
     const sys = this.system;
-    const show = P >= B.assemble[0] ? 1 : 0;
-    const draw = smoother(range(P, B.assemble[0], B.assemble[0] + (B.assemble[1] - B.assemble[0]) * 0.85));
-    const build = range(P, B.assemble[0] + 0.05, B.assemble[1]);
+    const a = B.assemble;
+    const show = P >= a[0] ? 1 : 0;
+    // THE SCAN sweeps out from the workshop over the first third of the
+    // assembly (the stations rise where it passes); then the line draws
+    // itself round from the customer's house.
+    const scanR = P >= a[0] && P < a[0] + 0.38 ? this.scanRadius(P) : -1;
+    const gs = this.town.ground;
+    (gs.uScan.value as THREE.Vector4).set(sys.shop.x, sys.shop.z, Math.max(0, scanR), 5 + 0.06 * Math.max(0, scanR));
+    gs.uScanK.value = scanR >= 0 ? show * (1 - smooth(range(scanR, 120, 165))) * smooth(range(scanR, 0, 6)) : 0;
+    const draw = smoother(range(P, a[0] + 0.3, a[1]));
     const U = sys.nodeU;
-    // The customer's pulse along the route.
-    let pulse = -1;
-    if (inW(P, B.nFly)) pulse = lerp(0, U[1], smoother(k(P, B.nFly)));
-    else if (inW(P, B.nBack)) pulse = lerp(U[1], 0, smoother(k(P, B.nBack)));
-    else if (inW(P, B.nBook)) pulse = lerp(U[1], U[2], k(P, B.nBook));
-    else if (inW(P, [B.nQuote[0], B.nQuoteSent])) pulse = lerp(U[2], U[3], smoother(k(P, [B.nQuote[0], B.nQuote[0] + 0.2])));
-    else if (inW(P, B.nInvoice)) pulse = lerp(U[3], U[4], smoother(k(P, B.nInvoice)));
-    else if (inW(P, B.nReview)) pulse = lerp(U[4], U[5], smoother(k(P, B.nReview)));
-    else if (inW(P, [B.nRemind[0], B.nVan[1]])) pulse = lerp(U[5], 1.0, smoother(k(P, [B.nRemind[0], B.nVan[1]])));
-    const lit = NODES.map((_, i) => {
-      if (i === 0) return bump(P, 18.0, 19.8, 0.1);
-      if (i === 1) return clamp01(bump(P, B.nFly[0], B.nBack[1] + 0.1, 0.05) + bump(P, 20.86, 21.1, 0.04) + bump(P, B.nLater[0], B.nLater[1], 0.05));
-      if (i === 2) return clamp01(bump(P, B.nBook[0], B.nBook[1] + 0.2, 0.05) + bump(P, 21.12, 21.5, 0.06) + bump(P, 25.3, 25.6, 0.05));
-      if (i === 3) return bump(P, B.nQuote[0], B.nQuoteSent + 0.12, 0.05);
-      if (i === 4) return bump(P, B.nInvoice[0], B.nPaid + 0.1, 0.05);
-      return clamp01(bump(P, B.nReview[0], B.nReview[1], 0.05) + bump(P, B.nRemind[0], B.nRemind[1], 0.05));
-    });
-    sys.update(show, draw, build, pulse, lit, t, this.camera, this.reduced);
-    // The customer's pulse lights the town it passes over.
-    if (pulse >= 0 && show > 0) {
-      sys.at(pulse, this.pulseLight.position);
+    // The customer's comet along the loop: where it is, which way it goes, its warmth (amber = the customer, indigo = the business).
+    const pulse = this.pulseV[0].set(0, 0, 1, 1);
+    const go = (from: number, to: number, kk: number, warm: number) => pulse.set(lerp(from, to, kk), 1, to >= from ? 1 : -1, warm);
+    if (inW(P, B.nFly)) go(0, U[1], smoother(k(P, B.nFly)), 1);
+    else if (inW(P, B.nBack)) go(U[1], 0, smoother(k(P, B.nBack)), 0);
+    else if (inW(P, B.nBook)) go(U[1], U[2], smoother(k(P, B.nBook)), 1);
+    else if (inW(P, [B.nQuote[0], B.nQuoteSent])) go(U[2], U[3], smoother(k(P, [B.nQuote[0], B.nQuote[0] + 0.2])), 0);
+    else if (inW(P, B.nInvoice)) go(U[3], U[4], smoother(k(P, B.nInvoice)), 0);
+    else if (inW(P, B.nReview)) go(U[4], U[5], smoother(k(P, B.nReview)), 0);
+    else if (inW(P, [B.nRemind[0], B.nVan[1]])) go(U[5], 1.0, smoother(k(P, [B.nRemind[0], B.nVan[1]])), 0);
+    // After six o'clock the loop carries other customers by itself, on its own time.
+    const own = smooth(range(P, 25.9, 26.3)) * (1 - smooth(range(P, 28.6, 28.9)));
+    const tt = this.reduced ? 0 : t;
+    this.pulseV[1].set(((tt * 0.05 + 0.3) % 1 + 1) % 1, own > 0.01 ? 1 : 0, 1, 1);
+    this.pulseV[2].set(((tt * 0.038 + 0.72) % 1 + 1) % 1, own > 0.01 ? 1 : 0, 1, 0);
+    // Each station's working windows: lit while it works, a ping as it starts.
+    const windows: [number, number][][] = [
+      [[18.0, 19.8]],
+      [[B.nFly[0], B.nBack[1] + 0.1], [20.86, 21.1], [B.nLater[0], B.nLater[1]]],
+      [[B.nBook[0], B.nBook[1] + 0.2], [21.12, 21.5], [25.3, 25.6]],
+      [[B.nQuote[0], B.nQuoteSent + 0.12]],
+      [[B.nInvoice[0], B.nPaid + 0.1]],
+      [[B.nReview[0], B.nReview[1]], [B.nRemind[0], B.nRemind[1]]],
+    ];
+    const lit = windows.map((ws) => Math.max(0, ...ws.map(([x, y]) => bump(P, x, y, 0.05))));
+    const ping = windows.map((ws) => Math.max(0, ...ws.map(([x]) => (P >= x ? 1 - range(P, x, x + 0.1) : 0))));
+    sys.update(show, scanR, draw, this.pulseV, lit, ping, t, this.camera, this.reduced);
+    // The customer's comet lights the town it passes over.
+    if (pulse.y > 0.5 && show > 0) {
+      sys.at(pulse.x, this.pulseLight.position);
       this.pulseLight.intensity = 60 * show;
     } else this.pulseLight.intensity = 0;
-    // Each part's lock is a click.
+    // Each station's lock is a click.
     if (P > this.prevP && P - this.prevP < 0.3)
       this.lockTimes().forEach((lt, i) => {
         if (this.prevP < lt && P >= lt) this.events.push({ type: "node", pos: NODES[i].pos });
