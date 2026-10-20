@@ -169,29 +169,19 @@ export const PHOTOS = {
   ),
   "cover-hacked": cover(
     "website-hacked",
-    "Red network cables connected to a black patch panel, with empty ports beside them.",
+    "An orange and white lifeguard hut on an empty beach, with storm clouds gathering over a rough sea behind it.",
     {
-      title: "Server Network",
-      author: "Chris Ciapala",
-      authorUrl: "https://isorepublic.com/media-author/chris-ciapala/",
-      page: "https://isorepublic.com/photo/server-network/",
-      source: "ISO Republic",
-      checked: "2026-10-12",
-    },
-    "50% 65%"
+      ...unsplash("Lifeguarded", "Ryan Loughlin", "rylomedia", "Lifeguarded_(Unsplash).jpg", "24 May 2017"),
+      checked: "2026-10-21",
+    }
   ),
   "cover-chat": cover(
     "website-chat-assistant",
-    "Matte black headphones with a red lead, resting on a plain white surface.",
+    "Two white chairs facing each other across a small table, in silhouette against a frosted window.",
     {
-      title: "Headphones Headset",
-      author: "Matthew Henry",
-      authorUrl: "https://stocksnap.io/author/200",
-      page: "https://stocksnap.io/photo/headphones-headset-NV7H1CLTC2",
-      source: "StockSnap",
-      checked: "2026-10-12",
-    },
-    "50% 55%"
+      ...unsplash("Conversation table", "Steve Halama", "steve3p_0", "Conversation_table_(Unsplash).jpg", "15 August 2016"),
+      checked: "2026-10-21",
+    }
   ),
 
   // The methodology: its banner (24:11) and the five stages (4:5).
