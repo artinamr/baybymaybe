@@ -172,9 +172,9 @@ const A_SOFA_AT = fix(-41.9, 1.15, 15.6);
 /** Sam's garden by day: the deck (old, then new), Sam on it with the phone. */
 const A_DECK_EYE = fix(-46.6, 1.35, 27.6);
 const A_DECK_AT = fix(-42.6, 1.3, 21.9);
-/** 3am: from Sam's dark garden, over the side fence to the neighbour's window that lights up (Aroha's). */
-const A_NIGHT_EYE = fix(-42.0, 2.3, 24.6);
-const A_NIGHT_AT = fix(-33.5, 2.05, 19.4);
+/** 3am: up out of Sam's garden over the sleeping town, where one window lights up (Aroha's, next door). */
+const A_NIGHT_EYE = fix(-38, 17, 47);
+const A_NIGHT_AT = fix(-33.5, 1.5, 17.5);
 
 /** The shopfront: the office through the glass, its desk, its chair, the laptop's light. */
 const B_WIN_EYE = S(-2.4, 1.25, 6.2);
@@ -193,8 +193,11 @@ export const KEYS_A: Key[] = [
   A(19.42, fix(-44.2, 2.2, 23.6), fix(-42.0, 1.3, 16.4), 36, { dof: 0.1 }),
   ...still(19.62, 0.08, A_SOFA_EYE, A_SOFA_AT, 30, { dof: 0.5 }),
   ...still(20.6, 0.24, A_SOFA_EYE, A_SOFA_AT, 30, { dof: 0.5 }),
-  // 3am: across the dark town to the window that lights up.
-  ...still(21.16, 0.18, A_NIGHT_EYE, A_NIGHT_AT, 32, { dof: 0.35 }),
+  // 3am: out through the sliders and slowly up over the sleeping town; one window lights up; down again for the morning.
+  A(20.9, fix(-44.3, 2.2, 23.0), fix(-42.2, 1.3, 17.0), 32, { dof: 0.1 }),
+  A(21.0, fix(-45.0, 9.0, 30.0), fix(-36, 1.5, 18), 32, { dof: 0 }),
+  ...still(21.18, 0.12, A_NIGHT_EYE, A_NIGHT_AT, 30, { dof: 0.25 }),
+  A(21.52, fix(-47.0, 8.0, 33.0), fix(-43, 1.2, 22), 32, { dof: 0 }),
   // The garden by day: the old deck; the quote accepted; the build; a year; the reminder.
   ...still(22.4, 0.7, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
   ...still(24.4, 0.9, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),

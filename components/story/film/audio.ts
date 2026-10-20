@@ -671,19 +671,22 @@ export class Score {
     // The envelopes: off, and in.
     if (crossed(B.fly[0])) this.whoosh(2.4, -0.2, 0.13);
     if (crossed(B.land)) this.ping(false, 0.045);
-    for (const [k, len, pan] of [
-      [16.34, 2.6, 0],
-      [16.94, 2.2, -0.2],
-      [20.58, 1.4, 0.2],
-      [21.02, 1.2, -0.2],
-      [21.19, 1.0, 0.2],
-      [22.36, 1.3, -0.1],
-      [25.36, 1.0, 0.1],
-      [25.64, 1.8, 0.2],
-      [27.36, 1.4, 0.3],
-      [28.0, 2.6, 0],
+    // Out of the black; the picture parting like a page; the quote going out (the office's side); one picture again; the end.
+    for (const [k, len, pan, vol] of [
+      [16.34, 2.6, 0, 0.09],
+      [18.92, 1.8, 0, 0.06],
+      [B.nQuoteSent, 1.0, 0.3, 0.06],
+      [27.42, 2.0, 0, 0.08],
+      [28.0, 2.6, 0, 0.09],
     ] as const)
-      if (crossed(k)) this.whoosh(len, pan, 0.09);
+      if (crossed(k)) this.whoosh(len, pan, vol);
+    // BOTH SIDES: the office's laptop waking in the empty room (right), the reply going, the week filling, 3am.
+    if (crossed(B.nWake[0]) || crossed(B.nNight[0] + 0.04)) {
+      this.click(1700, 3, 0.05, 0.05, 0.45, 0, 0.4);
+      this.bell(74, 0.45, 0.022, 2.4);
+    }
+    if (crossed(B.nSent) || crossed(B.nNightWrite[1])) this.click(2400, 8, 0.04, 0.04, 0.45, 0, 0.4);
+    if (crossed(B.nPick + 0.04)) this.bell(81, 0.45, 0.03, 2.0);
     if (crossed(B.nBack[1])) this.ping(true, 0.06);
     if (crossed(B.replySent + 0.02)) this.ping(false, 0.04);
     // Mail landing on the pile all night, quietly.
