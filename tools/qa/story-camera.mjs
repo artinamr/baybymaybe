@@ -121,7 +121,7 @@ const cards = world["allCards"]();
 const local = new THREE.Vector3();
 const cardGap = (eye) => {
   let best = 9;
-  for (const c of [...cards, world.dropCard]) {
+  for (const c of cards) {
     if (!c.group.visible || c.faceMat.opacity < 0.05) continue;
     c.group.updateMatrixWorld(true);
     local.copy(eye).applyMatrix4(new THREE.Matrix4().copy(c.group.matrixWorld).invert());

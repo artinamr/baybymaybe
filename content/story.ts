@@ -157,7 +157,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "Take your hands off the keyboard.",
     beat: "Same customer. Same evening. A different route.",
     scene:
-      "Your hands stop and lift off the keys. Silence. The jobs round the desk hold still, then burn away from their edges into sparks of light, and the light runs together over the keyboard into a single drop of glass, glowing. It rises out through the window, and as it climbs over the town the night runs backward: the clock turns back to 7:37pm and the town lights up at dusk. Then the drop dives across the roofs and down into Sam’s garden.",
+      "Your hands stop and lift off the keys. Silence. The jobs round the desk hold still, then burn away from their edges, and the room goes dark. When the picture comes back it is high over the sleeping town, and the night runs backward: the clock turns back to 7:37pm and the town lights up at dusk.",
     machine: "none",
   },
   {
@@ -167,7 +167,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "This time, the page is ready.",
     line: "Fast on a phone, with one clear button: Get a free quote. Three questions and it’s sent.",
     scene:
-      "Sam on the sofa again, the same evening. The drop slips in through the open doors to Sam’s phone and opens out into the page: there at once, with a photo of a deck and one indigo button. Over the town, almost every phone stays lit. Sam answers three short questions; each answer settles into the glass as a point of amber light. Sam adds a photo of the old deck and sends it.",
+      "The same evening, from above. A hundred phones over the town load your new page, and almost every one stays lit. Then the picture divides down the middle like a page: on one side Sam on the sofa, on the other your office, empty, its lamp off. Sam answers three short questions on a page that was there at once, adds a photo of the old deck and sends it.",
     machine: "new",
   },
   {
@@ -177,7 +177,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "This time, they hear back in a minute.",
     line: "An assistant replies at 7:41pm, asks what you’d ask and offers times to measure up. Anything it can’t answer, it passes to you.",
     scene:
-      "The drop turns straight into an answer: thanks for getting in touch, three times for a free measure-up. Sam taps Wednesday at 2pm. The drop crosses the town to your workshop and opens into your calendar, the booking already in it. At 3am a window lights up across the dark town; the drop goes to it and answers Aroha, who asked about council consent. That question needs you, so it waits over your desk for the morning.",
+      "In the empty office the laptop wakes. Sam’s enquiry comes in and a reply writes itself: thanks for getting in touch, and three times for a free measure-up. It goes at 7:41pm, and on the other side Sam’s phone lights up with it. Sam taps Wednesday at 2pm and the booking appears in your week. At 3am a window lights up across the dark town: Aroha asks whether a deck needs council consent. The reply goes, and the question it can’t answer is kept for you.",
     machine: "new",
   },
   {
@@ -187,7 +187,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "Typed once. Used everywhere.",
     line: "The enquiry fills in the booking, the quote and the invoice. Sam accepts and pays from their phone.",
     scene:
-      "The morning: you come in and the question is waiting. After the measure-up, the drop opens into a quote over your desk, and Sam’s three answers flow out of it into their lines: the details are already there. You add the price; it folds back into the drop and crosses the town to Sam, who accepts it on the phone. The new deck goes in, board by board. The quote turns into the invoice, and Sam pays it online, standing on the new deck.",
+      "Morning. You come in, the question is waiting, and you answer it. Sam’s quote is already filled in from the enquiry, so you add the price and send it, and Sam, out on the old deck, accepts it on the phone. A week later the new deck goes in, board by board. The invoice is made from the quote and goes on its own, and Sam pays it online, standing on the new deck.",
     machine: "new",
   },
   {
@@ -197,7 +197,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "The end becomes a way back.",
     line: "A thank-you, a review, and a reminder a year on when the deck needs oiling. Sam books again.",
     scene:
-      "Two days after the job, the drop asks Sam how it went, and Sam gives five stars. Then it rests on the edge of the deck like a drop of dew while a year goes by. When the deck starts to grey it wakes: it’s been a year, time for an oil. Sam taps Book a time, and this time it’s your van that pulls up outside.",
+      "Two days after the job, a thank-you goes to Sam with a question: how did it go? Five stars come back. A year passes in both pictures at once, the garden turning through its seasons. Then a reminder goes on its own: it’s been a year, time for an oil. Sam books, and on the Saturday it’s your van that pulls up outside.",
     machine: "new",
   },
   {
@@ -207,7 +207,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "6pm. Laptop closed.",
     line: "The work keeps moving without you at the keyboard. You go home.",
     scene:
-      "The drop flies home with the late sun. Six o’clock, golden light in the workshop. It shows you the day: enquiries answered, measure-ups booked, quotes accepted, invoices paid, nothing waiting on you. You close the laptop and switch off the lamp, and the drop settles beside it. As you drive home, a window lights up across the town and the drop goes out to answer it.",
+      "Six o’clock a year on, and golden light in the office. The laptop shows the day: enquiries answered, measure-ups booked, quotes accepted, invoices paid, nothing waiting on you. You close the laptop, switch off the lamp and drive home, while Sam is out on the deck in the evening. Then the two pictures come back together as one: the town at dusk, with both places in it.",
     machine: "new",
   },
   {
@@ -216,7 +216,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "Find your leaks.",
     line: "Free audit in two days.",
     scene:
-      "The camera rises over the town in the evening light. The drop rises to meet it, nearer and brighter, until its light is the whole picture and settles to warm paper white.",
+      "The camera rises over the town in the evening light, until the picture settles to warm paper white.",
     machine: "none",
   },
 ];

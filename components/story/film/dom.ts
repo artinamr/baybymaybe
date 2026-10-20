@@ -22,7 +22,7 @@ const CLOCK_ON: [number, number][] = [
   [4.62, 7.36],
   [12.84, 15.42],
   [16.4, 16.94],
-  [19.84, 21.5],
+  [19.8, 21.42],
   [25.84, 27.3],
 ];
 
@@ -128,6 +128,7 @@ export class Dom {
     // The words.
     let left = false;
     let centre = false;
+    let paneB = false;
     let landed = false;
     for (const c of this.cards) {
       const card = CARDS[c.i];
@@ -143,6 +144,7 @@ export class Dom {
         c.el.toggleAttribute("data-fact", fact);
       }
       if (on && card.id !== "open" && card.id !== "turn") left = true;
+      if (on && card.part === "main" && c.el.dataset.pane === "b") paneB = true;
       if (on && (card.id === "open" || card.id === "turn")) centre = true;
     }
     // Where the words are, for the film (it keeps its cards clear of them).
@@ -161,6 +163,7 @@ export class Dom {
     }
     this.set("shade", left, () => this.shade?.style.setProperty("--shade", left ? "1" : "0"));
     this.set("shadeC", centre, () => this.shade?.style.setProperty("--shade-c", centre ? "1" : "0"));
+    this.set("side", paneB, () => (paneB ? this.shade?.setAttribute("data-side", "b") : this.shade?.removeAttribute("data-side")));
 
     // The counter: the film's own customers.
     const sim = w.sim;

@@ -58,11 +58,11 @@ export const CARDS: Card[] = [
   { id: "you", part: "beat", in: 14.0, out: 14.86 },
   { id: "turn", part: "main", in: 15.04, out: 15.48 },
   { id: "turn", part: "beat", in: 17.4, out: 17.96 },
-  { id: "new-website", part: "main", in: 18.12, out: 19.66 },
+  { id: "new-website", part: "main", in: 18.12, out: 18.86 },
   { id: "new-ai", part: "main", in: 19.92, out: 21.62 },
   { id: "new-platform", part: "main", in: 21.92, out: 23.64 },
   { id: "new-followup", part: "main", in: 23.92, out: 25.64 },
-  { id: "new-you", part: "main", in: 25.92, out: 27.5 },
+  { id: "new-you", part: "main", in: 25.92, out: 27.3 },
 ];
 
 /** The fact inside a main card comes in a little after the title. */
@@ -74,8 +74,10 @@ export const FACT_DELAY = 0.42;
  * edges, so a rest always has its words fully in.
  */
 export const RESTS: number[] = [
-  0, 0.62, 1.66, 2.3, 2.9, 3.5, 4.3, 4.74, 5.42, 5.98, 6.5, 7.1, 7.58, 8.3, 8.9, 9.5, 10.3, 11.0, 11.6, 12.56, 13.3, 14.4, 15.4, 16.9, 17.7, 18.4, 19.0, 19.4,
-  20.5, 21.18, 22.3, 23.1, 24.3, 25.3, 26.3, 27.0, 27.7, FILM_LEN,
+  0, 0.62, 1.66, 2.3, 2.9, 3.5, 4.3, 4.74, 5.42, 5.98, 6.5, 7.1, 7.58, 8.3, 8.9, 9.5, 10.3, 11.0, 11.6, 12.56, 13.3, 14.4, 15.4, 16.9, 17.7, 18.4,
+  // Both sides: the page; the office writing; the reply; booked; 3am; the morning; the quote; accepted; the job; paid;
+  // how did it go; a year; the reminder; the van; six o'clock; the laptop shut; one picture again.
+  19.62, 20.0, 20.3, 20.7, 21.16, 22.0, 22.3, 22.52, 23.0, 23.5, 24.2, 24.7, 25.2, 25.78, 26.3, 26.9, 27.9, FILM_LEN,
 ];
 
 /** How long autoplay holds on a rest (seconds): time to read what is on screen. */
@@ -83,7 +85,7 @@ export function dwellAt(P: number): number {
   if (P >= FILM_LEN - 0.01) return 0;
   if (P < 0.01) return 1.2;
   // Moments that need to land: the turn's silence, the last image of each half.
-  if ([14.4, 15.4, 27.7].some((r) => Math.abs(r - P) < 0.03)) return 4.4;
+  if ([14.4, 15.4, 27.9].some((r) => Math.abs(r - P) < 0.03)) return 4.4;
   if ([2.3, 5.42, 9.5, 16.9, 22.3].some((r) => Math.abs(r - P) < 0.03)) return 2.2;
   return 3.4;
 }
@@ -96,7 +98,12 @@ export function paceAt(P: number): number {
     : P > 15.0 && P < 17.4 ? 7.4
     : P > 9.0 && P < 9.6 ? 6.4
     : P > 11.0 && P < 12.0 ? 6.4
-    : P > 26.4 && P < 27.6 ? 6.6
+    // Both sides: the picture parts and each half comes down to its place; a pane's new frame; one picture again.
+    : P > 18.9 && P < 19.46 ? 9.0
+    : P > 20.84 && P < 21.04 ? 7.6
+    : P > 25.4 && P < 25.72 ? 7.0
+    : P > 27.3 && P < 27.95 ? 9.0
+    : P > 26.4 && P < 27.3 ? 6.6
     : 5.4;
 }
 

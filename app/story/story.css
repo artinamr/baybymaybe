@@ -568,6 +568,32 @@ html:not([data-st-paper]) .st-bar {
   font-size: clamp(32px, 3.6vw, 64px);
   max-width: 16ch;
 }
+/* BOTH SIDES (round 27): while the picture is in two, the words sit under the
+   business's pane (the right one; the lower one on a portrait screen), below
+   the desk, a size smaller: a pane is half the frame. */
+.st-card[data-pane="b"] {
+  left: calc(50vw + 0.7vw + var(--g));
+  width: min(520px, calc(50vw - 0.7vw - 2 * var(--g)));
+  bottom: calc(6vh + 22px);
+}
+.st-card[data-pane="b"] .st-t {
+  font-size: clamp(30px, 2.8vw, 50px);
+}
+.st-card[data-pane="b"] .st-k {
+  margin-bottom: 14px;
+}
+.st-card[data-pane="b"] .st-l {
+  margin-top: 16px;
+  font-size: clamp(15px, 1.1vw, 18px);
+  max-width: 40ch;
+}
+.st-cards[data-side="b"]::before {
+  left: auto;
+  right: 0;
+  width: 50vw;
+  height: 60vh;
+  background: radial-gradient(80% 70% at 40% 90%, rgba(3, 3, 6, 0.78), rgba(3, 3, 6, 0.3) 55%, transparent 80%);
+}
 /* The opening and the turn are said in the middle of the frame. */
 .st-card[data-ch="open"],
 .st-card[data-ch="turn"] {
@@ -1201,6 +1227,26 @@ html[data-st-paper] .st-hud {
   .st-card[data-ch="open"] .st-t,
   .st-card[data-ch="open"].st-card-beat .st-t {
     margin-left: 0;
+  }
+  .st-card[data-pane="b"] {
+    left: var(--g);
+    right: var(--g);
+    width: auto;
+    bottom: 92px;
+  }
+  .st-card[data-pane="b"] .st-t {
+    font-size: clamp(24px, 6.6vw, 32px);
+  }
+  .st-card[data-pane="b"] .st-l {
+    margin-top: 10px;
+    font-size: 14.5px;
+  }
+  .st-cards[data-side="b"]::before {
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: 42vh;
+    background: linear-gradient(to top, rgba(3, 3, 6, 0.86), rgba(3, 3, 6, 0.5) 50%, transparent);
   }
   .st-card[data-ch="turn"] .st-t {
     font-size: clamp(40px, 12vw, 60px);

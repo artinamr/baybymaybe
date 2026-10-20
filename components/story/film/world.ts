@@ -574,9 +574,12 @@ export class World {
     // Eased in time (a card that only grazes the words as the camera whips past dips, it does not blink).
     const ease = dt > 0 ? 1 - Math.exp(-dt / 0.12) : 1;
     const wd = this.words;
-    const cam = this.camera;
-    cam.updateMatrixWorld();
+    this.camera.updateMatrixWorld();
     for (const card of this.allCards()) {
+      // In two, a card is seen by its own pane's camera, in its own part of the frame.
+      const pane = !this.split.on ? -1 : card === this.officeCard ? 1 : card === this.phoneCard ? 0 : -1;
+      const cam = pane === 1 ? this.panes[1] : pane === 0 ? this.panes[0] : this.camera;
+      const pr = pane === 1 ? this.rects[1] : pane === 0 ? this.rects[0] : null;
       if (card.shown <= 0.002) {
         if (card.clear !== 1) {
           card.clear = 1;
@@ -607,6 +610,11 @@ export class World {
       const near = -0.06;
       const take = (v: THREE.Vector3) => {
         this._q.copy(v).applyMatrix4(cam.projectionMatrix);
+        if (pr) {
+          // The pane's own frame, into the whole frame's (rects are shares, y down).
+          this._q.x = pr[0] * 2 - 1 + (this._q.x + 1) * (pr[2] - pr[0]);
+          this._q.y = 1 - pr[3] * 2 + (this._q.y + 1) * (pr[3] - pr[1]);
+        }
         x0 = Math.min(x0, this._q.x);
         x1 = Math.max(x1, this._q.x);
         y0 = Math.min(y0, this._q.y);

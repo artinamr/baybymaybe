@@ -45,7 +45,6 @@ const out = await page.evaluate(
       mailC: w.mailC.group,
       crowd: w.crowd.mesh,
       strips: w.strips.mesh,
-      drop: w.drop.mesh,
     };
     const cards = { phone: w.phoneCard, sheet: w.sheetCard, quote: w.quoteCard, invoice: w.invoiceCard };
     w.pend.forEach((c, i) => (cards["pend" + i] = c));

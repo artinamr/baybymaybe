@@ -58,7 +58,7 @@ const res = await page.evaluate(
       }
       const cam = w.camera;
       cam.updateMatrixWorld();
-      const cards = [...w.allCards(), w.dropCard];
+      const cards = w.allCards();
       cards.forEach((c, i) => {
         for (let p = c.group; p; p = p.parent) if (!p.visible) return;
         if (c.faceMat.opacity < 0.15) return;

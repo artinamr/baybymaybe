@@ -55,6 +55,9 @@ function Kicker({ text }: { text: string }) {
   );
 }
 
+/** While the picture is in two, these chapters' words sit under the business's pane (split.ts). */
+const IN_PANE = new Set(["new-ai", "new-platform", "new-followup", "new-you"]);
+
 function Card({ c, part }: { c: StoryChapter; part: "main" | "beat" }) {
   const key = `${c.id}-${part}`;
   if (part === "beat") {
@@ -68,7 +71,7 @@ function Card({ c, part }: { c: StoryChapter; part: "main" | "beat" }) {
   }
   const n = c.title.split(" ").length;
   return (
-    <div className="st-card" data-card={key} data-ch={c.id}>
+    <div className="st-card" data-card={key} data-ch={c.id} data-pane={IN_PANE.has(c.id) ? "b" : undefined}>
       {c.kicker ? <Kicker text={c.kicker} /> : null}
       <p className="st-t">
         <Words text={c.title} />
