@@ -1,0 +1,218 @@
+/* Pricing, "living paper" (crazy-r29). Scoped to .cz-pr; every motion is
+   opt-in (reduced motion and scroll-timeline support), and every end state
+   is fully visible. */
+
+/* ---------- Hero: a soft indigo light behind an oversized headline ---------- */
+.cz-pr-hero {
+  position: relative;
+  isolation: isolate;
+}
+.cz-pr-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -12% -8% auto auto;
+  width: min(62vw, 760px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in oklab, #5b3df0 16%, transparent), transparent 72%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+.cz-pr-hero .sp-h1 {
+  font-size: clamp(48px, 9.2vw, 148px);
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+}
+.cz-pr-hero .sp-h1 em {
+  display: inline-block;
+  color: #5b3df0;
+}
+
+/* ---------- Quote steps: sticky stacking panels ---------- */
+.cz-pr-stack li {
+  position: relative;
+  background: #fbfaf8;
+  border: 1px solid color-mix(in oklab, #0a0b10 9%, transparent);
+  border-radius: 18px;
+  padding: 30px 30px 34px;
+  margin-bottom: 18px;
+  box-shadow:
+    0 1px 1px rgba(10, 11, 16, 0.03),
+    0 8px 22px -12px rgba(10, 11, 16, 0.14),
+    0 30px 60px -36px rgba(10, 11, 16, 0.22);
+}
+.cz-pr-stack li:last-child {
+  border-bottom: 1px solid color-mix(in oklab, #0a0b10 9%, transparent);
+  margin-bottom: 0;
+}
+.cz-pr-stack .flow-n {
+  font-size: 13px;
+  color: #5b3df0;
+}
+@media (min-width: 900px) {
+  .cz-pr-stack li {
+    position: sticky;
+    top: calc(104px + var(--i, 0) * 16px);
+    min-height: 210px;
+  }
+}
+
+/* ---------- Cards: lift, layered shadow, an indigo light on hover ---------- */
+.cz-pr-cards li {
+  position: relative;
+  isolation: isolate;
+  border-top: 0;
+  padding: 28px 28px 32px;
+  border-radius: 18px;
+  background: #fbfaf8;
+  border: 1px solid color-mix(in oklab, #0a0b10 8%, transparent);
+  box-shadow:
+    0 1px 1px rgba(10, 11, 16, 0.03),
+    0 6px 16px -10px rgba(10, 11, 16, 0.1);
+  overflow: hidden;
+}
+.cz-pr-cards li::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(420px circle at 18% 0%, color-mix(in oklab, #5b3df0 13%, transparent), transparent 62%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.cz-pr-cards li:hover::before,
+.cz-pr-cards li:focus-within::before {
+  opacity: 1;
+}
+
+/* ---------- Running costs: an indigo hairline draws under the row on hover ---------- */
+.cz-pr-rows li {
+  position: relative;
+}
+.cz-pr-rows li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: #5b3df0;
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+.cz-pr-rows .item-t {
+  transition: color 0.35s ease;
+}
+.cz-pr-rows li:hover .item-t {
+  color: #5b3df0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cz-pr-hero .sp-h1 {
+    animation: cz-pr-line 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .cz-pr-hero .sp-h1 em {
+    animation: cz-pr-line 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0.13s both;
+  }
+  .cz-pr-hero::before {
+    animation: cz-pr-breathe 9s ease-in-out infinite alternate;
+  }
+  .cz-pr-cards li {
+    transition:
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cz-pr-cards li:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      0 1px 1px rgba(10, 11, 16, 0.03),
+      0 14px 30px -14px rgba(10, 11, 16, 0.18),
+      0 44px 80px -40px rgba(91, 61, 240, 0.28);
+  }
+  .cz-pr-rows li::after {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cz-pr-rows li:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes cz-pr-line {
+  from {
+    transform: translateY(0.42em);
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    transform: none;
+    clip-path: inset(0 0 -20% 0);
+  }
+}
+@keyframes cz-pr-breathe {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-4%, 3%, 0) scale(1.08);
+  }
+}
+
+/* ---------- Scroll-driven: sections rise into focus as they enter ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .cz-pr .split-head,
+    .cz-pr-cards li,
+    .cz-pr-rows li,
+    .cz-pr .own-head,
+    .cz-pr .own-list li {
+      animation: cz-pr-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+    @media (max-width: 899px) {
+      .cz-pr-stack li {
+        animation: cz-pr-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 30%;
+      }
+    }
+    .cz-pr .own-tick svg path {
+      stroke-dasharray: 24;
+      animation: cz-pr-tick linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 40%;
+    }
+  }
+}
+
+@keyframes cz-pr-rise {
+  from {
+    translate: 0 32px;
+    scale: 0.97;
+    filter: blur(6px);
+  }
+  to {
+    translate: none;
+    scale: none;
+    filter: none;
+  }
+}
+@keyframes cz-pr-tick {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .cz-pr-stack li,
+  .cz-pr-cards li {
+    padding: 24px 20px 26px;
+    border-radius: 14px;
+  }
+}

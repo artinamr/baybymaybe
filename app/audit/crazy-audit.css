@@ -1,0 +1,206 @@
+/* crazy-r29, the audit page: "living paper".
+   Everything here is progressive: without motion preference or scroll-driven
+   animation support the page is exactly the plain page, and no end state is
+   ever hidden. The [data-rv] reveal owns `transform`, `filter` and `opacity`,
+   so the motion below uses the individual `translate` / `scale` properties,
+   which compose with it instead of fighting it. */
+
+/* ---------- The headline: two lines rising in turn ---------- */
+.cz-au .cz-l {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cz-au .cz-l {
+    animation: cz-au-line 1.15s var(--ease-expo) both;
+  }
+  .cz-au .cz-l {
+    animation-delay: 140ms;
+  }
+  .cz-au .cz-l + br + .cz-l {
+    animation-delay: 270ms;
+  }
+}
+@keyframes cz-au-line {
+  from {
+    translate: 0 0.55em;
+    opacity: 0.01;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+/* ---------- The form card: a tactile surface with indigo light ---------- */
+.cz-au .ct-form > * {
+  position: relative;
+  isolation: isolate;
+  transition:
+    translate 700ms var(--ease-expo),
+    box-shadow 700ms var(--ease-expo);
+}
+.cz-au .ct-form > *::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 85% 0%, color-mix(in srgb, var(--indigo) 16%, transparent), transparent 62%),
+    radial-gradient(90% 60% at 0% 100%, color-mix(in srgb, var(--indigo) 9%, transparent), transparent 70%);
+  opacity: 0.35;
+  transition: opacity 700ms var(--ease-expo);
+  z-index: -1;
+}
+.cz-au .ct-form:hover > *,
+.cz-au .ct-form:focus-within > * {
+  box-shadow:
+    0 1px 2px rgba(10, 11, 16, 0.04),
+    0 10px 24px -10px rgba(10, 11, 16, 0.1),
+    0 34px 70px -28px color-mix(in srgb, var(--indigo) 28%, transparent);
+}
+.cz-au .ct-form:hover > *::before,
+.cz-au .ct-form:focus-within > *::before {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .cz-au .ct-form:hover > * {
+    translate: 0 -3px;
+  }
+}
+
+/* ---------- What you get: each line slides in from the rule ---------- */
+.cz-au .ct-next li {
+  position: relative;
+}
+.cz-au .ct-next li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1px;
+  width: 100%;
+  background: var(--indigo);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 900ms var(--ease-expo);
+}
+.cz-au .ct-next li:hover::after {
+  transform: scaleX(1);
+}
+.cz-au .ct-email {
+  background: linear-gradient(var(--indigo), var(--indigo)) left bottom / 0% 1px no-repeat;
+  transition:
+    background-size 700ms var(--ease-expo),
+    color 300ms ease;
+}
+.cz-au .ct-email:hover,
+.cz-au .ct-email:focus-visible {
+  color: var(--indigo);
+  background-size: 100% 1px;
+}
+
+/* ---------- What we look at: four lifted cards ---------- */
+.cz-au-look li {
+  position: relative;
+  padding: 26px 26px 30px;
+  border-top: 0;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--paper) 70%, white);
+  box-shadow:
+    inset 0 0 0 1px var(--hair),
+    0 1px 2px rgba(10, 11, 16, 0.03);
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    box-shadow 700ms var(--ease-expo),
+    translate 700ms var(--ease-expo);
+}
+.cz-au-look li::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(70% 90% at 100% 0%, color-mix(in srgb, var(--indigo) 13%, transparent), transparent 65%);
+  opacity: 0;
+  transition: opacity 700ms var(--ease-expo);
+}
+.cz-au-look li:hover {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--indigo) 22%, var(--hair)),
+    0 2px 4px rgba(10, 11, 16, 0.04),
+    0 18px 40px -18px rgba(10, 11, 16, 0.14),
+    0 40px 80px -40px color-mix(in srgb, var(--indigo) 30%, transparent);
+}
+.cz-au-look li:hover::before {
+  opacity: 1;
+}
+.cz-au-look .item-n {
+  color: var(--indigo);
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .cz-au-look li:hover {
+    translate: 0 -4px;
+  }
+}
+
+/* ---------- Scroll: sections and cards rise into focus ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .cz-au-sec {
+      animation: cz-au-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .cz-au-look li {
+      animation: cz-au-card linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 30%;
+    }
+    .cz-au-look li:nth-child(even) {
+      animation-range: entry 15% cover 36%;
+    }
+    .cz-au .ct-next li {
+      animation: cz-au-slide linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+@keyframes cz-au-rise {
+  from {
+    translate: 0 32px;
+    scale: 0.97;
+    filter: blur(6px);
+  }
+  to {
+    translate: 0 0;
+    scale: 1;
+    filter: none;
+  }
+}
+/* Scale only: [data-rv] already lifts the card, and the hover owns translate. */
+@keyframes cz-au-card {
+  from {
+    scale: 0.94;
+  }
+  to {
+    scale: 1;
+  }
+}
+@keyframes cz-au-slide {
+  from {
+    translate: -18px 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .cz-au-look li {
+    padding: 22px 20px 24px;
+  }
+}

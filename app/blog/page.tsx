@@ -11,6 +11,8 @@ import { ALL_SOURCES, BLOG_UPDATED, PUBLISHED, TOPICS, longDate, topicLabel, typ
 import { Photo } from "@/components/site/Photo";
 import { BODIES } from "@/content/blog/bodies";
 import { GLOSSARY } from "@/content/blog/glossary";
+import { CrazyGlow } from "./CrazyGlow";
+import "./crazy-blog-home.css";
 
 export const metadata = pageMeta({
   title: "Blog: websites, platforms and AI for NZ businesses",
@@ -59,6 +61,7 @@ export default function Blog() {
   return (
     <Page here="blog" crumbs={[{ name: "Blog", href: PAGES.blog }]}>
       <BlogLd articles={PUBLISHED} />
+      <CrazyGlow />
 
       <section className="sp-hero bl-hero">
         <Kicker>Blog</Kicker>

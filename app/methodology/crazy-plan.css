@@ -1,0 +1,297 @@
+/* ==========================================================================
+   crazy-r29, "living paper": the plan and what you receive.
+   - The plan: a playhead of indigo light sweeps day 1 to day 14 as the plan
+     scrolls through the screen (a view timeline); bars lift on hover with a
+     shine; the decision pins turn into place.
+   - What you receive: each card tilts up off the page into focus as it
+     enters, lifts on hover with a layered shadow and a soft indigo light,
+     and its contents arrive in a stagger (the signature writes itself, the
+     ticks pop, the keys are stamped "in your name").
+   Everything moving sits behind prefers-reduced-motion and @supports, and
+   every end state is fully visible. Individual transform properties
+   (translate, scale, rotate) compose with [data-rv]'s transform.
+   ========================================================================== */
+
+/* Static, for everyone: the layers the motion needs. */
+.mp-chart {
+  isolation: isolate;
+}
+.mp-track {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: var(--name-w);
+  right: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: 14px;
+}
+.mp-head {
+  position: absolute;
+  inset: 0;
+  /* At rest (no scroll timelines or reduced motion) the light sits at the
+     end of the fortnight: the whole plan reads as done. */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--indigo) 3%, transparent) 70%,
+    color-mix(in oklab, var(--indigo) 9%, transparent) 99.4%,
+    var(--indigo) 99.6%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+.mp-row {
+  border-radius: 14px;
+}
+.mp-bar {
+  position: relative;
+}
+.mp-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 0.55) 48%, transparent 66%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.ma {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.ma::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(420px 260px at 88% -8%, color-mix(in oklab, var(--indigo) 14%, transparent), transparent 70%),
+    radial-gradient(300px 200px at 0% 110%, color-mix(in oklab, var(--indigo) 6%, transparent), transparent 70%);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.ma-keys b {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---- The plan ---- */
+  .mp-bar {
+    transition:
+      transform 1100ms var(--ease-expo) calc(var(--i) * 110ms + 200ms),
+      background 250ms ease,
+      box-shadow 450ms var(--ease-expo),
+      translate 450ms var(--ease-expo);
+  }
+  .mp-row:hover .mp-bar,
+  .mp-row:focus-visible .mp-bar {
+    translate: 0 -3px;
+    box-shadow:
+      inset 3px 0 0 var(--indigo),
+      0 2px 4px color-mix(in oklab, var(--indigo) 18%, transparent),
+      0 14px 28px -12px color-mix(in oklab, var(--indigo) 55%, transparent);
+  }
+  .mp-row:hover .mp-bar::after,
+  .mp-row:focus-visible .mp-bar::after {
+    transform: translateX(120%);
+    transition: transform 900ms var(--ease-expo);
+  }
+  .mp-pin {
+    transition:
+      transform 500ms var(--ease-expo),
+      background 250ms ease;
+  }
+  .mp-pins li:hover .mp-pin {
+    transform: rotate(225deg) scale(1.25);
+    background: var(--indigo);
+  }
+  .mp-pins li:last-child .mp-pin {
+    background: var(--indigo);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--indigo) 45%, transparent);
+    animation: mp-live 2.6s ease-out 1.6s infinite;
+  }
+
+  .ma {
+    transition:
+      box-shadow 600ms var(--ease-expo),
+      translate 600ms var(--ease-expo),
+      opacity 1100ms var(--ease-expo),
+      transform 1300ms var(--ease-expo),
+      filter 900ms ease;
+  }
+  .ma::before {
+    transition: opacity 600ms ease;
+  }
+  .ma:hover {
+    translate: 0 -6px;
+    box-shadow:
+      0 1px 2px color-mix(in oklab, var(--ink) 5%, transparent),
+      0 10px 24px -14px color-mix(in oklab, var(--ink) 30%, transparent),
+      0 48px 90px -50px color-mix(in oklab, var(--indigo) 55%, transparent);
+  }
+  .ma:hover::before {
+    opacity: 1;
+  }
+
+  @supports (animation-timeline: view()) {
+    /* The fortnight passes as you read: the playhead runs day 1 to day 14. */
+    .mp-head {
+      opacity: 1;
+      animation: mp-sweep linear both;
+      animation-timeline: view();
+      animation-range: cover 15% cover 65%;
+    }
+    .mp-pins li .mp-pin {
+      animation: mp-pin-turn linear both;
+      animation-timeline: view();
+      animation-range: entry 40% cover 45%;
+    }
+    .mp-pins li:last-child .mp-pin {
+      animation:
+        mp-pin-turn linear both,
+        mp-live 2.6s ease-out 1.6s infinite;
+      animation-timeline: view(), auto;
+      animation-range: entry 40% cover 45%, normal;
+    }
+
+    /* A card tilts up off the page and comes into focus. */
+    .ma {
+      transform-origin: 50% 100%;
+      animation: ma-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 38%;
+    }
+    .ma-rows div,
+    .ma-checks li,
+    .ma-keys li {
+      animation: ma-line linear both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 30%;
+    }
+    .ma-tick {
+      animation: ma-pop linear both;
+      animation-timeline: view();
+      animation-range: entry 60% cover 34%;
+    }
+    .ma-keys b {
+      animation: ma-stamp linear both;
+      animation-timeline: view();
+      animation-range: entry 70% cover 36%;
+    }
+    .ma-sign i {
+      animation: ma-sign linear both;
+      animation-timeline: view();
+      animation-range: entry 80% cover 42%;
+    }
+    .ma-browser img {
+      animation: ma-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
+  }
+}
+
+@keyframes mp-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes mp-pin-turn {
+  from {
+    transform: rotate(-135deg) scale(0.4);
+  }
+  to {
+    transform: rotate(45deg) scale(1);
+  }
+}
+@keyframes mp-live {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--indigo) 45%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 12px color-mix(in oklab, var(--indigo) 0%, transparent);
+  }
+}
+@keyframes ma-rise {
+  from {
+    translate: 0 32px;
+    scale: 0.97;
+    rotate: x 9deg;
+  }
+  to {
+    translate: 0 0;
+    scale: 1;
+    rotate: x 0deg;
+  }
+}
+@keyframes ma-line {
+  from {
+    opacity: 0.2;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes ma-pop {
+  0% {
+    scale: 0.3;
+  }
+  70% {
+    scale: 1.12;
+  }
+  100% {
+    scale: 1;
+  }
+}
+@keyframes ma-stamp {
+  0% {
+    scale: 1.6;
+    rotate: -8deg;
+    opacity: 0.2;
+  }
+  70% {
+    scale: 0.94;
+    rotate: 0deg;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+    rotate: 0deg;
+    opacity: 1;
+  }
+}
+@keyframes ma-sign {
+  from {
+    background-size: 0 22px;
+  }
+  to {
+    background-size: 120px 22px;
+  }
+}
+@keyframes ma-wipe {
+  from {
+    clip-path: inset(0 0 100% 0);
+    scale: 1.08;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    scale: 1;
+  }
+}
+
+/* Phones: the playhead runs under the shorter name column too. */
+@media (max-width: 900px) {
+  .mp-track {
+    border-radius: 10px;
+  }
+}

@@ -1,6 +1,16 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useState, type PointerEvent } from "react";
+import "./crazy-work-index.css";
+
+/** The indigo light follows the pointer over a cover (--mx/--my, in px). */
+function follow(e: PointerEvent<HTMLElement>) {
+  if (e.pointerType !== "mouse") return;
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
+  el.style.setProperty("--my", `${(e.clientY - r.top).toFixed(0)}px`);
+}
 
 export type WorkCard = { slug: string; kind: string; href: string; client: string; title: string; summary: string; cover: string; coverAlt: string; label: string; services: { slug: string; name: string }[]; srcSet: string; preview?: string };
 
@@ -49,7 +59,8 @@ export function WorkIndex({ items }: { items: WorkCard[] }) {
               </div>
             ) : null}
           <article className="wk-card" data-kind={w.kind} data-featured={i === 0 ? "" : undefined} hidden={!shown(w)} data-rv>
-            <a className="wk-img" href={w.href} tabIndex={-1} aria-hidden style={w.preview ? { backgroundImage: `url(${w.preview})` } : undefined}>
+            <a className="wk-img" href={w.href} tabIndex={-1} aria-hidden onPointerMove={follow} style={w.preview ? { backgroundImage: `url(${w.preview})` } : undefined}>
+              <span className="wk-light" aria-hidden />
               {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
               <img
                 src={w.cover}

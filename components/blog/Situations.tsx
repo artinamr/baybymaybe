@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Photo as PhotoData } from "@/content/images";
+import "./crazy-index.css";
 
 export type Situation = {
   slug: string;
@@ -46,7 +47,19 @@ export function Situations({ items }: { items: Situation[] }) {
           </li>
         ))}
       </ol>
-      <a className="bl-peek" href={cur.href} tabIndex={-1} aria-hidden>
+      <a
+        className="bl-peek"
+        href={cur.href}
+        tabIndex={-1}
+        aria-hidden
+        onPointerMove={(e) => {
+          if (e.pointerType !== "mouse") return;
+          const el = e.currentTarget;
+          const r = el.getBoundingClientRect();
+          el.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
+          el.style.setProperty("--my", `${(e.clientY - r.top).toFixed(0)}px`);
+        }}
+      >
         <span className="bl-peek-img">
           {items.map((s, i) => (
             <span key={s.slug} data-on={i === on ? "" : undefined}>

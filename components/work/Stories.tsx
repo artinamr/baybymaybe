@@ -4,6 +4,7 @@ import { Practice, Booking } from "@/components/demos/practice/Practice";
 import { Portal } from "@/components/demos/portal/Portal";
 import { EnquiryDesk } from "@/components/demos/enquiry/EnquiryDesk";
 import type { Project } from "@/content/work";
+import "./crazy-live.css";
 
 /** The working demonstration, large, at the top of its case study. */
 export function Stage({ p }: { p: Project }) {
@@ -31,7 +32,7 @@ export function Story({ p }: { p: Project }) {
   if (p.slug === "practice-website") {
     return (
       <>
-        <div className="cs-views">
+        <div className="cs-views cz-views">
           <figure data-rv>
             <BrowserFrame url={`${p.url}/services/tax`} label="The Tarn & Wick service page, on a desktop">
               <Practice screen="service" />
@@ -45,7 +46,7 @@ export function Story({ p }: { p: Project }) {
             <Cap n="02">The same site on a phone: one column, and the call to action first.</Cap>
           </figure>
         </div>
-        <figure className="cs-close" data-rv>
+        <figure className="cs-close cz-close" data-rv>
           <div className="cs-close-shot">
             <Booking still annotate />
           </div>
@@ -71,7 +72,7 @@ export function Story({ p }: { p: Project }) {
   }
   if (p.slug === "operations-portal") {
     return (
-      <div className="cs-views">
+      <div className="cs-views cz-views">
         <figure data-rv>
           <BrowserFrame url={`${p.url}/client`} label="The Kerrow portal, as a client sees it">
             <Portal view="client" />
@@ -88,7 +89,7 @@ export function Story({ p }: { p: Project }) {
     );
   }
   return (
-    <div className="cs-views">
+    <div className="cs-views cz-views">
       <figure data-rv>
         <BrowserFrame url={`${p.url}/inbox`} label="The Pellow enquiry desk, a reply waiting for approval">
           <EnquiryDesk start="move" startStep={3} />

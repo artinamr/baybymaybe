@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import "./crazy-footer.css";
 import { AuditForm } from "@/components/contact/AuditForm";
 import { Signature } from "./Signature";
 import { NzTime } from "./NzTime";
@@ -38,6 +39,27 @@ export function SiteFooter({ home = false, form = true }: { home?: boolean; form
       window.location.href = `mailto:${EMAIL}`;
     }
   };
+
+  // The audit card's indigo light follows the pointer: one rAF-batched write
+  // of --mx/--my onto the card itself (never a page-wide property).
+  const card = useRef<HTMLDivElement>(null);
+  const raf = useRef(0);
+  const at = useRef({ x: 0, y: 0 });
+  const follow = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    const el = card.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    at.current = { x: e.clientX - r.left, y: e.clientY - r.top };
+    if (!el.hasAttribute("data-lit")) el.setAttribute("data-lit", "");
+    if (raf.current) return;
+    raf.current = requestAnimationFrame(() => {
+      raf.current = 0;
+      el.style.setProperty("--mx", `${at.current.x.toFixed(1)}px`);
+      el.style.setProperty("--my", `${at.current.y.toFixed(1)}px`);
+    });
+  };
+  const leave = () => card.current?.removeAttribute("data-lit");
 
   return (
     <footer className="site-foot" aria-label="Site" data-noform={form ? undefined : ""}>
@@ -86,7 +108,7 @@ export function SiteFooter({ home = false, form = true }: { home?: boolean; form
               </button>
             </div>
           </div>
-          <div className="sfa-form">
+          <div className="sfa-form" ref={card} onPointerMove={follow} onPointerLeave={leave}>
             <AuditForm tone="card" />
           </div>
         </section>

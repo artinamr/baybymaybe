@@ -1,0 +1,230 @@
+/* ==========================================================================
+   crazy-r29 · the home page's PAPER sheets (Selected work, How we work).
+   "Living paper": covers wipe open and drift against the scroll, cards lift
+   on a soft layered shadow with an indigo light that follows the pointer
+   (--mx/--my, written by PageReveal), the stages answer the hand.
+   Every motion is opt-in: reduced motion and browsers without view
+   timelines keep the plain sheet, and nothing ends hidden.
+   ========================================================================== */
+
+/* ---- Selected work: the cards ------------------------------------------- */
+
+.work-media {
+  transition:
+    transform 900ms var(--ease-expo),
+    box-shadow 900ms var(--ease-expo);
+}
+/* The pointer's indigo light, inside the glass of the cover. */
+.work-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      520px circle at var(--mx, 50%) var(--my, 40%),
+      color-mix(in oklab, #5b3df0 20%, transparent),
+      color-mix(in oklab, #5b3df0 6%, transparent) 38%,
+      transparent 64%
+    );
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+.work-shine {
+  z-index: 2;
+}
+.work-card:hover .work-media::after,
+.work-card:focus-within .work-media::after {
+  opacity: 1;
+}
+.work-card:hover .work-media,
+.work-card:focus-within .work-media {
+  transform: translateY(-8px);
+  box-shadow:
+    0 1px 2px rgba(10, 11, 16, 0.06),
+    0 8px 18px -6px rgba(10, 11, 16, 0.1),
+    0 34px 60px -24px rgba(10, 11, 16, 0.22),
+    0 60px 120px -60px color-mix(in oklab, #5b3df0 35%, transparent);
+}
+/* The name answers the cover: a hairline of indigo draws under it. */
+.work-name a {
+  background: linear-gradient(#5b3df0, #5b3df0) left bottom / 0% 1px no-repeat;
+  transition: background-size 700ms var(--ease-expo);
+}
+.work-card:hover .work-name a,
+.work-name a:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* ---- How we work: each stage is a sheet the hand can lift --------------- */
+
+.step {
+  isolation: isolate;
+}
+.step::before {
+  content: "";
+  position: absolute;
+  inset: -22px -18px -22px;
+  z-index: -1;
+  border-radius: 14px;
+  background:
+    radial-gradient(
+      320px circle at var(--mx, 50%) var(--my, 30%),
+      color-mix(in oklab, #5b3df0 9%, transparent),
+      transparent 70%
+    ),
+    color-mix(in oklab, #ffffff 70%, transparent);
+  box-shadow:
+    0 1px 2px rgba(10, 11, 16, 0.05),
+    0 18px 40px -22px rgba(10, 11, 16, 0.18);
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transition:
+    opacity 500ms ease,
+    transform 800ms var(--ease-expo);
+  pointer-events: none;
+}
+.step:hover::before {
+  opacity: 1;
+  transform: none;
+}
+.step-title {
+  transition:
+    transform 800ms var(--ease-expo),
+    color 400ms ease;
+}
+.step:hover .step-title {
+  transform: translateX(4px);
+  color: #5b3df0;
+}
+/* The last stage the line has reached keeps a slow halo: "you are here". */
+@media (prefers-reduced-motion: no-preference) {
+  .steps[data-lit="1"] .step[data-i="0"] .step-dot,
+  .steps[data-lit="2"] .step[data-i="1"] .step-dot,
+  .steps[data-lit="3"] .step[data-i="2"] .step-dot,
+  .steps[data-lit="4"] .step[data-i="3"] .step-dot,
+  .steps[data-lit="5"] .step[data-i="4"] .step-dot {
+    animation: cz-here 2.4s ease-in-out infinite;
+  }
+}
+@keyframes cz-here {
+  0%,
+  100% {
+    box-shadow: 0 0 0 6px color-mix(in oklab, #5b3df0 13%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 11px color-mix(in oklab, #5b3df0 5%, transparent);
+  }
+}
+
+/* ---- Scroll-driven: covers wipe open and drift; stages settle in order --- */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* The cover wipes open from the top as its card enters, then the photo
+       drifts a little against the scroll (translate, so the hover's scale
+       on transform still works). */
+    .work-media img {
+      animation:
+        cz-wipe linear both,
+        cz-drift linear both;
+      animation-timeline: view(), view();
+      animation-range:
+        entry 5% cover 38%,
+        cover 0% cover 100%;
+    }
+    .work-card-2 .work-media img {
+      animation-range:
+        entry 15% cover 45%,
+        cover 0% cover 100%;
+    }
+    @keyframes cz-wipe {
+      from {
+        clip-path: inset(0 0 100% 0);
+      }
+      to {
+        clip-path: inset(0 0 0 0);
+      }
+    }
+    @keyframes cz-drift {
+      from {
+        translate: 0 -3.5%;
+      }
+      to {
+        translate: 0 3.5%;
+      }
+    }
+    /* The body text of each card follows its cover a beat later. */
+    .work-body {
+      animation: cz-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 32%;
+    }
+    @keyframes cz-rise {
+      from {
+        transform: translateY(32px) scale(0.97);
+        filter: blur(6px);
+      }
+      to {
+        transform: none;
+        filter: none;
+      }
+    }
+    /* The rail itself comes into focus as the section reaches it. */
+    .steps {
+      animation: cz-focus linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+    @keyframes cz-focus {
+      from {
+        filter: blur(6px);
+        transform: translateY(32px) scale(0.97);
+      }
+      to {
+        filter: none;
+        transform: none;
+      }
+    }
+  }
+}
+
+/* Without motion: no lifts that move, just the light and the shadow. */
+@media (prefers-reduced-motion: reduce) {
+  .work-card:hover .work-media,
+  .work-card:focus-within .work-media,
+  .step:hover::before,
+  .step:hover .step-title {
+    transform: none;
+  }
+}
+/* Touch has no pointer to follow: keep the plate and light off. */
+@media (hover: none) {
+  .step::before,
+  .work-media::after {
+    display: none;
+  }
+}
+
+/* ---- The sheets' headlines close up as they settle ----------------------- */
+/* Letter-spacing, not transform: the rise ([data-rv]) owns the transform. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    #work-title,
+    #process-title {
+      animation: cz-close linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+    @keyframes cz-close {
+      from {
+        letter-spacing: 0.01em;
+      }
+      to {
+        letter-spacing: -0.032em;
+      }
+    }
+  }
+}

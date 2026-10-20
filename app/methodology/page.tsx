@@ -12,6 +12,9 @@ import { pageMeta } from "@/lib/meta";
 import { PHOTOS } from "@/content/images";
 // Its own stylesheet: the stages, the sticky photograph, your part. No other page loads it.
 import "./methodology.css";
+// crazy-r29 "living paper": scroll-driven reveals, the stacked decisions, the pointer's light.
+import "./crazy-methodology.css";
+import { PointerGlow } from "./PointerGlow";
 
 const DESCRIPTION =
   "How we take a project from first conversation to launch: five clear stages, useful deliverables and your decisions at the right points.";
@@ -97,13 +100,19 @@ export default function Methodology() {
       <PageLd href={PAGES.methodology} name="Methodology" description={DESCRIPTION} image={PHOTOS["method-hero"]} />
       <HowToLd stages={STAGES} />
       <QaLd items={QA} />
+      <PointerGlow sel=".ma, .mf-decide li" />
 
       <section className="sp-hero">
         <Kicker>Methodology</Kicker>
         <h1 className="sp-h1" data-rv>
-          Good work starts
-          <br />
-          <em>with a clear plan.</em>
+          <span className="cz-l">
+            <span>Good work starts</span>
+          </span>{" "}
+          <span className="cz-l">
+            <span>
+              <em>with a clear plan.</em>
+            </span>
+          </span>
         </h1>
         <p className="sp-lede" data-rv>
           You work directly with the Auckland team designing and building your project. We agree the scope, show you the

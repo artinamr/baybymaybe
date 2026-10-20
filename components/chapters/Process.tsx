@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type CSSProperties } from "react";
 import { PageSection, PageMarker } from "./Section";
+import "./crazy-sheets.css";
 import { PAGES, STAGES } from "@/lib/content";
 import { onScrollFrame } from "@/lib/scroll";
 import { scroll } from "@/lib/stores";

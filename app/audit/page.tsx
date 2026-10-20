@@ -6,6 +6,7 @@ import { ArticleCard } from "@/components/blog/ArticleCard";
 import { CONTACT, FAQ_ALL, PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { article, type ArticleMeta } from "@/content/blog";
+import "./crazy-audit.css";
 
 const DESCRIPTION =
   "Send us your website. Within two days you get a plain, written answer: what works, what is costing you enquiries, and what we would build instead. Free.";
@@ -46,13 +47,13 @@ export default function Audit() {
     <Page crumbs={[{ name: "Free website audit", href: PAGES.audit }]} footerForm={false}>
       <PageLd href={PAGES.audit} name="Free website audit" description={DESCRIPTION} />
       <QaLd items={QA} />
-      <section className="ct au" id="contact" aria-labelledby="au-title">
+      <section className="ct au cz-au" id="contact" aria-labelledby="au-title">
         <div className="ct-head">
           <Kicker>Free website audit</Kicker>
           <h1 id="au-title" className="sp-h1" data-rv>
-            Send us your website.
+            <span className="cz-l">Send us your website.</span>
             <br />
-            <em>Get a straight answer in two days.</em>
+            <em className="cz-l">Get a straight answer in two days.</em>
           </h1>
           <p className="sp-lede" data-rv>
             We look at your website the way your customers do, and write down plainly what we find. No pitch, and no
@@ -82,14 +83,14 @@ export default function Audit() {
         </div>
       </section>
 
-      <section className="sp-block split" aria-labelledby="au-look-h">
+      <section className="sp-block split cz-au-sec" aria-labelledby="au-look-h">
         <header className="split-head">
           <Kicker>What we look at</Kicker>
           <h2 id="au-look-h" className="sp-h2" data-rv>
             Your site, as your customers see it.
           </h2>
         </header>
-        <ul className="items">
+        <ul className="items cz-au-look">
           {LOOK.map((it, i) => (
             <li key={it.title} data-rv style={{ transitionDelay: `${(i % 2) * 90}ms` }}>
               <span className="item-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
@@ -100,7 +101,7 @@ export default function Audit() {
         </ul>
       </section>
 
-      <section className="sp-block split" aria-labelledby="au-qa-h">
+      <section className="sp-block split cz-au-sec" aria-labelledby="au-qa-h">
         <header className="split-head">
           <Kicker>Questions</Kicker>
           <h2 id="au-qa-h" className="sp-h2" data-rv>
@@ -118,7 +119,7 @@ export default function Audit() {
       </section>
 
       {READ.length ? (
-        <section className="sp-block bl-related" aria-labelledby="au-read-h">
+        <section className="sp-block bl-related cz-au-sec" aria-labelledby="au-read-h">
           <header className="split-head bl-related-head">
             <Kicker>Read first, if you like</Kicker>
             <h2 id="au-read-h" className="sp-h2" data-rv>

@@ -1,4 +1,6 @@
+import type { CSSProperties } from "react";
 import type { Service } from "@/content/services";
+import "./crazy-journey.css";
 
 type Slug = Service["slug"];
 
@@ -25,7 +27,13 @@ export function Journey({ focus }: { focus?: Slug }) {
   return (
     <ol className="jr" data-focus={focus}>
       {JOURNEY.map((s, i) => (
-        <li key={s.t} className="jr-step" data-by={s.by} data-dim={focus && s.by !== focus ? "" : undefined}>
+        <li
+          key={s.t}
+          className="jr-step"
+          data-by={s.by}
+          data-dim={focus && s.by !== focus ? "" : undefined}
+          style={{ "--i": i } as CSSProperties}
+        >
           <span className="jr-tag">{TAG[s.by]}</span>
           <span className="jr-dot" aria-hidden>
             <span className="mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />

@@ -1,7 +1,32 @@
 "use client";
 
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent, type PointerEvent } from "react";
 import { CONTACT, FORM_ENDPOINT, PAGES } from "@/lib/content";
+import "./crazy-contact.css";
+
+/** The card's indigo light follows the pointer: two custom properties on the card itself, no re-render. */
+function glow(e: PointerEvent<HTMLElement>) {
+  if (e.pointerType !== "mouse") return;
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--mx", `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
+  el.style.setProperty("--my", `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`);
+}
+
+/** The send pill leans a few pixels toward the pointer, and springs back on leave. */
+function magnet(e: PointerEvent<HTMLElement>) {
+  if (e.pointerType !== "mouse") return;
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  const x = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+  const y = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+  el.style.setProperty("--tx", `${(x * 6).toFixed(2)}px`);
+  el.style.setProperty("--ty", `${(y * 4).toFixed(2)}px`);
+}
+function unmagnet(e: PointerEvent<HTMLElement>) {
+  e.currentTarget.style.setProperty("--tx", "0px");
+  e.currentTarget.style.setProperty("--ty", "0px");
+}
 
 const NEEDS = ["Website", "Platform", "AI automation", "Not sure yet"] as const;
 type State = "idle" | "sending" | "sent" | "error";
@@ -146,7 +171,14 @@ export function AuditForm({ tone = "paper", intent = "audit" }: { tone?: "paper"
   }
 
   return (
-    <form ref={formRef} className={`audit-form af-${tone}`} onSubmit={submit} noValidate data-state={state}>
+    <form
+      ref={formRef}
+      className={`audit-form af-${tone}`}
+      onSubmit={submit}
+      onPointerMove={tone === "card" ? glow : undefined}
+      noValidate
+      data-state={state}
+    >
       {intent === "choose" ? (
         <div className="af-kind" role="group" aria-label="What would you like?">
           {(["audit", "project"] as const).map((k) => (
@@ -250,7 +282,13 @@ export function AuditForm({ tone = "paper", intent = "audit" }: { tone?: "paper"
         </label>
       </div>
       <div className="af-foot">
-        <button type="submit" className="pill btn-shine pill-lg af-send" disabled={state === "sending"}>
+        <button
+          type="submit"
+          className="pill btn-shine pill-lg af-send"
+          disabled={state === "sending"}
+          onPointerMove={magnet}
+          onPointerLeave={unmagnet}
+        >
           <span>{state === "sending" ? "Sending…" : copyFor.send}</span>
           <span className="pill-arrow" aria-hidden>
             <span>→</span>

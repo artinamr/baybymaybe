@@ -1,0 +1,212 @@
+/* ==========================================================================
+   crazy-r29 "living paper": the system layer. Tokens for section rhythm and
+   depth, tactile buttons, text links and the focus ring. Imported at the top
+   of globals.css, so every rule that must win over a later global rule of the
+   same name doubles its class (.pill.pill) to outrank it.
+   Motion only under prefers-reduced-motion: no-preference; nothing here ever
+   hides content.
+   ========================================================================== */
+
+:root {
+  /* Section rhythm: fluid, generous, one scale for every page. */
+  --sec-xs: clamp(24px, 3vw, 40px);
+  --sec-sm: clamp(40px, 5vw, 72px);
+  --sec-md: clamp(64px, 8vw, 120px);
+  --sec-lg: clamp(96px, 12vw, 176px);
+  --sec-xl: clamp(128px, 16vw, 240px);
+  --gutter: clamp(16px, 4vw, 56px);
+
+  /* Depth: soft layered shadows (ink-tinted, never grey), and the indigo lift. */
+  --shadow-1: 0 1px 1px rgba(10, 11, 16, 0.04), 0 2px 6px -2px rgba(10, 11, 16, 0.06);
+  --shadow-2: 0 1px 1px rgba(10, 11, 16, 0.03), 0 4px 10px -4px rgba(10, 11, 16, 0.08),
+    0 18px 40px -18px rgba(10, 11, 16, 0.16);
+  --shadow-3: 0 1px 2px rgba(10, 11, 16, 0.04), 0 8px 18px -8px rgba(10, 11, 16, 0.1),
+    0 32px 70px -28px rgba(10, 11, 16, 0.24);
+  --shadow-indigo: 0 2px 4px -1px rgba(91, 61, 240, 0.35), 0 12px 28px -10px rgba(91, 61, 240, 0.55),
+    0 28px 60px -24px rgba(91, 61, 240, 0.45);
+
+  /* Motion vocabulary. */
+  --ease-rise: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-press: cubic-bezier(0.3, 0, 0.2, 1);
+  --dur-rise: 900ms;
+  --rise-y: 32px;
+  --rise-scale: 0.97;
+  --rise-blur: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   Focus: a paper gap, then an indigo ring that settles in from wider out.
+   -------------------------------------------------------------------------- */
+:where(a, button, summary):focus-visible {
+  box-shadow: 0 0 0 6px color-mix(in oklab, var(--indigo) 14%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :where(a, button, summary):focus-visible {
+    animation: crz-focus 420ms var(--ease-rise) both;
+  }
+}
+@keyframes crz-focus {
+  from {
+    outline-offset: 8px;
+    outline-color: color-mix(in oklab, var(--indigo) 0%, transparent);
+  }
+}
+.pill.pill:focus-visible {
+  outline-offset: 4px;
+  box-shadow: var(--shadow-indigo), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   The indigo pill: a light that follows the pointer (--mx/--my when a page
+   sets them, else it rests at the top), a layered lift, a real press.
+   The liked shine sweep (.btn-shine::after) is untouched.
+   -------------------------------------------------------------------------- */
+.pill.pill {
+  isolation: isolate;
+  box-shadow: 0 1px 2px rgba(91, 61, 240, 0.3), 0 10px 30px -10px rgba(91, 61, 240, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(10, 11, 16, 0.18);
+}
+.pill.pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    120px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255, 255, 255, 0.28),
+    transparent 70%
+  );
+  opacity: 0.55;
+  pointer-events: none;
+}
+.pill.pill:hover {
+  box-shadow: var(--shadow-indigo), inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -1px 0 rgba(10, 11, 16, 0.18);
+}
+.pill.pill:hover::before {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pill.pill {
+    transition:
+      transform 450ms var(--ease-rise),
+      box-shadow 450ms var(--ease-rise);
+  }
+  .pill.pill::before {
+    transition: opacity 400ms ease;
+  }
+  .pill.pill:hover {
+    transform: translateY(-2px) scale(1.015);
+  }
+  .pill.pill:active {
+    transform: translateY(0) scale(0.97);
+    transition-duration: 120ms;
+    transition-timing-function: var(--ease-press);
+    box-shadow: 0 1px 2px rgba(91, 61, 240, 0.4), 0 6px 16px -8px rgba(91, 61, 240, 0.55),
+      inset 0 2px 4px rgba(10, 11, 16, 0.22);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The ghost pill: keeps its ink-from-the-pointer fill; adds a lift and press.
+   -------------------------------------------------------------------------- */
+.ghost.ghost:hover {
+  box-shadow: var(--shadow-2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ghost.ghost {
+    transition:
+      border-color 300ms ease,
+      transform 450ms var(--ease-rise),
+      box-shadow 450ms var(--ease-rise);
+  }
+  .ghost.ghost:hover {
+    transform: translateY(-2px);
+  }
+  .ghost.ghost:active {
+    transform: scale(0.97);
+    transition-duration: 120ms;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Text links: the rule turns indigo and runs the full width; the arrow leans
+   on; on leave it draws back from the right.
+   -------------------------------------------------------------------------- */
+.text-link.text-link::after {
+  background: linear-gradient(90deg, var(--indigo), var(--indigo-hi));
+  opacity: 0.9;
+}
+.text-link.text-link {
+  transition: color 300ms ease;
+}
+.text-link.text-link:hover {
+  color: var(--indigo);
+}
+.text-link.text-link > svg,
+.text-link.text-link > [aria-hidden="true"] {
+  display: inline-block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .text-link.text-link::after {
+    transition: transform 600ms var(--ease-rise);
+  }
+  .text-link.text-link > svg,
+  .text-link.text-link > [aria-hidden="true"] {
+    transition: transform 450ms var(--ease-rise);
+  }
+  .text-link.text-link:hover > svg,
+  .text-link.text-link:hover > [aria-hidden="true"] {
+    transform: translateX(4px);
+  }
+}
+
+/* Plain prose links on every page: an indigo underline that thickens on hover. */
+:where(main) :where(p, li) > a:not([class]) {
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in oklab, var(--indigo) 45%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+:where(main) :where(p, li) > a:not([class]):hover {
+  text-decoration-color: var(--indigo);
+  text-decoration-thickness: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :where(main) :where(p, li) > a:not([class]) {
+    transition:
+      text-decoration-color 250ms ease,
+      text-decoration-thickness 250ms ease,
+      text-underline-offset 250ms ease;
+  }
+  :where(main) :where(p, li) > a:not([class]):hover {
+    text-underline-offset: 5px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   A shared rise for anyone who opts in with [data-crz-rise] (section heads,
+   cards): scroll-driven, so it costs no script, and it ends fully visible.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    [data-crz-rise] {
+      animation: crz-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+  }
+}
+@keyframes crz-rise {
+  from {
+    transform: translateY(var(--rise-y)) scale(var(--rise-scale));
+    filter: blur(var(--rise-blur));
+    opacity: 0.4;
+  }
+  to {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+}

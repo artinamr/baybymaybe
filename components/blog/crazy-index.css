@@ -1,0 +1,246 @@
+/* Living paper: the blog's library (BlogIndex) and "What are you deciding?"
+   (Situations). Every motion sits behind reduced-motion and, where it reads
+   the scroll, behind @supports (animation-timeline: view()). Nothing here
+   ends hidden: without these rules the page is exactly as it was. */
+
+/* ---------- The library's cards: a light that follows the pointer ---------- */
+.bl-index .bl-card {
+  position: relative;
+  isolation: isolate;
+}
+.bl-index .bl-card::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  border-radius: 30px;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 30%),
+      color-mix(in oklab, #5b3df0 11%, transparent),
+      transparent 62%
+    ),
+    color-mix(in oklab, var(--paper) 40%, white);
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--ink) 4%, transparent),
+    0 18px 40px -22px color-mix(in oklab, var(--ink) 22%, transparent),
+    0 40px 90px -50px color-mix(in oklab, #5b3df0 26%, transparent);
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+.bl-index .bl-card:hover::before,
+.bl-index .bl-card:focus-visible::before {
+  opacity: 1;
+}
+.bl-index .bl-card-img {
+  position: relative;
+  transition:
+    translate 700ms var(--ease-expo),
+    box-shadow 700ms var(--ease-expo);
+}
+/* The glint: a narrow band of indigo-white light where the pointer is. */
+.bl-index .bl-card-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    260px circle at var(--ix, 50%) var(--iy, 50%),
+    color-mix(in oklab, white 34%, transparent),
+    color-mix(in oklab, #6b4bff 10%, transparent) 40%,
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+.bl-index .bl-card:hover .bl-card-img::after {
+  opacity: 1;
+}
+.bl-index .bl-card:hover .bl-card-img,
+.bl-index .bl-card:focus-visible .bl-card-img {
+  box-shadow:
+    0 2px 4px -2px color-mix(in oklab, var(--ink) 10%, transparent),
+    0 22px 44px -24px color-mix(in oklab, var(--ink) 34%, transparent),
+    0 44px 90px -40px color-mix(in oklab, #5b3df0 30%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bl-index .bl-card:hover .bl-card-img,
+  .bl-index .bl-card:focus-visible .bl-card-img {
+    translate: 0 -6px;
+  }
+}
+
+/* ---------- Scroll: photographs wipe open and drift against the page ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .bl-index .bl-card-img {
+      animation: crazy-ix-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 34%;
+    }
+    /* `translate`, not `transform`: the card's hover zoom keeps working. */
+    .bl-index .bl-card-img img {
+      scale: 1.1;
+      animation: crazy-ix-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .bl-index .bl-card-title {
+      animation: crazy-ix-focus linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 30%;
+    }
+
+    /* The situations: each row rises into focus in turn as it enters. */
+    .bl-sit li {
+      animation: crazy-ix-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}
+@keyframes crazy-ix-wipe {
+  from {
+    clip-path: inset(18% 0 0 0 round 20px);
+    translate: 0 28px;
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 20px);
+    translate: 0 0;
+  }
+}
+@keyframes crazy-ix-drift {
+  from {
+    translate: 0 -4.5%;
+  }
+  to {
+    translate: 0 4.5%;
+  }
+}
+@keyframes crazy-ix-focus {
+  from {
+    translate: 0 18px;
+    filter: blur(4px);
+    opacity: 0.35;
+  }
+  to {
+    translate: 0 0;
+    filter: none;
+    opacity: 1;
+  }
+}
+@keyframes crazy-ix-rise {
+  from {
+    translate: 0 32px;
+    scale: 0.97;
+    filter: blur(6px);
+    opacity: 0.2;
+  }
+  to {
+    translate: 0 0;
+    scale: 1;
+    filter: none;
+    opacity: 1;
+  }
+}
+
+/* ---------- The search: the field lights from within when in hand ---------- */
+.bl-search {
+  transition:
+    box-shadow 500ms var(--ease-expo),
+    border-color 300ms ease;
+}
+.bl-search:focus-within {
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, #5b3df0 12%, transparent),
+    0 18px 44px -26px color-mix(in oklab, #5b3df0 55%, transparent);
+}
+.bl-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Situations: the row in hand, drawn with a line of light ---------- */
+.bl-sit a {
+  position: relative;
+}
+.bl-sit a::after {
+  content: "";
+  position: absolute;
+  left: 60px;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, #5b3df0, color-mix(in oklab, #6b4bff 40%, transparent) 70%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 900ms var(--ease-expo);
+}
+.bl-sit a:hover::after,
+.bl-sit a:focus-visible::after {
+  transform: scaleX(1);
+}
+@media (hover: hover) and (min-width: 1001px) {
+  .bl-sit a[data-on]::after {
+    transform: scaleX(1);
+  }
+  .bl-sit a[data-on] .bl-sit-n {
+    color: var(--ink);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bl-sit-q {
+    transition:
+      color 300ms ease,
+      translate 700ms var(--ease-expo);
+  }
+  .bl-sit a:hover .bl-sit-q,
+  .bl-sit a:focus-visible .bl-sit-q {
+    translate: 10px 0;
+  }
+}
+
+/* The panel: layered shadow, a light that follows the pointer, and each new
+   photograph wiped in from the left as its row is taken up. */
+.bl-peek {
+  isolation: isolate;
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--ink) 4%, transparent),
+    0 24px 60px -34px color-mix(in oklab, var(--ink) 26%, transparent),
+    0 60px 120px -70px color-mix(in oklab, #5b3df0 30%, transparent);
+  background:
+    radial-gradient(
+      380px circle at var(--mx, 70%) var(--my, 20%),
+      color-mix(in oklab, #5b3df0 9%, transparent),
+      transparent 64%
+    ),
+    color-mix(in oklab, var(--paper) 55%, white);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bl-peek-img > span[data-on] {
+    animation: crazy-ix-peek 1100ms var(--ease-expo) both;
+  }
+  .bl-peek-b > span[data-on] {
+    animation: crazy-ix-say 900ms var(--ease-expo) both;
+  }
+}
+@keyframes crazy-ix-peek {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes crazy-ix-say {
+  from {
+    translate: 0 12px;
+    filter: blur(4px);
+  }
+  to {
+    translate: 0 0;
+    filter: none;
+  }
+}

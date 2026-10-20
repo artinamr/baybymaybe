@@ -1,0 +1,229 @@
+/* ==== crazy-r29 "living paper": an article ====
+   The title's words rise into focus; the cover is wiped open and drifts
+   against the scroll; the short answer, the questions and the related cards
+   carry an indigo light under the pointer; the end matter rises and comes
+   into focus as it enters. Every motion sits behind reduced-motion and
+   (for scroll-driven parts) animation-timeline support, and every end
+   state is fully visible. */
+
+/* ---- The title: each word slides up out of a soft focus, in a stagger ---- */
+.ar-h1 .ar-w {
+  display: inline-block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ar-h1 .ar-w {
+    animation: ar-word 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(120ms + var(--i, 0) * 55ms);
+  }
+}
+@keyframes ar-word {
+  from {
+    transform: translateY(0.42em) scale(0.98);
+    filter: blur(6px);
+  }
+  to {
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ---- The progress hairline gets a bright head ---- */
+.ar-progress {
+  height: 2px;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--indigo) 70%, transparent), var(--indigo));
+  box-shadow: 0 0 12px color-mix(in oklab, var(--indigo) 55%, transparent);
+}
+
+/* ---- The short answer: a lifted card with the pointer's light ---- */
+.ar .ar-short {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgb(10 11 16 / 0.04),
+    0 8px 24px -12px rgb(10 11 16 / 0.12),
+    0 30px 60px -30px rgb(91 61 240 / 0.18);
+  transition:
+    box-shadow 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ar .ar-short::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--indigo), color-mix(in oklab, var(--indigo) 0%, transparent));
+  border-radius: 3px;
+}
+[data-ar-light] {
+  --mx: 50%;
+  --my: 0%;
+}
+[data-ar-light]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    420px circle at var(--mx) var(--my),
+    color-mix(in oklab, var(--indigo) 13%, transparent),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  [data-ar-light]:hover::after {
+    opacity: 1;
+  }
+  .ar .ar-short:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 1px 2px rgb(10 11 16 / 0.05),
+      0 14px 34px -14px rgb(10 11 16 / 0.18),
+      0 44px 80px -36px rgb(91 61 240 / 0.28);
+  }
+}
+
+/* ---- The cover: wiped open from the bottom, drifting against the scroll ---- */
+.ar-cover {
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ar-cover {
+      view-timeline-name: --ar-cover;
+    }
+    .ar-cover img {
+      animation:
+        ar-wipe linear both,
+        ar-drift linear both;
+      animation-timeline: --ar-cover, --ar-cover;
+      animation-range:
+        entry 0% cover 42%,
+        cover 0% cover 100%;
+      will-change: transform;
+    }
+  }
+}
+@keyframes ar-wipe {
+  from {
+    clip-path: inset(18% 4% 0 4% round 18px);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 0);
+  }
+}
+@keyframes ar-drift {
+  from {
+    transform: scale(1.12) translateY(-4%);
+  }
+  to {
+    transform: scale(1.12) translateY(4%);
+  }
+}
+
+/* ---- The questions: each one a soft card that lifts, with the light ---- */
+.ar-faq dl > div[data-ar-light] {
+  position: relative;
+  isolation: isolate;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin: 0 -20px;
+  border-radius: 18px;
+  transition:
+    background-color 500ms ease,
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ar-faq dl > div[data-ar-light]:hover {
+    background: color-mix(in oklab, var(--paper) 40%, white);
+  }
+  .ar-faq dl > div[data-ar-light]:hover dt {
+    color: var(--indigo);
+  }
+}
+.ar-faq dt {
+  transition: color 400ms ease;
+}
+
+/* ---- The end matter rises into focus as it enters ---- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ar-faq dl > div,
+    .ar-sources li,
+    .ar-sources-note,
+    .ar-credit,
+    .ar-about {
+      animation: ar-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+@keyframes ar-rise {
+  from {
+    transform: translateY(32px) scale(0.97);
+    filter: blur(6px);
+    opacity: 0.35;
+  }
+  to {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+}
+
+/* ---- About this article: a quiet paper card ---- */
+.ar .ar-about {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+/* ---- The contents: the current section held in a soft indigo lozenge ---- */
+@media (min-width: 900px) {
+  .ar-toc .ar-toc-list a {
+    border-radius: 10px;
+    transition:
+      color 300ms ease,
+      background-color 400ms ease,
+      transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ar-toc .ar-toc-list a[aria-current="true"] {
+    background: color-mix(in oklab, var(--indigo) 7%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--indigo) 14%, transparent);
+    transform: translateX(4px);
+  }
+  .ar-toc .ar-toc-list a:hover {
+    color: var(--indigo);
+  }
+  .ar-toc .ar-toc-meter > span {
+    background: var(--indigo);
+    box-shadow: 0 0 10px color-mix(in oklab, var(--indigo) 50%, transparent);
+    transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* ---- Print: none of it ---- */
+@media print {
+  .ar-h1 .ar-w,
+  .ar-cover img,
+  .ar-faq dl > div,
+  .ar-sources li,
+  .ar-sources-note,
+  .ar-credit,
+  .ar-about {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+    clip-path: none !important;
+    opacity: 1 !important;
+  }
+  [data-ar-light]::after {
+    display: none;
+  }
+}

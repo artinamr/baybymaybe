@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import "./crazy-prose.css";
 
 /**
  * THE ARTICLE'S PARTS — the few shapes every article is built from, so the
@@ -46,9 +47,9 @@ export function Callout({ title, children }: { title: string; children: ReactNod
 /** Numbered steps, each a short title and a line or two. */
 export function Steps({ items }: { items: { t: string; b: ReactNode }[] }) {
   return (
-    <ol className="ar-steps">
+    <ol className="ar-steps" data-stack="">
       {items.map((s, i) => (
-        <li key={s.t}>
+        <li key={s.t} style={{ "--i": i } as CSSProperties}>
           <span className="ar-steps-n mono" aria-hidden>
             {String(i + 1).padStart(2, "0")}
           </span>

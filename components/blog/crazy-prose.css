@@ -1,0 +1,256 @@
+/*
+ * CRAZY R29, "living paper": the article's parts (Prose.tsx) and its
+ * diagrams (Diagrams.tsx) come into focus as they enter, driven by the
+ * scroll itself (view timelines, no JS). Screen only (print untouched),
+ * only with motion allowed and only where view timelines exist; every
+ * animation ends fully visible, so nothing is ever left hidden.
+ */
+
+/* Cards in a figure: a soft lift and a quiet indigo light on hover (CSS only). */
+@media screen {
+  .ar-fig-body {
+    position: relative;
+    isolation: isolate;
+    transition: box-shadow 500ms cubic-bezier(0.2, 0.7, 0.2, 1), border-color 500ms ease;
+  }
+  .ar-fig-body::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(60% 70% at 85% 0%, color-mix(in oklab, #5b3df0 9%, transparent), transparent 70%);
+    opacity: 0;
+    transition: opacity 600ms ease;
+  }
+  .ar-fig:hover .ar-fig-body {
+    border-color: color-mix(in oklab, #5b3df0 22%, var(--hair-soft));
+    box-shadow:
+      0 1px 1px rgba(10, 11, 16, 0.03),
+      0 8px 18px -10px rgba(10, 11, 16, 0.1),
+      0 30px 60px -30px rgba(91, 61, 240, 0.18);
+  }
+  .ar-fig:hover .ar-fig-body::after {
+    opacity: 1;
+  }
+
+  /* The callout: a card with depth. */
+  .ar-callout {
+    box-shadow: 0 18px 40px -28px rgba(10, 11, 16, 0.22);
+  }
+
+  /* A heading's indigo rule (drawn full when there is no motion). */
+  .ar-h2 {
+    position: relative;
+  }
+  .ar-h2::after {
+    content: "";
+    display: block;
+    width: 44px;
+    height: 2px;
+    margin-top: 18px;
+    border-radius: 2px;
+    background: #5b3df0;
+    transform-origin: left center;
+  }
+  .ar-sources .ar-h2::after,
+  .ar-faq .ar-h2::after {
+    display: none;
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    @keyframes crz-prose-rise {
+      from {
+        opacity: 0.01;
+        transform: translateY(32px) scale(0.97);
+        filter: blur(6px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+        filter: none;
+      }
+    }
+    @keyframes crz-prose-up {
+      from {
+        opacity: 0.01;
+        transform: translateY(22px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    @keyframes crz-prose-wipe {
+      from {
+        clip-path: inset(-80px -80px 100% -80px round 20px);
+        transform: translateY(40px);
+      }
+      to {
+        clip-path: inset(-80px -80px -80px -80px round 20px);
+        transform: none;
+      }
+    }
+    @keyframes crz-prose-rule {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+    @keyframes crz-prose-bar {
+      from {
+        border-left-color: transparent;
+        transform: translateX(-14px);
+        opacity: 0.01;
+      }
+      to {
+        border-left-color: #5b3df0;
+        transform: none;
+        opacity: 1;
+      }
+    }
+    @keyframes crz-prose-tick {
+      from {
+        stroke-dashoffset: 24;
+      }
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+    @keyframes crz-prose-arrow {
+      from {
+        clip-path: inset(0 100% 0 0);
+      }
+      to {
+        clip-path: inset(0 0 0 0);
+      }
+    }
+
+    /* Headings: rise and focus; the rule under them draws out. */
+    .prose .ar-h2,
+    .prose .ar-h3 {
+      animation: crz-prose-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+    .prose .ar-h2::after {
+      animation: crz-prose-rule linear both;
+      animation-timeline: view();
+      animation-range: entry 40% cover 30%;
+    }
+
+    /* Figures: the card is uncovered by a wipe from the top as it rises. */
+    .prose .ar-fig-body {
+      animation: crz-prose-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+    .prose .ar-fig figcaption {
+      animation: crz-prose-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+
+    /* Callouts slide in from their indigo edge. */
+    .prose .ar-callout {
+      animation: crz-prose-bar linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 25%;
+    }
+
+    /* Steps, checklist lines and table rows: each comes up on its own. */
+    .prose .ar-steps li,
+    .prose .ar-check li,
+    .prose .ar-table tbody tr {
+      animation: crz-prose-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+    .prose .ar-check .ar-tick path {
+      stroke-dasharray: 24;
+      animation: crz-prose-tick linear both;
+      animation-timeline: view();
+      animation-range: entry 60% cover 25%;
+    }
+
+    /* Diagrams: each part enters a beat after the one before it. */
+    .dg-tree-row,
+    .dg-end,
+    .dg-step,
+    .dg-route,
+    .dg-layer {
+      animation: crz-prose-rise linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--i, 0) * 6%) cover calc(18% + var(--i, 0) * 4%);
+    }
+    .dg-arrow svg {
+      animation: crz-prose-arrow linear both;
+      animation-timeline: view();
+      animation-range: entry 50% cover 30%;
+    }
+  }
+
+  /* Diagram parts answer the pointer. */
+  .dg-step,
+  .dg-layer,
+  .dg-q,
+  .dg-out,
+  .dg-node {
+    transition:
+      translate 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      box-shadow 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      border-color 300ms ease;
+  }
+  @media (hover: hover) {
+    .dg-step:hover,
+    .dg-node:hover,
+    .dg-out:hover {
+      translate: 0 -3px;
+      border-color: color-mix(in oklab, #5b3df0 40%, var(--hair));
+      box-shadow:
+        0 1px 2px rgba(10, 11, 16, 0.04),
+        0 14px 28px -16px rgba(91, 61, 240, 0.32);
+    }
+    .dg-layer:hover {
+      position: relative;
+      z-index: 1;
+      translate: 6px 0;
+      box-shadow: -3px 0 0 #5b3df0, 0 14px 28px -18px rgba(10, 11, 16, 0.25);
+    }
+  }
+}
+
+/*
+ * Steps as a stack of sheets (wide screens, motion allowed): each step is a
+ * card that pins under the nav, a few pixels below the one before, so the
+ * list piles up as you read it and the next one slides over it.
+ */
+@media screen and (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .prose .ar-steps[data-stack] {
+    border-top: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .prose .ar-steps[data-stack] li {
+    position: sticky;
+    top: calc(var(--nav-h, 76px) + 20px + var(--i, 0) * 10px);
+    padding: 24px 26px 22px;
+    border: 1px solid var(--hair);
+    border-radius: 18px;
+    background: color-mix(in oklab, var(--paper) 70%, white);
+    box-shadow:
+      0 1px 1px rgba(10, 11, 16, 0.03),
+      0 -10px 30px -22px rgba(10, 11, 16, 0.22);
+  }
+  .prose .ar-steps[data-stack] li:last-child {
+    box-shadow:
+      0 1px 1px rgba(10, 11, 16, 0.03),
+      0 -10px 30px -22px rgba(10, 11, 16, 0.22),
+      0 26px 50px -34px rgba(91, 61, 240, 0.28);
+  }
+}

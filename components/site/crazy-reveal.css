@@ -1,0 +1,104 @@
+/* Living paper: the reveal and the photographs (crazy-r29).
+   Every rule here only adds motion. Without motion preference, without
+   scroll timelines or without JS, everything is simply shown, as before. */
+
+/* 1. The rise: out of a blur, a little smaller, into focus. The opacity
+   still starts at 0.01 (globals.css): see the LCP note there. A batch that
+   enters together arrives in a stagger (--rv-d, written by SubReveal). */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-sp] [data-rv] {
+    scale: 0.97;
+    transform-origin: 50% 100%;
+    transition:
+      opacity 1100ms var(--ease-expo) var(--rv-d, 0ms),
+      transform 1300ms var(--ease-expo) var(--rv-d, 0ms),
+      scale 1300ms var(--ease-expo) var(--rv-d, 0ms),
+      filter 900ms ease var(--rv-d, 0ms);
+  }
+  html[data-sp] [data-rv][data-in] {
+    scale: 1;
+  }
+
+  /* 2. Titles: each line slides up out of its own slot, the second after the first. */
+  html[data-sp] .crz-ln {
+    display: block;
+    overflow: clip;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+  html[data-sp] .crz-ln-i {
+    display: block;
+    translate: 0 108%;
+    transition: translate 1250ms var(--ease-expo) calc(var(--rv-d, 0ms) + 80ms);
+  }
+  html[data-sp] .crz-ln + .crz-ln .crz-ln-i {
+    transition-delay: calc(var(--rv-d, 0ms) + 210ms);
+  }
+  html[data-sp] [data-in] .crz-ln-i {
+    translate: 0 0;
+  }
+}
+
+/* Without the reveal running, a title's lines are plain blocks (as the
+   line break and the block em were before). */
+.crz-ln {
+  display: block;
+}
+
+/* 3. Photographs: a wipe from the top as they come into view (lazy ones
+   only: a first-screen picture is never held back), and a slow drift
+   against the scroll the whole time they are on screen. The drift scales
+   the picture a hair and moves its clip the opposite way, so the frame
+   never shows a gap or spills out of its box. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    img[data-ph] {
+      will-change: translate;
+      scale: 1.087;
+      animation: crz-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    img[data-ph="wipe"] {
+      -webkit-mask-image: linear-gradient(#000, #000);
+      mask-image: linear-gradient(#000, #000);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: 50% 0%;
+      mask-position: 50% 0%;
+      animation:
+        crz-drift linear both,
+        crz-wipe linear both;
+      animation-timeline: view(), view();
+      animation-range:
+        cover 0% cover 100%,
+        entry 10% cover 45%;
+    }
+  }
+}
+
+@keyframes crz-drift {
+  from {
+    translate: 0 -3%;
+    clip-path: inset(6.76% 4% 1.24% 4%);
+  }
+  50% {
+    translate: 0 0;
+    clip-path: inset(4% 4% 4% 4%);
+  }
+  to {
+    translate: 0 3%;
+    clip-path: inset(1.24% 4% 6.76% 4%);
+  }
+}
+
+@keyframes crz-wipe {
+  from {
+    -webkit-mask-size: 100% 0%;
+    mask-size: 100% 0%;
+  }
+  to {
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+}

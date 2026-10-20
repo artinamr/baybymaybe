@@ -1,0 +1,200 @@
+/* crazy-r29 "living paper": the services index.
+   Every motion sits behind reduced-motion and view-timeline support, and no
+   end state hides anything: without them the page is exactly as before. */
+
+/* 1. The pointer's indigo light (CrazyGlow writes --mx/--my in px). */
+.svc-catalogue .svc-img,
+.svc-demo-img {
+  position: relative;
+  isolation: isolate;
+}
+.svc-catalogue .svc-img::after,
+.svc-demo-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(91, 61, 240, 0.26),
+    rgba(91, 61, 240, 0.08) 42%,
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+.svc-catalogue .svc-card:hover .svc-img::after,
+.svc-demo:hover .svc-demo-img::after {
+  opacity: 1;
+}
+.svc-catalogue .svc-card .svc-img,
+.svc-demo-img {
+  transition:
+    box-shadow 700ms var(--ease-expo),
+    translate 700ms var(--ease-expo);
+}
+.svc-catalogue .svc-card:hover .svc-img,
+.svc-demo:hover .svc-demo-img {
+  translate: 0 -6px;
+  box-shadow:
+    0 1px 2px rgba(10, 11, 16, 0.05),
+    0 8px 18px -6px rgba(10, 11, 16, 0.1),
+    0 28px 60px -18px rgba(40, 26, 120, 0.22);
+}
+
+/* The specimen card lifts and catches the same light. */
+.svc-catalogue .svc-example {
+  position: relative;
+  transition:
+    translate 700ms var(--ease-expo),
+    box-shadow 700ms var(--ease-expo),
+    border-color 400ms ease;
+}
+.svc-catalogue .svc-card:hover .svc-example {
+  translate: 0 -4px;
+  border-color: rgba(91, 61, 240, 0.28);
+  box-shadow:
+    0 1px 2px rgba(10, 11, 16, 0.04),
+    0 18px 40px -16px rgba(40, 26, 120, 0.2);
+}
+
+/* "Which do you need?": a soft light under the pointer along the row. */
+.svc-choose a {
+  position: relative;
+  transition: padding 500ms var(--ease-expo);
+}
+.svc-choose a::before {
+  content: "";
+  position: absolute;
+  inset: 0 -12px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 14px;
+  background: radial-gradient(
+    360px circle at calc(var(--mx, 50%) + 12px) var(--my, 50%),
+    rgba(91, 61, 240, 0.09),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.svc-choose a:hover::before {
+  opacity: 1;
+}
+.svc-choose li {
+  position: relative;
+  z-index: 0;
+}
+
+/* 2. How it starts: sticky stacking panels on wide screens. */
+@media (min-width: 900px) {
+  .svc-stack {
+    padding-bottom: 10vh;
+  }
+  .svc-stack li {
+    position: sticky;
+    top: calc(104px + var(--i, 0) * 18px);
+    margin-bottom: 18px;
+    padding: 30px 32px 34px 24px;
+    border: 1px solid var(--hair);
+    border-radius: 18px;
+    background: var(--paper, #f6f5f2);
+    box-shadow:
+      0 1px 2px rgba(10, 11, 16, 0.04),
+      0 22px 50px -26px rgba(10, 11, 16, 0.22);
+  }
+  .svc-stack li:last-child {
+    border-bottom: 1px solid var(--hair);
+  }
+}
+
+/* 3. Scroll-driven depth (view timelines). */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* Photographs open with a wipe and drift against the scroll. */
+    /* (The wipe clips the picture, not its frame, so the frame's lifted
+       shadow is never cut off.) */
+    .svc-demo-img img {
+      animation: crazy-svc-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 38%;
+    }
+    .svc-catalogue .svc-img img {
+      scale: 1.12;
+      animation:
+        crazy-svc-wipe linear both,
+        crazy-svc-drift linear both;
+      animation-timeline: view(), view();
+      animation-range:
+        entry 0% cover 38%,
+        cover 0% cover 100%;
+    }
+    .svc-catalogue .svc-card:nth-child(2) .svc-img img {
+      animation-name: crazy-svc-wipe-r, crazy-svc-drift;
+    }
+
+    /* Each choice row slides in from the left as it enters. */
+    .svc-choose a {
+      animation: crazy-svc-row linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+
+    /* Stacked panels recede as the next one slides over them. */
+    @media (min-width: 900px) {
+      .svc-stack li {
+        animation: crazy-svc-recede linear both;
+        animation-timeline: view();
+        animation-range: exit -40% exit 60%;
+      }
+    }
+  }
+}
+
+@keyframes crazy-svc-wipe {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes crazy-svc-wipe-r {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes crazy-svc-drift {
+  from {
+    translate: 0 -5%;
+  }
+  to {
+    translate: 0 5%;
+  }
+}
+@keyframes crazy-svc-row {
+  from {
+    translate: -28px 0;
+    opacity: 0.35;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+@keyframes crazy-svc-recede {
+  from {
+    scale: 1;
+    filter: none;
+  }
+  to {
+    scale: 0.96;
+    filter: brightness(0.97);
+  }
+}

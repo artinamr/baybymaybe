@@ -1,0 +1,189 @@
+/* ==========================================================================
+   crazy-r29 · chrome: "living paper" for the pills and the phone menu.
+   Everything here is additive; without hover, motion or the newer CSS the
+   globals' pills and sheet stand exactly as before. Nothing ends hidden.
+   ========================================================================== */
+
+/* --- Pills: layers ------------------------------------------------------- */
+.pill-label {
+  position: relative;
+}
+.pill-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(120px circle at var(--px, 50%) var(--py, 50%), rgba(255, 255, 255, 0.34), transparent 62%),
+    radial-gradient(220px circle at var(--px, 50%) var(--py, 50%), rgba(107, 75, 255, 0.55), transparent 70%);
+  opacity: 0;
+  transition: opacity 400ms ease;
+  mix-blend-mode: soft-light;
+}
+.pill:hover .pill-glow,
+.pill:focus-visible .pill-glow {
+  opacity: 1;
+}
+
+/* A layered, tactile shadow: a tight contact shadow and a long indigo bloom. */
+.pill.mag {
+  isolation: isolate;
+  box-shadow:
+    0 1px 1px rgba(10, 11, 16, 0.08),
+    0 4px 10px -4px rgba(75, 47, 219, 0.45),
+    0 18px 36px -14px rgba(91, 61, 240, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(10, 11, 16, 0.12);
+}
+.pill.mag:hover {
+  box-shadow:
+    0 1px 1px rgba(10, 11, 16, 0.08),
+    0 8px 18px -6px rgba(75, 47, 219, 0.5),
+    0 28px 56px -18px rgba(91, 61, 240, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(10, 11, 16, 0.12);
+}
+
+.pill:focus-visible,
+.ghost:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 3px;
+}
+
+.ghost-arrow {
+  display: inline-block;
+}
+
+/* --- Magnetic lean (mouse only, motion welcome) --------------------------- */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .mag {
+    translate: var(--tx, 0px) var(--ty, 0px);
+    transition:
+      translate 500ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 300ms var(--ease-expo),
+      box-shadow 400ms ease,
+      border-color 300ms ease;
+  }
+  .ghost.mag .ghost-label {
+    display: inline-block;
+    translate: calc(var(--tx, 0px) * 0.6) calc(var(--ty, 0px) * 0.6);
+    transition:
+      translate 500ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 300ms ease;
+  }
+  .ghost-arrow {
+    transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ghost:hover .ghost-arrow {
+    transform: translate(2px, -2px);
+  }
+  .pill.mag:active,
+  .ghost.mag:active {
+    transform: scale(0.97);
+  }
+}
+
+/* --- The phone menu ------------------------------------------------------- */
+.menu-aura {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  min-height: 100%;
+  pointer-events: none;
+  background:
+    radial-gradient(42vmax circle at var(--lx, 82%) var(--ly, 12%), rgba(91, 61, 240, 0.13), transparent 70%),
+    radial-gradient(60vmax circle at 8% 100%, rgba(91, 61, 240, 0.07), transparent 72%);
+}
+
+.menu-sheet nav a {
+  position: relative;
+  padding-bottom: 0.12em;
+}
+.menu-sheet nav a > .mono {
+  transition: color 300ms ease;
+}
+.menu-sheet nav a[aria-current="page"] .menu-word,
+.menu-sheet nav a[aria-current="page"] > .mono {
+  color: var(--indigo);
+}
+/* A hairline under each link, drawn in as the sheet opens. */
+.menu-sheet nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: color-mix(in oklab, var(--ink) 12%, transparent);
+  transform-origin: left;
+}
+.menu-go {
+  margin-left: auto;
+  font-size: 0.42em;
+  color: var(--indigo);
+  opacity: 0.35;
+  align-self: center;
+}
+.menu-sheet nav a:hover .menu-go,
+.menu-sheet nav a:focus-visible .menu-go {
+  opacity: 1;
+}
+.menu-sheet nav a:hover > .mono,
+.menu-sheet nav a:focus-visible > .mono {
+  color: var(--indigo);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The sheet opens as a circle of paper from the Menu button, top right. */
+  .menu-sheet {
+    clip-path: circle(0px at calc(100% - 44px) 36px);
+    transition: clip-path 900ms cubic-bezier(0.7, 0, 0.2, 1);
+  }
+  .menu-sheet[data-open] {
+    clip-path: circle(150vmax at calc(100% - 44px) 36px);
+  }
+  /* Links come into focus: blur to sharp, rising, one after another. */
+  .menu-sheet nav a {
+    filter: blur(6px);
+    transition:
+      transform 900ms cubic-bezier(0.16, 1, 0.3, 1) calc(120ms + var(--i) * 70ms),
+      opacity 600ms ease calc(120ms + var(--i) * 70ms),
+      filter 900ms cubic-bezier(0.16, 1, 0.3, 1) calc(120ms + var(--i) * 70ms);
+  }
+  .menu-sheet[data-open] nav a {
+    filter: none;
+  }
+  .menu-sheet nav a::after {
+    transform: scaleX(0);
+    transition: transform 1100ms cubic-bezier(0.16, 1, 0.3, 1) calc(260ms + var(--i) * 70ms);
+  }
+  .menu-sheet[data-open] nav a::after {
+    transform: scaleX(1);
+  }
+  .menu-word {
+    display: inline-block;
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .menu-go {
+    transition:
+      opacity 300ms ease,
+      transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .menu-sheet nav a:hover .menu-word,
+  .menu-sheet nav a:focus-visible .menu-word {
+    transform: translateX(0.12em);
+  }
+  .menu-sheet nav a:hover .menu-go,
+  .menu-sheet nav a:focus-visible .menu-go {
+    transform: translateX(0.2em);
+  }
+  .menu-close {
+    transition:
+      transform 600ms cubic-bezier(0.16, 1, 0.3, 1) 200ms,
+      opacity 400ms ease 200ms;
+  }
+  .menu-sheet:not([data-open]) .menu-close {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+}

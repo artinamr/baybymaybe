@@ -10,6 +10,9 @@ import { pageMeta } from "@/lib/meta";
 import { SERVICES, service, type Service } from "@/content/services";
 import { FEATURED, KIND_LABEL, project } from "@/content/work";
 import { PUBLISHED, TOPICS } from "@/content/blog";
+import type { CSSProperties } from "react";
+import { CrazyGlow } from "./CrazyGlow";
+import "./crazy-services-index.css";
 
 const DESCRIPTION =
   "Website design, web platforms and AI automation from an Auckland studio. Clear thinking, distinctive design and systems built around your business.";
@@ -120,6 +123,7 @@ export default function Services() {
     <Page here="services" crumbs={[{ name: "Services", href: PAGES.services }]}>
       <PageLd type="CollectionPage" href={PAGES.services} name="Services" description={DESCRIPTION} />
       <QaLd items={QA} />
+      <CrazyGlow />
       <section className="sp-hero svc-index-hero">
         <Kicker>Services</Kicker>
         <Title lines={["Better websites.", "Better ways to work."]} />
@@ -132,7 +136,7 @@ export default function Services() {
       <section className="svc-cards svc-catalogue" aria-label="Our services">
         {SERVICES.map((s, i) => (
           <a key={s.slug} className="svc-card" href={PAGES.service(s.slug)} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
-            <span className="svc-img">
+            <span className="svc-img" data-glow>
               <Photo p={s.cardPhoto} sizes="(min-width: 1360px) 620px, (min-width: 900px) 46vw, 92vw" eager={i === 0} decorative />
             </span>
             <div className="svc-meta">
@@ -168,7 +172,7 @@ export default function Services() {
             const s = c.to === "audit" ? null : service(c.to)!;
             return (
               <li key={c.if} data-rv style={{ transitionDelay: `${(i % 4) * 60}ms` }}>
-                <a href={s ? PAGES.service(s.slug) : PAGES.audit} data-audit={s ? undefined : ""}>
+                <a href={s ? PAGES.service(s.slug) : PAGES.audit} data-audit={s ? undefined : ""} data-glow>
                   <span className="svc-choose-if">{c.if}</span>
                   <span className="svc-choose-to">
                     {s ? s.name : "Start with the free audit"} <span aria-hidden>→</span>
@@ -211,7 +215,7 @@ export default function Services() {
         <div className="svc-demo-grid">
           {SERVICES.map((s) => project(FEATURED[s.slug])!).map((p, i) => (
             <a key={p.slug} className="svc-demo" href={PAGES.project(p.slug)} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
-              <span className="svc-demo-img">
+              <span className="svc-demo-img" data-glow>
                 {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
                 <img src={p.cover} srcSet={coverSrcSet(p.cover)} sizes="(max-width: 760px) 92vw, 600px" alt="" width={2400} height={1500} loading="lazy" decoding="async" />
               </span>
@@ -259,9 +263,9 @@ export default function Services() {
             </a>
           </p>
         </header>
-        <ol className="flow flow-4">
+        <ol className="flow flow-4 svc-stack">
           {START.map((it, i) => (
-            <li key={it.title} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
+            <li key={it.title} data-rv style={{ transitionDelay: `${i * 90}ms`, "--i": i } as CSSProperties}>
               <span className="flow-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
               <h3 className="item-t">{it.title}</h3>
               <p className="item-b">{it.body}</p>

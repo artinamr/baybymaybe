@@ -4,6 +4,11 @@ import { LiveSite } from "./LiveSite";
 import { PAGES } from "@/lib/content";
 import { WORK_ITEMS, type Project, type Shot } from "@/content/work";
 import { service } from "@/content/services";
+import type { CSSProperties } from "react";
+import "./crazy-study.css";
+
+/** A per-item step for the scroll-driven stagger in crazy-study.css. */
+const k = (n: number) => ({ ["--k" as string]: n }) as CSSProperties;
 
 const NUM = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen"];
 
@@ -158,7 +163,7 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
         </header>
         <ul className="ss-page-grid">
           {s.pages.map((pg, n) => (
-            <li key={pg.path} data-rv style={{ transitionDelay: `${(n % 3) * 70}ms` }}>
+            <li key={pg.path} data-rv style={{ transitionDelay: `${(n % 3) * 70}ms`, ...k(n % 3) }}>
               <a href={live(pg.path)} target="_blank" rel="noopener" className="ss-page">
                 <span className="ss-page-img">
                   {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
@@ -187,9 +192,9 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
             The decisions behind the design.
           </h2>
         </header>
-        <ol className="flow">
+        <ol className="flow ss-approach">
           {p.approach.map((it, n) => (
-            <li key={it.title} data-rv style={{ transitionDelay: `${n * 90}ms` }}>
+            <li key={it.title} data-rv style={{ transitionDelay: `${n * 90}ms`, ...k(n) }}>
               <span className="flow-n mono" data-n={String(n + 1).padStart(2, "0")} aria-hidden />
               <h3 className="item-t">{it.title}</h3>
               <p className="item-b">{it.body}</p>
@@ -272,8 +277,8 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
           </h2>
         </header>
         <ul className="ss-swatches" data-rv>
-          {s.palette.map((c) => (
-            <li key={c.hex}>
+          {s.palette.map((c, n) => (
+            <li key={c.hex} style={k(n)}>
               <span className="ss-chip" style={{ background: c.hex }} aria-hidden />
               <span className="ss-sw-name">{c.name}</span>
               <span className="ss-sw-hex mono">{c.hex}</span>
@@ -304,7 +309,7 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
         </header>
         <dl className="ss-facts">
           {s.facts.map((f, n) => (
-            <div key={f.label} data-rv style={{ transitionDelay: `${n * 80}ms` }}>
+            <div key={f.label} data-rv style={{ transitionDelay: `${n * 80}ms`, ...k(n % 4) }}>
               <dt className="ss-fact-v">{f.value}</dt>
               <dd className="ss-fact-l">{f.label}</dd>
             </div>

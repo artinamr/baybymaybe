@@ -1,0 +1,200 @@
+/* crazy-r29 "living paper": the services pages. Depth and motion only; every
+   resting state is the plain page, so nothing hides without these rules. */
+
+/* 1. Cards lift on a soft layered shadow, with an indigo light rising from
+   the corner the pointer comes from (CSS only, no script). */
+.svc-spec-card,
+.svc-demo-img,
+.svc-catalogue .svc-img {
+  position: relative;
+  isolation: isolate;
+}
+.svc-spec-card {
+  overflow: hidden;
+  transition:
+    transform 700ms var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1)),
+    box-shadow 700ms var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-color 500ms ease;
+}
+.svc-spec-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    120% 90% at var(--mx, 85%) var(--my, 0%),
+    color-mix(in oklab, #5b3df0 13%, transparent),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+/* transform, not translate: the scroll rise fills translate and would win. */
+.svc-spec-card:hover {
+  transform: translateY(-6px);
+  border-color: color-mix(in oklab, #5b3df0 26%, var(--hair));
+  box-shadow:
+    0 1px 1px rgba(10, 11, 16, 0.03),
+    0 6px 14px -6px rgba(10, 11, 16, 0.08),
+    0 26px 48px -22px rgba(10, 11, 16, 0.16),
+    0 40px 90px -40px color-mix(in oklab, #5b3df0 30%, transparent);
+}
+.svc-spec-card:hover::after {
+  opacity: 1;
+}
+
+.svc-demo-img,
+.svc-catalogue .svc-img {
+  transition: box-shadow 900ms var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.svc-demo:hover .svc-demo-img,
+.svc-catalogue .svc-card:hover .svc-img {
+  box-shadow:
+    0 2px 4px rgba(10, 11, 16, 0.04),
+    0 22px 44px -20px rgba(10, 11, 16, 0.18),
+    0 50px 100px -50px color-mix(in oklab, #5b3df0 34%, transparent);
+}
+
+/* The chooser's rows: an indigo hairline draws across under the hovered row. */
+.svc-choose a {
+  position: relative;
+}
+.svc-choose a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(to right, #5b3df0, color-mix(in oklab, #5b3df0 20%, transparent));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 900ms var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.svc-choose a:hover::after,
+.svc-choose a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svc-spec-card:hover {
+    transform: none;
+  }
+  .svc-choose a::after {
+    transition: none;
+  }
+}
+
+/* 2. Scroll-driven depth: blocks rise and come into focus as they enter;
+   photographs open with a wipe and drift against the scroll. Individual
+   transform properties (translate/scale) so they compose with the hover
+   zoom and with [data-rv]; no opacity, so content is never hidden. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    @keyframes crz-svc-rise {
+      from {
+        translate: 0 32px;
+        scale: 0.97;
+        filter: blur(6px);
+      }
+      to {
+        translate: 0 0;
+        scale: 1;
+        filter: blur(0);
+      }
+    }
+    @keyframes crz-svc-wipe {
+      from {
+        clip-path: inset(14% 0 0 0 round 18px);
+      }
+      to {
+        clip-path: inset(0 0 0 0 round 0);
+      }
+    }
+    @keyframes crz-svc-drift {
+      from {
+        translate: 0 -5%;
+        scale: 1.1;
+      }
+      to {
+        translate: 0 5%;
+        scale: 1.1;
+      }
+    }
+    @keyframes crz-svc-line {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    .svc-spec-card,
+    .svc-demo,
+    .svc-work-card,
+    .svc-catalogue .svc-card,
+    .jr-step,
+    .svc-run-line li,
+    .svc-choose li,
+    .svc-sec-head {
+      animation: crz-svc-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 75%;
+    }
+    /* A stagger across a row: later columns settle a little later. */
+    .svc-spec-card:nth-child(3n + 2),
+    .svc-demo:nth-child(3n + 2),
+    .jr-step:nth-child(3n + 2),
+    .svc-run-line li:nth-child(2n) {
+      animation-range: entry 6% entry 85%;
+    }
+    .svc-spec-card:nth-child(3n),
+    .svc-demo:nth-child(3n),
+    .jr-step:nth-child(3n),
+    .svc-run-line li:nth-child(3n) {
+      animation-range: entry 12% entry 95%;
+    }
+    /* The wipe runs on the picture inside its frame, so the frame's hover
+       shadow is never clipped. */
+    .svc-demo-img img {
+      animation: crz-svc-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+    .svc-catalogue .svc-img img {
+      animation:
+        crz-svc-wipe linear both,
+        crz-svc-drift linear both;
+      animation-timeline: view(), view();
+      animation-range:
+        entry 0% cover 40%,
+        cover 0% cover 100%;
+    }
+
+    .svc-run-line::before {
+      transform-origin: 0 50%;
+      animation: crz-svc-line linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 50%;
+    }
+    /* Under 1000px the line runs down the steps: draw it downward instead. */
+    @keyframes crz-svc-line-down {
+      from {
+        transform: scaleY(0);
+      }
+      to {
+        transform: scaleY(1);
+      }
+    }
+    @media (max-width: 1000px) {
+      .svc-run-line::before {
+        transform-origin: 50% 0;
+        animation-name: crz-svc-line-down;
+        animation-range: entry 0% cover 60%;
+      }
+    }
+  }
+}

@@ -1,0 +1,218 @@
+/* crazy-r29 "living paper": the sub-pages' header.
+   A pointer light along the bar, links that roll to indigo, an indigo pill
+   with its shine that leans toward the pointer, a scroll progress hairline.
+   Everything readable without motion; motion only when it is welcome. */
+
+.sp-nav {
+  --nav-mx: 50%;
+  --nav-on: 0;
+  isolation: isolate;
+}
+/* The pointer's light, low behind the links (set by SubMenu's effect). */
+.sp-nav::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    260px 120px at var(--nav-mx) 100%,
+    color-mix(in oklab, var(--indigo) 9%, transparent),
+    transparent 70%
+  );
+  opacity: var(--nav-on);
+  transition: opacity 400ms ease;
+}
+
+/* The links roll: the word slides up and an indigo copy rises in its place. */
+.sp-nav .cz-roll {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  line-height: 1.25;
+}
+.sp-nav .cz-roll > span {
+  display: block;
+}
+.sp-nav .cz-roll > span + span {
+  position: absolute;
+  inset: 0;
+  color: var(--indigo);
+  transform: translateY(105%);
+}
+.sp-nav .sp-link[aria-current="page"]::after {
+  transform-origin: left;
+}
+
+/* The audit: the indigo pill with its shine. */
+.sp-nav .sp-cta {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-color: var(--indigo);
+  background: var(--indigo);
+  color: var(--paper);
+  font-weight: 500;
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--indigo) 30%, transparent),
+    0 8px 22px -10px color-mix(in oklab, var(--indigo) 70%, transparent);
+  transition:
+    background 300ms ease,
+    border-color 300ms ease,
+    box-shadow 400ms ease,
+    transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sp-nav .sp-cta::before {
+  content: "";
+  position: absolute;
+  inset: -2px auto -2px -40%;
+  width: 38%;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.38), transparent);
+  transform: translateX(0) skewX(-18deg);
+  pointer-events: none;
+}
+.sp-nav .sp-cta:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ink) 30%, transparent),
+    0 14px 30px -12px color-mix(in oklab, var(--indigo) 80%, transparent);
+}
+.sp-nav .sp-cta:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 3px;
+}
+.sp-nav .sp-cta > span[aria-hidden] {
+  display: inline-block;
+  transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sp-nav .sp-cta:hover > span[aria-hidden] {
+  transform: translateY(2px);
+}
+
+.sp-nav .sp-mark {
+  transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sp-nav .sp-brand:hover .sp-mark {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.sp-nav .sp-menu {
+  transition:
+    background 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease;
+}
+.sp-nav .sp-menu:hover {
+  border-color: var(--indigo);
+  color: var(--indigo);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sp-nav .cz-roll > span {
+    transition: transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sp-nav .sp-link:hover .cz-roll > span:first-child,
+  .sp-nav .sp-link:focus-visible .cz-roll > span:first-child {
+    transform: translateY(-105%);
+  }
+  .sp-nav .sp-link:hover .cz-roll > span + span,
+  .sp-nav .sp-link:focus-visible .cz-roll > span + span {
+    transform: translateY(0);
+  }
+
+  /* The magnet: SubMenu writes --cx/--cy while the pointer is near. */
+  .sp-nav .sp-cta {
+    transform: translate(calc(var(--cx, 0) * 1px), calc(var(--cy, 0) * 1px));
+  }
+  .sp-nav .sp-cta:active {
+    transform: translate(calc(var(--cx, 0) * 1px), calc(var(--cy, 0) * 1px)) scale(0.96);
+  }
+  .sp-nav .sp-cta:hover::before {
+    animation: czNavShine 900ms cubic-bezier(0.3, 0.7, 0.2, 1);
+  }
+  @keyframes czNavShine {
+    from {
+      transform: translateX(0) skewX(-18deg);
+    }
+    to {
+      transform: translateX(420%) skewX(-18deg);
+    }
+  }
+
+  /* The bar arrives: the brand, then each link, in a short stagger. */
+  .sp-nav .sp-brand,
+  .sp-nav .sp-links > * {
+    animation: czNavIn 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .sp-nav .sp-links > :nth-child(1) { animation-delay: 60ms; }
+  .sp-nav .sp-links > :nth-child(2) { animation-delay: 110ms; }
+  .sp-nav .sp-links > :nth-child(3) { animation-delay: 160ms; }
+  .sp-nav .sp-links > :nth-child(4) { animation-delay: 210ms; }
+  .sp-nav .sp-links > :nth-child(5) { animation-delay: 260ms; }
+  .sp-nav .sp-links > :nth-child(6) { animation-delay: 320ms; }
+  .sp-nav .sp-links > :nth-child(7) { animation-delay: 360ms; }
+  @keyframes czNavIn {
+    from {
+      opacity: 0.01;
+      transform: translateY(-10px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
+  }
+  /* The pill's own transform carries the magnet: arrive without it. */
+  .sp-nav .sp-links > .sp-cta {
+    animation-name: czNavInFade;
+  }
+  @keyframes czNavInFade {
+    from {
+      opacity: 0.01;
+      filter: blur(4px);
+    }
+  }
+
+  /* How far down the page: an indigo hairline under the bar. Articles keep
+     their own reading-progress line, so not there. */
+  @supports (animation-timeline: scroll()) {
+    .sp-nav::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 1px;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--indigo) 20%, transparent),
+        var(--indigo)
+      );
+      transform-origin: left;
+      transform: scaleX(0);
+      animation: czNavProgress linear both;
+      animation-timeline: scroll(root);
+    }
+    .sp:has(.ar-toc) .sp-nav::before {
+      content: none;
+    }
+    @keyframes czNavProgress {
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+
+@media print {
+  .sp-nav::before,
+  .sp-nav::after {
+    content: none;
+  }
+}

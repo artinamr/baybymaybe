@@ -1,0 +1,202 @@
+/*
+ * "Living paper" on the methodology page (crazy-r29).
+ * Every motion sits behind prefers-reduced-motion: no-preference, and the
+ * scroll-driven ones also behind @supports (animation-timeline: view()).
+ * Nothing ends hidden: every keyframe ends on the element as it is.
+ * Elements that carry [data-rv] are moved only with the individual
+ * translate / scale / rotate properties, so the reveal's own transform,
+ * opacity and filter transitions stay intact.
+ */
+
+/* The hero's two lines, each its own block (they were split by a <br>). */
+.cz-l {
+  display: block;
+}
+
+/* The pointer's indigo light on cards (set by PointerGlow: --mx / --my). */
+.ma,
+.mf-decide li {
+  position: relative;
+  isolation: isolate;
+}
+.ma::after,
+.mf-decide li::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in oklab, var(--indigo) 13%, transparent),
+    color-mix(in oklab, var(--indigo) 4%, transparent) 42%,
+    transparent 70%
+  );
+  transition: opacity 500ms ease;
+}
+.ma:hover::after,
+.mf-decide li:hover::after {
+  opacity: 1;
+}
+.mf-decide li {
+  background: color-mix(in oklab, var(--paper) 55%, white);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The headline: each line slides up out of its own slot, in a stagger. */
+  .cz-l {
+    overflow: clip;
+    padding-bottom: 0.1em;
+    margin-bottom: -0.1em;
+  }
+  .cz-l > span {
+    display: inline-block;
+    animation: cz-line 1300ms var(--ease-expo) both;
+  }
+  .cz-l + .cz-l > span {
+    animation-delay: 130ms;
+  }
+  html[data-intro="wait"] .cz-l > span {
+    animation-play-state: paused;
+  }
+
+  /* Cards lift on hover: a soft layered shadow, a few pixels up. */
+  .ma,
+  .mf-decide li {
+    transition:
+      opacity 1100ms var(--ease-expo),
+      transform 1300ms var(--ease-expo),
+      filter 900ms ease,
+      translate 700ms var(--ease-expo),
+      box-shadow 700ms var(--ease-expo),
+      border-color 500ms ease;
+  }
+  .ma:hover,
+  .mf-decide li:hover {
+    translate: 0 -6px;
+    border-color: color-mix(in oklab, var(--indigo) 22%, var(--hair));
+    box-shadow:
+      0 1px 2px color-mix(in oklab, var(--ink) 5%, transparent),
+      0 8px 18px -10px color-mix(in oklab, var(--ink) 18%, transparent),
+      0 30px 60px -30px color-mix(in oklab, var(--ink) 26%, transparent),
+      0 60px 110px -60px color-mix(in oklab, var(--indigo) 38%, transparent);
+  }
+
+  /* Your three decisions stack as you read them (wide, tall screens). */
+  @media (min-width: 901px) and (min-height: 700px) {
+    .mf-decide {
+      gap: 22vh;
+      padding-bottom: 6vh;
+    }
+    .mf-decide li {
+      position: sticky;
+      top: calc(var(--nav-h) + 28px);
+      box-shadow:
+        0 1px 2px color-mix(in oklab, var(--ink) 4%, transparent),
+        0 24px 50px -36px color-mix(in oklab, var(--ink) 30%, transparent);
+    }
+    .mf-decide li:nth-child(2) {
+      top: calc(var(--nav-h) + 44px);
+    }
+    .mf-decide li:nth-child(3) {
+      top: calc(var(--nav-h) + 60px);
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    /* The banner: a wipe opens it, then it drifts against the scroll. */
+    .sp-banner img {
+      animation:
+        cz-wipe linear both,
+        cz-drift linear both;
+      animation-timeline: view(), view();
+      animation-range:
+        entry 0% cover 42%,
+        cover 0% cover 100%;
+    }
+
+    /* Each stage rises and comes into focus as it enters. */
+    .mf {
+      perspective: 1400px;
+    }
+    .mf-stage {
+      animation: cz-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+
+    /* The thing you receive tips up off the page as it arrives. */
+    .ma {
+      transform-origin: 50% 100%;
+      animation: cz-tip linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 38%;
+    }
+
+    /* The principles rise in as a block. */
+    .pr-grid {
+      animation: cz-rise-soft linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+@keyframes cz-line {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes cz-wipe {
+  from {
+    clip-path: inset(14% 10% 14% 10% round 28px);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 0px);
+  }
+}
+@keyframes cz-drift {
+  from {
+    transform: scale(1.14) translateY(-4%);
+  }
+  to {
+    transform: scale(1.14) translateY(4%);
+  }
+}
+@keyframes cz-rise {
+  from {
+    translate: 0 32px;
+    scale: 0.97;
+    filter: blur(6px);
+  }
+  to {
+    translate: none;
+    scale: none;
+    filter: none;
+  }
+}
+@keyframes cz-rise-soft {
+  from {
+    translate: 0 32px;
+    scale: 0.97;
+  }
+  to {
+    translate: none;
+    scale: none;
+  }
+}
+@keyframes cz-tip {
+  from {
+    rotate: x 14deg;
+    translate: 0 40px;
+  }
+  to {
+    rotate: none;
+    translate: none;
+  }
+}

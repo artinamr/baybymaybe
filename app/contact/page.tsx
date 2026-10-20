@@ -4,6 +4,7 @@ import { PageLd } from "@/components/site/JsonLd";
 import { NzTime } from "@/components/site/NzTime";
 import { CONTACT, PAGES, PLACE, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
+import "@/components/contact/crazy-contact.css";
 
 const DESCRIPTION =
   "Ask Nerodyn, an Auckland studio, for a free website audit or tell us about a new project: a website, a platform or AI automation. We reply within two days.";
@@ -34,9 +35,13 @@ export default function Contact() {
         <div className="ct-head">
           <Kicker>Contact</Kicker>
           <h1 id="ct-title" className="sp-h1" data-rv>
-            Tell us
+            <span className="ct-line">
+              <span>Tell us</span>
+            </span>
             <br />
-            <em>what you need.</em>
+            <span className="ct-line">
+              <em>what you need.</em>
+            </span>
           </h1>
           <p className="sp-lede" data-rv>
             A free audit of the website you have, or a new project from scratch. Pick one and tell us a little; everything else

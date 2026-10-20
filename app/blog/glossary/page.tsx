@@ -1,3 +1,4 @@
+import "@/components/blog/crazy-glossary.css";
 import { Page, Crumbs, Closing } from "@/components/site/Page";
 import { GlossaryLd } from "@/components/site/JsonLd";
 import { GlossaryFilter } from "@/components/blog/GlossaryFilter";

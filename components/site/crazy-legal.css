@@ -1,0 +1,185 @@
+/* Legal pages, "living paper" (crazy-r29).
+   Everything here is progressive: without scroll-driven animations, or with
+   reduced motion, the page reads exactly as before. No end state hides text. */
+
+/* Reading progress: one indigo hairline under the nav. */
+.lg-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 60;
+  pointer-events: none;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, #5b3df0, #6b4bff);
+  box-shadow: 0 0 12px rgba(91, 61, 240, 0.35);
+  display: none;
+}
+
+/* The section mark: the numeral as a small indigo token. */
+.lg-h .mono[data-n] {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--indigo) 28%, transparent);
+  background: color-mix(in oklab, var(--indigo) 6%, transparent);
+  transform: translateY(-0.28em);
+  flex: none;
+}
+
+/* The contents: a rail with a marker for where you are. */
+.lg-doc .doc-toc a {
+  position: relative;
+  padding-left: 14px;
+}
+.lg-doc .doc-toc a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  bottom: 0.2em;
+  width: 2px;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--ink) 12%, transparent);
+  transform-origin: 50% 0;
+}
+
+/* The hairline between sections draws itself across as it arrives. */
+.lg-sec {
+  position: relative;
+}
+.lg-sec + .lg-sec {
+  border-top-color: transparent;
+}
+.lg-sec + .lg-sec::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--indigo), var(--hair-soft) 38%, var(--hair-soft));
+  transform-origin: 0 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .lg-progress {
+      display: block;
+      animation: lg-grow linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    /* Each section rises, sharpens and settles as it enters. */
+    .lg-sec {
+      animation: lg-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .lg-sec + .lg-sec::before {
+      animation: lg-grow linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 35%;
+    }
+    .lg-sec .lg-h .mono[data-n] {
+      animation: lg-token linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 40%;
+    }
+
+    /* The contents follow the reader: each section names a timeline, the doc
+       shares them, and the link lights while its section crosses a band near
+       the top of the screen. */
+    .lg-doc {
+      timeline-scope: var(--lg-scope);
+    }
+    .lg-doc .lg-sec {
+      view-timeline-name: var(--lg-tl);
+      view-timeline-inset: 28% 62%;
+    }
+    .lg-doc .doc-toc a {
+      animation: lg-on linear;
+      animation-timeline: var(--lg-tl);
+      animation-range: cover 0% cover 100%;
+    }
+    .lg-doc .doc-toc a::before {
+      animation: lg-bar linear;
+      animation-timeline: var(--lg-tl);
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes lg-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes lg-rise {
+  from {
+    transform: translateY(32px) scale(0.97);
+    filter: blur(6px);
+    opacity: 0.3;
+  }
+  to {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+}
+@keyframes lg-token {
+  from {
+    background: color-mix(in oklab, var(--indigo) 0%, transparent);
+    letter-spacing: 0.3em;
+  }
+  to {
+    background: color-mix(in oklab, var(--indigo) 6%, transparent);
+    letter-spacing: 0;
+  }
+}
+@keyframes lg-on {
+  0%,
+  100% {
+    color: var(--indigo);
+  }
+}
+@keyframes lg-bar {
+  0% {
+    background: var(--indigo);
+    transform: scaleY(0.2);
+  }
+  20%,
+  80% {
+    background: var(--indigo);
+    transform: scaleY(1);
+  }
+  100% {
+    background: var(--indigo);
+    transform: scaleY(0.2);
+  }
+}
+
+@media (max-width: 900px) {
+  .lg-doc .doc-toc a {
+    padding-left: 0;
+  }
+  .lg-doc .doc-toc a::before {
+    display: none;
+  }
+}
+
+@media print {
+  .lg-progress {
+    display: none !important;
+  }
+  .lg-sec {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+}

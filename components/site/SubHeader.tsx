@@ -2,6 +2,7 @@ import { LogoMark } from "@/components/chrome/LogoMark";
 import { PAGES } from "@/lib/content";
 import { NAV, type Here } from "@/lib/nav";
 import { SubMenu } from "./SubMenu";
+import "./crazy-nav.css";
 
 /**
  * The header of the site's own pages: the name back home, the site's pages,
@@ -18,7 +19,10 @@ export function SubHeader({ here, audit = "#contact" }: { here?: Here; audit?: s
       <nav className="sp-links" aria-label="Site">
         {NAV.map((l) => (
           <a key={l.key} href={l.href} className="sp-link" aria-current={here === l.key ? "page" : undefined}>
-            {l.label}
+            <span className="cz-roll">
+              <span>{l.label}</span>
+              <span aria-hidden>{l.label}</span>
+            </span>
           </a>
         ))}
         <a href={audit} className="sp-cta">

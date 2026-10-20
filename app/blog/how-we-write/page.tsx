@@ -1,3 +1,4 @@
+import "@/components/blog/crazy-glossary.css";
 import type { ReactNode } from "react";
 import { Page, Crumbs, Closing } from "@/components/site/Page";
 import { PageLd } from "@/components/site/JsonLd";

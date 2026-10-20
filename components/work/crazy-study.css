@@ -1,0 +1,256 @@
+/* CRAZY r29, the concept website's case study (components/work/SiteStudy.tsx).
+   "Living paper": pictures wipe open and drift against the scroll, the
+   figures rise out of their own line, the phones float at three depths, the
+   palette chips settle in turn, and the cards lift with an indigo light.
+   Every scroll-driven motion sits behind reduced-motion AND a support check,
+   and every animation ENDS at the resting style (clip-path: none, no
+   offset), so nothing is ever left hidden. Animations use the individual
+   `translate` / `scale` properties so the existing hover `transform`s still
+   compose on top of them. */
+
+/* Hover: the card lifts on a layered shadow; an indigo light rises inside. */
+.ss-pages .ss-page-img {
+  position: relative;
+  isolation: isolate;
+}
+.ss-pages .ss-page-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(120% 90% at 50% 115%, color-mix(in oklab, #5b3df0 26%, transparent), transparent 62%),
+    linear-gradient(180deg, transparent 55%, color-mix(in oklab, #0a0b10 10%, transparent));
+  opacity: 0;
+  transition: opacity 700ms var(--ease-expo, ease);
+}
+.ss-pages .ss-page:hover .ss-page-img::after,
+.ss-pages .ss-page:focus-visible .ss-page-img::after {
+  opacity: 1;
+}
+.ss-pages .ss-page:hover .ss-page-img,
+.ss-pages .ss-page:focus-visible .ss-page-img {
+  box-shadow:
+    0 1px 2px color-mix(in oklab, #0a0b10 6%, transparent),
+    0 18px 30px -22px color-mix(in oklab, #0a0b10 30%, transparent),
+    0 50px 90px -46px color-mix(in oklab, #5b3df0 34%, transparent);
+}
+
+.cs-next .svc-other {
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    border-color 300ms ease,
+    background 300ms ease,
+    transform 700ms var(--ease-expo, ease),
+    box-shadow 700ms var(--ease-expo, ease);
+}
+.cs-next .svc-other::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(70% 120% at 0% 0%, color-mix(in oklab, #5b3df0 16%, transparent), transparent 60%);
+  opacity: 0;
+  transition: opacity 600ms var(--ease-expo, ease);
+}
+.cs-next .svc-other:hover,
+.cs-next .svc-other:focus-visible {
+  transform: translateY(-6px);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, #0a0b10 6%, transparent),
+    0 22px 40px -28px color-mix(in oklab, #0a0b10 34%, transparent),
+    0 60px 100px -60px color-mix(in oklab, #5b3df0 40%, transparent);
+}
+.cs-next .svc-other:hover::before,
+.cs-next .svc-other:focus-visible::before {
+  opacity: 1;
+}
+.cs-next .svc-other .svc-go {
+  transition: translate 500ms var(--ease-expo, ease), color 300ms ease;
+}
+.cs-next .svc-other:hover .svc-go {
+  translate: 6px 0;
+  color: #5b3df0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-next .svc-other,
+  .cs-next .svc-other:hover,
+  .cs-next .svc-other:focus-visible {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* The pages: each screenshot wipes up from its foot, a beat after its
+       neighbour, and the picture inside drifts against the scroll. */
+    .ss-pages .ss-page-img img {
+      scale: 1.08;
+      animation:
+        cz-wipe-up linear both,
+        cz-drift linear both;
+      animation-timeline: view(), view();
+      animation-range:
+        entry calc(var(--k, 0) * 9%) cover 42%,
+        cover 0% cover 100%;
+    }
+
+    /* Up close: the big pictures open sideways from the text's side. */
+    .ss-features .ss-shot img {
+      animation: cz-wipe-side linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 46%;
+    }
+    .ss-features .ss-feature[data-flip] .ss-shot img {
+      animation-name: cz-wipe-side-r;
+    }
+    .ss-features .ss-shots .ss-shot:nth-child(2) img {
+      animation-range: entry 22% cover 52%;
+    }
+    .ss-features .ss-shots .ss-shot:nth-child(3) img {
+      animation-range: entry 34% cover 58%;
+    }
+
+    /* On a phone: three depths. The section names the timeline, because the
+       row itself scrolls sideways on small screens. */
+    .ss-phones {
+      view-timeline: --cz-phones block;
+    }
+    .ss-phones .ss-phone {
+      animation: cz-float linear both;
+      animation-timeline: --cz-phones;
+      animation-range: cover 0% cover 100%;
+      --cz-d: 36px;
+    }
+    .ss-phones .ss-phone-fig:nth-child(2) .ss-phone {
+      --cz-d: -28px;
+    }
+    .ss-phones .ss-phone-fig:nth-child(3) .ss-phone {
+      --cz-d: 64px;
+    }
+
+    /* The look: chips settle one after another. */
+    .ss-look .ss-chip {
+      animation: cz-chip linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--k, 0) * 7%) cover 38%;
+    }
+
+    /* The figures rise out of their own line. */
+    .ss-built .ss-fact-v {
+      animation: cz-rise linear both;
+      animation-timeline: view();
+      animation-range: entry calc(10% + var(--k, 0) * 8%) cover 40%;
+    }
+  }
+}
+
+@keyframes cz-wipe-up {
+  0% {
+    clip-path: inset(100% 0 0 0);
+  }
+  99% {
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    clip-path: none;
+  }
+}
+@keyframes cz-wipe-side {
+  0% {
+    clip-path: inset(0 100% 0 0 round 16px);
+    translate: -24px 0;
+  }
+  99% {
+    clip-path: inset(0 0 0 0 round 16px);
+    translate: 0 0;
+  }
+  100% {
+    clip-path: none;
+    translate: 0 0;
+  }
+}
+@keyframes cz-wipe-side-r {
+  0% {
+    clip-path: inset(0 0 0 100% round 16px);
+    translate: 24px 0;
+  }
+  99% {
+    clip-path: inset(0 0 0 0 round 16px);
+    translate: 0 0;
+  }
+  100% {
+    clip-path: none;
+    translate: 0 0;
+  }
+}
+@keyframes cz-drift {
+  from {
+    translate: 0 -3.5%;
+  }
+  to {
+    translate: 0 3.5%;
+  }
+}
+@keyframes cz-float {
+  from {
+    translate: 0 var(--cz-d, 32px);
+  }
+  to {
+    translate: 0 calc(var(--cz-d, 32px) * -1);
+  }
+}
+@keyframes cz-chip {
+  0% {
+    scale: 0.6;
+    rotate: -8deg;
+    border-radius: 50%;
+  }
+  100% {
+    scale: 1;
+    rotate: 0deg;
+    border-radius: 18px;
+  }
+}
+@keyframes cz-rise {
+  0% {
+    translate: 0 0.55em;
+    clip-path: inset(0 0 100% 0);
+  }
+  99% {
+    translate: 0 0;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    translate: 0 0;
+    clip-path: none;
+  }
+}
+
+/* Approach: on a wide screen the decisions stack as sheets of paper, each
+   one sliding up over the last and leaving its edge showing. */
+@media (min-width: 900px) {
+  .ss-approach {
+    display: grid;
+    gap: 18px;
+    padding-bottom: 8vh;
+  }
+  .ss-approach li,
+  .ss-approach li:last-child {
+    position: sticky;
+    top: calc(104px + var(--k, 0) * 18px);
+    padding: 30px 32px 34px;
+    border: 1px solid var(--hair, rgba(10, 11, 16, 0.12));
+    border-radius: 22px;
+    background: #f6f5f2;
+    box-shadow:
+      0 1px 2px color-mix(in oklab, #0a0b10 5%, transparent),
+      0 -18px 40px -34px color-mix(in oklab, #0a0b10 30%, transparent),
+      0 40px 70px -56px color-mix(in oklab, #0a0b10 34%, transparent);
+  }
+}

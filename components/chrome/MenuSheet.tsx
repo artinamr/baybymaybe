@@ -1,6 +1,15 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from "react";
+import "./crazy-chrome.css";
+
+/** The sheet's light follows the pointer (--lx/--ly), drawn in crazy-chrome.css. */
+function light(e: PointerEvent<HTMLDivElement>) {
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--lx", `${e.clientX - r.left}px`);
+  el.style.setProperty("--ly", `${e.clientY - r.top}px`);
+}
 
 export type MenuLink = { label: string; mark: string; href: string; current?: boolean; onClick?: () => void };
 
@@ -46,7 +55,8 @@ export function MenuSheet({
     };
   }, [open, onClose]);
   return (
-    <div className="menu-sheet" ref={sheet} data-open={open || undefined} inert={!open} role="dialog" aria-modal="true" aria-label="Menu">
+    <div className="menu-sheet" ref={sheet} data-open={open || undefined} inert={!open} role="dialog" aria-modal="true" aria-label="Menu" onPointerMove={light}>
+      <span className="menu-aura" aria-hidden />
       <button type="button" className="menu-close mono" onClick={onClose} ref={close}>
         Close
       </button>
@@ -67,7 +77,10 @@ export function MenuSheet({
                 : undefined
             }
           >
-            <span className="mono">{l.mark}</span> {l.label}
+            <span className="mono">{l.mark}</span> <span className="menu-word">{l.label}</span>
+            <span className="menu-go" aria-hidden>
+              →
+            </span>
           </a>
         ))}
       </nav>

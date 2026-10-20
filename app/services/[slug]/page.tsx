@@ -12,6 +12,7 @@ import { WorkTitle } from "@/components/work/WorkTitle";
 import { SERVICES, service } from "@/content/services";
 import { KIND_LABEL, project } from "@/content/work";
 import { PUBLISHED } from "@/content/blog";
+import "./crazy-service.css";
 
 /** What the discipline is called in a sentence ("the steps a website takes care of"). */
 const ROLE = { websites: "a website", platforms: "a platform", "ai-automation": "automation" } as const;
@@ -70,13 +71,18 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
       <ServiceLd name={s.name} description={s.description} href={PAGES.service(s.slug)} image={s.photo} />
       <QaLd items={s.faq} />
 
-      <div className="svc-detail">
+      <div className="svc-detail crazy-svc">
         <section className="sp-hero svc-hero">
           <Crumbs crumbs={crumbs} />
           <h1 className="sp-h1" data-rv>
-            {s.h1[0]}
-            <br />
-            <em>{s.h1[1]}</em>
+            <span className="cz-line">
+              <span>{s.h1[0]}</span>
+            </span>{" "}
+            <span className="cz-line">
+              <span>
+                <em>{s.h1[1]}</em>
+              </span>
+            </span>
           </h1>
           <div className="svc-hero-row">
             <div className="svc-hero-text">

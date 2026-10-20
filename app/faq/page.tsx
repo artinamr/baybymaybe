@@ -6,6 +6,7 @@ import { QaList } from "@/components/site/QaList";
 import { CONTACT, FAQ_ALL, PAGES, ogCard } from "@/lib/content";
 import { CrumbsLd, FaqLd, SiteLd } from "@/components/site/JsonLd";
 import { pageMeta } from "@/lib/meta";
+import "./crazy-qa.css";
 
 export const metadata: Metadata = pageMeta({
   title: "Questions: straight answers before the first call",
@@ -46,8 +47,13 @@ export default function Questions() {
           <p className="sp-kicker" data-rv>
             <span className="sp-rule" aria-hidden /> Questions
           </p>
-          <h1 className="sp-h1" data-rv>
-            Straight answers.
+          <h1 className="sp-h1 cq-h1" data-rv>
+            <span className="cq-w">
+              <span>Straight</span>
+            </span>{" "}
+            <span className="cq-w">
+              <span>answers.</span>
+            </span>
           </h1>
           <p className="sp-lede" data-rv>
             What people ask us before the first call. Anything else, write to{" "}
@@ -71,8 +77,9 @@ export default function Questions() {
           </nav>
           <div className="doc-body">
             {FAQ_ALL.map((g, gi) => (
-              <section key={g.group} id={slug(g.group)} className="fq-group" aria-labelledby={`${slug(g.group)}-h`} data-rv>
+              <section key={g.group} id={slug(g.group)} className="fq-group cq-group" aria-labelledby={`${slug(g.group)}-h`} data-rv>
                 <h2 id={`${slug(g.group)}-h`} className="fq-h">
+                  <span className="cq-num" data-n={String(gi + 1).padStart(2, "0")} aria-hidden />
                   <span className="mono" data-n={String(gi + 1).padStart(2, "0")} aria-hidden />
                   {g.group}
                 </h2>

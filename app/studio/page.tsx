@@ -5,6 +5,7 @@ import { PAGES, PRINCIPLES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { PHOTOS } from "@/content/images";
 import "./studio.css";
+import "./crazy-studio.css";
 
 const BANNER = PHOTOS["studio-hero"];
 
@@ -53,7 +54,7 @@ export default function Studio() {
   return (
     <Page here="studio" crumbs={[{ name: "Studio", href: PAGES.studio }]}>
       <PageLd type="AboutPage" href={PAGES.studio} name="About the Nerodyn studio" description={DESCRIPTION} />
-      <section className="sp-hero">
+      <section className="sp-hero st-x">
         <Kicker>Studio</Kicker>
         <Title lines={["One team,", "from first call to launch."]} />
         {/* The introduction beside the place the team works from: the whole photograph in the first screen. */}
@@ -76,7 +77,7 @@ export default function Studio() {
         </div>
       </section>
 
-      <section className="sp-block split" aria-labelledby="for-h">
+      <section className="sp-block split st-x" aria-labelledby="for-h">
         <header className="split-head">
           <Kicker>Who we work with</Kicker>
           <h2 id="for-h" className="sp-h2" data-rv>
@@ -93,7 +94,7 @@ export default function Studio() {
         </ul>
       </section>
 
-      <section className="sp-block split" aria-labelledby="setup-h">
+      <section className="sp-block split st-x" aria-labelledby="setup-h">
         <header className="split-head">
           <Kicker>How we’re set up</Kicker>
           <h2 id="setup-h" className="sp-h2" data-rv>
@@ -114,7 +115,7 @@ export default function Studio() {
         </ul>
       </section>
 
-      <section className="sp-block pr" aria-labelledby="believe-h">
+      <section className="sp-block pr st-x" aria-labelledby="believe-h">
         <h2 id="believe-h" className="sp-h2" data-rv>
           What we believe in.
         </h2>
@@ -129,7 +130,7 @@ export default function Studio() {
         </ul>
       </section>
 
-      <section className="sp-block own" aria-labelledby="wont-h">
+      <section className="sp-block own st-x" aria-labelledby="wont-h">
         <div className="own-head">
           <Kicker>And what we won’t do</Kicker>
           <h2 id="wont-h" className="sp-h2" data-rv>

@@ -1,0 +1,137 @@
+/* Studio, "living paper" (crazy-r29): sections rise into focus, the photograph wipes in and drifts against the
+   scroll, cards lift under an indigo light, the five refusals arrive one by one. Every motion sits behind
+   reduced-motion and scroll-timeline support; without them the page is exactly the plain one. */
+
+/* Cards: a soft layered lift and an indigo light on hover (CSS only, works everywhere). */
+.st-x .items li,
+.st-x .pr-grid li {
+  position: relative;
+  isolation: isolate;
+  /* No transition here: the [data-rv] reveal owns this element's transition. The lift lives in ::after. */
+}
+.st-x .items li::after,
+.st-x .pr-grid li::after {
+  content: "";
+  position: absolute;
+  inset: -12px -14px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgb(91 61 240 / 0.1), transparent 60%),
+    radial-gradient(80% 70% at 100% 100%, rgb(91 61 240 / 0.05), transparent 70%),
+    rgb(255 255 255 / 0.55);
+  box-shadow:
+    0 1px 1px rgb(10 11 16 / 0.03),
+    0 6px 14px -6px rgb(10 11 16 / 0.08),
+    0 24px 48px -20px rgb(10 11 16 / 0.14),
+    0 0 0 1px rgb(91 61 240 / 0.08);
+  transition: opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@media (hover: hover) {
+  .st-x .items li:hover::after,
+  .st-x .pr-grid li:hover::after {
+    opacity: 1;
+  }
+  .st-x .items li:hover .item-t,
+  .st-x .pr-grid li:hover .pr-name {
+    color: #5b3df0;
+  }
+}
+.st-x .item-t,
+.st-x .pr-name {
+  transition: color 0.4s ease;
+}
+
+/* Scroll-driven depth: only where the browser can drive it and the reader welcomes motion. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    @keyframes st-rise {
+      from {
+        transform: translateY(32px) scale(0.97);
+        filter: blur(6px);
+      }
+      to {
+        transform: none;
+        filter: none;
+      }
+    }
+    @keyframes st-wipe {
+      from {
+        clip-path: inset(0 0 100% 0 round 28px);
+      }
+      to {
+        clip-path: inset(0 0 0 0 round 28px);
+      }
+    }
+    @keyframes st-drift {
+      from {
+        transform: translateY(-6%) scale(1.14);
+      }
+      to {
+        transform: translateY(6%) scale(1.14);
+      }
+    }
+    @keyframes st-slide {
+      from {
+        transform: translateX(-28px);
+        filter: blur(4px);
+      }
+      to {
+        transform: none;
+        filter: none;
+      }
+    }
+
+    /* Each section rises and comes into focus as it enters. */
+    .sp-block.st-x {
+      animation: st-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+      transform-origin: 50% 0;
+    }
+
+    /* The photograph: a wipe from the top as it enters, then a slow drift against the scroll. */
+    .st-x .st-photo .sp-banner {
+      overflow: hidden;
+      animation: st-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+    .st-x .st-photo .sp-banner img {
+      animation: st-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+      will-change: transform;
+    }
+
+    /* The cards in each list stagger their arrival by their own place on the screen. */
+    .st-x .items li,
+    .st-x .pr-grid li {
+      animation: st-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 90%;
+    }
+
+    /* The five refusals arrive one by one, from the left, like crossing them off. */
+    .st-x .own-no li {
+      animation: st-slide linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 100%;
+    }
+    .st-x .own-no .own-tick {
+      animation: st-spin linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 30%;
+    }
+    @keyframes st-spin {
+      from {
+        transform: rotate(-90deg) scale(0.6);
+      }
+      to {
+        transform: none;
+      }
+    }
+  }
+}

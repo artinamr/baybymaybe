@@ -1,7 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { searchable } from "@/lib/search";
+import "./crazy-index.css";
+
+/** The light under the pointer: one card at a time, written straight onto it. */
+function follow(e: ReactPointerEvent<HTMLDivElement>) {
+  if (e.pointerType !== "mouse") return;
+  const card = (e.target as HTMLElement).closest<HTMLElement>(".bl-card");
+  if (!card) return;
+  const r = card.getBoundingClientRect();
+  // The glow layer reaches 14px past the card on every side.
+  card.style.setProperty("--mx", `${(e.clientX - r.left + 14).toFixed(0)}px`);
+  card.style.setProperty("--my", `${(e.clientY - r.top + 14).toFixed(0)}px`);
+  const img = card.querySelector<HTMLElement>(".bl-card-img");
+  if (img) {
+    const ir = img.getBoundingClientRect();
+    img.style.setProperty("--ix", `${(e.clientX - ir.left).toFixed(0)}px`);
+    img.style.setProperty("--iy", `${(e.clientY - ir.top).toFixed(0)}px`);
+  }
+}
 
 type Item = { slug: string; topic: string };
 type Word = { id: string; term: string; href: string; text: string };
@@ -125,7 +143,9 @@ export function BlogIndex({
           ))}
         </p>
       ) : null}
-      <div className="bl-index">{children}</div>
+      <div className="bl-index" onPointerMove={follow}>
+        {children}
+      </div>
       {shown.length === 0 && !waiting ? (
         <div className="bl-none">
           <p>

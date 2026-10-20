@@ -1,6 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type PointerEvent } from "react";
+import "./crazy-qa.css";
+
+/** The row's light follows the pointer: written straight onto the row, no re-render. */
+function follow(e: PointerEvent<HTMLLIElement>) {
+  if (e.pointerType !== "mouse") return;
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+  el.style.setProperty("--my", `${e.clientY - r.top}px`);
+}
 
 /**
  * Questions that open in place (the home page's accordion, as a list of its
@@ -13,7 +23,7 @@ export function QaList({ items, id, first = -1 }: { items: { q: string; a: strin
       {items.map((f, i) => {
         const on = open.includes(i);
         return (
-          <li key={f.q} className="qa" data-open={on || undefined}>
+          <li key={f.q} className="qa" data-open={on || undefined} onPointerMove={follow}>
             <h3>
               <button
                 type="button"

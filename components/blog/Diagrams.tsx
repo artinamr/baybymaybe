@@ -1,4 +1,8 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import "./crazy-prose.css";
+
+/** The part's place in its diagram, so each enters a beat after the last. */
+const beat = (i: number) => ({ "--i": i }) as CSSProperties;
 
 /**
  * THE ARTICLES' DIAGRAMS — drawn in the page's own type and hairlines, as
@@ -16,7 +20,7 @@ export function DecisionTree({ steps, end }: { steps: { q: string; no: { t: stri
     <div className="dg dg-tree">
       <ol className="dg-tree-list">
         {steps.map((s, i) => (
-          <li key={s.q} className="dg-tree-row">
+          <li key={s.q} className="dg-tree-row" style={beat(i)}>
             <div className="dg-q">
               <span className="dg-n mono" aria-hidden>
                 {String(i + 1).padStart(2, "0")}
@@ -39,7 +43,7 @@ export function DecisionTree({ steps, end }: { steps: { q: string; no: { t: stri
           </li>
         ))}
       </ol>
-      <div className="dg-end">
+      <div className="dg-end" style={beat(steps.length)}>
         <span className="sr-only">If every answer is yes: </span>
         <p className="dg-out-t">{end.t}</p>
         <p className="dg-out-b">{end.b}</p>
@@ -55,8 +59,8 @@ export function DecisionTree({ steps, end }: { steps: { q: string; no: { t: stri
 export function Flow({ steps }: { steps: { t: string; b?: string; person?: boolean; alt?: string }[] }) {
   return (
     <ol className="dg dg-flow">
-      {steps.map((s) => (
-        <li key={s.t} className="dg-step" data-person={s.person ? "" : undefined}>
+      {steps.map((s, i) => (
+        <li key={s.t} className="dg-step" style={beat(i)} data-person={s.person ? "" : undefined}>
           <p className="dg-step-t">
             {s.person ? (
               <span className="dg-person" aria-hidden>
@@ -81,8 +85,8 @@ export function Routes({ rows, failure }: { rows: { from: string; to: string[]; 
   return (
     <div className="dg dg-routes">
       <ul className="dg-routes-list">
-        {rows.map((r) => (
-          <li key={r.from} className="dg-route">
+        {rows.map((r, i) => (
+          <li key={r.from} className="dg-route" style={beat(i)}>
             <p className="dg-node dg-from">{r.from}</p>
             <span className="dg-arrow" aria-hidden>
               <svg viewBox="0 0 40 12" preserveAspectRatio="none">
@@ -111,7 +115,7 @@ export function Layers({ rows }: { rows: { t: string; b: string; yours: string }
   return (
     <ol className="dg dg-layers">
       {rows.map((r, i) => (
-        <li key={r.t} className="dg-layer">
+        <li key={r.t} className="dg-layer" style={beat(i)}>
           <span className="dg-n mono" aria-hidden>
             {String(i + 1).padStart(2, "0")}
           </span>

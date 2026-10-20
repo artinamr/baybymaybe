@@ -1,0 +1,235 @@
+/* ==========================================================================
+   crazy-r29, "living paper": the work index.
+   - each cover lifts on a soft layered shadow, with an indigo light that
+     follows the pointer (--mx/--my, written by WorkIndex on pointer move);
+   - covers open with a clip-path wipe and drift slightly against the scroll
+     (view timelines; the `translate` and `scale` properties, so they never
+     fight the hover zoom's `transform` or the reveal's);
+   - the group headings and the concept phones rise with the scroll.
+   Every motion sits behind reduced-motion and @supports; without them the
+   page is exactly as before, nothing hidden.
+   ========================================================================== */
+
+.wk-img {
+  position: relative;
+  isolation: isolate;
+  transition:
+    box-shadow 700ms var(--ease-expo),
+    translate 700ms var(--ease-expo),
+    border-color 300ms ease;
+}
+.wk-light {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background:
+    radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in oklab, #5b3df0 22%, transparent),
+      color-mix(in oklab, #5b3df0 6%, transparent) 40%,
+      transparent 70%
+    );
+  mix-blend-mode: multiply;
+  transition: opacity 500ms ease;
+}
+.wk-light::after {
+  /* a thin rim of light that follows the pointer round the edge */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    #6b4bff,
+    transparent 70%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.wk-card:hover .wk-light,
+.wk-card:focus-within .wk-light {
+  opacity: 1;
+}
+.wk-card:hover .wk-img,
+.wk-card:focus-within .wk-img {
+  border-color: color-mix(in oklab, #5b3df0 26%, transparent);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ink) 6%, transparent),
+    0 8px 18px -6px color-mix(in oklab, var(--ink) 10%, transparent),
+    0 34px 60px -24px color-mix(in oklab, var(--ink) 22%, transparent),
+    0 60px 90px -50px color-mix(in oklab, #5b3df0 30%, transparent);
+}
+
+/* The arrow and the title answer the hover too. */
+.wk-title a {
+  transition: color 300ms ease;
+}
+.wk-card:hover .wk-title a {
+  color: #5b3df0;
+}
+
+/* The filter: the pressed pill carries the indigo shine. */
+.wk-filter button {
+  position: relative;
+  overflow: hidden;
+}
+.wk-filter button[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    color-mix(in oklab, #ffffff 34%, transparent) 50%,
+    transparent 70%
+  );
+  translate: -120% 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wk-card:hover .wk-img {
+    translate: 0 -6px;
+  }
+  .wk-filter button {
+    transition:
+      background 200ms ease,
+      color 200ms ease,
+      border-color 200ms ease,
+      translate 400ms var(--ease-expo);
+  }
+  .wk-filter button:hover {
+    translate: 0 -2px;
+  }
+  .wk-filter button[aria-pressed="true"]::after {
+    animation: wk-shine 900ms var(--ease-expo) both;
+  }
+  @keyframes wk-shine {
+    to {
+      translate: 120% 0;
+    }
+  }
+
+  /* The phones by the headline breathe, each on its own beat. */
+  .wk-fan-p img {
+    animation: wk-float 7s ease-in-out infinite alternate;
+  }
+  .wk-fan-p:nth-child(2) img {
+    animation-duration: 8.4s;
+    animation-delay: -2s;
+  }
+  .wk-fan-p:nth-child(3) img {
+    animation-duration: 7.6s;
+    animation-delay: -4s;
+  }
+  @keyframes wk-float {
+    from {
+      translate: 0 0;
+    }
+    to {
+      translate: 0 -8px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* The cover is wiped open from the bottom as it enters... */
+    .wk-img {
+      animation: wk-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+    @keyframes wk-wipe {
+      from {
+        clip-path: inset(18% 0 0 0 round 20px);
+      }
+      to {
+        clip-path: inset(0 0 0 0 round 20px);
+      }
+    }
+    /* ...and the picture inside drifts against the scroll. */
+    .wk-img img {
+      scale: 1.08;
+      animation: wk-drift linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+    @keyframes wk-drift {
+      from {
+        translate: 0 -3.5%;
+      }
+      to {
+        translate: 0 3.5%;
+      }
+    }
+
+    /* The headings over each group rise and come into focus. */
+    .wk-group h2,
+    .wk-group p {
+      animation: wk-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+    .wk-group p {
+      animation-range: entry 10% entry 100%;
+    }
+    @keyframes wk-rise {
+      from {
+        translate: 0 32px;
+        scale: 0.97;
+        filter: blur(6px);
+        opacity: 0.25;
+      }
+      to {
+        translate: 0 0;
+        scale: 1;
+        filter: none;
+        opacity: 1;
+      }
+    }
+
+    /* The meta and summary under each cover follow it in, a beat behind. */
+    .wk-card .wk-kind,
+    .wk-card .wk-title,
+    .wk-card .wk-sum {
+      animation: wk-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .wk-card .wk-title {
+      animation-range: entry 5% entry 80%;
+    }
+    .wk-card .wk-sum {
+      animation-range: entry 10% entry 90%;
+    }
+
+    /* The phones by the headline part a little as the page leaves them. */
+    .wk-fan-p {
+      animation: wk-part linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+    .wk-fan-p:nth-child(1) {
+      --wk-dx: -14px;
+    }
+    .wk-fan-p:nth-child(2) {
+      --wk-dx: 0px;
+    }
+    .wk-fan-p:nth-child(3) {
+      --wk-dx: 14px;
+    }
+    @keyframes wk-part {
+      to {
+        translate: var(--wk-dx) -40px;
+      }
+    }
+  }
+}

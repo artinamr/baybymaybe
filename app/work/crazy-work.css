@@ -1,0 +1,168 @@
+/* ==========================================================================
+   LIVING PAPER, the work pages (crazy-r29). Three moves, all additive:
+   1. Pictures arrive by a clip-path wipe and drift a little against the
+      scroll (view timelines; individual `translate`/`scale` properties so the
+      hover transforms underneath still compose).
+   2. Cards and page thumbnails lift on a soft layered shadow with an indigo
+      light pooled under the pointer side (CSS only).
+   3. The figures, the palette chips and the phones settle in one after
+      another as they enter.
+   Nothing here can leave content hidden: every animation ends at full
+   visibility, and all of it sits behind reduced-motion and support checks.
+   ========================================================================== */
+
+/* ---------- 2. Lift and light (works everywhere, motion or not) ---------- */
+.wk-img,
+.ss-page-img {
+  position: relative;
+  isolation: isolate;
+}
+.wk-img::after,
+.ss-page-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(120% 80% at 50% 115%, color-mix(in oklab, #5b3df0 26%, transparent), transparent 62%),
+    linear-gradient(180deg, transparent 55%, color-mix(in oklab, #0a0b10 10%, transparent));
+  opacity: 0;
+  transition: opacity 700ms var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.wk-card:hover .wk-img::after,
+.wk-card:focus-within .wk-img::after,
+.ss-page:hover .ss-page-img::after,
+.ss-page:focus-visible .ss-page-img::after {
+  opacity: 1;
+}
+.wk-img {
+  box-shadow:
+    0 1px 1px color-mix(in oklab, #0a0b10 4%, transparent),
+    0 12px 24px -18px color-mix(in oklab, #0a0b10 22%, transparent),
+    0 40px 80px -60px color-mix(in oklab, #0a0b10 40%, transparent);
+  transition:
+    box-shadow 700ms var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1)),
+    translate 900ms var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.wk-card:hover .wk-img,
+.wk-card:focus-within .wk-img {
+  translate: 0 -6px;
+  box-shadow:
+    0 2px 2px color-mix(in oklab, #0a0b10 5%, transparent),
+    0 22px 40px -24px color-mix(in oklab, #0a0b10 30%, transparent),
+    0 60px 110px -60px color-mix(in oklab, #5b3df0 42%, transparent);
+}
+.ss-page:hover .ss-page-img {
+  box-shadow:
+    0 2px 2px color-mix(in oklab, #0a0b10 5%, transparent),
+    0 22px 40px -24px color-mix(in oklab, #0a0b10 28%, transparent),
+    0 50px 90px -56px color-mix(in oklab, #5b3df0 38%, transparent);
+}
+.ss-shot img {
+  transition: box-shadow 700ms var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.ss-shot:hover img {
+  box-shadow:
+    0 1px 2px color-mix(in oklab, #0a0b10 5%, transparent),
+    0 30px 60px -34px color-mix(in oklab, #0a0b10 30%, transparent),
+    0 70px 120px -70px color-mix(in oklab, #5b3df0 40%, transparent);
+}
+
+/* ---------- 1 and 3. Scroll-driven arrivals ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* The wipe: a picture opens upward from its lower edge as it enters. */
+    .wk-img,
+    .ss-page-img,
+    .ss-shot {
+      animation: cw-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 85%;
+    }
+    @keyframes cw-wipe {
+      /* The sides and foot sit outside the box so the layered shadow is
+         never cut; only the top edge travels. */
+      from {
+        clip-path: inset(16% -12% -40% -12%);
+      }
+      to {
+        clip-path: inset(-30% -12% -40% -12%);
+      }
+    }
+
+    /* The drift: the picture inside moves against the scroll, slightly
+       larger than its frame so no edge ever shows. */
+    .wk-img img,
+    .ss-page-img img {
+      scale: 1.08;
+      animation: cw-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    @keyframes cw-drift {
+      from {
+        translate: 0 -3.5%;
+      }
+      to {
+        translate: 0 3.5%;
+      }
+    }
+
+    /* The figures: each value rises into focus in turn. */
+    /* (On the value itself: its row carries the site's own [data-rv]
+       reveal, which this must not fight.) */
+    .ss-facts .ss-fact-v {
+      animation: cw-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
+
+    /* The palette: chips settle one after another. */
+    .ss-swatches > li {
+      animation: cw-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+    .ss-swatches > li:nth-child(2) {
+      animation-range: entry 8% entry 88%;
+    }
+    .ss-swatches > li:nth-child(3) {
+      animation-range: entry 16% entry 96%;
+    }
+    .ss-swatches > li:nth-child(n + 4) {
+      animation-range: entry 24% cover 30%;
+    }
+
+    @keyframes cw-rise {
+      from {
+        opacity: 0.2;
+        translate: 0 32px;
+        scale: 0.97;
+        filter: blur(6px);
+      }
+      to {
+        opacity: 1;
+        translate: 0 0;
+        scale: 1;
+        filter: blur(0);
+      }
+    }
+
+    /* The features' text column slides a touch toward its picture. */
+    .ss-feature .ss-feature-t {
+      animation: cw-slide linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+    @keyframes cw-slide {
+      from {
+        translate: 0 0.6em;
+      }
+      to {
+        translate: 0 0;
+      }
+    }
+  }
+}

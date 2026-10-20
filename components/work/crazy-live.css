@@ -1,0 +1,301 @@
+/* crazy-r29 · live-site: the concept website in its frame, its stories and
+   the reading row. "Living paper": depth, light and scroll-driven rises.
+   Every motion is opt-in (reduced motion and view timelines); without them
+   everything sits exactly where it always did, fully visible. */
+
+/* ---------- The live frame ---------- */
+.cz-live {
+  position: relative;
+  perspective: 1800px;
+  --mx: 50%;
+  --my: 50%;
+  --rx: 0deg;
+  --ry: 0deg;
+}
+.cz-live-frame {
+  position: relative;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-origin: 50% 50%;
+  transition:
+    transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ink) 6%, transparent),
+    0 18px 40px -28px color-mix(in oklab, var(--ink) 30%, transparent),
+    0 60px 120px -60px color-mix(in oklab, var(--ink) 42%, transparent);
+}
+.cz-live[data-lit] .cz-live-frame {
+  transition-duration: 260ms, 900ms;
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ink) 6%, transparent),
+    0 24px 50px -30px color-mix(in oklab, var(--ink) 34%, transparent),
+    0 80px 140px -64px color-mix(in oklab, #5b3df0 38%, transparent);
+}
+
+/* The light that follows the pointer across the glass. */
+.cz-live-light {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(520px circle at var(--mx) var(--my), rgb(91 61 240 / 0.16), rgb(91 61 240 / 0) 62%),
+    radial-gradient(180px circle at var(--mx) var(--my), rgb(255 255 255 / 0.22), rgb(255 255 255 / 0) 70%);
+  mix-blend-mode: screen;
+  transition: opacity 600ms ease;
+}
+.cz-live[data-lit] .cz-live-light {
+  opacity: 1;
+}
+.ss-screen[data-on] .cz-live-light {
+  display: none;
+}
+
+/* A small lamp in the address bar: grey at rest, indigo while the site
+   loads, steady when it is running. */
+.cz-live-status {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  width: 44px;
+}
+.cz-live-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--ink) 18%, transparent);
+  transition:
+    background 400ms ease,
+    box-shadow 400ms ease;
+}
+.cz-live-status[data-state="loading"]::before,
+.cz-live-status[data-state="live"]::before {
+  background: #5b3df0;
+  box-shadow: 0 0 0 3px rgb(91 61 240 / 0.16);
+}
+
+/* The poster settles in focus as the frame arrives. */
+.ss-screen .ss-poster {
+  transition:
+    transform 1600ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Powering on: a band of indigo light runs down the screen once, and the
+     site fades up beneath it when it has loaded. */
+  .cz-live-scan {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgb(91 61 240 / 0) 0%,
+      rgb(91 61 240 / 0.1) 42%,
+      rgb(255 255 255 / 0.85) 49.5%,
+      rgb(91 61 240 / 0.35) 50.5%,
+      rgb(91 61 240 / 0) 58%
+    );
+    background-size: 100% 260%;
+    background-repeat: no-repeat;
+    animation: cz-live-scan 1400ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  .ss-screen[data-loaded] .cz-live-scan {
+    animation: cz-live-scan 1100ms cubic-bezier(0.65, 0, 0.35, 1) 1 both;
+  }
+  .ss-screen[data-on]:not([data-loaded]) .cz-live-scan {
+    animation-iteration-count: infinite;
+  }
+  .ss-screen[data-on] .cz-live-site {
+    animation: cz-live-on 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .cz-live-status[data-state="loading"]::before {
+    animation: cz-live-blink 900ms ease-in-out infinite alternate;
+  }
+
+  @keyframes cz-live-scan {
+    from {
+      background-position: 0 100%;
+      opacity: 1;
+    }
+    85% {
+      opacity: 1;
+    }
+    to {
+      background-position: 0 0%;
+      opacity: 0;
+    }
+  }
+  @keyframes cz-live-on {
+    from {
+      filter: blur(8px) saturate(0.6);
+      transform: scale(1.015);
+    }
+    to {
+      filter: none;
+      transform: none;
+    }
+  }
+  @keyframes cz-live-blink {
+    to {
+      box-shadow: 0 0 0 6px rgb(91 61 240 / 0.04);
+    }
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* The frame rises toward you as it enters: lifted, slightly small and
+       soft, then square and sharp by the time it fills the view. */
+    .cz-live {
+      animation: cz-live-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 38%;
+    }
+    /* The picture drifts against the scroll inside its frame. */
+    .ss-screen:not([data-on]) .ss-poster {
+      animation: cz-live-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    @keyframes cz-live-rise {
+      from {
+        transform: translateY(56px) scale(0.94);
+        filter: blur(6px);
+      }
+      to {
+        transform: none;
+        filter: none;
+      }
+    }
+    @keyframes cz-live-drift {
+      from {
+        object-position: center 0%;
+        scale: 1.04;
+      }
+      to {
+        object-position: center 0%;
+        scale: 1;
+      }
+    }
+  }
+}
+
+/* ---------- The stories: views of the working demonstrations ---------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .cz-views > figure {
+      animation: cz-view-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 34%;
+    }
+    /* The phone sits a little nearer: it travels further and arrives later,
+       so the pair parts in depth as you pass. */
+    .cz-views > figure:nth-child(2) {
+      animation-name: cz-view-rise-near;
+      animation-range: entry 0% cover 44%;
+    }
+    .cz-close {
+      animation: cz-close-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+
+    @keyframes cz-view-rise {
+      from {
+        transform: translateY(32px) scale(0.97);
+        filter: blur(6px);
+      }
+      to {
+        transform: none;
+        filter: none;
+      }
+    }
+    @keyframes cz-view-rise-near {
+      from {
+        transform: translateY(96px) scale(0.95);
+        filter: blur(6px);
+      }
+      to {
+        transform: none;
+        filter: none;
+      }
+    }
+    @keyframes cz-close-wipe {
+      from {
+        clip-path: inset(0 0 22% 0 round 18px);
+        transform: translateY(32px);
+      }
+      to {
+        clip-path: inset(0 0 0 0 round 0);
+        transform: none;
+      }
+    }
+  }
+}
+
+/* Captions: the number lights indigo as its figure is hovered. */
+.cz-views .cs-cap b {
+  transition: color 300ms ease;
+}
+.cz-views figure:hover .cs-cap b {
+  color: #5b3df0;
+}
+
+/* ---------- The reading row ---------- */
+.cz-reading .bl-grid > * {
+  position: relative;
+  /* keeps the shared [data-rv] reveal's own transitions */
+  transition:
+    opacity 1100ms var(--ease-expo),
+    transform 1300ms var(--ease-expo),
+    filter 900ms ease,
+    translate 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 14px;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .cz-reading .bl-grid > *:hover {
+    translate: 0 -6px;
+    box-shadow:
+      0 2px 4px color-mix(in oklab, var(--ink) 5%, transparent),
+      0 22px 44px -26px color-mix(in oklab, var(--ink) 32%, transparent),
+      0 48px 90px -50px rgb(91 61 240 / 0.34);
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .cz-reading .cz-reading-title {
+      animation: cz-read-title linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+    .cz-reading .bl-grid > * {
+      animation: cz-view-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+    .cz-reading .bl-grid > *:nth-child(2) {
+      animation-range: entry 8% cover 36%;
+    }
+    .cz-reading .bl-grid > *:nth-child(3) {
+      animation-range: entry 16% cover 42%;
+    }
+
+    @keyframes cz-read-title {
+      from {
+        transform: translateY(0.5em);
+        letter-spacing: 0.02em;
+        filter: blur(4px);
+      }
+      to {
+        transform: none;
+        filter: none;
+      }
+    }
+  }
+}

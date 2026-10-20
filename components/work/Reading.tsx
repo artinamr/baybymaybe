@@ -2,6 +2,7 @@ import { Kicker } from "@/components/site/Page";
 import { ArticleCard } from "@/components/blog/ArticleCard";
 import { PAGES } from "@/lib/content";
 import { PUBLISHED, type ArticleMeta } from "@/content/blog";
+import "./crazy-live.css";
 
 /**
  * A case study's reading: the articles that name this project, or else the
@@ -24,10 +25,10 @@ export function readingFor(slug: string, services: string[]): ArticleMeta[] {
 export function Reading({ articles }: { articles: ArticleMeta[] }) {
   if (!articles.length) return null;
   return (
-    <section className="sp-block bl-related" aria-labelledby="read-h">
+    <section className="sp-block bl-related cz-reading" aria-labelledby="read-h">
       <header className="split-head bl-related-head">
         <Kicker>From the blog</Kicker>
-        <h2 id="read-h" className="sp-h2" data-rv>
+        <h2 id="read-h" className="sp-h2 cz-reading-title" data-rv>
           Before you build.
         </h2>
         <p className="split-more" data-rv>

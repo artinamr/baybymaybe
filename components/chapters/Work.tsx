@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { PageSection, PageMarker } from "./Section";
+import "./crazy-sheets.css";
 import { PAGES } from "@/lib/content";
 import { HOME_WORK, KIND_LABEL } from "@/content/work";
 import { service } from "@/content/services";

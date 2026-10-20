@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { searchable } from "@/lib/search";
 
 /**
@@ -23,6 +23,26 @@ export function GlossaryFilter({ terms }: { terms: { id: string; text: string }[
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
+  }, []);
+
+  // The indigo light under a term follows the pointer across it (--gx, written
+  // straight onto the term only while the pointer is over one).
+  useEffect(() => {
+    if (!matchMedia("(hover: hover) and (prefers-reduced-motion: no-preference)").matches) return;
+    let last: HTMLElement | null = null;
+    const onMove = (e: PointerEvent) => {
+      const t = e.target;
+      const el = t instanceof Element ? (t.closest(".gl-term") as HTMLElement | null) : null;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--gx", `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
+      last = el;
+    };
+    addEventListener("pointermove", onMove, { passive: true });
+    return () => {
+      removeEventListener("pointermove", onMove);
+      last?.style.removeProperty("--gx");
+    };
   }, []);
 
   const keep = hits?.map((id) => `[data-term="${id}"]`).join(",");
@@ -58,6 +78,9 @@ export function GlossaryFilter({ terms }: { terms: { id: string; text: string }[
       <p className="gl-find-n" aria-live="polite">
         {hits ? (hits.length ? `${hits.length} of ${terms.length} terms` : `No term matches “${q.trim()}”.`) : `${terms.length} terms`}
       </p>
+      <div className="gl-meter" aria-hidden style={{ "--gl-frac": hits ? hits.length / Math.max(terms.length, 1) : 1 } as CSSProperties}>
+        <i />
+      </div>
     </div>
   );
 }

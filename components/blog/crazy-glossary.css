@@ -1,0 +1,259 @@
+/*
+ * crazy-r29 "living paper": the glossary and How we write.
+ * Every motion is opt-in (reduced motion off, scroll timelines supported)
+ * and every end state is fully visible: without support the page is exactly
+ * the plain one.
+ */
+
+/* ---------- Glossary: terms as tactile index cards ---------- */
+
+.gl-term {
+  position: relative;
+  isolation: isolate;
+}
+/* the indigo light that sits under a term while you read it */
+.gl-term::before {
+  content: "";
+  position: absolute;
+  inset: 0 -20px;
+  z-index: -1;
+  border-radius: 18px;
+  background:
+    radial-gradient(420px 160px at var(--gx, 22%) 50%, color-mix(in oklab, var(--indigo) 9%, transparent), transparent 70%),
+    color-mix(in oklab, var(--paper) 70%, white);
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--ink) 4%, transparent),
+    0 12px 32px -18px color-mix(in oklab, var(--ink) 22%, transparent),
+    0 30px 60px -40px color-mix(in oklab, var(--indigo) 30%, transparent);
+  opacity: 0;
+  transform: scale(0.985);
+  transition:
+    opacity 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  pointer-events: none;
+}
+/* a hairline rail of indigo on the term's left edge */
+.gl-term::after {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 24px;
+  bottom: 26px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--indigo);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+  pointer-events: none;
+}
+.gl-term:hover::before,
+.gl-term:focus-within::before,
+.gl-term:target::before {
+  opacity: 1;
+  transform: none;
+}
+.gl-term:hover::after,
+.gl-term:focus-within::after,
+.gl-term:target::after {
+  transform: scaleY(1);
+}
+.gl-t {
+  transition:
+    color 0.35s ease,
+    letter-spacing 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.gl-term:hover .gl-t,
+.gl-term:target .gl-t {
+  color: var(--indigo);
+  letter-spacing: -0.022em;
+}
+.gl-see span[aria-hidden] {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.gl-see:hover span[aria-hidden],
+.gl-see:focus-visible span[aria-hidden] {
+  transform: translateX(5px);
+}
+
+/* group titles: oversized editorial heads that stay with you while you read */
+.gl-h {
+  font-size: clamp(30px, 4.4vw, 64px);
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+@media (min-width: 900px) {
+  .gl-group-head {
+    position: sticky;
+    top: calc(var(--nav-h) + 8px);
+    z-index: 2;
+    padding: 14px 0 16px;
+    background: linear-gradient(var(--paper) 78%, color-mix(in oklab, var(--paper) 0%, transparent));
+  }
+}
+
+/* the find field: a lit, tactile well */
+.gl-find .bl-search {
+  transition:
+    box-shadow 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.3s ease;
+}
+.gl-find .bl-search:focus-within {
+  border-color: color-mix(in oklab, var(--indigo) 60%, transparent);
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--indigo) 12%, transparent),
+    0 18px 40px -22px color-mix(in oklab, var(--indigo) 45%, transparent);
+}
+.gl-meter {
+  position: relative;
+  height: 2px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: var(--hair);
+  overflow: hidden;
+}
+.gl-meter i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--indigo), #6b4bff);
+  transform-origin: left;
+  transform: scaleX(var(--gl-frac, 1));
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* the topics list: a sliding indigo tick on hover */
+.gl-topics a {
+  display: block;
+  width: fit-content;
+  transition:
+    color 0.3s ease,
+    transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.gl-topics a:hover {
+  color: var(--indigo);
+  transform: translateX(4px);
+}
+
+/* ---------- How we write: numbered panels ---------- */
+
+.hw-body .lg-sec {
+  position: relative;
+}
+.hw-body .lg-h {
+  font-size: clamp(26px, 3vw, 40px);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.hw-body .lg-h [data-n]::before {
+  transition: color 0.4s ease;
+}
+.hw-body .lg-sec:hover .lg-h [data-n]::before {
+  color: var(--indigo);
+}
+
+/* ---------- Motion: scroll-driven, opt-in, never hiding content ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .gl-hero .sp-h1 em,
+  .hw-h1 em {
+    display: inline-block;
+    animation: gl-line-up 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+  }
+  @keyframes gl-line-up {
+    from {
+      transform: translateY(0.45em);
+      clip-path: inset(0 0 100% 0);
+    }
+    to {
+      transform: none;
+      clip-path: inset(0 0 -20% 0);
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    .gl-term dt,
+    .gl-term dd,
+    .gl-group-head .gl-line,
+    .hw-body .lg-sec {
+      animation: gl-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .gl-term dd {
+      animation-range: entry 8% entry 80%;
+    }
+    @keyframes gl-rise {
+      from {
+        transform: translateY(32px) scale(0.97);
+        filter: blur(6px);
+        opacity: 0.35;
+      }
+      to {
+        transform: none;
+        filter: none;
+        opacity: 1;
+      }
+    }
+
+    /* the group title tracks in as it arrives, from wide to set */
+    .gl-h {
+      animation: gl-track linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+    @keyframes gl-track {
+      from {
+        letter-spacing: 0.02em;
+        transform: translateX(-12px);
+      }
+      to {
+        letter-spacing: -0.035em;
+        transform: none;
+      }
+    }
+
+    /* How we write: each section's number swells as it passes the middle */
+    .hw-body .lg-h [data-n] {
+      display: inline-block;
+      animation: gl-num linear both;
+      animation-timeline: view();
+      animation-range: cover 20% cover 60%;
+    }
+    @keyframes gl-num {
+      from {
+        transform: translateY(8px);
+      }
+      to {
+        transform: none;
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gl-term::before,
+  .gl-term::after,
+  .gl-meter i,
+  .gl-t {
+    transition: none;
+  }
+}
+
+@media print {
+  .gl-term::before,
+  .gl-term::after,
+  .gl-meter {
+    display: none;
+  }
+  .gl-group-head {
+    position: static;
+  }
+}
+
+/* the sticky group title must not cover a term reached by its address */
+@media (min-width: 900px) {
+  .gl-term {
+    scroll-margin-top: calc(var(--nav-h) + 150px);
+  }
+}
