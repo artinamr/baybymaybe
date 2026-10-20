@@ -115,6 +115,10 @@ export default function Body() {
           <Cite n={1} />
         </p>
       </Callout>
+      <p>
+        Deciding whether your website needs one at all, and what it must never say, has its own guide:{" "}
+        <a href={PAGES.article("website-chat-assistant")}>should our website have a chat assistant?</a>
+      </p>
 
       <H2 id="search">5. Searching your own documents</H2>
       <Parts
