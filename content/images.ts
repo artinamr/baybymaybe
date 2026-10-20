@@ -205,13 +205,16 @@ export const PHOTOS = {
   ),
   "method-discover": stage(
     "discover",
-    "An open blank notebook and a black pen, ready for the first conversation.",
-    { ...iso("Notebook Desk Above", "Artsy Crafty", "artsy-crafty", "notebook-desk-above"), checked: "2026-10-12" }
+    "A polished brass and steel telescope on a lookout, with a town and hills out of focus behind it.",
+    { ...iso("Telescope", "Michael Schwarzenberger", "michael-schwarzenberger", "telescope"), checked: "2026-10-21" }
   ),
   "method-define": stage(
     "define",
-    "Page structures sketched in a notebook, with blank orange tabs marking the sections.",
-    { ...iso("Sketch Wireframe Notes", "Jeffrey Betts", "jeffrey-betts", "sketch-wireframe-notes-2"), checked: "2026-10-12" }
+    "A hand holding up a brass compass against hazy, tree-covered hills.",
+    {
+      ...unsplash("Photograph of a compass being held upright", "Heidi Sandstrom", "sandstromfilm", "Photograph_of_a_compass_being_held_upright.jpg", "6 August 2016"),
+      checked: "2026-10-21",
+    }
   ),
   "method-design": stage(
     "design",
@@ -223,7 +226,11 @@ export const PHOTOS = {
     "A close view of black keyboard keys and their aluminium edges.",
     { ...iso("Laptop Keyboard Buttons", "One Idea LLC", "one-idea-llc", "laptop-keyboard-buttons"), checked: "2026-10-12", org: true }
   ),
-  "method-live": stage("live", "A wireless mouse beside a closed silver laptop on a wooden desk.", { ...iso("Mouse Laptop and Desk", "50Fish", "50fish", "mouse-laptop-and-desk"), checked: "2026-10-12" }),
+  "method-live": stage(
+    "live",
+    "A white lighthouse standing against a pale blue sky and soft white clouds.",
+    { ...unsplash("Seaburn Park Lighthouse", "Andrew Ridley", "aridley88", "Seaburn_Park_Lighthouse_(Unsplash).jpg", "14 January 2017"), checked: "2026-10-21" }
+  ),
 
   // The services: banners (24:11) and their cards (4:5).
   "svc-websites": photo("services/websites-wide", 2400, 1100, "A white keyboard on a wooden work desk, photographed from above.", WEBSITE_DESK, "50% 42%"),

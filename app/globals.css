@@ -3049,6 +3049,11 @@ html[data-render] .stone-cursor {
 .bl-card:hover .bl-card-go span {
   transform: translateX(5px);
 }
+/* A head that sits above a full-width grid (articles, the work), not beside
+   a column, so it must not stick: the cards would scroll up over it. */
+.split-head.bl-related-head {
+  position: static;
+}
 /* A few articles on another page (a service, the audit). */
 .bl-related .bl-related-head {
   margin-bottom: calc(var(--vh) * 6);
