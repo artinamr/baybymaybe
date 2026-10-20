@@ -1,7 +1,12 @@
 import { Page, Kicker, Title, Closing } from "@/components/site/Page";
 import { PageLd } from "@/components/site/JsonLd";
+import { Photo } from "@/components/site/Photo";
 import { PAGES, PRINCIPLES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
+import { PHOTOS } from "@/content/images";
+import "./studio.css";
+
+const BANNER = PHOTOS["studio-hero"];
 
 const DESCRIPTION =
   "Nerodyn is one Auckland team of designers and engineers: who we work with, how we are set up, what we believe, and what we won’t do.";
@@ -51,11 +56,24 @@ export default function Studio() {
       <section className="sp-hero">
         <Kicker>Studio</Kicker>
         <Title lines={["One team,", "from first call to launch."]} />
-        <p className="sp-lede" data-rv>
-          Nerodyn designs, engineers and looks after websites, platforms and AI automation, from Auckland, for businesses
-          across New Zealand. The people you meet are the people who do the work, with no account managers in between and
-          no subcontractors.
-        </p>
+        {/* The introduction beside the place the team works from: the whole photograph in the first screen. */}
+        <div className="st-hero-row">
+          <p className="sp-lede" data-rv>
+            Nerodyn designs, engineers and looks after websites, platforms and AI automation, from Auckland, for
+            businesses across New Zealand. The people you meet are the people who do the work, with no account managers
+            in between and no subcontractors.
+          </p>
+          <figure className="st-photo" data-rv>
+            <div className="sp-banner">
+              <Photo p={BANNER} sizes="(min-width: 1360px) 700px, (min-width: 901px) 52vw, 92vw" priority />
+            </div>
+            <figcaption>
+              Mt Victoria, Auckland. Photograph by{" "}
+              <a href={BANNER.credit.page} target="_blank" rel="noreferrer">{BANNER.credit.author}</a> ·{" "}
+              {BANNER.credit.licence}
+            </figcaption>
+          </figure>
+        </div>
       </section>
 
       <section className="sp-block split" aria-labelledby="for-h">
