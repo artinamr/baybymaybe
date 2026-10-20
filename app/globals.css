@@ -2862,6 +2862,11 @@ html[data-nowebgl] .pot-fill {
   font-size: 11px;
   color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
+/* The number is drawn from data-n, so the question reads clean (search
+   engines, assistants, screen readers) and looks exactly the same. */
+.qa-n::before {
+  content: attr(data-n);
+}
 .qa-text {
   transition: color 300ms ease;
 }

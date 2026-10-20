@@ -22,7 +22,7 @@ export function QaList({ items, id, first = -1 }: { items: { q: string; a: strin
                 aria-controls={`${id}-${i}`}
                 onClick={() => setOpen((cur) => (on ? cur.filter((x) => x !== i) : [...cur, i]))}
               >
-                <span className="qa-n mono">{String(i + 1).padStart(2, "0")}</span>
+                <span className="qa-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                 <span className="qa-text">{f.q}</span>
                 <span className="qa-icon" aria-hidden />
               </button>
