@@ -55,10 +55,11 @@ export default function Body() {
       </p>
       <p>
         Ranking then weighs much more, and Google is direct about what matters most: content that is helpful,
-        reliable and written for people. The same guidance is firm about the other side. Google publishes spam
-        policies (stuffing pages with keywords, buying links, publishing pages made only to catch searches), and a
-        site that breaks them can rank lower or be left out of the results altogether.
-        <Cite n={4} />
+        reliable and written for people.
+        <Cite n={4} /> It is just as firm about the other side. Google’s spam policies (stuffing pages with keywords,
+        buying links, publishing pages made only to rank for particular searches) say a site that breaks them may
+        rank lower or not appear in the results at all.
+        <Cite n={5} />
       </p>
 
       <H2 id="what-google-rewards">What Google rewards</H2>
@@ -67,22 +68,22 @@ export default function Body() {
         same thing the reader sees. Its self-check questions include whether the page shows first-hand knowledge,
         whether it adds something the other results don’t, and whether someone reading it would leave feeling they
         learned enough to reach their goal.
-        <Cite n={5} />
+        <Cite n={6} />
       </p>
       <p>
         In practice, for a business site, that looks like:
       </p>
       <ul>
         <li>
-          <strong>One clear page per thing you do,</strong> described in the words a customer would use. Google
-          recommends anticipating the words people type and using them where they count: in the page’s title, its
-          headings and its text.
-          <Cite n={3} />
+          <strong>One clear page per thing you do,</strong> described in the words a customer would use. Google’s
+          guidance is to use the words people would search with, and to put them where they count: the page’s title
+          and main heading, and descriptive places such as image alt text and link text.
+          <Cite n={4} />
         </li>
         <li>
           <strong>An accurate title and description for every page.</strong> Write a distinct title that clearly
-          describes the page. Google can use your description for the summary beneath it in results, though it
-          often creates that summary from the page itself.
+          describes the page. Google builds the summary beneath it in results mostly from the page itself, and only
+          occasionally from your description, so make the top of the page say plainly what it offers.
           <Cite n={3} />
         </li>
         <li>
@@ -92,7 +93,7 @@ export default function Body() {
         <li>
           <strong>A fast, steady page.</strong> Content that is easy to read, well organised with headings, and not
           buried under pop-ups. There is no preferred word count; Google says chasing one is a warning sign.
-          <Cite n={5} />
+          <Cite n={6} />
         </li>
       </ul>
 
@@ -148,7 +149,7 @@ export default function Body() {
               <p>
                 <Term id="search-console">Google Search Console</Term> is free. It shows which searches your pages
                 appear in, which ones get clicked, and any problems Google hit while reading the site.
-                <Cite n={6} /> It is also how you submit a sitemap and ask for a page to be re-read.
+                <Cite n={7} /> It is also how you submit a sitemap and ask for a page to be re-read.
               </p>
             ),
           },
@@ -197,7 +198,7 @@ export default function Body() {
         waiting a few weeks before judging their effect.
         <Cite n={3} /> Use Search Console to check impressions, clicks and the searches your pages appear for. Compare
         those figures over time, allowing for seasonal changes in demand.
-        <Cite n={6} />
+        <Cite n={7} />
       </p>
       <p>
         It also never quite finishes. Pages date, services change, competitors publish. The businesses that do well
@@ -225,13 +226,13 @@ export default function Body() {
         </li>
         <li>
           <strong>Link schemes backfire.</strong> Buying links, or swapping them in bulk, breaks Google’s spam
-          policies and can cost the site its place in the results. You are responsible for what a firm you hire does
-          to your site.
-          <Cite n={4} />
+          policies and can cost the site its place in the results.
+          <Cite n={5} /> And Google is plain that you are responsible for what any firm you hire does to your site.
+          <Cite n={2} />
         </li>
         <li>
-          <strong>Start with read-only access.</strong> For an audit, Google suggests granting access to Search
-          Console first, and checking advice against Google’s own documentation.
+          <strong>Start with read-only access.</strong> Google’s advice is to give a new SEO read access to Search
+          Console only, not the right to change anything, at this stage.
           <Cite n={2} />
         </li>
       </ul>

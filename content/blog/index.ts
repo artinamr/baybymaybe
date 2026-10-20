@@ -489,6 +489,12 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
+        title: "Spam policies for Google web search",
+        publisher: "Google Search Central",
+        url: "https://developers.google.com/search/docs/essentials/spam-policies",
+        accessed: "2026-10-20",
+      },
+      {
         title: "Creating helpful, reliable, people-first content",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
