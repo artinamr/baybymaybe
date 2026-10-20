@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/meta";
 
 export const metadata: Metadata = pageMeta({
   title: "Privacy policy",
-  description: "What personal information the Nerodyn website collects, why, who else sees it, and how to have it corrected or deleted.",
+  description: "What personal information the Nerodyn website collects, why, who else sees it, how long it is kept, and how to have it corrected or deleted.",
   path: "privacy/",
 });
 
