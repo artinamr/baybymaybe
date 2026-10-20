@@ -11,6 +11,8 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { PageReveal } from "@/components/chapters/PageReveal";
 import { OrgLd } from "@/components/site/JsonLd";
 import { minuteWords, storyMinutes } from "@/lib/storyLength";
+// The home page's own styles (the loader, the hero, the film's chapters): only this page pays for them.
+import "./home.css";
 
 // The home page's own canonical address (the layout's title and card are its).
 export const metadata = { alternates: { canonical: "./" } };

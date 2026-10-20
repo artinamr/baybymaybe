@@ -1057,8 +1057,13 @@ way relative to each other.
 15. **Every rule in `app/globals.css` costs every page its first paint.**
    Page-specific styles live in route stylesheets: `app/blog/blog.css`
    (imported by `app/blog/layout.tsx`), `app/services/services.css`
-   (`app/services/layout.tsx`), `app/methodology/methodology.css` (its
-   page). Shared parts stay global (the article cards other pages show,
+   (`app/services/layout.tsx`), `app/methodology/methodology.css` and
+   `app/studio/studio.css` (their pages), and the HOME page's own styles
+   (the loader, intro, hero, chapters, home menu and work cards: 35% of
+   what was global) in `app/home.css` (imported by `app/page.tsx`; moved
+   in order on 2026-10-20, a rule only if every class or id it needs
+   appears nowhere but the home page: no other page's HTML, no script
+   chunk but the home's own). Shared parts stay global (the article cards other pages show,
    `.sr-only`, `.own`, `.pr-grid`). Route sheets load AFTER the global one,
    so a rule there beats a later global rule of equal specificity: keep a
    page's `@media`/`@container` overrides in the same sheet as the rules they

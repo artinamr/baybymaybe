@@ -236,14 +236,6 @@ a {
     animation: none;
   }
 }
-#field-card {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: var(--paper-2);
-  opacity: 0;
-}
 #stage {
   position: fixed;
   inset: 0;
@@ -252,19 +244,6 @@ a {
 }
 #stage canvas {
   display: block;
-}
-#stage-frame {
-  position: fixed;
-  z-index: 3;
-  pointer-events: none;
-  top: 13%;
-  right: 4%;
-  bottom: 11%;
-  left: 40%;
-  border-radius: 28px;
-  border: 1px solid color-mix(in oklab, var(--ink) 10%, transparent);
-  box-shadow: 0 40px 90px -40px color-mix(in oklab, var(--ink) 22%, transparent);
-  opacity: 0;
 }
 
 .grain {
@@ -308,22 +287,14 @@ a {
 
 html[data-intro="wait"] #stage { clip-path: inset(13% 4% 11% 40% round 28px); opacity: 0; }
 html[data-intro="run"] #stage { animation: stage-open 1100ms var(--ease-expo) both; }
-html[data-intro="run"] #field-card { animation: card-tint 1100ms var(--ease-expo) both; }
-html[data-intro="run"] #stage-frame { animation: frame-open 1100ms var(--ease-expo) both; }
 
 /* While the opaque loader covers it, the hero is not laid out for show: its
    lines are placed by the layout script, and on a slow device that move
    (unseen, under the loader) still counted as layout shift. */
 html[data-intro="wait"] [data-chapter="potential"] { visibility: hidden; }
 html[data-intro="wait"] .intro { opacity: 0; }
-html[data-intro="wait"] .intro-mask > span { transform: translateY(135%) skewY(3deg); }
-html[data-intro="wait"] .intro-rule { transform: scaleX(0); }
 
 html[data-intro="run"] .intro { animation: fade-in 500ms ease-out var(--d, 0ms) both; }
-html[data-intro="run"] .intro-rise { animation: rise-in 700ms var(--ease-expo) var(--d, 0ms) both; }
-html[data-intro="run"] .intro-drop { animation: drop-in 600ms var(--ease-expo) var(--d, 0ms) both; }
-html[data-intro="run"] .intro-mask > span { animation: line-in var(--dur, 900ms) var(--ease-line) var(--d, 0ms) both; }
-html[data-intro="run"] .intro-rule { animation: rule-in 600ms var(--ease-expo) var(--d, 0ms) both; }
 
 /* First wheel/touch fast-forwards everything; scroll is never blocked. */
 html[data-intro-skip] #stage,
@@ -352,11 +323,6 @@ html[data-intro-skip] .intro-mask > span {
   height: calc(var(--vh) * 100);
   align-self: start;
 }
-.chapter.is-sticky > .back,
-.chapter.is-sticky > .front {
-  position: sticky;
-  top: 0;
-}
 .chapter > .back {
   z-index: 1;
 }
@@ -379,60 +345,6 @@ html[data-intro-skip] .intro-mask > span {
   display: block;
   overflow: clip;
   overflow-clip-margin: 0.14em;
-}
-/* Type moves with the same weight as the stone: long expo-out rises, a soft
-   focus-pull from a slight blur, a generous stagger — and a quiet, quicker
-   exit upward. */
-.rv-in {
-  display: inline-block;
-  transform: none;
-  filter: blur(0);
-  transition:
-    transform 1400ms var(--ease-expo) calc(var(--i, 0) * 110ms),
-    opacity 900ms ease calc(var(--i, 0) * 110ms),
-    filter 1200ms var(--ease-expo) calc(var(--i, 0) * 110ms);
-}
-.rv-fade {
-  filter: blur(0);
-  transition:
-    transform 1300ms var(--ease-expo) calc(var(--i, 0) * 110ms),
-    opacity 1000ms ease calc(var(--i, 0) * 110ms),
-    filter 1100ms var(--ease-expo) calc(var(--i, 0) * 110ms);
-}
-.rv-wipe {
-  clip-path: inset(0 0 0 0);
-  transition: clip-path 1500ms var(--ease-expo) 80ms, transform 1500ms var(--ease-expo) 80ms, filter 1300ms var(--ease-expo) 80ms;
-}
-/* 140%: the line box plus the mask's clip margin would let the tops of
-   waiting glyphs peek out at a smaller offset. */
-.chapter[data-state="before"] .rv-in {
-  transform: translateY(140%) skewY(4deg);
-  filter: blur(6px);
-}
-.chapter[data-state="before"] .rv-fade {
-  opacity: 0;
-  transform: translateY(28px);
-  filter: blur(6px);
-}
-.chapter[data-state="before"] .rv-wipe {
-  clip-path: inset(0 0 100% 0);
-  transform: translateY(32px);
-  filter: blur(4px);
-}
-.chapter[data-state="after"] .rv-in,
-.chapter[data-state="after"] .rv-fade,
-.chapter[data-state="after"] .rv-wipe {
-  opacity: 0;
-  filter: blur(6px);
-  transform: translateY(-30%);
-  transition:
-    transform 700ms cubic-bezier(0.7, 0, 0.84, 0),
-    opacity 600ms ease-in,
-    filter 700ms ease-in;
-}
-.chapter[data-state="after"] .rv-wipe,
-.chapter[data-state="after"] .rv-fade {
-  transform: translateY(-28px);
 }
 
 /* ---- shared type ----
@@ -468,13 +380,6 @@ html[data-intro-skip] .intro-mask > span {
   letter-spacing: -0.026em;
   max-width: 13em;
 }
-.body-l {
-  font-size: 17px;
-  line-height: 1.6;
-  letter-spacing: -0.003em;
-  max-width: 40ch;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-}
 .accent {
   color: var(--indigo);
 }
@@ -507,18 +412,6 @@ html[data-intro-skip] .intro-mask > span {
 /* ==========================================================================
    00 · POTENTIAL (hero)
    ========================================================================== */
-
-.hero-h1 {
-  position: absolute;
-  inset: 0;
-  font-weight: inherit;
-  pointer-events: none;
-  /* Before the layout script has run the lines carry their desktop fallback
-     sizes (POTENTIAL ≈ 1350 px wide): unclipped, that widened a phone's
-     layout viewport on load and the hero was laid out for the wrong width
-     for ~2.5 s. Nothing drawn here ever lies outside the hero. */
-  overflow: clip;
-}
 .hl {
   position: absolute;
   display: block;
@@ -538,236 +431,25 @@ html[data-intro-skip] .intro-mask > span {
   line-height: 1;
   overflow-clip-margin: 0.3em;
 }
-.hl-1 {
-  left: var(--l1-left, 54px);
-  top: calc(var(--l1-cap, 180px) - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA) - var(--dCap)) * var(--l1-size, 106px));
-  font-size: var(--l1-size, 106px);
-  letter-spacing: -0.028em;
-}
-.hl-2 {
-  left: var(--l2-left, 150px);
-  top: calc(var(--l2-baseline, 387px) - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA)) * var(--l2-size, 106px));
-  font-size: var(--l2-size, 106px);
-  letter-spacing: -0.028em;
-}
-.hl-3 {
-  left: var(--pot-left, 58px);
-  top: calc(var(--pot-baseline, 720px) - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA)) * var(--pot-size, 240px));
-  font-size: var(--pot-size, 240px);
-  letter-spacing: -0.02em;
-}
-.pot {
-  position: relative;
-  display: inline-block;
-}
 /* The hero's visible words are drawn from data-t, so the h1 reads to search
    engines and assistants as its one sentence (the sr-only text), not twice. */
-.hero-h1 [data-t]::before {
-  content: attr(data-t);
-}
-.pot-outline {
-  color: transparent;
-  -webkit-text-stroke: max(1px, 0.006em) var(--indigo);
-  paint-order: stroke fill;
-}
-.pot-fill {
-  position: absolute;
-  inset: 0;
-  color: var(--indigo);
-  clip-path: inset(-0.3em calc(100% - var(--o, 62%)) -0.3em var(--o, 62%));
-  transition: clip-path 1000ms var(--ease-io);
-}
-.pot-fill[data-filled] {
-  clip-path: inset(-0.3em 0 -0.3em 0);
-}
-.pot-fill[data-instant] {
-  transition: none;
-}
-@supports not (-webkit-text-stroke: 1px black) {
-  .pot-outline {
-    color: var(--indigo);
-  }
-}
-
-.hero-kicker {
-  position: absolute;
-  left: var(--g);
-  top: var(--eyebrow-top, 140px);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.005em;
-  color: color-mix(in oklab, var(--ink) 60%, transparent);
-}
-.hero-desc {
-  position: absolute;
-  left: var(--g);
-  top: var(--band-top, 760px);
-  max-width: min(var(--desc-width, 374px), 40ch);
-  font-size: 15px;
-  line-height: 1.55;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-  pointer-events: auto;
-}
-.hero-ctas {
-  position: absolute;
-  left: var(--cta-left, 446px);
-  top: var(--band-top, 760px);
-  display: flex;
-  gap: 12px;
-  pointer-events: auto;
-}
-.hero-ctas > span {
-  display: inline-flex;
-}
-
-/* ==========================================================================
-   01 · WHAT WE BUILD · 02 · WHY NERODYN — the left column
-   ========================================================================== */
-
-.col-left,
-.col-right {
-  position: absolute;
-  top: 0;
-  height: calc(var(--vh) * 100);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: calc(var(--vh) * 3);
-}
-.col-left {
-  left: var(--g);
-  width: calc(44vw - var(--g));
-}
-.col-right {
-  left: 60vw;
-  right: calc(var(--g) + 40px);
-}
 
 /* The three disciplines share one slot; the rail shows where you are. */
-.disc-rail {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, auto);
-  justify-content: start;
-  column-gap: 28px;
-  padding-bottom: 14px;
-  margin-top: calc(var(--vh) * 1.5);
-}
-.disc-tick {
-  font-size: 13px;
-  font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 38%, transparent);
-  transition: color 500ms ease;
-}
-.disc-tick .mono {
-  font-size: 10px;
-  margin-right: 4px;
-}
-[data-disc="0"] .disc-tick[data-i="0"],
-[data-disc="1"] .disc-tick[data-i="1"],
-[data-disc="2"] .disc-tick[data-i="2"] {
-  color: var(--ink);
-}
-[data-disc="0"] .disc-tick[data-i="0"] .mono,
-[data-disc="1"] .disc-tick[data-i="1"] .mono,
-[data-disc="2"] .disc-tick[data-i="2"] .mono {
-  color: var(--indigo);
-}
-.disc-bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--hair);
-}
-.disc-bar > span {
-  position: absolute;
-  inset: 0;
-  background: var(--indigo);
-  transform: scaleX(var(--disc-p, 0));
-  transform-origin: left;
-}
-.discs {
-  display: grid;
-  grid-template: 1fr / 1fr;
-  min-height: calc(var(--vh) * 34);
-}
 .disc {
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
   gap: calc(var(--vh) * 2.2);
 }
-.disc-title {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: min(3.6vw, calc(var(--vh) * 6));
-  line-height: 1.04;
-  letter-spacing: -0.026em;
-  max-width: 11.5em;
-  margin: 0;
-}
-.disc-body {
-  font-size: 17px;
-  line-height: 1.6;
-  max-width: 40ch;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-  transition:
-    opacity 900ms var(--ease-expo) 240ms,
-    transform 1100ms var(--ease-expo) 240ms,
-    filter 900ms ease 240ms;
-}
 [data-disc="0"] .disc:not([data-i="0"]),
 [data-disc="1"] .disc:not([data-i="1"]),
 [data-disc="2"] .disc:not([data-i="2"]) {
-  pointer-events: none;
-}
-/* The way on to the discipline's own page: quiet, after its list. */
-.disc-more {
-  margin-top: 2px;
-  color: var(--indigo);
-  transition:
-    opacity 900ms var(--ease-expo) 640ms,
-    transform 1100ms var(--ease-expo) 640ms,
-    filter 900ms ease 640ms;
-}
-[data-disc="0"] .disc:not([data-i="0"]) .disc-more,
-[data-disc="1"] .disc:not([data-i="1"]) .disc-more,
-[data-disc="2"] .disc:not([data-i="2"]) .disc-more,
-.chapter[data-state="before"] .disc-more {
-  opacity: 0;
-  filter: blur(6px);
-  transform: translateY(10px);
-  transition-delay: 0ms;
-  transition-duration: 450ms;
-  /* The three share one slot: a hidden one must never take the click
-     (links in .front are otherwise always clickable). */
   pointer-events: none;
 }
 
 /* ==========================================================================
    01 · THE STUDIO — the statement, read through the stone
    ========================================================================== */
-
-.statement-sec {
-  position: absolute;
-  inset: 0;
-}
-.statement-sec .marker {
-  position: absolute;
-  left: var(--g);
-  top: calc(var(--vh) * 16);
-}
-.statement-wrap {
-  position: absolute;
-  left: var(--g);
-  top: calc(var(--vh) * 26);
-  width: calc(86vw - var(--g));
-}
 .statement {
   font-family: var(--display);
   font-weight: 500;
@@ -777,155 +459,7 @@ html[data-intro-skip] .intro-mask > span {
   color: var(--ink);
   max-width: 17em;
 }
-.inversion {
-  position: absolute;
-  inset: 0;
-  user-select: none;
-  pointer-events: none;
-  clip-path: polygon(0 0, 0 0, 0 0);
-}
-.statement.is-inverted,
-.statement.is-inverted .accent {
-  color: var(--paper);
-}
-.statement-body {
-  position: absolute;
-  left: var(--g);
-  top: calc(var(--vh) * 78);
-  max-width: 44ch;
-  font-size: 16px;
-  line-height: 1.6;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-}
-
-/* ==========================================================================
-   03 · WHY NERODYN — the headline at the top, one claim at a time below
-   ========================================================================== */
-
-.why-sec {
-  position: absolute;
-  inset: 0;
-}
-.why-top {
-  position: absolute;
-  left: var(--g);
-  top: calc(var(--vh) * 14);
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--vh) * 2.4);
-}
-.why-h2 {
-  max-width: 12em;
-}
-.why-top {
-  transition:
-    opacity 700ms var(--ease-expo),
-    transform 900ms var(--ease-expo),
-    filter 700ms ease;
-}
-/* The paper copy of the section's words, clipped each frame (lib/project.ts)
-   to the silhouettes of the glass behind them: the letters turn from ink to
-   paper exactly where a piece passes behind — never ink on black glass. */
-.why-inv {
-  pointer-events: none;
-  user-select: none;
-  clip-path: polygon(0 0, 0 0, 0 0);
-}
-.why-inv,
-.why-inv * {
-  color: var(--paper) !important;
-  pointer-events: none !important;
-}
-.why-inv .claim-bar {
-  background: color-mix(in oklab, var(--paper) 30%, transparent);
-}
-.why-inv .claim-bar > span {
-  background: var(--paper);
-}
-.why-claims {
-  position: absolute;
-  left: calc(var(--g) - 30px);
-  bottom: calc(var(--vh) * 8);
-  width: min(46vw, 660px);
-  padding: 26px 30px 30px;
-  border-radius: 22px;
-  border: 1px solid transparent;
-  transition:
-    background-color 700ms var(--ease-expo),
-    border-color 700ms var(--ease-expo),
-    box-shadow 700ms var(--ease-expo),
-    backdrop-filter 700ms var(--ease-expo);
-}
-
-.claim-index {
-  position: relative;
-  display: flex;
-  gap: 22px;
-  padding-bottom: 12px;
-  margin-bottom: calc(var(--vh) * 2.6);
-}
-.claim-tick {
-  font-size: 10.5px;
-  color: color-mix(in oklab, var(--ink) 34%, transparent);
-  transition: color 500ms ease;
-}
-[data-claim="0"] .claim-tick[data-i="0"],
-[data-claim="1"] .claim-tick[data-i="1"],
-[data-claim="2"] .claim-tick[data-i="2"] {
-  color: var(--indigo);
-}
-.claim-bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--hair);
-}
-.claim-bar > span {
-  position: absolute;
-  inset: 0;
-  background: var(--indigo);
-  transform: scaleX(var(--claim-p, 0));
-  transform-origin: left;
-}
-.claims {
-  display: grid;
-  grid-template: 1fr / 1fr;
-}
-.claim {
-  grid-area: 1 / 1;
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--vh) * 2);
-}
-.claim-title {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: min(5vw, calc(var(--vh) * 8.4));
-  line-height: 1;
-  letter-spacing: -0.032em;
-  margin: 0;
-}
-.claim-body {
-  font-size: 17px;
-  line-height: 1.6;
-  max-width: 40ch;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-  transition:
-    opacity 900ms var(--ease-expo) 260ms,
-    transform 1100ms var(--ease-expo) 260ms,
-    filter 900ms ease 260ms;
-}
 /* Word by word: the title rises out of a soft blur, a word at a time. */
-.claim-w,
-.disc-w {
-  display: inline-block;
-  transition:
-    opacity 900ms var(--ease-expo) calc(var(--k, 0) * 55ms),
-    transform 1200ms var(--ease-expo) calc(var(--k, 0) * 55ms),
-    filter 1000ms ease calc(var(--k, 0) * 55ms);
-}
 [data-claim="0"] .claim:not([data-i="0"]) :is(.claim-w, .claim-body),
 [data-claim="1"] .claim:not([data-i="1"]) :is(.claim-w, .claim-body),
 [data-claim="2"] .claim:not([data-i="2"]) :is(.claim-w, .claim-body),
@@ -938,112 +472,14 @@ html[data-intro-skip] .intro-mask > span {
   transition-duration: 450ms;
   transition-delay: 0ms;
 }
-[data-claim="0"] .claim:not([data-i="0"]),
-[data-claim="1"] .claim:not([data-i="1"]),
-[data-claim="2"] .claim:not([data-i="2"]) {
-  pointer-events: none;
-}
-/* Under the claims: the way on to how the studio is set up. */
-.why-more {
-  margin-top: calc(var(--vh) * 2.4);
-}
 /* The shortest phones have no room under the film for a second way on (the
    menu still reaches every page): the chapter keeps its words clear. */
-@media (max-width: 767px) and (max-height: 600px) {
-  .disc-more,
-  .why-more {
-    display: none;
-  }
-}
 
 /* ==========================================================================
    06 · THE MARK — contact + footer
    ========================================================================== */
-
-/* "Let's ◆ talk." — the two words stand ON the floor's horizon (their baseline
-   on the line written live by lib/project.ts), parted round the stone, which
-   stands whole in the middle of the frame. */
-.mark-display {
-  position: absolute;
-  inset: 0;
-  font-weight: inherit;
-  --md-size: min(14.5vw, calc(var(--vh) * 25));
-  /* The stone's width on the horizon, with air either side of it. */
-  --md-gap: min(16vw, calc(var(--vh) * 27));
-}
-.mark-display .md-w {
-  position: absolute;
-  top: calc(var(--floorline, var(--horizon, calc(var(--vh) * 49))) - ((1 - var(--dA) - var(--dD)) / 2 + var(--dA)) * var(--md-size));
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: var(--md-size);
-  line-height: 1;
-  letter-spacing: -0.035em;
-  color: var(--indigo);
-  white-space: nowrap;
-}
-.mark-display .rv {
-  overflow-clip-margin: 0.3em;
-}
-.md-l {
-  right: calc(50% + var(--md-gap) / 2);
-}
-.md-r {
-  left: calc(50% + var(--md-gap) / 2);
-}
-.mark-front {
-  position: absolute;
-  inset: 0;
-}
-/* The marker at the top, as every scene has it. */
-.mark-head {
-  position: absolute;
-  left: var(--g);
-  top: calc(var(--vh) * 9.5);
-}
-.mark-head .marker {
-  margin: 0;
-}
 /* On the floor, under the reflection: one sentence and the way on, centred
    under the stone. */
-.mark-foot {
-  position: absolute;
-  left: var(--g);
-  right: var(--g);
-  bottom: calc(var(--vh) * 7.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 24px;
-}
-.mark-body {
-  max-width: 48ch;
-  font-size: 17px;
-  line-height: 1.5;
-  color: color-mix(in oklab, var(--ink) 75%, transparent);
-  margin: 0;
-}
-.mark-ctas {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 16px 30px;
-}
-.mark-mail {
-  font-size: 15px;
-}
-@media (max-height: 780px) and (min-width: 768px) {
-  .mark-body {
-    max-width: 58ch;
-    font-size: 15px;
-  }
-  .mark-foot {
-    gap: 16px;
-    bottom: calc(var(--vh) * 5.5);
-  }
-}
 .email {
   position: relative;
   display: inline-flex;
@@ -1452,77 +888,8 @@ html[data-reading] .nav::after {
   -webkit-backdrop-filter: saturate(1.3) blur(14px);
   backdrop-filter: saturate(1.3) blur(14px);
 }
-.nav-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-.nav-mark {
-  height: 22px;
-  width: auto;
-}
-.nav-word {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
 .logo-mark path {
   transition: fill 400ms ease, transform 500ms var(--ease-expo);
-}
-html[data-mark] .nav-mark path {
-  fill: var(--indigo);
-}
-html[data-mark] .nav-mark .lm-plate {
-  transform: translateY(-14px);
-  transition-delay: 0ms;
-}
-html[data-mark] .nav-mark .lm-left {
-  transform: translateX(-10px);
-  transition-delay: 60ms;
-}
-html[data-mark] .nav-mark .lm-right {
-  transform: translateX(10px);
-  transition-delay: 120ms;
-}
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 34px;
-}
-.nav-link {
-  font-size: 13px;
-  font-weight: 500;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-  letter-spacing: 0.01em;
-}
-.nav-menu {
-  display: none;
-}
-
-/* The liked hover-swap: the label rolls up, its indigo twin rolls in. */
-.swap {
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  line-height: 1.2;
-  vertical-align: bottom;
-}
-.swap-a,
-.swap-b {
-  display: block;
-  transition: transform 500ms var(--ease-expo);
-}
-.swap-b {
-  position: absolute;
-  left: 0;
-  top: 100%;
-  color: var(--indigo);
-}
-a:hover .swap-a,
-a:hover .swap-b,
-a:focus-visible .swap-a,
-a:focus-visible .swap-b {
-  transform: translateY(-100%);
 }
 
 /* Indigo pill — the liked shine sweep. */
@@ -1708,117 +1075,7 @@ a:focus-visible .swap-b {
 html[data-clip] #stage {
   clip-path: inset(var(--ci-t) var(--ci-r) var(--ci-b) var(--ci-l) round var(--ci-rad));
 }
-html[data-clip] #field-card {
-  clip-path: inset(var(--ci-t) var(--ci-r) var(--ci-b) var(--ci-l) round var(--ci-rad));
-  opacity: var(--ci-tint, 0);
-}
-html[data-clip] #stage-frame {
-  top: var(--ci-t);
-  right: var(--ci-r);
-  bottom: var(--ci-b);
-  left: var(--ci-l);
-  border-radius: var(--ci-rad);
-  opacity: var(--ci-frame, 0);
-}
-
-/* The door to the story (/story/) is the stone itself. Over it (hero only)
-   the pointer carries a lens of frosted glass that opens into an invitation:
-   a play disc, "Watch the story" and the film's length. The disc comes
-   first, under the pointer, and the words open out beside it. On a touch
-   screen the same invitation sits on the stone as a link (.stone-door), and
-   the keyboard finds it there too. */
-.stone-cursor {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 70;
-  pointer-events: none;
-}
-.stone-cursor-lens,
-.stone-door {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 22px 6px 6px;
-  border-radius: 999px;
-  white-space: nowrap;
-  color: var(--ink);
-  background: color-mix(in oklab, var(--paper) 64%, transparent);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
-  border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
-  box-shadow:
-    0 1px 0 color-mix(in oklab, white 60%, transparent) inset,
-    0 18px 40px -20px color-mix(in oklab, var(--ink) 45%, transparent);
-}
-.stone-cursor-lens {
-  position: absolute;
-  left: 14px;
-  top: 12px;
-  opacity: 0;
-  transform: scale(0.42);
-  transform-origin: 26px 50%;
-  transition:
-    opacity 160ms ease-out,
-    transform 560ms var(--ease-expo);
-}
-html[data-stone-hover]:not([data-scrolled]) .stone-cursor-lens {
-  opacity: 1;
-  transform: none;
-}
-/* The play disc: indigo, a white triangle, a slow ring of light breathing out. */
-.si-play {
-  position: relative;
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--indigo);
-  box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--indigo) 70%, transparent);
-}
-.si-play svg {
-  width: 14px;
-  height: 14px;
-  fill: #fff;
-  margin-left: 2px;
-}
-.si-play::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  animation: lensPulse 2.2s var(--ease-expo) infinite;
-}
-.si-text {
-  display: grid;
-  gap: 1px;
-  text-align: left;
-}
-.si-title {
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.006em;
-}
-.si-meta {
-  font-size: 12.5px;
-  line-height: 1.2;
-  color: color-mix(in oklab, var(--ink) 62%, transparent);
-}
 /* The words open out from the disc, a beat after it. */
-.stone-cursor .si-text {
-  opacity: 0;
-  transform: translateX(-8px);
-  transition:
-    opacity 260ms ease-out 70ms,
-    transform 620ms var(--ease-expo) 40ms;
-}
-html[data-stone-hover]:not([data-scrolled]) .stone-cursor .si-text {
-  opacity: 1;
-  transform: none;
-}
 html[data-stone-hover] {
   cursor: pointer;
 }
@@ -1830,51 +1087,10 @@ html[data-stone-hover] {
     box-shadow: 0 0 0 12px color-mix(in oklab, var(--indigo) 0%, transparent);
   }
 }
-/* The door on the stone, a little under its girdle. */
-.stone-door {
-  position: absolute;
-  left: var(--hero-axis, 66%);
-  top: calc(var(--stone-top, 30vh) + 0.4 * (var(--stone-bottom, 74vh) - var(--stone-top, 30vh)));
-  translate: -50% -50%;
-  text-decoration: none;
-  transition:
-    opacity 500ms ease,
-    transform 700ms var(--ease-expo);
-}
 /* With a mouse it waits for the keyboard: hidden and out of the pointer's way
    (the click is the stone's own), shown on keyboard focus. */
-@media (hover: hover) {
-  .chapter > .front a.stone-door {
-    opacity: 0;
-    transform: scale(0.94);
-    pointer-events: none;
-  }
-  .chapter > .front a.stone-door:focus-visible {
-    opacity: 1;
-    transform: none;
-    outline: 2px solid var(--indigo);
-    outline-offset: 4px;
-  }
-}
 /* On a touch screen it is the cue: it settles in after the intro, and leaves
    once the page is scrolled. */
-@media (hover: none) {
-  .stone-cursor {
-    display: none;
-  }
-  .stone-door {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  html[data-intro="done"]:not([data-scrolled]) .stone-door {
-    opacity: 1;
-    transform: none;
-    transition-delay: 400ms;
-  }
-  html[data-scrolled] .chapter > .front a.stone-door {
-    pointer-events: none;
-  }
-}
 
 
 /* ==========================================================================
@@ -2344,14 +1560,6 @@ html[data-stone-hover] {
 }
 
 /* ==========================================================================
-   No WebGL: a complete, readable page — POTENTIAL filled, no stage.
-   ========================================================================== */
-
-html[data-nowebgl] .pot-fill {
-  clip-path: inset(0 0 0 0);
-}
-
-/* ==========================================================================
    Tablet (768–1099)
    ========================================================================== */
 
@@ -2359,96 +1567,20 @@ html[data-nowebgl] .pot-fill {
   .h2 {
     font-size: min(4.2vw, calc(var(--vh) * 5.4));
   }
-  .col-left {
-    width: calc(46vw - var(--g));
-  }
-  .col-right {
-    left: 54vw;
-  }
 }
 
 /* Short screens: a little tighter. */
-@media (max-height: 820px) and (min-width: 768px) {
-  .col-left,
-  .col-right {
-    gap: calc(var(--vh) * 2.4);
-  }
-}
 
 /* ==========================================================================
    Mobile (≤ 767): 3D in a top band, copy below it (docs/SPEC.md §12)
    ========================================================================== */
 
 @media (max-width: 767px) and (max-aspect-ratio: 5/6) {
-  .nav-links {
-    display: none;
-  }
-  .nav-menu {
-    display: inline-flex;
-    height: 40px;
-    align-items: center;
-    padding: 0 14px;
-    border: 1px solid var(--hair);
-    border-radius: 999px;
-  }
-  .hero-desc {
-    font-size: 15px;
-    right: var(--g);
-    max-width: none;
-  }
-  .hero-ctas {
-    left: var(--g);
-    top: calc(var(--vh) * 88);
-  }
-  .hero-ctas .pill,
-  .hero-ctas .ghost {
-    height: 44px;
-  }
-  .col-left,
-  .col-right {
-    left: var(--g);
-    right: var(--g);
-    width: auto;
-    top: calc(var(--vh) * 52);
-    height: calc(var(--vh) * 44);
-    justify-content: flex-start;
-    gap: 14px;
-  }
   .h2 {
     font-size: 10vw;
   }
-  .body-l {
-    font-size: 15px;
-  }
-  .disc-rail {
-    column-gap: 14px;
-  }
-  .disc-title {
-    font-size: 22px;
-  }
-  .disc-body {
-    font-size: 15px;
-  }
   /* The finale on a phone: the marker at the top, "Let's ◆ talk." on the
      horizon round the stone, the sentence and the way on at the foot. */
-  .mark-head {
-    top: calc(var(--vh) * 10.5);
-  }
-  .mark-display {
-    --md-size: 17.5vw;
-    --md-gap: 22vw;
-  }
-  .mark-foot {
-    bottom: calc(var(--vh) * 5);
-    gap: 18px;
-  }
-  .mark-body {
-    font-size: 15px;
-  }
-  .mark-ctas {
-    flex-direction: column;
-    gap: 14px;
-  }
   .email-text {
     font-size: 7vw;
   }
@@ -2483,52 +1615,8 @@ html[data-nowebgl] .pot-fill {
    ========================================================================== */
 
 @media (max-width: 767px) and (max-aspect-ratio: 5/6) {
-  .statement-sec .marker {
-    top: calc(var(--vh) * 11);
-  }
-  .statement-wrap {
-    top: calc(var(--vh) * 53);
-    width: calc(100vw - 2 * var(--g));
-  }
   .statement {
     font-size: 7.4vw;
-  }
-  .statement-body {
-    top: auto;
-    bottom: calc(var(--vh) * 7);
-    right: var(--g);
-    font-size: 14px;
-  }
-  .why-top {
-    top: calc(var(--vh) * 46);
-    right: var(--g);
-    gap: 10px;
-  }
-  .why-h2 {
-    font-size: 7.6vw;
-  }
-  .why-claims {
-    left: calc(var(--g) - 14px);
-    right: calc(var(--g) - 14px);
-    width: auto;
-    bottom: calc(var(--vh) * 4);
-    padding: 14px 14px 16px;
-    border-radius: 16px;
-  }
-  .claim-index {
-    margin-bottom: 10px;
-  }
-  .claim-title {
-    font-size: 8.4vw;
-  }
-  .claim-body {
-    font-size: 14px;
-  }
-  .disc-title {
-    font-size: 6.4vw;
-  }
-  .disc-body {
-    font-size: 14px;
   }
 }
 
@@ -2553,211 +1641,10 @@ html[data-nowebgl] .pot-fill {
 }
 
 /* ==========================================================================
-   WHAT WE BUILD — what each discipline actually delivers
-   ========================================================================== */
-
-.disc-list {
-  display: grid;
-  gap: 10px;
-  margin: 2px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.disc-list li {
-  position: relative;
-  padding-left: 26px;
-  font-size: 15px;
-  line-height: 1.45;
-  color: color-mix(in oklab, var(--ink) 80%, transparent);
-  transition:
-    opacity 900ms var(--ease-expo) calc(320ms + var(--k, 0) * 70ms),
-    transform 1100ms var(--ease-expo) calc(320ms + var(--k, 0) * 70ms),
-    filter 900ms ease calc(320ms + var(--k, 0) * 70ms);
-}
-/* A tiny cut of glass for a bullet: the stone's facet, in indigo. */
-.disc-list li::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  top: 0.42em;
-  width: 9px;
-  height: 9px;
-  background: linear-gradient(135deg, var(--indigo-hi, #6b4bff), var(--indigo) 55%, #2a1a8f);
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-}
-[data-disc="0"] .disc:not([data-i="0"]) .disc-list li,
-[data-disc="1"] .disc:not([data-i="1"]) .disc-list li,
-[data-disc="2"] .disc:not([data-i="2"]) .disc-list li,
-.chapter[data-state="before"] .disc-list li {
-  opacity: 0;
-  filter: blur(6px);
-  transform: translateY(10px);
-  transition-delay: 0ms;
-  transition-duration: 450ms;
-}
-
-/* ==========================================================================
    PAGE SECTIONS — plain content on a sheet of paper that scrolls up OVER the
    film (the film holds under it: lib/chapters.ts). Soft edges above and below,
    so the 3D dissolves into the page and back, never a hard seam.
    ========================================================================== */
-
-/* A sheet of paper with a real edge — rounded corners, a hairline and a soft
-   shadow on the scene below — never a fade to white (a white-out was the
-   round-10 "absolute crap"): the page slides over the film, visibly. */
-.page-sec {
-  --sheet-r: 34px;
-  --sheet-top: 0 -1px 0 color-mix(in oklab, var(--ink) 9%, transparent), 0 -34px 70px -44px color-mix(in oklab, var(--ink) 30%, transparent);
-  --sheet-bot: 0 1px 0 color-mix(in oklab, var(--ink) 9%, transparent), 0 34px 70px -44px color-mix(in oklab, var(--ink) 30%, transparent);
-  position: relative;
-  z-index: 5;
-  background: var(--paper);
-  border-radius: var(--sheet-r);
-  box-shadow: var(--sheet-top), var(--sheet-bot);
-}
-/* A run of sheets is one card: square where two meet. */
-.page-sec:has(+ .page-sec) {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  box-shadow: var(--sheet-top);
-}
-.page-sec + .page-sec {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  box-shadow: var(--sheet-bot);
-}
-.page-in {
-  padding: calc(var(--vh) * 16) var(--g) calc(var(--vh) * 14);
-  max-width: 1600px;
-  margin: 0 auto;
-}
-.page-sec + .page-sec .page-in {
-  padding-top: calc(var(--vh) * 6);
-}
-.ps-head {
-  display: grid;
-  gap: calc(var(--vh) * 3);
-  justify-items: start;
-  margin-bottom: calc(var(--vh) * 10);
-  max-width: 1100px;
-}
-.ps-marker {
-  margin: 0;
-}
-.ps-title {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: min(6.6vw, calc(var(--vh) * 10.5));
-  line-height: 0.98;
-  letter-spacing: -0.032em;
-  margin: 0;
-}
-.ps-lede {
-  font-size: 18px;
-  line-height: 1.6;
-  max-width: 52ch;
-  color: color-mix(in oklab, var(--ink) 72%, transparent);
-  margin: 0;
-}
-.ps-foot {
-  margin-top: calc(var(--vh) * 9);
-}
-
-/* ---- 03 · Selected work: an editorial stagger ------------------------------ */
-
-.work-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  column-gap: 28px;
-  row-gap: calc(var(--vh) * 11);
-  align-items: start;
-}
-.work-card {
-  display: grid;
-  gap: 0;
-}
-.work-card-1 {
-  grid-column: 1 / span 7;
-}
-.work-card-2 {
-  grid-column: 9 / span 4;
-  margin-top: calc(var(--vh) * 18);
-}
-.work-card-3 {
-  grid-column: 3 / span 6;
-}
-.work-media {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  aspect-ratio: 16 / 10;
-  border-radius: 6px;
-  /* The tone of the covers' own paper, so a cover still loading is a quiet light card, never a black box. */
-  background: #eeede9;
-  isolation: isolate;
-}
-.work-card-2 .work-media {
-  aspect-ratio: 4 / 5;
-}
-.work-media img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.02);
-  transition: transform 1600ms var(--ease-expo);
-}
-.work-card:hover .work-media img {
-  transform: scale(1.065);
-}
-/* The glass's own light: one white glint across the cover on hover. */
-.work-shine {
-  position: absolute;
-  inset: -20%;
-  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.22) 49%, rgba(255, 255, 255, 0.05) 53%, transparent 60%);
-  transform: translateX(-70%);
-  pointer-events: none;
-}
-.work-card:hover .work-shine {
-  transform: translateX(70%);
-  transition: transform 1300ms var(--ease-expo);
-}
-.work-body {
-  display: grid;
-  gap: 8px;
-  padding-top: 24px;
-  justify-items: start;
-}
-.work-kind {
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--indigo);
-  margin: 0;
-}
-.work-kind span {
-  color: color-mix(in oklab, var(--ink) 40%, transparent);
-  margin-right: 6px;
-}
-.work-name {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: min(2.8vw, 40px);
-  line-height: 1.04;
-  letter-spacing: -0.022em;
-  margin: 4px 0 0;
-}
-.work-client {
-  font-size: 14px;
-  color: color-mix(in oklab, var(--ink) 55%, transparent);
-  margin: 0;
-}
-.work-line {
-  font-size: 16px;
-  line-height: 1.6;
-  max-width: 46ch;
-  color: color-mix(in oklab, var(--ink) 74%, transparent);
-  margin: 6px 0 0;
-}
 
 /* ---- 05 · How we work: five stages on one line ------------------------------- */
 
@@ -2770,69 +1657,11 @@ html[data-nowebgl] .pot-fill {
   padding: 46px 0 0;
   list-style: none;
 }
-.steps-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 7px;
-  height: 1px;
-  background: var(--hair);
-}
-.steps-line > span {
-  position: absolute;
-  inset: 0;
-  background: var(--indigo);
-  transform: scaleX(var(--line, 0));
-  transform-origin: left;
-}
 .step {
   position: relative;
   display: grid;
   gap: 14px;
   align-content: start;
-}
-.step-dot {
-  position: absolute;
-  top: -46px;
-  left: 0;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: var(--paper);
-  border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
-  transition:
-    background 500ms ease,
-    border-color 500ms ease,
-    box-shadow 700ms var(--ease-expo);
-}
-.steps[data-lit="1"] .step[data-i="0"] .step-dot,
-.steps[data-lit="2"] .step:is([data-i="0"], [data-i="1"]) .step-dot,
-.steps[data-lit="3"] .step:is([data-i="0"], [data-i="1"], [data-i="2"]) .step-dot,
-.steps[data-lit="4"] .step:not([data-i="4"]) .step-dot,
-.steps[data-lit="5"] .step .step-dot {
-  background: var(--indigo);
-  border-color: var(--indigo);
-  box-shadow: 0 0 0 6px color-mix(in oklab, var(--indigo) 13%, transparent);
-}
-.step-day {
-  font-size: 12px;
-  color: var(--indigo);
-  margin: 0;
-}
-.step-title {
-  font-family: var(--display);
-  font-weight: 500;
-  font-size: min(2.7vw, 40px);
-  line-height: 1;
-  letter-spacing: -0.024em;
-  margin: 0;
-}
-.step-body {
-  font-size: 16px;
-  line-height: 1.55;
-  max-width: 26ch;
-  color: color-mix(in oklab, var(--ink) 74%, transparent);
-  margin: 0;
 }
 
 /* ---- The questions' answers open in place (QaList: /faq/, services, pricing) - */
@@ -3147,56 +1976,15 @@ html[data-nowebgl] .pot-fill {
 }
 
 @media (max-width: 1099px) {
-  .work-card-1,
-  .work-card-3 {
-    grid-column: 1 / -1;
-  }
-  .work-card-2 {
-    grid-column: 1 / span 8;
-    margin-top: 0;
-  }
   .steps {
     grid-template-columns: repeat(3, 1fr);
     row-gap: calc(var(--vh) * 6);
   }
-  .steps-line {
-    display: none;
-  }
-  .step-dot {
-    top: -28px;
-  }
 }
 
 @media (max-width: 767px) {
-  .page-sec {
-    --sheet-r: 24px;
-  }
   .site-foot {
     border-radius: 24px 24px 0 0;
-  }
-  .page-in {
-    padding: calc(var(--vh) * 12) var(--g) calc(var(--vh) * 10);
-  }
-  .ps-title {
-    font-size: 13vw;
-  }
-  .ps-lede {
-    font-size: 16px;
-  }
-  .work-grid {
-    /* One column: twelve with their 28 px gaps need 308 px on their own,
-       wider than a 320 px phone's text column. */
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: calc(var(--vh) * 7);
-  }
-  .work-card-2 {
-    grid-column: 1 / -1;
-  }
-  .work-card-2 .work-media {
-    aspect-ratio: 16 / 10;
-  }
-  .work-name {
-    font-size: 30px;
   }
   /* Phones: the five down one hairline that fills as you read. */
   .steps {
@@ -3204,32 +1992,8 @@ html[data-nowebgl] .pot-fill {
     row-gap: 28px;
     padding: 0 0 0 38px;
   }
-  .steps-line {
-    display: block;
-    left: 7px;
-    right: auto;
-    top: 8px;
-    bottom: 8px;
-    width: 1px;
-    height: auto;
-  }
-  .steps-line > span {
-    transform: scaleY(var(--line, 0));
-    transform-origin: top;
-  }
   .step {
     gap: 8px;
-  }
-  .step-dot {
-    top: 1px;
-    left: -38px;
-  }
-  .step-title {
-    font-size: 30px;
-  }
-  .step-body {
-    font-size: 15px;
-    max-width: none;
   }
   .qa-q {
     font-size: 17px;
@@ -3252,9 +2016,6 @@ html[data-nowebgl] .pot-fill {
     padding: 0 14px;
     font-size: 13px;
   }
-  .disc-list {
-    display: none;
-  }
 }
 
 /* ==========================================================================
@@ -3270,75 +2031,12 @@ html[data-nowebgl] .pot-fill {
   transition: visibility 0s linear 1150ms;
 }
 /* The paper the page waits under — it lifts as the mark flies to the nav. */
-.ld-veil {
-  position: absolute;
-  inset: 0;
-  background: var(--paper);
-  transition: opacity 900ms var(--ease-expo) 120ms;
-}
 html:not([data-intro="wait"]) #loader {
   visibility: hidden;
   pointer-events: none;
 }
-html:not([data-intro="wait"]) .ld-veil {
-  opacity: 0;
-}
-.ld-in {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 26px;
-}
-/* THE HAND-OFF: the assembled mark flies to the nav's mark (--fx/--fy/--fs,
-   measured by Experience) and hands over as it lands. */
-.ld-fly {
-  position: relative;
-  line-height: 0;
-  transition:
-    transform 1000ms cubic-bezier(0.65, 0, 0.18, 1),
-    opacity 160ms ease 900ms;
-}
-html:not([data-intro="wait"]) .ld-fly {
-  transform: translate(var(--fx, 0px), var(--fy, 0px)) scale(var(--fs, 1));
-  opacity: 0;
-}
-html:not([data-intro="wait"]) .ld-bar,
-html:not([data-intro="wait"]) .ld-n {
-  opacity: 0;
-  transform: translateY(8px);
-  transition:
-    opacity 280ms ease,
-    transform 400ms var(--ease-expo);
-}
-html[data-handoff] .nav-brand .nav-mark {
-  opacity: 0;
-}
-.nav-brand .nav-mark {
-  transition: opacity 180ms ease;
-}
-.ld-mark {
-  width: 46px;
-  height: auto;
-  color: var(--ink);
-  overflow: visible;
-}
 /* A glint of white light sweeps the mark while the stone gets ready — the
    film's own event, a narrow band across polished black. */
-.ld-glint {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  background: linear-gradient(104deg, transparent 38%, color-mix(in oklab, white 92%, transparent) 50%, transparent 62%) no-repeat;
-  background-size: 280% 100%;
-  background-position: 135% 0;
-  animation: ld-glint 2800ms cubic-bezier(0.5, 0, 0.2, 1) 1250ms infinite;
-}
 @keyframes ld-glint {
   0% {
     background-position: 135% 0;
@@ -3347,19 +2045,6 @@ html[data-handoff] .nav-brand .nav-mark {
   100% {
     background-position: -35% 0;
   }
-}
-.ld-mark path {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.ld-mark .lm-plate {
-  animation: ld-plate 900ms var(--ease-expo) 120ms both;
-}
-.ld-mark .lm-left {
-  animation: ld-left 900ms var(--ease-expo) 300ms both;
-}
-.ld-mark .lm-right {
-  animation: ld-right 900ms var(--ease-expo) 380ms both;
 }
 @keyframes ld-plate {
   from {
@@ -3379,41 +2064,7 @@ html[data-handoff] .nav-brand .nav-mark {
     transform: translate(42%, 10%) rotate(7deg);
   }
 }
-/* The line: a hairline that fills with indigo as the stone gets ready. */
-.ld-bar {
-  position: relative;
-  width: 132px;
-  height: 1px;
-  background: color-mix(in oklab, var(--ink) 12%, transparent);
-  animation: fade-in 500ms ease 200ms both;
-}
-.ld-bar > span {
-  position: absolute;
-  inset: 0;
-  background: var(--indigo);
-  transform: scaleX(var(--ld, 0));
-  transform-origin: left;
-}
 /* …led by a small bright head of light. */
-.ld-bar > i {
-  position: absolute;
-  top: -2px;
-  left: -2.5px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--indigo);
-  box-shadow: 0 0 10px 2px color-mix(in oklab, var(--indigo) 55%, transparent);
-  transform: translateX(calc(var(--ld, 0) * 132px));
-}
-.ld-n {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: color-mix(in oklab, var(--ink) 45%, transparent);
-  margin: -14px 0 0;
-  font-variant-numeric: tabular-nums;
-  animation: fade-in 500ms ease 260ms both;
-}
 @media (prefers-reduced-motion: reduce) {
   #loader {
     display: none;
@@ -3428,36 +2079,12 @@ html[data-render] .stone-cursor {
   visibility: hidden !important;
 }
 
-/* The big work cards rise without the focus pull: a blur transition over a
-   large image layer costs frames while the film is still running. */
-.work-card[data-rv] {
-  filter: none;
-  transition:
-    opacity 1100ms var(--ease-expo),
-    transform 1300ms var(--ease-expo);
-}
-
 /* ==========================================================================
    Idle animations rest while unseen — each one costs a style pass every frame
    (the loader's glint once the loader is gone; the stone lens's pulse while
    it is hidden; the studio's haze while it has no
    opacity). Paused, not removed: each picks up where it was when it returns.
    ========================================================================== */
-html:not([data-intro="wait"]) .ld-glint {
-  animation: none;
-}
-html:not([data-stone-hover]) .stone-cursor .si-play::after,
-html[data-scrolled] .si-play::after {
-  animation-play-state: paused;
-}
-@media (hover: hover) {
-  .stone-door:not(:focus-visible) .si-play::after {
-    animation-play-state: paused;
-  }
-}
-html[data-reduced] .si-play::after {
-  animation: none;
-}
 #field:not([data-haze])::after {
   animation-play-state: paused;
 }
@@ -3491,43 +2118,9 @@ html[data-reduced] .si-play::after {
    Androids at 360): the hero's two actions keep to one row inside the
    gutters — past the edge they widened the whole layout and pushed the Menu
    off-screen. From 390 px up nothing changes. */
-.cta-short {
-  display: none;
-}
-@media (max-width: 389px) and (max-aspect-ratio: 5/6) {
-  .hero-ctas {
-    gap: 8px;
-  }
-  .hero-ctas .pill,
-  .hero-ctas .ghost {
-    padding: 0 15px;
-    font-size: 14px;
-  }
-  .hero-ctas .pill {
-    gap: 8px;
-  }
-}
-@media (max-width: 349px) and (max-aspect-ratio: 5/6) {
-  .cta-long {
-    display: none;
-  }
-  .cta-short {
-    display: inline;
-  }
-}
 /* Under 360 px the hero's sentence ran to four lines and its last line hid
    behind the actions: a point smaller it keeps to three, and the actions sit
    a little lower. From 360 px up nothing changes. */
-@media (max-width: 359px) and (max-aspect-ratio: 5/6) {
-  .hero-desc {
-    font-size: 14px;
-    line-height: 1.5;
-    letter-spacing: -0.02em;
-  }
-  .hero-ctas {
-    top: calc(var(--vh) * 89.5);
-  }
-}
 
 /* ==========================================================================
    THE SITE'S PAGES, CONTINUED (services, studio, investment, contact): the
@@ -3915,41 +2508,6 @@ html[data-reduced] .si-play::after {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-.menu-here {
-  margin-top: 34px;
-  padding-top: 22px;
-  border-top: 1px solid var(--hair);
-  opacity: 0;
-  transform: translateY(20px);
-  transition:
-    transform 700ms var(--ease-expo) calc(var(--i) * 60ms),
-    opacity 500ms ease calc(var(--i) * 60ms);
-}
-.menu-sheet[data-open] .menu-here {
-  opacity: 1;
-  transform: none;
-}
-.menu-here-h {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: color-mix(in oklab, var(--ink) 62%, transparent);
-  margin: 0 0 12px;
-}
-.menu-here-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-}
-.menu-here-links a {
-  font-size: 15px;
-  font-weight: 500;
-}
-.menu-here-links .mono {
-  font-size: 10px;
-  color: var(--indigo);
-  margin-right: 4px;
 }
 
 @media (max-width: 900px) {
@@ -4375,36 +2933,7 @@ html[data-reduced] .si-play::after {
     overflow: hidden;
   }
 }
-
-/* The home page's work: covers are interfaces, anchored at their top left;
-   names link to their case studies; one link to all of it. */
-.work-media picture {
-  display: contents;
-}
-.work-media img {
-  object-position: top left;
-}
-.work-name a {
-  color: inherit;
-}
-.work-all {
-  margin: calc(var(--vh) * 8) 0 0;
-}
 /* A service page's case study. */
-.cs-feature {
-  margin-top: 30px;
-}
-.cs-feature .wk-img {
-  aspect-ratio: 21 / 9;
-}
-.cs-feature .svc-go {
-  justify-self: start;
-}
-@media (max-width: 900px) {
-  .cs-feature .wk-img {
-    aspect-ratio: 16 / 10;
-  }
-}
 
 /* ==========================================================================
    THE BLOG — the index and the articles: the same paper, ink and indigo, a
