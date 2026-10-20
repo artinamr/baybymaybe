@@ -515,7 +515,7 @@ export const ARTICLES: ArticleMeta[] = [
     description:
       "Set up a Google Business Profile, check your eligibility, complete verification and keep the details customers rely on up to date.",
     short:
-      "A Google Business Profile is the free listing that controls how your business appears on Google Search and Maps. Add or claim it, verify it, keep its hours, services and photos complete and accurate, and reply to every review. Google ranks local results on relevance, distance and prominence, and there is no way to pay for a better place.",
+      "A Google Business Profile is the free listing that controls how your business appears on Google Search and Maps. Add or claim it, verify it, keep its hours, services and photos complete and accurate, and reply to every review. Google ranks local results on relevance, distance and popularity, and there is no way to pay for a better place.",
     audience: {
       for: "Any New Zealand business with premises customers can visit, or that travels to its customers.",
       skip: "You sell only online, with no face-to-face contact. Google’s rules leave profiles to businesses customers can visit, or that visit them.",

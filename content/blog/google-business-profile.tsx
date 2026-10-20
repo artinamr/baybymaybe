@@ -71,9 +71,9 @@ export default function Body() {
             t: "Sign in with an account the business owns",
             b: (
               <p>
-                A profile needs a Google Account. Use one tied to your business email rather than a personal account
-                only one person can reach, and turn on two-step verification while you are there.
-                <Cite n={1} />
+                A profile needs a Google Account.
+                <Cite n={1} /> Our advice: use one tied to your business email rather than a personal account only
+                one person can reach, and turn on two-step verification while you are there.
               </p>
             ),
           },
@@ -218,8 +218,8 @@ export default function Body() {
             front door.
           </>,
           <>
-            <strong>Every review answered,</strong> good or bad, within a few days.
-            <Cite n={3} />
+            <strong>Every review answered,</strong> good or bad, in good time.
+            <Cite n={6} />
           </>,
           <>
             <strong>The web address tested monthly:</strong> the button still leads somewhere that works, on a phone.
