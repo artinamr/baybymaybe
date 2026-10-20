@@ -77,7 +77,7 @@ export const RESTS: number[] = [
   0, 0.62, 1.66, 2.3, 2.9, 3.5, 4.3, 4.74, 5.42, 5.98, 6.5, 7.1, 7.58, 8.3, 8.9, 9.5, 10.3, 11.0, 11.6, 12.56, 13.3, 14.4, 15.4, 16.9, 17.7, 18.4,
   // Both sides: the page; the office writing; the reply; booked; 3am; the morning; the quote; accepted; the job; paid;
   // how did it go; a year; the reminder; the van; six o'clock; the laptop shut; one picture again.
-  19.62, 20.0, 20.3, 20.7, 21.16, 22.0, 22.3, 22.52, 23.0, 23.5, 24.2, 24.7, 25.2, 25.78, 26.3, 26.9, 27.9, FILM_LEN,
+  19.72, 20.0, 20.3, 20.7, 21.16, 22.0, 22.3, 22.52, 23.0, 23.5, 24.2, 24.7, 25.2, 25.78, 26.3, 26.9, 27.9, FILM_LEN,
 ];
 
 /** How long autoplay holds on a rest (seconds): time to read what is on screen. */

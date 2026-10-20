@@ -1578,8 +1578,9 @@ export class World {
       g.shadow.set(-0.25, 0.02, 0.32);
       g.high.set(0.3, 0.1, -0.25);
       if (isNew(P)) {
-        g.split = 0.6 * Math.max(dusk, night);
-        g.shadow.set(-0.36, 0.08, 0.3);
+        g.split = 0.7 * Math.max(dusk, night);
+        // (Green in the shadows takes the magenta out of the twilight: a deep blue night.)
+        g.shadow.set(-0.32, 0.2, 0.22);
         g.high.set(0.34, 0.14, -0.22);
       }
     }

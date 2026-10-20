@@ -218,8 +218,8 @@ export const KEYS_B: Key[] = [
   A(19.3, fix(39.0, 8, 18), fix(41.0, 1.8, -11), 40, { dof: 0 }),
   A(19.44, S(-2.6, 1.6, 10.6), S(-2.9, 1.25, 4.2), 38, { dof: 0.05 }),
   // In through the glass (between two mullions), and round onto the desk.
-  A(19.6, S(-2.55, 1.32, 7.2), S(-3.7, 1.2, 3.6), 36, { dof: 0.15 }),
-  ...still(19.8, 0.04, B_WIN_EYE, B_WIN_AT, 36, B_WIN),
+  A(19.56, S(-2.55, 1.32, 7.2), S(-3.7, 1.2, 3.6), 36, { dof: 0.15 }),
+  ...still(19.74, 0.04, B_WIN_EYE, B_WIN_AT, 36, B_WIN),
   // The empty office through the night, the morning, the job, a year: the business stays where it is.
   ...still(27.12, 0.06, B_WIN_EYE, B_WIN_AT, 36, B_WIN),
   A(27.48, fix(30, 24, 70), fix(24, 2, -6), 39, { sub: 0.35, dof: 0 }),
