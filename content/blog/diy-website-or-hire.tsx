@@ -32,8 +32,8 @@ export default function Body() {
         picking the one that matches your week and your plans.
       </p>
       <p>
-        Business.govt.nz puts the trade plainly: “setting up a website costs money, and maintaining it takes time and
-        skill”, whichever way you go.
+        Comparing your own website with selling through a marketplace, Business.govt.nz puts the trade plainly:
+        “setting up a website costs money, and maintaining it takes time and skill”.
         <Cite n={1} /> The skill in that sentence is the part owners discover late: the launch is the start of the
         looking-after, not the end of the work.
       </p>
@@ -142,9 +142,9 @@ export default function Body() {
       <H2 id="if-you-build">If you build it, protect these</H2>
       <ul>
         <li>
-          <strong>The domain in your business’s name.</strong> For .nz names the rule is explicit: if you ask someone
-          to register on your behalf, “they must register it in your name, not theirs”. You can check with a WHOIS
-          search on the Domain Name Commission’s website.
+          <strong>The domain in your business’s name.</strong> For a .nz name, the Domain Name Commission’s advice is
+          to make sure your business is listed as the registrant, and to have your registrar transfer it if your web
+          developer or provider is listed instead. A search on its website shows who the registrant is.
           <Cite n={4} />
         </li>
         <li>
@@ -193,9 +193,10 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>From DIY to hired.</strong> What carries over: the domain (a .nz name moves with its UDAI, which
-          your registrar must give you promptly and at no cost, and which is valid for 30 days).
-          <Cite n={4} /> The words and photos carry over if you have kept copies out of the tool. What doesn’t: the
+          <strong>From DIY to hired.</strong> What carries over: the domain. A .nz name moves with its authorisation
+          code (it used to be called the UDAI), which your provider must give you on request and free of charge
+          <Cite n={5} /> and which expires after 30 days.
+          <Cite n={6} /> The words and photos carry over if you have kept copies out of the tool. What doesn’t: the
           pages themselves may need rebuilding. For example, Squarespace says creating a new trial site means
           recreating the existing content there.
           <Cite n={2} />

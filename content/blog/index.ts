@@ -381,7 +381,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website ownership", "who owns my website", "website hosting", ".nz domain", "website handover", "website support"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-ownership"],
     faq: [
@@ -401,10 +401,16 @@ export const ARTICLES: ArticleMeta[] = [
     related: { services: ["websites", "platforms"], work: ["practice-website"], articles: ["website-quote-checklist", "redesign-or-improve", "website-hacked"] },
     sources: [
       {
-        title: "A ready reference for registrants",
+        title: "Manage my domain name?",
         publisher: "Domain Name Commission",
-        url: "https://dnc.org.nz/assets/DocumentLibrary/a_ready_reference_for_registrants.pdf",
-        accessed: CHECKED_1012,
+        url: "https://dnc.org.nz/tools-and-services/how-do-i-2/manage-my-domain-name/",
+        accessed: "2026-10-20",
+      },
+      {
+        title: ".nz Rules",
+        publisher: "Domain Name Commission",
+        url: "https://dnc.org.nz/about/compliance-and-enforcement/nz-rules/nz-rules/",
+        accessed: "2026-10-20",
       },
       {
         title: "Protect your business against ransomware",
@@ -424,6 +430,24 @@ export const ARTICLES: ArticleMeta[] = [
         publisher: "Own Your Online (NCSC)",
         url: "https://www.ownyouronline.govt.nz/business/get-protected/guides/secure-your-domain-name/",
         accessed: CHECKED_1012,
+      },
+      {
+        title: "Change a domain name holder?",
+        publisher: "Domain Name Commission",
+        url: "https://dnc.org.nz/tools-and-services/how-do-i-2/change-a-domain-name-holder/",
+        accessed: "2026-10-20",
+      },
+      {
+        title: "How a complaint works",
+        publisher: "Domain Name Commission",
+        url: "https://dnc.org.nz/for-consumers/complaints-about-nz-industry-service-providers/how-it-works/",
+        accessed: "2026-10-20",
+      },
+      {
+        title: "Transfer my domain?",
+        publisher: "Domain Name Commission",
+        url: "https://dnc.org.nz/tools-and-services/how-do-i-2/transfer-my-domain-name/",
+        accessed: "2026-10-20",
       },
     ],
     status: "published",
@@ -630,7 +654,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["build your own website", "diy website vs professional", "website builder", "how much to build a website", "hire a web designer", "website builder vs web designer"],
     published: "2026-10-07",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 6,
     cover: PHOTOS["cover-diy"],
     faq: [
@@ -668,10 +692,22 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
-        title: "A ready reference for registrants",
+        title: "Manage my domain name?",
         publisher: "Domain Name Commission",
-        url: "https://dnc.org.nz/assets/DocumentLibrary/a_ready_reference_for_registrants.pdf",
-        accessed: CHECKED_1012,
+        url: "https://dnc.org.nz/tools-and-services/how-do-i-2/manage-my-domain-name/",
+        accessed: "2026-10-20",
+      },
+      {
+        title: "Transfer my domain?",
+        publisher: "Domain Name Commission",
+        url: "https://dnc.org.nz/tools-and-services/how-do-i-2/transfer-my-domain-name/",
+        accessed: "2026-10-20",
+      },
+      {
+        title: "Get an authentication code (UDAI)?",
+        publisher: "Domain Name Commission",
+        url: "https://dnc.org.nz/tools-and-services/how-do-i-2/get-a-udai/",
+        accessed: "2026-10-20",
       },
     ],
     status: "published",
