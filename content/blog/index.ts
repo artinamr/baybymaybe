@@ -72,6 +72,8 @@ export type ArticleMeta = {
 
 /** Sources fetched and read during the editorial revision, including primary-source checks. */
 const CHECKED_1012 = "2026-10-12";
+/** Revised in the accuracy pass of 20 October 2026 (corrections from the research memos). */
+const REVISED_1020 = "2026-10-20";
 
 export const ARTICLES: ArticleMeta[] = [
   {
@@ -93,7 +95,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website redesign", "website improvements", "rebuild or refresh a website", "Core Web Vitals", "301 redirects", "New Zealand small business website"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 8,
     cover: PHOTOS["cover-redesign"],
     faq: [
@@ -150,7 +152,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website quote", "web design quote", "website proposal checklist", "website cost", "website ownership", "New Zealand"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-quote"],
     faq: [
@@ -199,7 +201,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "platforms",
     keywords: ["client portal", "customer portal", "client portal for small business", "multi-factor authentication", "Privacy Act 2020", "custom portal vs off-the-shelf"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-portal"],
     faq: [
@@ -219,7 +221,7 @@ export const ARTICLES: ArticleMeta[] = [
     related: { services: ["platforms"], work: ["operations-portal"], articles: ["connect-website-crm-booking", "after-launch-ownership"] },
     sources: [
       {
-        title: "Principle 5: Storage and security of personal information",
+        title: "Principle 5: Storage and security of information",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/5/",
         accessed: CHECKED_1012,
@@ -286,7 +288,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       { title: "Spam: three steps", publisher: "Department of Internal Affairs", url: "https://www.dia.govt.nz/Spam-Three-Steps", accessed: CHECKED_1012 },
       {
-        title: "Principle 5: Storage and security of personal information",
+        title: "Principle 5: Storage and security of information",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/5/",
         accessed: CHECKED_1012,
@@ -313,7 +315,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "automation",
     keywords: ["AI automation", "AI for small business", "workflow automation", "ai tools for business", "human in the loop", "Privacy Act 2020 and AI"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-ai"],
     faq: [
@@ -445,7 +447,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["what is seo", "search engine optimisation", "seo for small business", "seo new zealand", "how to rank on google", "how does google search work"],
     published: "2026-10-07",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-seo"],
     faq: [
@@ -527,7 +529,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["google business profile", "google my business", "add business to google maps", "get on google maps", "google maps listing", "local search new zealand"],
     published: "2026-10-07",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-gbp"],
     faq: [
@@ -692,7 +694,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website hacked", "what to do if website is hacked", "hacked website fix", "report cyber attack nz", "malware on website", "website security new zealand"],
     published: "2026-10-08",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-hacked"],
     faq: [

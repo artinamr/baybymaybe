@@ -181,9 +181,9 @@ export default function Body() {
           clients when there’s a disagreement, and helps you notice when something is wrong.
         </li>
         <li>
-          <strong>A plan for when something goes wrong.</strong> The Privacy Commissioner expects a privacy breach that has
-          caused, or might cause, serious harm to be notified to it within 72 hours of the business becoming aware of it,
-          even while still investigating, and the affected people to be told as soon as possible.
+          <strong>A plan for when something goes wrong.</strong> If a privacy breach has caused, or might cause, serious
+          harm, the Privacy Act requires the business to notify the Privacy Commissioner, ideally within 72 hours of
+          becoming aware of it, even while still investigating, and to tell the affected people as soon as it can.
           <Cite n={4} /> Know in advance who would make that call.
         </li>
       </ul>
