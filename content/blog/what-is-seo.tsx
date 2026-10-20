@@ -401,8 +401,8 @@ export default function Body() {
         </li>
         <li>
           <strong>A paid place in a ranking that looks independent.</strong> In October 2026 the Commerce Commission
-          asked the High Court to stop two websites presenting rankings that businesses paid for as independent; the
-          court had not ruled when we checked. You can report an approach to the Commission on 0800 943 600.
+          asked the High Court to stop two websites that, it alleges, presented rankings businesses had paid for as
+          independent; the court had not ruled when we checked. You can report an approach to the Commission on 0800 943 600.
           <Cite n={19} />
         </li>
       </ul>
