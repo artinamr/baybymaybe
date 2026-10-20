@@ -94,7 +94,7 @@ const OFFICE: { a: number; b: number; id: string; part: string }[] = [
   { a: 20.46, b: 20.9, id: "booked", part: "booking" },
   { a: B.nNight[0] + 0.02, b: B.nNight[1] - 0.02, id: "night", part: "reply" },
   { a: B.nHand[0], b: B.nHand[1] + 0.04, id: "hand", part: "reply" },
-  { a: B.nQuote[0] - 0.02, b: 22.66, id: "quote", part: "quote" },
+  { a: B.nHand[1] + 0.04, b: 22.66, id: "quote", part: "quote" },
   { a: B.nInvoice[0], b: 23.62, id: "invoice", part: "invoice" },
   { a: B.nReview[0], b: 24.42, id: "review", part: "followup" },
   { a: B.nRemind[0] - 0.04, b: 25.4, id: "remind", part: "followup" },
@@ -1751,7 +1751,7 @@ export class World {
       // A pane inside a closed room (the office once the camera is in; Sam on the sofa) has no sky behind it, and
       // the office pane draws only the workshop.
       const P0 = this.lastP;
-      const room = c.sub < 0.05 && (i === 1 ? P0 > 19.72 && P0 < 27.3 : P0 > 19.48 && P0 < 20.86);
+      const room = c.sub < 0.05 && (i === 1 ? P0 > 19.72 && P0 < 27.18 : P0 > 19.54 && P0 < 20.84);
       const sky = !room;
       const inside = room;
       // (Sam's room by day: the shadows cover the room and the deck, so the sun through the windows lays its shapes.)

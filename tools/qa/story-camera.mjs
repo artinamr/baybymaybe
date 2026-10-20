@@ -45,7 +45,7 @@ const film = (f) => jiti.import(new URL(`components/story/film/${f}`, root).href
 const THREE = await jiti.import("three");
 const { MeshBVH } = await jiti.import("three-mesh-bvh");
 const { World } = await film("world.ts");
-const { cameraSmooth, phoneAdjust, paneShare, PANE_KEYS } = await film("camera.ts");
+const { cameraSmooth, phoneAdjust, paneShare, PANE_KEYS, KEYS } = await film("camera.ts");
 const { splitAt, paneRects } = await film("split.ts");
 const { FILM_LEN } = await jiti.import(new URL("components/story/timeline.ts", root).href);
 
@@ -219,6 +219,15 @@ const close = runs((r) => r.card < 0.6, (rs) => rs.reduce((a, b) => (b.card < a.
 report("CARDS (a card in the air within 0.6 m of the lens)", close, (r) => `closest ${r.worst.card} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}${r.worst.pane ? " (pane " + r.worst.pane + ")" : ""}`, (r) => r.worst.card < 0.25);
 const movers = runs((r) => r.mover < 0.6, (rs) => rs.reduce((a, b) => (b.mover < a.mover ? b : a)));
 report("MOVERS (a van or a person within 0.6 m of the lens)", movers, (r) => `closest ${r.worst.mover} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}${r.worst.pane ? " (pane " + r.worst.pane + ")" : ""}`, (r) => r.worst.mover < 0.25);
+// Each key list runs forward in P with no repeated P (pane keys are not smoothed: a key out of order is a jump).
+const order = [];
+for (const [name, keys] of [["KEYS", KEYS], ["KEYS_A", PANE_KEYS[0]], ["KEYS_B", PANE_KEYS[1]]])
+  for (let i = 1; i < keys.length; i++) if (!(keys[i].P > keys[i - 1].P)) order.push({ name, i, a: keys[i - 1].P, b: keys[i].P });
+console.log(`\nKEY ORDER (a list not strictly increasing in P): ${order.length}`);
+for (const o of order) {
+  fails++;
+  console.log(`  FAIL ${o.name}[${o.i}] P ${o.b} after P ${o.a}`);
+}
 if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify(rows));
 console.log(`\n${fails ? "FAIL" : "PASS"}: ${fails} problem run(s)`);
 process.exitCode = fails ? 1 : 0;

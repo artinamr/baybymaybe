@@ -163,7 +163,8 @@ export class Dom {
     }
     this.set("shade", left, () => this.shade?.style.setProperty("--shade", left ? "1" : "0"));
     this.set("shadeC", centre, () => this.shade?.style.setProperty("--shade-c", centre ? "1" : "0"));
-    this.set("side", paneB, () => (paneB ? this.shade?.setAttribute("data-side", "b") : this.shade?.removeAttribute("data-side")));
+    // (Only while the shade is on, so the side stays put while it fades out.)
+    if (left) this.set("side", paneB, () => (paneB ? this.shade?.setAttribute("data-side", "b") : this.shade?.removeAttribute("data-side")));
 
     // The counter: the film's own customers.
     const sim = w.sim;

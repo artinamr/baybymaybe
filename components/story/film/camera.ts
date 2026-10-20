@@ -203,7 +203,7 @@ export const KEYS_A: Key[] = [
   A(21.441, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
   // The garden by day: the old deck; the quote accepted; the build; a year; the reminder.
   // The mornings and the days: Sam's room from inside, out through the sliders to the deck.
-  ...still(24.4, 2.9, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
+  A(21.5, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
   // The Saturday (you come and oil the deck) and six o'clock: the garden still.
   ...still(26.6, 0.62, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
   // Out through the sliders, then up and back into the one picture (clear of the garden tree).
