@@ -33,7 +33,7 @@ const visible = (page) =>
   await sleep(200);
   const v1 = await visible(page);
   ok(v1.length === 1 && v1[0] === "after-launch-ownership", `search "udai" → ${v1.join(",")}`);
-  ok(await page.evaluate(() => [...document.querySelectorAll(".bl-hits a")].map((a) => a.textContent).includes("UDAI")), "glossary hit offered for udai");
+  ok(await page.evaluate(() => [...document.querySelectorAll(".bl-hits a")].map((a) => a.textContent).some((t) => /Authorisation code/.test(t))), "glossary hit offered for udai (the authorisation code, its old name)");
   ok((await page.$eval(".bl-count", (e) => e.textContent)).includes("1 of 11"), "count says 1 of 11");
   await clear(page);
   await page.keyboard.type("privacy");

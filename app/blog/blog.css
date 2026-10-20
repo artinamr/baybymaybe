@@ -69,20 +69,31 @@
 }
 
 /* ---- The words ------------------------------------------------------------ */
+/* Room to read (round 27, the owner: "too cramped"): 20 px on a measure of
+   about 70 characters (33em), paragraphs spaced by the type, and the pictures
+   of the argument (figures, tables) on the full column, wider than the text. */
 .prose {
-  font-size: 18px;
-  line-height: 1.7;
+  font-size: 20px;
+  line-height: 1.65;
   color: color-mix(in oklab, var(--ink) 82%, transparent);
 }
 .prose > * {
-  max-width: 68ch;
+  max-width: 33em;
 }
 .prose > .ar-fig,
 .prose > .ar-table-wrap {
   max-width: none;
 }
+.prose > .ar-callout,
+.prose > .ar-parts {
+  max-width: 38em;
+}
+.prose > .ar-steps,
+.prose > .ar-check {
+  max-width: 36em;
+}
 .prose p {
-  margin: 0 0 22px;
+  margin: 0 0 1.15em;
 }
 .prose > :where(ul, ol) {
   margin: 0 0 26px;
@@ -118,7 +129,7 @@
   line-height: 1.12;
   letter-spacing: -0.02em;
   color: var(--ink);
-  margin: 64px 0 22px;
+  margin: clamp(80px, 11vh, 120px) 0 26px;
   scroll-margin-top: calc(var(--nav-h) + 24px);
   text-wrap: balance;
 }
@@ -144,7 +155,7 @@
   line-height: 1.2;
   letter-spacing: -0.015em;
   color: var(--ink);
-  margin: 38px 0 12px;
+  margin: 48px 0 14px;
 }
 .prose sup {
   line-height: 0;
@@ -159,7 +170,7 @@
 
 /* Figures: original diagrams on a lighter card. */
 .ar-fig {
-  margin: 40px 0 44px;
+  margin: 52px 0 56px;
 }
 .ar-fig-body {
   container-type: inline-size;
@@ -175,8 +186,8 @@
   color: color-mix(in oklab, var(--ink) 62%, transparent);
 }
 .ar-callout {
-  margin: 34px 0;
-  padding: 22px 26px;
+  margin: 44px 0;
+  padding: 26px 30px;
   border-left: 2px solid var(--indigo);
   border-radius: 0 16px 16px 0;
   background: color-mix(in oklab, var(--indigo) 5%, var(--paper));
@@ -191,7 +202,7 @@
 }
 .ar-callout-b p {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
 }
 .ar-steps,
 .ar-check {
@@ -764,11 +775,12 @@ ol.dg {
     font-size: 17px;
   }
   .prose {
-    font-size: 17px;
+    font-size: 18px;
+    line-height: 1.6;
   }
   .ar-h2 {
     font-size: max(26px, 6.6vw);
-    margin-top: 52px;
+    margin-top: 64px;
   }
   .ar-sources .ar-h2 {
     font-size: 26px;
