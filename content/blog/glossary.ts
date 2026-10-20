@@ -434,7 +434,7 @@ export const GLOSSARY = [
     term: "Chat assistant",
     also: "Website chatbot",
     group: "ai",
-    def: "Software on a website that answers visitors’ questions in conversation. The kind built on generative AI drafts its own answers, so the Privacy Commissioner’s guidance applies: it should answer from approved material, say what it is, and hand over to a person rather than improvise.",
+    def: "Software on a website that answers visitors’ questions in conversation. The kind built on generative AI writes its own answers, so it can be wrong with confidence: keep it to approved material, say that it’s an assistant, and offer a person.",
     cite: ["genai"],
     see: { slug: "website-chat-assistant", id: "harm" },
   },
