@@ -51,8 +51,16 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   if (!s) notFound();
   const others = SERVICES.filter((o) => o.slug !== s.slug);
   const work = s.work.map((slug) => project(slug)!).filter(Boolean);
-  // What the blog says about this discipline: up to three articles, newest first.
-  const reading = PUBLISHED.filter((a) => a.related.services.includes(s.slug)).slice(0, 3);
+  // What the blog says about this discipline: up to six articles (two rows).
+  // Those mainly about it come first, and among them the buying guides (an
+  // article with a `situation` answers a buyer's starting point), then the
+  // others that touch it; newest first within each (PUBLISHED is).
+  const rank = (a: (typeof PUBLISHED)[number]) => (a.related.services[0] === s.slug ? 0 : 2) + (a.situation ? 0 : 1);
+  const reading = PUBLISHED.filter((a) => a.related.services.includes(s.slug))
+    .map((a, i) => ({ a, i }))
+    .sort((x, y) => rank(x.a) - rank(y.a) || x.i - y.i)
+    .map((x) => x.a)
+    .slice(0, 6);
   const crumbs = [
     { name: "Services", href: PAGES.services },
     { name: s.name, href: PAGES.service(s.slug) },
