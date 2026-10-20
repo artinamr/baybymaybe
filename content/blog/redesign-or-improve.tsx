@@ -91,8 +91,11 @@ export default function Body() {
           inside images, menus can’t be used with a keyboard, and fixing it means replacing the theme anyway.
         </li>
         <li>
-          <strong>Nobody is sure who owns it.</strong> If the domain, the hosting or the code sit in someone else’s
-          name and can’t be moved, a rebuild in your own name may be the cleanest way out.
+          <strong>The site can’t leave its provider.</strong> A domain or hosting account in someone else’s name is not
+          a reason to rebuild on its own: ask for them to be moved into your business’s name first. The{" "}
+          <a href={`${PAGES.article("after-launch-ownership")}#today`}>ownership guide</a> shows how to find out what you
+          own. But if the site itself is locked to a provider’s platform and can’t be moved, a rebuild in your own name
+          may be the cleanest way out.
         </li>
       </ul>
       <p>
