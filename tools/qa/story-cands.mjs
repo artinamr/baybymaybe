@@ -23,6 +23,7 @@ await new Promise((r) => setTimeout(r, 3000));
 for (const c of list) {
   await page.evaluate((c) => {
     window.__story.world.paneOverride = [c.A ?? null, c.B ?? null];
+    window.__story.world.officeTo = c.O ?? null;
     window.__story.world.camOverride = c.M ? { eye: { x: c.M.eye[0], y: c.M.eye[1], z: c.M.eye[2] }, at: { x: c.M.at[0], y: c.M.at[1], z: c.M.at[2] }, fov: c.M.fov } : null;
     window.__story.jump(c.P);
   }, c);

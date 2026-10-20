@@ -134,6 +134,8 @@ export class World {
   camOverride: { eye: { x: number; y: number; z: number }; at: { x: number; y: number; z: number }; fov: number } | null = null;
   /** Look-dev: a pane's camera set by hand (window.__story.world.paneOverride = [{ eye, at, fov, ppy }, null]). */
   paneOverride: ({ eye: number[]; at: number[]; fov: number; ppx?: number; ppy?: number } | null)[] = [null, null];
+  /** Look-dev: where the office's card settles (world x, y, z, yaw, scale). */
+  officeTo: number[] | null = null;
   /** Parts the pointer can ask about (content/story.ts PARTS), with their boxes. */
   readonly parts: { id: string; box: THREE.Box3; on: boolean }[] = [];
 
@@ -552,6 +554,12 @@ export class World {
     this.crowdAndCounts(Pw, t, nw);
     this.seasons(Pw);
     this.office(P, t, hours);
+    if (nw) {
+      this.home.lampLight.intensity *= 1.6;
+      this.home.roomLight.intensity = 0;
+      this.phoneLight.intensity *= 2.2;
+      this.shop.screenLight.intensity *= 2.0;
+    }
     this.drive(t);
     this.keepClear(f.dt);
     this.pointer(f.pointer);
@@ -1221,7 +1229,13 @@ export class World {
     const phoneG = this.samPhone.group;
     const dev = { p: phoneG.position.clone(), q: phoneG.quaternion.clone(), s: 0.105 };
     const onDeck = (P >= 10 && P < 12.8) || P >= 21.5;
-    const air = onDeck ? { p: H(-0.2, 1.62, -6.0), q: Q(0, 0.22, 0), s: 1 } : { p: H(-3.25, 1.5, -2.5), q: Q(-0.03, 0.12, 0), s: 1 };
+    const air = nw
+      ? onDeck
+        ? { p: H(-1.37, 1.75, -7.37), q: Q(0, 0.6, 0), s: 0.5 }
+        : { p: H(-1.84, 1.38, -0.96), q: Q(-0.02, 0.6, 0), s: 0.5 }
+      : onDeck
+        ? { p: H(-0.2, 1.62, -6.0), q: Q(0, 0.22, 0), s: 1 }
+        : { p: H(-3.25, 1.5, -2.5), q: Q(-0.03, 0.12, 0), s: 1 };
     const windows: [number, number][] = nw
       ? [
           // The page; the reply and the booking; the quote; the invoice; how did it go; the reminder.
@@ -1510,8 +1524,9 @@ export class World {
     }
     void time;
     // Up off the laptop with a little weight; down into it again as the moment ends.
-    const from = { p: this.shop.laptop.hinge.clone().add(V(0, 0.14, 0.03)), q: Q(0, 0, 0), s: 0.18 };
-    const to = { p: S(-3.9, 2.0 + Math.sin(t * 0.6) * 0.004, 5.35), q: Q(0, 0, 0), s: 1 };
+    const from = { p: this.shop.laptop.hinge.clone().add(V(0, 0.12, 0.02)), q: Q(0, 0.62, 0), s: 0.12 };
+    const ot = this.officeTo;
+    const to = ot ? { p: V(ot[0], ot[1], ot[2]), q: Q(0, ot[3], 0), s: ot[4] } : { p: S(-3.95, 1.5 + Math.sin(t * 0.6) * 0.004, 4.0), q: Q(0, 0.5, 0), s: 0.4 };
     const kk = smoother(range(P, a, a + 0.1)) * (1 - smoother(range(P, b - 0.08, b)));
     carry(card.group, from, to, settle(kk, 0.45), 0.12);
     card.show(Math.min(1, kk * 3), 1.05);
@@ -1545,6 +1560,11 @@ export class World {
       g.split = 0.55 * dusk;
       g.shadow.set(-0.25, 0.02, 0.32);
       g.high.set(0.3, 0.1, -0.25);
+      if (isNew(P)) {
+        g.split = 0.6 * Math.max(dusk, night);
+        g.shadow.set(-0.36, 0.08, 0.3);
+        g.high.set(0.34, 0.14, -0.22);
+      }
     }
     g.lift.set(0, 0, 0);
     g.gamma.set(1, 1, 1);
@@ -1557,6 +1577,9 @@ export class World {
     } else {
       g.sat = 1.04;
       g.gain.set(1.03, 1.0, 0.97);
+      // (By day the rooms and the garden are warm and clean.)
+      g.gain.lerp(new THREE.Vector3(1.07, 1.02, 0.93), 1 - night);
+      g.exposure *= 1 + 0.12 * (1 - night);
     }
     // The turn: the dark takes the room; then the town at dusk again.
     g.black = 0.82 * smooth(range(P, B.black[0], B.black[0] + 0.1)) * (1 - smooth(range(P, B.black[1] - 0.1, B.black[1])));
@@ -1668,22 +1691,28 @@ export class World {
       v.aperture = this.camOverride || (i === 1 && c.sub < 0.05) ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
       // Each pane's shadows are spent on its own subject.
       const r = Math.min(150, Math.max(3, v.focus * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
-      // A pane that looks into a closed room has no sky to draw behind it (the office; Sam on the sofa).
-      const sky = c.sub > 0.05 || (i === 0 && !(this.lastP > 19.48 && this.lastP < 20.86));
+      // A pane inside a closed room (the office once the camera is in; Sam on the sofa) has no sky behind it, and
+      // the office pane draws only the workshop.
+      const P0 = this.lastP;
+      const room = c.sub < 0.05 && (i === 1 ? P0 > 19.72 && P0 < 27.3 : P0 > 19.48 && P0 < 20.86);
+      const sky = !room;
+      const inside = room;
       v.before = () => {
         this.sky.aimShadow(c.at, r);
         this.sky.dome.visible = sky;
+        this.scene.environmentIntensity = this.sky.out.envI * (inside ? 0.42 : 1);
         // Each pane draws only the place it can see (the office pane looks into a closed room;
         // Sam's garden never sees the workshop): two views for little more than the cost of one.
         const own = c.sub < 0.05;
-        this.town.group.visible = !own || i === 0;
-        this.land.group.visible = !own || i === 0;
-        this.home.group.visible = !own || i === 0;
+        this.town.group.visible = !(room && i === 1);
+        this.land.group.visible = !(room && i === 1);
+        this.home.group.visible = !(room && i === 1);
         this.shop.group.visible = !own || i === 1;
       };
     }
     this.post.render(this.gl, this.scene, this.views, g, time);
     this.sky.dome.visible = true;
+    this.scene.environmentIntensity = this.sky.out.envI;
     this.town.group.visible = this.land.group.visible = this.home.group.visible = this.shop.group.visible = true;
   }
 }

@@ -167,19 +167,19 @@ export const KEYS: Key[] = [
  */
 
 /** Sam on the sofa, through the open sliders (the phone's page lifted beside them). */
-const A_SOFA_EYE = H(-2.75, 1.42, -6.0);
-const A_SOFA_AT = H(-2.75, 1.12, -1.4);
+const A_SOFA_EYE = fix(-44.25, 1.38, 18.45);
+const A_SOFA_AT = fix(-41.9, 1.15, 15.6);
 /** Sam's garden by day: the deck (old, then new), Sam on it with the phone. */
-const A_DECK_EYE = H(3.0, 3.4, -13.6);
-const A_DECK_AT = H(-1.4, 1.0, -6.6);
+const A_DECK_EYE = fix(-46.6, 1.35, 27.6);
+const A_DECK_AT = fix(-42.6, 1.3, 21.9);
 /** 3am: from Sam's dark garden, over the side fence to the neighbour's window that lights up (Aroha's). */
-const A_NIGHT_EYE = fix(-46.0, 2.4, 27.6);
-const A_NIGHT_AT = fix(-33.5, 2.2, 19.5);
+const A_NIGHT_EYE = fix(-42.0, 2.3, 24.6);
+const A_NIGHT_AT = fix(-33.5, 2.05, 19.4);
 
 /** The shopfront: the office through the glass, its desk, its chair, the laptop's light. */
-const B_WIN_EYE = S(-3.9, 1.62, 9.4);
-const B_WIN_AT = S(-3.9, 1.72, 4.8);
-const B_WIN = { dof: 0.14, ppy: 0.42 };
+const B_WIN_EYE = S(-2.4, 1.25, 6.2);
+const B_WIN_AT = S(-4.0, 1.2, 3.4);
+const B_WIN = { dof: 0.3 };
 
 const A = (P: number, eye: Pt, at: Pt, fov: number, o: { ppx?: number; ppy?: number; dof?: number; sub?: number } = {}): Key => ({ P, eye, at, fov, ppx: o.ppx ?? 0.5, ppy: o.ppy, dof: o.dof, sub: o.sub ?? 0 });
 
@@ -190,17 +190,18 @@ export const KEYS_A: Key[] = [
   // Down into Sam's garden, as the film first came down to it.
   A(19.14, fix(-20, 30, 82), fix(-26, 3, 8), 40, { sub: 0.2, dof: 0 }),
   A(19.3, fix(-50, 9, 40), fix(-42, 1.8, 17), 40, { dof: 0 }),
-  A(19.42, fix(-43.5, 2.8, 26.0), fix(-41.4, 1.5, 17.4), 40, { dof: 0.1 }),
-  ...still(19.62, 0.08, A_SOFA_EYE, A_SOFA_AT, 40, { dof: 0.14 }),
-  ...still(20.6, 0.24, A_SOFA_EYE, A_SOFA_AT, 40, { dof: 0.14 }),
+  A(19.42, fix(-44.2, 2.2, 23.6), fix(-42.0, 1.3, 16.4), 36, { dof: 0.1 }),
+  ...still(19.62, 0.08, A_SOFA_EYE, A_SOFA_AT, 30, { dof: 0.5 }),
+  ...still(20.6, 0.24, A_SOFA_EYE, A_SOFA_AT, 30, { dof: 0.5 }),
   // 3am: across the dark town to the window that lights up.
-  ...still(21.16, 0.18, A_NIGHT_EYE, A_NIGHT_AT, 36, { dof: 0.2 }),
+  ...still(21.16, 0.18, A_NIGHT_EYE, A_NIGHT_AT, 32, { dof: 0.35 }),
   // The garden by day: the old deck; the quote accepted; the build; a year; the reminder.
-  ...still(22.4, 0.7, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
-  ...still(24.4, 0.9, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
+  ...still(22.4, 0.7, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
+  ...still(24.4, 0.9, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
   // The Saturday (you come and oil the deck) and six o'clock: the garden still.
-  ...still(26.6, 0.62, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
-  // Up and back into the one picture.
+  ...still(26.6, 0.62, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
+  // Up and back into the one picture (straight up first, clear of the garden tree).
+  A(27.36, fix(-47.2, 6.2, 29.6), fix(-42, 2, 16), 36, { dof: 0.1 }),
   A(27.48, fix(-30, 24, 74), fix(-22, 2, 6), 39, { sub: 0.35, dof: 0 }),
   A(27.66, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
   A(28.2, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
@@ -211,11 +212,13 @@ export const KEYS_B: Key[] = [
   A(18.98, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
   // Down to the workshop, to the lit office window.
   A(19.14, fix(20, 30, 80), fix(26, 3, -6), 40, { sub: 0.2, dof: 0 }),
-  A(19.3, fix(36.5, 10, 22), fix(39.8, 2.0, -11), 40, { dof: 0 }),
-  A(19.42, fix(40.1, 2.6, 0.5), fix(40.1, 1.7, -12.4), 40, { dof: 0.1 }),
-  ...still(19.62, 0.08, B_WIN_EYE, B_WIN_AT, 40, B_WIN),
+  A(19.3, fix(39.0, 8, 18), fix(41.0, 1.8, -11), 40, { dof: 0 }),
+  A(19.44, S(-2.6, 1.6, 10.6), S(-2.9, 1.25, 4.2), 38, { dof: 0.05 }),
+  // In through the glass (between two mullions), and round onto the desk.
+  A(19.6, S(-2.55, 1.32, 7.2), S(-3.7, 1.2, 3.6), 36, { dof: 0.15 }),
+  ...still(19.8, 0.04, B_WIN_EYE, B_WIN_AT, 36, B_WIN),
   // The empty office through the night, the morning, the job, a year: the business stays where it is.
-  ...still(27.12, 0.06, B_WIN_EYE, B_WIN_AT, 40, B_WIN),
+  ...still(27.12, 0.06, B_WIN_EYE, B_WIN_AT, 36, B_WIN),
   A(27.48, fix(30, 24, 70), fix(24, 2, -6), 39, { sub: 0.35, dof: 0 }),
   A(27.66, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
   A(28.2, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
