@@ -56,8 +56,7 @@ export default function Body() {
       </p>
       <p>
         If your developer or provider is the registrant, the Commission advises asking your registrar to transfer it to
-        your business.<Cite n={2} /> A developer who manages the name can be its administrative or technical contact
-        instead.<Cite n={1} />
+        your business.<Cite n={2} />
       </p>
       <H3>Who owns the code and the words</H3>
       <p>
