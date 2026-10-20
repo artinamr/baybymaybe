@@ -314,10 +314,11 @@ export default function Body() {
       <ul>
         <li>
           <strong>Tell the Privacy Commissioner as soon as practicable.</strong>
-          The Commissioner’s guidance: “Ideally you’ll do that within 72 hours after you’re aware that you have a
-          notifiable breach, even if you’re still investigating it.”
-          <Cite n={12} /> You can send details as you learn them. The Commissioner’s website has a
-          self-assessment tool (a guide, not a final ruling) and NotifyUs, the reporting form.
+          <Cite n={12} /> The Commissioner’s guidance: “Ideally you’ll do that within 72 hours after you’re aware that
+          you have a notifiable breach, even if you’re still investigating it.”
+          <Cite n={8} /> You can send details as you learn them.
+          <Cite n={12} /> The Commissioner’s website has a self-assessment tool (a guide, not a final ruling) and
+          NotifyUs, the reporting form.
           <Cite n={8} />
         </li>
         <li>
