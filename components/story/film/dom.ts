@@ -229,7 +229,8 @@ export class Dom {
       if (this.nowT) this.nowT.textContent = ch.name;
       this.ticks.forEach((li, k) => li.toggleAttribute("data-past", k <= ci));
     });
-    const canDrop = P < 14.9 || (P > 18.0 && P < 27.6);
+    // (While the picture is in two, nothing would show an enquiry of yours: the button waits.)
+    const canDrop = P < 14.9 || (P > 18.0 && P < 18.9);
     this.set("drop", canDrop, () => this.drop?.toggleAttribute("data-hidden", !canDrop));
     const paper = P > FILM_LEN - 0.8;
     this.set("paper", paper, () => document.documentElement.toggleAttribute("data-st-paper", paper));
