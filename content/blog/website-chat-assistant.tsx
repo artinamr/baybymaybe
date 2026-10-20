@@ -22,8 +22,8 @@ export default function Body() {
       <p>
         Add a <Term id="chat-assistant">chat assistant</Term> only if the same questions keep arriving, you have written
         answers you would stand behind, and someone will read its conversations every week. Whatever it tells a visitor,
-        your business has said. Keep it to approved answers, word for word on prices and refunds, and hand a particular
-        booking, health or legal matters to a person.
+        your business has said. Keep it to approved answers, word for word on prices and refunds, and hand questions about a
+        particular booking, health or the law to a person.
       </p>
       <p>
         If the questions come from information missing on your website, fix the pages first: that costs less and helps

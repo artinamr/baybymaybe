@@ -80,8 +80,8 @@ export default function Body() {
         </li>
       </ul>
       <p>
-        Twenty near-identical “Plumber in [town]” pages, each sending people to the same contact page, fit that last
-        description. One page listing the areas you cover doesn’t.
+        Say you have 20 near-identical “Plumber in [town]” pages, each sending people to the same contact page: they
+        fit that last description. One page listing the areas you cover doesn’t.
       </p>
       <p>
         AI answers rest on the same work. Google says AI Overviews and AI Mode have no extra requirements and need no

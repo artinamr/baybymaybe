@@ -243,7 +243,7 @@ export const ARTICLES: ArticleMeta[] = [
         url: "https://dnc.org.nz/tools-and-services/how-do-i-2/manage-my-domain-name/",
         accessed: "2026-10-20",
       },
-      { title: "Web fonts from Adobe Fonts", publisher: "Adobe Fonts Help", url: "https://helpx.adobe.com/fonts/using/webfont-licensing.html", accessed: "2026-10-20" },
+      { title: "Web fonts from Adobe Fonts", publisher: "Adobe Fonts Help", url: "https://helpx.adobe.com/fonts/web/font-licensing/webfont-licensing.html", accessed: "2026-10-20" },
       {
         title: "Protect your website",
         publisher: "Own Your Online (NCSC)",
@@ -514,7 +514,7 @@ export const ARTICLES: ArticleMeta[] = [
       {
         title: "Unsolicited Electronic Messages Act 2007, section 6: Meaning of commercial electronic message",
         publisher: "New Zealand Legislation (Parliamentary Counsel Office)",
-        url: "https://www.legislation.govt.nz/act/public/2007/7/en/latest/",
+        url: "https://www.legislation.govt.nz/act/public/2007/7/en/latest/#DLM405198",
         accessed: "2026-10-20",
       },
       {
@@ -662,7 +662,7 @@ export const ARTICLES: ArticleMeta[] = [
       {
         title: "Fair Trading Act 1986, section 9: Misleading and deceptive conduct generally",
         publisher: "New Zealand Legislation",
-        url: "https://www.legislation.govt.nz/act/public/1986/0121/latest/DLM96907.html",
+        url: "https://www.legislation.govt.nz/act/public/1986/0121/latest/DLM96903.html",
         accessed: "2026-10-20",
       },
       {
@@ -1366,7 +1366,7 @@ export const ARTICLES: ArticleMeta[] = [
       {
         title: "Export your site content",
         publisher: "Squarespace Help",
-        url: "https://support.squarespace.com/hc/en-us/articles/206566687-Exporting-your-site",
+        url: "https://support.squarespace.com/hc/en-us/articles/206566687-Export-your-site-content",
         accessed: "2026-10-20",
       },
     ],
@@ -1665,7 +1665,7 @@ export const ARTICLES: ArticleMeta[] = [
       {
         title: "Privacy Act 2020, section 201: Privacy officers",
         publisher: "New Zealand Legislation",
-        url: "https://www.legislation.govt.nz/act/public/2020/0031/latest/whole.html",
+        url: "https://www.legislation.govt.nz/act/public/2020/31/en/latest/#LMS23683",
         accessed: "2026-10-20",
       },
       {

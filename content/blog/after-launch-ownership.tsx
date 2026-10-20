@@ -231,8 +231,8 @@ export default function Body() {
 
       <H2 id="today">If you’re not sure what you own today</H2>
       <p>
-        Many businesses find out only when they try to leave, or when whoever set it up has moved on. You can check in
-        an afternoon, without telling anyone.
+        Many businesses find out only when they try to leave, or when whoever set it up has moved on. You can do the
+        first three checks in an afternoon, without telling anyone.
       </p>
       <Steps
         items={[
@@ -353,7 +353,8 @@ export default function Body() {
       </p>
       <p>
         The practice manager asks in writing for the domain, logins, DNS records and a backup, and after two silent
-        weeks contacts the registrar on record, then the Commission. Once the clinic holds the domain and a
+        weeks contacts the registrar on record, then the Commission. The Commission deals with the domain only, so the
+        backup still has to come from the web company. Once the clinic holds the domain and a
         backup, it copies the DNS records, verifies Search Console itself and removes the old token, and only then
         moves the hosting. Nothing needs rebuilding.
       </p>

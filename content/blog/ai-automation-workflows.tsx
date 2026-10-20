@@ -127,7 +127,8 @@ export default function Body() {
           [
             "Microsoft",
             <>
-              Copilot prompts, responses and data reached through Microsoft Graph: not used to train foundation models.
+              Microsoft Copilot (formerly Microsoft 365 Copilot) on a work account: prompts, responses and data reached
+              through Microsoft Graph aren’t used to train foundation models.
               <Cite n={6} />
             </>,
           ],
@@ -168,6 +169,12 @@ export default function Body() {
       />
 
       <H2 id="workflows">Five workflows that often pass</H2>
+      <p>
+        Most of these handle customers’ details, so use them only on a tool whose provider has confirmed it won’t keep
+        or disclose that information,
+        <Cite n={8} /> or take the personal details out first.
+        <Cite n={7} />
+      </p>
       <Workflow
         id="enquiries"
         title="1. Sorting enquiries and drafting replies"
@@ -191,8 +198,9 @@ export default function Body() {
         person="A person checks anything marked unsure, plus a sample of the rest."
         wrong={
           <>
-            A smudged scan gives a wrong number that looks right. Keep the originals: Inland Revenue says to keep
-            records for at least seven tax years, and storing them offshore, including in the cloud, needs its approval.
+            A smudged scan gives a wrong number that looks right. Keep the source documents: Inland Revenue says to keep
+            records for at least seven tax years, and records stored offshore, including in the cloud, need its
+            approval, held by you or by your cloud provider.
             <Cite n={11} />
           </>
         }
