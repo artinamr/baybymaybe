@@ -51,6 +51,25 @@ export type Grade = {
   /** Depth of field: the subject's distance (m) and the aperture (0 none … 1 the widest). */
   focus: number;
   aperture: number;
+  /**
+   * BOTH SIDES (split.ts): x where the gap's middle is (a share of the width,
+   * or of the height down from the top when stacked), y half the gap, z 1 when
+   * the panes are stacked, w 1 while the picture is in two.
+   */
+  panes: THREE.Vector4;
+};
+
+/**
+ * One picture in the frame: its camera, where it is (shares of the frame,
+ * [x0, y0, x1, y1], y down), its focus and aperture, and what to set before
+ * it is drawn (its shadows, its haze).
+ */
+export type View = {
+  camera: THREE.PerspectiveCamera;
+  rect: [number, number, number, number];
+  focus: number;
+  aperture: number;
+  before?: () => void;
 };
 
 export function makeGrade(): Grade {
@@ -76,8 +95,31 @@ export function makeGrade(): Grade {
     threshold: 0.9,
     focus: 5,
     aperture: 0,
+    panes: new THREE.Vector4(0.5, 0, 0, 0),
   };
 }
+
+/** Which pane a point of the frame is in, for the passes (uv: y up). Gap: the paper between. */
+const PANE_GLSL = /* glsl */ `
+uniform vec4 uPanes;
+// Along the split: across (x), or down from the top when stacked.
+float splitAxis(vec2 uv) { return uPanes.z > 0.5 ? 1.0 - uv.y : uv.x; }
+// 0 pane A, 1 pane B.
+float paneOf(vec2 uv) { return uPanes.w > 0.5 && splitAxis(uv) > uPanes.x ? 1.0 : 0.0; }
+float inGap(vec2 uv) { return uPanes.w > 0.5 && abs(splitAxis(uv) - uPanes.x) < uPanes.y ? 1.0 : 0.0; }
+// The point in its own pane's frame (0..1 each way, y up), for the vignette and the fringe.
+vec2 paneUv(vec2 uv) {
+  if (uPanes.w < 0.5) return uv;
+  float a = splitAxis(uv);
+  float b = paneOf(uv);
+  float lo = b > 0.5 ? uPanes.x + uPanes.y : 0.0;
+  float hi = b > 0.5 ? 1.0 : uPanes.x - uPanes.y;
+  float t = (a - lo) / max(hi - lo, 1e-3);
+  return uPanes.z > 0.5 ? vec2(uv.x, 1.0 - t) : vec2(t, uv.y);
+}
+// How far from the gap (a share of the split's length): light is kept off it.
+float fromGap(vec2 uv) { return uPanes.w > 0.5 ? abs(splitAxis(uv) - uPanes.x) - uPanes.y : 1.0; }
+`;
 
 const VERT = /* glsl */ `
 out vec2 vUv;
@@ -167,10 +209,12 @@ uniform sampler2D tScene;
 uniform sampler2D tDepth;
 uniform float uNear;
 uniform float uFar;
-uniform float uFocus;
-uniform float uAperture;
+// Each pane's subject distance and aperture (A, B).
+uniform vec2 uFocus;
+uniform vec2 uAperture;
 uniform float uMaxCoc;
 in vec2 vUv;
+${PANE_GLSL}
 vec3 fin(vec3 c) {
   bvec3 bad = equal(floatBitsToUint(c) & uvec3(0x7f800000u), uvec3(0x7f800000u));
   return clamp(mix(c, vec3(0.0), bad), 0.0, 64.0);
@@ -180,7 +224,11 @@ void main() {
   vec3 c = fin(texture(tScene, vUv).rgb);
   float d = unpackRGBAToDepth(texture(tDepth, vUv));
   float z = -perspectiveDepthToViewZ(d, uNear, uFar);
-  float coc = clamp(uAperture * uMaxCoc * (1.0 - uFocus / max(z, 0.02)), -uMaxCoc, uMaxCoc);
+  bool b = paneOf(vUv) > 0.5;
+  float focus = b ? uFocus.y : uFocus.x;
+  float aperture = b ? uAperture.y : uAperture.x;
+  // (The paper between the panes is sharp: it never spreads into them.)
+  float coc = inGap(vUv) > 0.5 ? 0.0 : clamp(aperture * uMaxCoc * (1.0 - focus / max(z, 0.02)), -uMaxCoc, uMaxCoc);
   gl_FragColor = vec4(c, coc / uMaxCoc * 0.5 + 0.5);
 }`;
 
@@ -216,22 +264,6 @@ void main() {
   gl_FragColor = vec4(wsum > 0.0 ? sum / wsum : c0.rgb, c0.a);
 }`;
 
-// A plain copy of the scene (the glass drawn over it bends this copy).
-const COPY = /* glsl */ `
-precision highp float;
-uniform sampler2D tSrc;
-in vec2 vUv;
-vec3 fin(vec3 c) {
-  bvec3 bad = equal(floatBitsToUint(c) & uvec3(0x7f800000u), uvec3(0x7f800000u));
-  return clamp(mix(c, vec3(0.0), bad), 0.0, 64.0);
-}
-void main() {
-  gl_FragColor = vec4(fin(texture(tSrc, vUv).rgb), 1.0);
-}`;
-
-/** Glass drawn after the scene, over a copy of it (drop.ts), and its depth. */
-export type Overlay = { color: THREE.Scene; depth: THREE.Scene; on: () => boolean };
-
 const COMPOSITE = /* glsl */ `
 precision highp float;
 uniform sampler2D tScene;
@@ -261,6 +293,7 @@ uniform sampler2D tSoft;
 uniform float uDof;
 uniform float uMaxCoc;
 in vec2 vUv;
+${PANE_GLSL}
 
 // Khronos PBR Neutral: linear through the mid-tones (screens and paper keep
 // their true colour and white), a soft shoulder above.
@@ -332,7 +365,8 @@ float hash(vec2 p) {
 
 void main() {
   vec2 uv = vUv;
-  vec2 c = uv - 0.5;
+  // Each pane is its own picture: its own vignette, its own fringe.
+  vec2 c = paneUv(uv) - 0.5;
   float r2 = dot(c, c);
   // A subtle lens dispersion at the periphery, measured in pixels. The
   // previous UV-scaled offset smeared fine rails more on larger displays.
@@ -361,6 +395,8 @@ void main() {
   }
   bloom += trail;
   bloom /= 1.0 + luma(bloom) * 0.12;
+  // No pane's light crosses the paper into the other.
+  bloom *= smoothstep(0.0, 0.035, fromGap(uv));
   vec3 lit = (hdr + bloom * uBloom) * uExposure;
   vec3 col = clamp(neutral(lit), 0.0, 1.0);
   // Keep amber, indigo and gold in bright lights instead of letting every
@@ -401,6 +437,12 @@ void main() {
   float gl = luma(o);
   o += g * uGrain * (0.45 + 1.4 * gl * (1.0 - gl)) * (1.0 - uPaper * 0.85);
   o += (hash(uv * uRes * 1.37 + 17.0) - 0.5) / 255.0;
+  // The gap between the panes: the page's own paper, clean (its edges a pixel soft).
+  if (uPanes.w > 0.5) {
+    float px = (uPanes.z > 0.5 ? 1.0 / uRes.y : 1.0 / uRes.x);
+    float e = 1.0 - smoothstep(uPanes.y - px, uPanes.y + px * 0.5, abs(splitAxis(uv) - uPanes.x));
+    o = mix(o, paper, e);
+  }
   gl_FragColor = vec4(o, 1.0);
 }`;
 
@@ -440,9 +482,6 @@ export class Post {
   private dofDown: THREE.ShaderMaterial;
   private dofGather: THREE.ShaderMaterial;
   private levels: number;
-  // The overlay's copy of the scene.
-  private copyRT: THREE.WebGLRenderTarget;
-  private copyMat: THREE.ShaderMaterial;
   private w = 1;
   private h = 1;
   private aaReady = false;
@@ -459,8 +498,6 @@ export class Post {
     this.depthRT.depthBuffer = true;
     this.softA = half(THREE.HalfFloatType, THREE.LinearFilter);
     this.softB = half(THREE.HalfFloatType, THREE.LinearFilter);
-    this.copyRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, format: THREE.RGBAFormat, depthBuffer: false, stencilBuffer: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false });
-    this.copyMat = pass(COPY, { tSrc: { value: null } });
     this.depthCam.matrixAutoUpdate = false;
     this.depthCam.layers.set(0);
     this.dofDown = pass(DOF_DOWN, {
@@ -468,9 +505,10 @@ export class Post {
       tDepth: { value: this.depthRT.texture },
       uNear: { value: 0.05 },
       uFar: { value: 2400 },
-      uFocus: { value: 5 },
-      uAperture: { value: 0 },
+      uFocus: { value: new THREE.Vector2(5, 5) },
+      uAperture: { value: new THREE.Vector2(0, 0) },
       uMaxCoc: { value: 7 },
+      uPanes: { value: new THREE.Vector4(0.5, 0, 0, 0) },
     });
     this.dofGather = pass(DOF_GATHER, { tSrc: { value: this.softA.texture }, uTexel: { value: new THREE.Vector2() }, uMaxCoc: { value: 7 } });
     // Thin rails need real coverage samples on phones as well as desktops.
@@ -542,6 +580,7 @@ export class Post {
       tSoft: { value: this.softB.texture },
       uDof: { value: 0 },
       uMaxCoc: { value: 7 },
+      uPanes: { value: new THREE.Vector4(0.5, 0, 0, 0) },
     });
     this.quad = new THREE.Mesh(fullscreenTriangle(), this.comp);
     this.quad.frustumCulled = false;
@@ -549,12 +588,7 @@ export class Post {
 
   /** The programs, compiled before the film is shown. */
   materials(): THREE.Material[] {
-    return [this.down, this.up, this.comp, this.dofDown, this.dofGather, this.copyMat];
-  }
-
-  /** The scene's copy the overlay's glass bends. */
-  get sceneCopy(): THREE.Texture {
-    return this.copyRT.texture;
+    return [this.down, this.up, this.comp, this.dofDown, this.dofGather];
   }
   get size() {
     return { w: this.w, h: this.h };
@@ -567,7 +601,6 @@ export class Post {
     this.w = w;
     this.h = h;
     this.scene.setSize(w, h);
-    this.copyRT.setSize(w, h);
     let mw = w;
     let mh = h;
     for (const m of this.mips) {
@@ -595,8 +628,24 @@ export class Post {
     r.render(this.quad, this.cam);
   }
 
-  /** Draw a frame: the scene into HDR, the bloom, the composite to the screen. */
-  render(r: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, g: Grade, time: number, pre?: THREE.Scene, overlay?: Overlay) {
+  /** A view's rectangle in a target of w x h pixels (GL order: from the bottom left). */
+  private px(v: View, w: number, h: number, out: THREE.Vector4) {
+    const [x0, y0, x1, y1] = v.rect;
+    const X0 = Math.round(x0 * w);
+    const X1 = Math.round(x1 * w);
+    const Y0 = Math.round((1 - y1) * h);
+    const Y1 = Math.round((1 - y0) * h);
+    return out.set(X0, Y0, Math.max(1, X1 - X0), Math.max(1, Y1 - Y0));
+  }
+  private _vp = new THREE.Vector4();
+  private _full = new THREE.Vector4();
+
+  /**
+   * Draw a frame: each view's scene into its part of the HDR target (one view
+   * fills it; two are the panes, the paper between them cleared), the depth
+   * of field, the bloom, the composite to the screen.
+   */
+  render(r: THREE.WebGLRenderer, scene: THREE.Scene, views: View[], g: Grade, time: number) {
     if (!this.aaReady) {
       const gl = r.getContext() as WebGL2RenderingContext;
       const depth = Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, gl.SAMPLES) as Int32Array);
@@ -622,71 +671,91 @@ export class Post {
       this.aaReady = true;
     }
     const auto = r.autoClear;
-    r.autoClear = true;
+    const split = views.length > 1;
+    const sp = g.panes;
+    (this.comp.uniforms.uPanes.value as THREE.Vector4).copy(sp);
+    (this.dofDown.uniforms.uPanes.value as THREE.Vector4).copy(sp);
     const T = this.timer;
     T?.poll();
     T?.begin("scene");
-    r.setRenderTarget(this.scene);
-    if (pre) {
-      // Depth first (it clears to the scene's background), then the scene
-      // shades only the nearest surface. A Color background would clear the
-      // depth again, so the scene draws without it.
-      pre.background = scene.background;
-      r.render(pre, camera);
-      r.autoClear = false;
-      const bg = scene.background;
-      scene.background = null;
-      r.render(scene, camera);
-      scene.background = bg;
-    } else r.render(scene, camera);
+    const st = this.scene;
+    this._full.set(0, 0, this.w, this.h);
+    if (split) {
+      // The paper between the panes is never drawn: clear it (nothing stale may bloom).
+      st.viewport.copy(this._full);
+      st.scissor.copy(this._full);
+      st.scissorTest = false;
+      r.setRenderTarget(st);
+      r.clear(true, true, false);
+    }
+    r.autoClear = true;
+    for (const v of views) {
+      v.before?.();
+      const vp = split ? this.px(v, this.w, this.h, this._vp) : this._full;
+      st.viewport.copy(vp);
+      st.scissor.copy(vp);
+      st.scissorTest = split;
+      r.setRenderTarget(st);
+      r.render(scene, v.camera);
+    }
+    st.viewport.copy(this._full);
+    st.scissor.copy(this._full);
+    st.scissorTest = false;
     T?.end();
     r.autoClear = false;
-    // The glass: over a copy of what is behind it, into the same target (it keeps the scene's depth).
-    const glass = !!overlay && overlay.on();
-    if (glass && overlay) {
-      this.copyMat.uniforms.tSrc.value = this.scene.texture;
-      this.blit(r, this.copyMat, this.copyRT);
-      r.setRenderTarget(this.scene);
-      r.render(overlay.color, camera);
-    }
 
-    // Depth of field: the depth at half size, the soft copy, the gather.
-    const dof = this.dofOn && g.aperture > 0.01 && (camera as THREE.PerspectiveCamera).isPerspectiveCamera;
+    // Depth of field: the depth at half size (each view in its part), the soft copy, the gather.
+    const dof = this.dofOn && views.some((v) => v.aperture > 0.01);
     this.comp.uniforms.uDof.value = dof ? 1 : 0;
     if (dof) {
       T?.begin("dof");
-      const pc = camera as THREE.PerspectiveCamera;
       const dc = this.depthCam;
-      dc.near = pc.near;
-      dc.far = pc.far;
-      dc.projectionMatrix.copy(pc.projectionMatrix);
-      dc.projectionMatrixInverse.copy(pc.projectionMatrixInverse);
-      dc.matrixWorld.copy(pc.matrixWorld);
-      dc.matrixWorldInverse.copy(pc.matrixWorldInverse);
       const clear = r.getClearColor(new THREE.Color());
       const alpha = r.getClearAlpha();
       r.setClearColor(0xffffff, 1);
-      r.autoClear = true;
-      r.setRenderTarget(this.depthRT);
+      const dt = this.depthRT;
+      const hw = dt.width;
+      const hh = dt.height;
+      dt.viewport.set(0, 0, hw, hh);
+      dt.scissor.set(0, 0, hw, hh);
+      dt.scissorTest = false;
+      r.setRenderTarget(dt);
+      r.clear(true, true, false);
       const override = scene.overrideMaterial;
       const bg = scene.background;
       scene.background = null;
       scene.overrideMaterial = this.depthMat;
-      r.render(scene, dc);
+      for (const v of views) {
+        if (v.aperture <= 0.01) continue;
+        const pc = v.camera;
+        dc.near = pc.near;
+        dc.far = pc.far;
+        dc.projectionMatrix.copy(pc.projectionMatrix);
+        dc.projectionMatrixInverse.copy(pc.projectionMatrixInverse);
+        dc.matrixWorld.copy(pc.matrixWorld);
+        dc.matrixWorldInverse.copy(pc.matrixWorldInverse);
+        const vp = split ? this.px(v, hw, hh, this._vp) : this._vp.set(0, 0, hw, hh);
+        dt.viewport.copy(vp);
+        dt.scissor.copy(vp);
+        dt.scissorTest = split;
+        r.setRenderTarget(dt);
+        r.render(scene, dc);
+      }
+      dt.viewport.set(0, 0, hw, hh);
+      dt.scissor.set(0, 0, hw, hh);
+      dt.scissorTest = false;
       scene.overrideMaterial = override;
       scene.background = bg;
-      if (glass && overlay) {
-        r.autoClear = false;
-        r.render(overlay.depth, dc);
-      }
       r.setClearColor(clear, alpha);
       r.autoClear = false;
       const dd = this.dofDown.uniforms;
+      const a = views[0];
+      const b = views[1] ?? views[0];
       dd.tScene.value = this.scene.texture;
-      dd.uNear.value = pc.near;
-      dd.uFar.value = pc.far;
-      dd.uFocus.value = g.focus;
-      dd.uAperture.value = g.aperture;
+      dd.uNear.value = a.camera.near;
+      dd.uFar.value = a.camera.far;
+      (dd.uFocus.value as THREE.Vector2).set(a.focus, b.focus);
+      (dd.uAperture.value as THREE.Vector2).set(a.aperture, b.aperture);
       this.blit(r, this.dofDown, this.softA);
       this.blit(r, this.dofGather, this.softB);
       T?.end();
@@ -750,8 +819,6 @@ export class Post {
     this.scene.dispose();
     this.mips.forEach((m) => m.dispose());
     this.depthRT.dispose();
-    this.copyRT.dispose();
-    this.copyMat.dispose();
     this.softA.dispose();
     this.softB.dispose();
     this.depthMat.dispose();

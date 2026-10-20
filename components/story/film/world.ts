@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Post, makeGrade, type Grade } from "./post";
+import { Post, makeGrade, type Grade, type View } from "./post";
 import { Sky } from "./sky";
 import { buildLand, type Land } from "./land";
 import { buildTown, SHOP, type Town } from "./town";
@@ -10,11 +10,9 @@ import { Card, Screen, Strips, carry, uiScale } from "./cards";
 import { MIST, WIND, hookMist } from "./mats";
 import { Crowd } from "./crowd";
 import { Envelope, type Flight } from "./mail";
-import { Drop, dropPose } from "./drop";
-import { being, dropPos, dropVel, HOUSES, PANELS, SPOT, type Being } from "./journey";
-import { Gather, type CardRest } from "./gather";
 import { ContactShade } from "./shade";
-import { BACK_STEP, cameraSmooth, phoneAdjust, phoneBackBase, phoneBackTable, type BackBase, type CamOut, type Ctx as CamCtx } from "./camera";
+import { BACK_STEP, CALLERS, PANE_KEYS, cameraSmooth, paneShare, phoneAdjust, phoneBackBase, phoneBackTable, type BackBase, type CamOut, type Ctx as CamCtx } from "./camera";
+import { paneRects, splitAt, type SplitState } from "./split";
 import { B, bump, clockAt, inW, isNew, k, ke, lapseHours, weathered, type W } from "./script";
 import { clamp01, lerp, range, settle, smooth, smoother } from "./ease";
 import { FILM_LEN } from "../timeline";
@@ -89,6 +87,19 @@ const JOB_SPOTS: [number, number, number, number, number][] = [
 /** When each job's card burns away at the turn. */
 const burnAt = (i: number): [number, number] => [B.fall[0] + 0.02 + i * 0.04, B.fall[0] + 0.3 + i * 0.04];
 
+/** THE OFFICE'S MOMENTS (the new way): when the office's screen is up, what it shows, and what the pointer calls it. */
+const OFFICE: { a: number; b: number; id: string; part: string }[] = [
+  { a: B.nWake[0], b: 20.34, id: "reply", part: "reply" },
+  { a: 20.46, b: 20.9, id: "booked", part: "booking" },
+  { a: B.nNight[0] + 0.02, b: B.nNight[1] - 0.02, id: "night", part: "reply" },
+  { a: B.nHand[0], b: B.nHand[1] + 0.04, id: "hand", part: "reply" },
+  { a: B.nQuote[0] - 0.02, b: 22.66, id: "quote", part: "quote" },
+  { a: B.nInvoice[0], b: 23.62, id: "invoice", part: "invoice" },
+  { a: B.nReview[0], b: 24.42, id: "review", part: "followup" },
+  { a: B.nRemind[0] - 0.04, b: 25.4, id: "remind", part: "followup" },
+  { a: B.nToday[0] - 0.06, b: B.nClose[0] - 0.02, id: "today", part: "reply" },
+];
+
 export class World {
   readonly scene = new THREE.Scene();
   readonly camera: THREE.PerspectiveCamera;
@@ -107,10 +118,21 @@ export class World {
   readonly samPhone = makePhone();
   readonly sim: Counts;
   readonly hero = { visible: false, falling: false };
+  /** BOTH SIDES: the panes' cameras (A the customer, B the business) while the picture is in two. */
+  readonly panes: [THREE.PerspectiveCamera, THREE.PerspectiveCamera];
+  readonly split: SplitState = { on: false, open: 0, at: 0.5 };
+  /** The panes' rectangles in the frame (shares of it, y down), and whether they are stacked (portrait). */
+  rects: [number, number, number, number][] = [
+    [0, 0, 0.5, 1],
+    [0.5, 0, 1, 1],
+  ];
+  stacked = false;
   info = { hours: 19.6, speed: 0 };
   events: SoundEvent[] = [];
   hover: string | null = null;
   camOverride: { eye: { x: number; y: number; z: number }; at: { x: number; y: number; z: number }; fov: number } | null = null;
+  /** Look-dev: a pane's camera set by hand (window.__story.world.paneOverride = [{ eye, at, fov, ppy }, null]). */
+  paneOverride: ({ eye: number[]; at: number[]; fov: number; ppx?: number; ppy?: number } | null)[] = [null, null];
   /** Parts the pointer can ask about (content/story.ts PARTS), with their boxes. */
   readonly parts: { id: string; box: THREE.Box3; on: boolean }[] = [];
 
@@ -122,15 +144,11 @@ export class World {
   private samPose = newPose();
   private ownerPose = newPose();
   private crowd: Crowd;
-  /** THE NEW WAY: the drop (drop.ts, journey.ts) and the turn's gathering (gather.ts). */
-  readonly drop: Drop;
-  private gather: Gather;
-  private pose = dropPose();
-  private me: Being = { vis: 0, r: 0.3, shape: 0, w: 1, h: 1, face: null, faceK: 0, facing: "camera", glow: 1, motes: 0, wobble: 0 };
-  private motes = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+  /** THE NEW WAY: the office's screen lifted off the laptop (the business's side of each moment). */
+  private officeCard: Card;
   private faces: Record<string, Screen> = {};
-  private dropPart: { id: string; box: THREE.Box3; on: boolean };
-  /** The houses whose enquiries the drop answers on its own (3am, six o'clock). */
+  private officePart: { id: string; box: THREE.Box3; on: boolean };
+  /** The houses that ask on their own (3am, six o'clock). */
   private callers = { night: -1, late: -1 };
   private mailA: Envelope;
   private mailB: Envelope;
@@ -155,7 +173,8 @@ export class World {
   private impactT = -1e9;
   private impactK = 0;
   private shadeG = new ContactShade(24, 0);
-  private cam: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0 };
+  private cam: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0, sub: 0 };
+  private paneCam: [CamOut, CamOut] = [0, 1].map(() => ({ eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0, sub: 0 })) as [CamOut, CamOut];
   private camCtx: CamCtx;
   private w = 1;
   private h = 1;
@@ -173,6 +192,11 @@ export class World {
     this.camera = new THREE.PerspectiveCamera(40, 16 / 9, 0.05, 2400);
     // Layer 1: light that is not a surface (halos, trails); the depth pass leaves it out.
     this.camera.layers.enable(1);
+    this.panes = [0, 1].map(() => {
+      const c = new THREE.PerspectiveCamera(40, 1, 0.05, 2400);
+      c.layers.enable(1);
+      return c;
+    }) as [THREE.PerspectiveCamera, THREE.PerspectiveCamera];
     this.post = new Post(4, 6, opts.quality > 0);
     this.sky = new Sky(this.scene, opts.quality === 0 ? 1024 : 2048);
     this.town = buildTown(this.scene, opts.quality);
@@ -206,9 +230,7 @@ export class World {
     this.traffic.body.castShadow = true;
     this.traffic.body.frustumCulled = this.traffic.dark.frustumCulled = false;
     this.scene.add(this.traffic.body, this.traffic.dark);
-    this.drop = new Drop(this.scene);
-    this.gather = new Gather(this.scene);
-    // The houses it answers on its own: the nearest real ones.
+    // The houses that ask on their own: the nearest real ones.
     const near = (x: number, z: number) => this.town.houses.reduce((a, b) => (Math.hypot(b.x - x, b.z - z) < Math.hypot(a.x - x, a.z - z) ? b : a));
     for (const [key, x, z] of [
       ["night", -6, 33],
@@ -216,20 +238,9 @@ export class World {
     ] as const) {
       const hh = near(x, z);
       this.callers[key] = hh.id;
-      HOUSES[key].door.copy(hh.door);
-      HOUSES[key].fwd.set(Math.sin(hh.yaw), 0, Math.cos(hh.yaw));
+      CALLERS[key].door.copy(hh.door);
+      CALLERS[key].fwd.set(Math.sin(hh.yaw), 0, Math.cos(hh.yaw));
     }
-    // The jobs' cards at the turn, where they stand when they burn: the sparks leave from them.
-    const rests: CardRest[] = JOB_SPOTS.map(([x, y, z, yaw, roll], i) => ({
-      m: new THREE.Matrix4().compose(S(x, y, z), Q(0, Math.PI + yaw, roll), V(1, 1, 1)),
-      w: 1.0,
-      h: 0.625,
-      t0: burnAt(i)[0],
-      t1: burnAt(i)[1],
-    }));
-    // ...and the inbox's pile outside, which goes with them.
-    rests.push({ m: new THREE.Matrix4().compose(COLUMN_BASE.clone().setY(7), Q(0, 0, 0), V(1, 1, 1)), w: 3.6, h: 10, t0: B.fall[0], t1: B.fall[0] + 0.3 });
-    this.gather.build(rests, SPOT.birth);
     this.mailA = new Envelope(this.scene);
     this.mailB = new Envelope(this.scene);
     this.mailC = new Envelope(this.scene);
@@ -252,9 +263,9 @@ export class World {
     this.quoteCard = deskCard(1.4, 0.875, false);
     this.invoiceCard = deskCard(1.4, 0.875, false);
     for (let i = 0; i < 5; i++) this.pend.push(deskCard(1.0, 0.625));
-    // The drop's own screens (what it becomes besides Sam's phone).
-    for (const id of ["cal", "hand", "quote", "today"]) this.faces[id] = new Screen(UI.DESK.w, UI.DESK.h, UI.DESK.s);
-    for (const id of ["night", "late"]) this.faces[id] = new Screen(UI.PHONE.w, UI.PHONE.h, UI.PHONE.s);
+    // The office's screen, lifted off the laptop (the new way's evidence on the business's side).
+    this.officeCard = deskCard(1.4, 0.875, false);
+    this.faces.quote = this.officeCard.screen;
     for (const c of this.allCards()) this.scene.add(c.group);
 
     // The vans: ours (taken from the workshop so it can drive), and the other business's.
@@ -310,9 +321,9 @@ export class World {
     box("admin", S(-3.9, 1.9, 5.15), V(4.6, 1.2, 0.8));
     box("deck", H(-1.3, 0.6, -7.0), V(7.4, 1.2, 5.2));
     box("van", H(0, 1.2, 12.5), V(2.4, 2.4, 5));
-    // The drop: what it is right now (its box follows it).
-    this.dropPart = { id: "site", box: new THREE.Box3(), on: false };
-    this.parts.push(this.dropPart);
+    // The office's screen: what it is right now (its box follows it).
+    this.officePart = { id: "reply", box: new THREE.Box3(), on: false };
+    this.parts.push(this.officePart);
 
     UI.initFonts().then(() => {
       for (const c of this.allCards()) c.screen.dirty();
@@ -322,16 +333,8 @@ export class World {
     });
   }
 
-  /** The drop, as the checks see a card: its mesh, its size (as a panel, or its drop's width), how much it shows. */
-  get dropCard() {
-    const me = this.me;
-    const r = this.pose.r * me.vis;
-    const panel = me.shape > 0.5;
-    return { group: this.drop.mesh, w: panel ? me.w : r * 2, h: panel ? me.h : r * 2, faceMat: { opacity: me.vis }, shown: me.vis };
-  }
-
   private allCards() {
-    return [this.phoneCard, this.sheetCard, this.quoteCard, this.invoiceCard, ...this.pend];
+    return [this.phoneCard, this.sheetCard, this.quoteCard, this.invoiceCard, ...this.pend, this.officeCard];
   }
 
   setSize(w: number, h: number, dpr: number) {
@@ -340,7 +343,6 @@ export class World {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.post.setSize(w * dpr, h * dpr);
-    this.drop.bind(this.post.sceneCopy, this.post.size.w, this.post.size.h);
   }
 
   /** The phone's pull-back at P (camera.ts phoneBackTable): the free distances once, a table per screen shape. */
@@ -414,20 +416,25 @@ export class World {
   private vanAt(P: number): { p: THREE.Vector3; yaw: number; lights: number } {
     const park = S(3.6, 0, 9.0);
     const samKerb = V(-44, 0, 3.4);
+    // Out of the yard, turning west onto the main street (on the left, as in New Zealand).
+    const west = (e: number, to: number) => {
+      const out = park.clone().lerp(V(park.x - 1.2, 0, 2.5), smooth(range(e, 0, 0.18)));
+      const p = out.add(V(lerp(0, to - park.x + 1.2, smooth(range(e, 0.12, 1))), 0, lerp(0, 0.9, smooth(range(e, 0.5, 1)))));
+      const yaw = lerp(0, -Math.PI / 2, smooth(range(e, 0.04, 0.24)));
+      return { p, yaw };
+    };
     if (isNew(P) && P >= B.nVan[0] && P < 26.0) {
-      // To Sam's kerb; after the measure-up, on and away west.
-      const t = smooth(k(P, B.nVan));
-      const away = smooth(range(P, B.nVan[1] + 0.04, 25.78));
-      return { p: V(lerp(-10, samKerb.x, t) - away * 22, 0, samKerb.z), yaw: -Math.PI / 2, lights: 1 - t * 0.6 + away * 0.6 };
+      // The Saturday: from the yard along the main street to Sam's kerb; then on west, out of sight.
+      const w = west(smooth(k(P, B.nVan)), samKerb.x + 1.0);
+      const away = smooth(range(P, 25.8, 25.9));
+      w.p.x -= away * 30;
+      return { p: w.p, yaw: w.yaw, lights: 0.4 };
     }
     if (P >= B.nDrive[0]) {
+      // Six o'clock: home, west along the main street with the lights on.
       const t = k(P, B.nDrive);
-      const e = t * t * (3 - 2 * t);
-      // Out of the yard onto the main street, then away east.
-      const out = park.clone().lerp(V(park.x - 2, 0, -2.2), smooth(range(e, 0, 0.3)));
-      const p = out.add(V(lerp(0, 46, smooth(range(e, 0.25, 1))), 0, 0));
-      const yaw = lerp(0, Math.PI / 2, smooth(range(e, 0.1, 0.35)));
-      return { p, yaw, lights: 1 };
+      const w = west(t * t * (3 - 2 * t), -120);
+      return { p: w.p, yaw: w.yaw, lights: 1 };
     }
     return { p: park, yaw: 0, lights: 0 };
   }
@@ -456,6 +463,25 @@ export class World {
     const cam = this.camera;
     cameraSmooth(P, this.camCtx, this.cam, FILM_LEN);
     phoneAdjust(this.cam, this.w / this.h, this.phoneBack(P));
+    // BOTH SIDES: while the picture is in two, each pane has its own camera.
+    splitAt(P, this.split);
+    this.stacked = this.w < this.h;
+    this.rects = paneRects(this.split, this.stacked);
+    if (this.split.on)
+      for (let i = 0; i < 2; i++) {
+        cameraSmooth(P, this.camCtx, this.paneCam[i], FILM_LEN, PANE_KEYS[i]);
+        const ov = this.paneOverride[i];
+        if (ov) {
+          const c = this.paneCam[i];
+          c.eye.fromArray(ov.eye);
+          c.at.fromArray(ov.at);
+          c.fov = ov.fov;
+          c.ppx = ov.ppx ?? 0.5;
+          c.ppy = ov.ppy ?? 0.5;
+          c.sub = 0;
+        }
+        paneShare(this.cam, this.paneCam[i], this.rects[i]);
+      }
     if (this.camOverride) {
       const e = this.camOverride.eye;
       const a = this.camOverride.at;
@@ -479,54 +505,28 @@ export class World {
       const inRoom = (e.x > -49.2 && e.x < -38.8 && e.z > 10.8 && e.z < 20.2 && e.y < 3.3) || (e.x > 36.8 && e.x < 51.2 && e.z > -23.2 && e.z < -10.8 && e.y < 4.6);
       MIST.value = (0.03 * dawn + 0.006 * dusk + 0.004 * night) * (inRoom ? 0 : 1);
     }
-    // An impact shakes the camera: the paper hitting the floor; the landing after the rewind.
-    if (this.prevP < 17.48 && P >= 17.48 && P - this.prevP < 0.3) {
-      // The drop arriving in Sam's garden after the dive.
-      this.impactT = t;
-      this.impactK = 0.25;
-    }
-    cam.position.copy(this.cam.eye);
     const since = t - this.impactT;
-    if (since >= 0 && since < 0.9 && br > 0) {
-      const d = Math.exp(-since * 5.5) * this.impactK;
-      cam.position.x += Math.sin(since * 150) * 0.022 * d;
-      cam.position.y += Math.sin(since * 123 + 1.3) * 0.03 * d;
-    }
-    // A living camera: never quite still. A slow push toward the subject and
-    // back (a hair over a percent of its distance, a dozen seconds a cycle),
-    // a breath beside it.
-    const push = (0.5 - 0.5 * Math.cos(t * 0.5)) * 0.013 * br;
-    cam.position.lerp(this.cam.at, push);
-    // ...and a slow drift round it (under a degree, a quarter of a minute a turn): the picture keeps its depth.
-    {
-      const a = Math.sin(t * 0.27) * 0.012 * br;
-      const c = Math.cos(a);
-      const sn = Math.sin(a);
-      const dx = cam.position.x - this.cam.at.x;
-      const dz = cam.position.z - this.cam.at.z;
-      cam.position.x = this.cam.at.x + dx * c - dz * sn;
-      cam.position.z = this.cam.at.z + dx * sn + dz * c;
-    }
-    cam.position.x += Math.sin(t * 0.37) * 0.01 * br;
-    cam.position.y += Math.sin(t * 0.29 + 1) * 0.008 * br;
-    cam.up.set(Math.sin(this.cam.roll), Math.cos(this.cam.roll), 0);
-    cam.lookAt(this.cam.at);
-    cam.fov = this.cam.fov;
-    cam.updateProjectionMatrix();
-    // Where the subject sits on screen: a lens shift, not a turn.
-    const pm = cam.projectionMatrix;
-    pm.elements[8] = -(this.cam.ppx - 0.5) * 2;
-    pm.elements[9] = (this.cam.ppy - 0.5) * 2;
-    cam.projectionMatrixInverse.copy(pm).invert();
-    cam.updateMatrixWorld(true);
+    const shake = since >= 0 && since < 0.9 && br > 0 ? Math.exp(-since * 5.5) * this.impactK : 0;
+    this.aim(cam, this.cam, this.w / this.h, t, br, shake, since, 0);
+    if (this.split.on)
+      for (let i = 0; i < 2; i++) {
+        const r = this.rects[i];
+        const aspect = ((r[2] - r[0]) * this.w) / Math.max(1, (r[3] - r[1]) * this.h);
+        // (Each pane breathes on its own beat: two photographs, not one.)
+        this.aim(this.panes[i], this.paneCam[i], aspect, t, br, 0, 0, i + 1);
+      }
 
     // THE SKY. The shadow map covers what the camera looks at.
     const dist = cam.position.distanceTo(this.cam.at);
     // Depth of field: the subject in focus, the aperture the shot's.
     this.grade.focus = dist;
     this.grade.aperture = this.camOverride ? 0 : this.cam.dof;
+    {
+      const sp = this.grade.panes;
+      sp.set(this.split.at, (this.split.open * 0.014) / 2, this.stacked ? 1 : 0, this.split.on ? 1 : 0);
+    }
     const radius = Math.min(150, Math.max(3, dist * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
-    const sky = this.sky.update(hours, t, this.cam.at, radius, dist < 10 ? 1.4 : dist < 40 ? 1.0 : dist < 60 ? 0.8 : 0.45);
+    const sky = this.sky.update(hours, t, this.split.on ? this.paneCam[0].at : this.cam.at, radius, dist < 10 ? 1.4 : dist < 40 ? 1.0 : dist < 60 ? 0.8 : 0.45);
     this.town.setLamps(sky.lights > 0.3 ? smooth((sky.lights - 0.3) / 0.3) : 0);
     this.land.update(this.reduced ? 0 : t, sky.night, this.sky.keyDir);
     const glass = new THREE.Color(0.16, 0.19, 0.24).lerp(new THREE.Color(0.03, 0.035, 0.05), sky.night);
@@ -536,7 +536,7 @@ export class World {
     const dropK = nw ? k(Pw, [B.nOver[0] + 0.2, B.nOver[1] - 0.08]) : k(Pw, B.drop);
     for (const h of this.town.houses) {
       const r = ((h.id * 7919) % 101) / 101;
-      const calling = nw && ((h.id === this.callers.night && P >= 20.99 && P < 21.32) || (h.id === this.callers.late && P >= 27.32 && P < 27.86));
+      const calling = nw && h.id === this.callers.night && P >= B.nNight[0] && P < B.nNight[1];
       this.town.setWindow(h.id, calling || (r < sky.lights * 0.82 && !this.crowd.gone(h.id, dropK, nw)) ? 1 : 0);
     }
 
@@ -550,7 +550,7 @@ export class World {
     this.column(Pw);
     this.crowdAndCounts(Pw, t, nw);
     this.seasons(Pw);
-    this.theDrop(P, t, hours, sky.night);
+    this.office(P, t, hours);
     this.drive(t);
     this.keepClear(f.dt);
     this.pointer(f.pointer);
@@ -646,7 +646,7 @@ export class World {
     const hod = ((hours % 24) + 24) % 24;
     const evening = hod > 18.5 || hod < 6.5;
     // HOME: the lamp is on while Sam is up in the evening.
-    const samUp = (!nw && P < B.samBed && evening) || (nw && P < B.n3am[0] && evening) || inW(P, [22.36, 22.74]);
+    const samUp = (!nw && P < B.samBed && evening) || (nw && P < B.nNight[0] - 0.1 && evening);
     const lamp = samUp ? 1 : 0;
     h.lampLight.intensity = 3.0 * lamp;
     (h.lampGlow.material as THREE.MeshBasicMaterial).color.setRGB(2.6, 1.7, 0.9).multiplyScalar(lamp + 0.03);
@@ -658,7 +658,7 @@ export class World {
     this.deck(kb, weathered(P));
 
     // SHOP: who is in, which lights are on.
-    const ownerIn = (!nw && P >= B.ownerIn[0] && P < 10.42) || (!nw && P >= B.late[0] && P < B.black[1]) || (nw && P >= 21.8 && P < 22.5) || (nw && P >= 25.8 && P < B.nWalk[1]);
+    const ownerIn = (!nw && P >= B.ownerIn[0] && P < 10.42) || (!nw && P >= B.late[0] && P < B.black[1]) || (nw && P >= B.nMorning[0] + 0.2 && P < 22.8) || (nw && P >= 25.86 && P < B.nWalk[1]);
     const lampOn = ownerIn && (hod > 18 || hod < 6.5) && !(nw && P > B.nLamp[0] + 0.03);
     s.lamp.spot.intensity = lampOn ? 7 * (1 - (nw ? 0 : range(P, B.black[0], B.black[0] + 0.12))) : 0;
     // Its shadow map is drawn only while it shines.
@@ -687,7 +687,7 @@ export class World {
     this.ourVan.position.copy(v.p);
     this.ourVan.rotation.set(0, v.yaw, 0);
     this.roll(this.ourVan);
-    this.ourVan.visible = !(nw && P >= 25.78 && P < 26.0);
+    this.ourVan.visible = !(nw && P >= 25.9 && P < 26.0);
     // The driver's door: open for the owner, shut behind them.
     this.shop.van.door.rotation.y = nw ? 1.2 * smooth(range(P, B.nIn[0] - 0.08, B.nIn[0])) * (1 - smooth(range(P, B.nIn[1] - 0.03, B.nIn[1] + 0.05))) : 0;
     (this.shop.van.lights.material as THREE.MeshBasicMaterial).color.setScalar(0.03 + v.lights * 3);
@@ -761,11 +761,11 @@ export class World {
 
   /** The laptop's lid: 0 shut … 1 open. */
   private lidAt(P: number) {
+    // The new way: left open in the office, asleep, until it is closed at six.
+    if (isNew(P)) return 1 - smooth(k(P, B.nClose));
     if (P < B.ownerIn[0]) return 0;
     if (P < 16.4) return smooth(range(P, 7.02, 7.1));
-    if (P >= 21.8 && P < 22.5) return smooth(range(P, 21.84, 21.92));
-    if (P < 25.8) return 0;
-    return 1 - smooth(k(P, B.nClose));
+    return 0;
   }
 
   private deckWas = -1;
@@ -853,7 +853,7 @@ export class World {
       o.visible = 0;
       return o;
     }
-    if (P < B.n3am[0]) {
+    if (P < B.nNight[0] - 0.1) {
       const typing = inW(P, B.nForm) ? 1 : 0;
       // The reply lands: a start, the phone lifted, the head up for a moment.
       const oh = bump(P, B.nBack[1], B.nBack[1] + 0.24, 0.05);
@@ -862,23 +862,13 @@ export class World {
       o.neck[0] -= 0.12 * oh;
       return o;
     }
-    if (inW(P, [22.36, 22.6])) return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.66, 1, 0.3);
-    // Yes said, up from the sofa and off to bed (the lamp goes off at the door).
-    if (inW(P, [22.6, 22.8])) {
-      const bed = [H(-2.1, 0, -0.62), H(-0.7, 0, -0.62), H(0.25, 0, -0.3), H(0.25, 0, 0.66), H(0.25, 0, 2.2)];
-      walk(this.poseC, bed, smooth(range(P, 22.62, 22.8)) * pathLength(bed), t, 0, null, this.homeFloor);
-      carryPhone(this.poseC);
-      const up = smooth(range(P, 22.6, 22.66));
-      if (up < 1) {
-        sofaPhone(this.poseD, h.seat, h.seatYaw, h.floor, t, 0.66, 0, 0.3);
-        return blend(this.poseD, this.poseC, up, o);
-      }
-      return copyPose(this.poseC, o);
-    }
-    // Out onto the new deck as its last boards land; in for the year, out again.
+    // The morning: out onto the old deck with the phone (the quote), back in.
+    const q = this.samDeck(P, t, o, deckSpot, [22.26, 22.42], [22.6, 22.72], null, true);
+    if (q) return q;
+    // Out onto the new deck as its last boards land; in for the year, out again, and there at six.
     const a = this.samDeck(P, t, o, deckSpot, [22.96, 23.14], [B.nYear[0], B.nYear[0] + 0.18], null, true);
     if (a) return a;
-    const b = this.samDeck(P, t, o, deckSpot, [B.nYear[1] - 0.18, B.nYear[1]], [B.nVan[0], 25.8], [B.nVan[0], B.nVan[0] + 0.16], true);
+    const b = this.samDeck(P, t, o, deckSpot, [B.nYear[1] - 0.18, B.nYear[1]], [29.0, 29.7], null, true);
     if (b) return b;
     o.visible = 0;
     return o;
@@ -990,17 +980,45 @@ export class World {
       o.visible = 0;
       return o;
     }
-    // The morning after 3am: in along the footpath, to the desk (the handover waiting on it); the quote, priced.
-    if (P >= 21.56 && P < 22.44) {
+    const inPath = () => {
       const door = s.doorAt;
-      const path = [V(60, 0, -1.6), V(44.4, 0, -2.4), V(43.2, 0, -8.0), V(door.x, 0, door.z), S(-1.62, 0, 5.6), S(-2.0, 0, 4.4), S(-3.0, 0, 2.7), V(s.seat.x, 0, s.seat.z + 0.05)];
-      walk(this.poseA, path, smooth(range(P, 21.56, 21.8)) * pathLength(path), t, 0, null, this.shopFloor);
-      const sit = smooth(range(P, 21.78, 21.86));
-      if (sit <= 0) return copyPose(this.poseA, o);
-      deskType(this.poseB, s.seat, s.seatYaw, F, s.keys, t, inW(P, [22.22, 22.34]) ? 1 : 0.1, 0);
-      return blend(this.poseA, this.poseB, sit, o);
+      return [V(60, 0, -1.6), V(44.4, 0, -2.4), V(43.2, 0, -8.0), V(door.x, 0, door.z), S(-1.62, 0, 5.6), S(-2.0, 0, 4.4), S(-3.0, 0, 2.7), V(s.seat.x, 0, s.seat.z + 0.05)];
+    };
+    // The morning after 3am: in along the footpath to the desk (the question waiting); the quote priced and sent.
+    // In again at the end of the Saturday, in the long afternoon (a time-lapse).
+    for (const [w0, w1] of [
+      [B.nMorning[0], 22.62],
+      [25.78, B.nStand[0]],
+    ] as const) {
+      if (P >= w0 && P < w1 && P < B.nStand[0]) {
+        const path = inPath();
+        const walkEnd = w0 + (w0 > 25 ? 0.16 : 0.26);
+        walk(this.poseA, path, smooth(range(P, w0, walkEnd)) * pathLength(path), t, 0, null, this.shopFloor);
+        const sit = smooth(range(P, walkEnd - 0.02, walkEnd + 0.06));
+        if (sit <= 0) return copyPose(this.poseA, o);
+        const busy = inW(P, B.nHand) || inW(P, [B.nQuote[0] + 0.14, B.nQuote[1] - 0.04]) ? 1 : P < B.nClose[0] && w0 > 25 ? 0.25 : 0.1;
+        deskType(this.poseB, s.seat, s.seatYaw, F, s.keys, t, busy, 0);
+        if (w0 > 25 && P >= B.nClose[0] - 0.06) break;
+        return blend(this.poseA, this.poseB, sit, o);
+      }
     }
-    if (P >= 25.8 && P < B.nStand[0]) {
+    // The job's morning: up and out to Sam's (fast, in the day's time-lapse).
+    if (P >= 22.62 && P < 22.82) {
+      const door = s.doorAt;
+      const path = [V(s.seat.x, 0, s.seat.z + 0.05), S(-3.0, 0, 2.7), S(-2.0, 0, 4.4), S(-1.62, 0, 5.6), V(door.x, 0, door.z), V(43.2, 0, -8.0), V(44.4, 0, -2.4), V(60, 0, -1.6)];
+      const up = smooth(range(P, 22.62, 22.66));
+      walk(this.poseA, path, smooth(range(P, 22.65, 22.8)) * pathLength(path), t, 0, null, this.shopFloor);
+      if (up < 1) {
+        deskType(this.poseB, s.seat, s.seatYaw, F, s.keys, t, 0, 0);
+        return blend(this.poseB, this.poseA, up, o);
+      }
+      if (P > 22.8) {
+        o.visible = 0;
+        return o;
+      }
+      return copyPose(this.poseA, o);
+    }
+    if (P >= B.nClose[0] - 0.06 && P < B.nStand[0]) {
       deskType(o, s.seat, s.seatYaw, F, s.keys, t, P < B.nClose[0] ? 0.25 : 0, 0);
       // Close the lid (both hands to its top edge), then the lamp's switch.
       const close = bump(P, B.nClose[0] - 0.04, B.nClose[1] + 0.04, 0.05);
@@ -1098,7 +1116,7 @@ export class World {
         ph.draw(`later|${time}|${tap.toFixed(2)}`, (c) => UI.phoneSearchLater(c, { time, tap }));
       }
     } else {
-      if (P < B.nFly[0]) {
+      if (P < B.nSent) {
         const form = P >= B.nTap + 0.04 ? 1 : 0;
         const tap = bump(P, B.nTap - 0.06, B.nTap + 0.05, 0.03);
         const fill = ke(P, B.nForm);
@@ -1140,15 +1158,6 @@ export class World {
         mat.map = want;
         mat.needsUpdate = true;
       }
-    } else {
-      const n = ke(P, B.nToday) * 5;
-      lp.draw(`today|${n.toFixed(1)}`, (c) => UI.today(c, { n }));
-      const mat = this.shop.laptop.screen.material as THREE.MeshBasicMaterial;
-      const want = P >= 21.8 && P < 22.5 ? this.faces.quote.tex : lp.tex;
-      if (mat.map !== want) {
-        mat.map = want;
-        mat.needsUpdate = true;
-      }
     }
   }
 
@@ -1180,12 +1189,22 @@ export class World {
     const pc = this.phoneCard;
     const phoneG = this.samPhone.group;
     const dev = { p: phoneG.position.clone(), q: phoneG.quaternion.clone(), s: 0.105 };
-    const onDeck = (P >= 10 && P < 12.8) || P >= 23.1;
+    const onDeck = (P >= 10 && P < 12.8) || P >= 21.5;
     const air = onDeck ? { p: H(-0.2, 1.62, -6.0), q: Q(0, 0.22, 0), s: 1 } : { p: H(-3.25, 1.5, -2.5), q: Q(-0.03, 0.12, 0), s: 1 };
-    const windows: [number, number][] = [
-      [B.lift[0], B.fold[1]],
-      [B.year[1] + 0.02, B.search[1] + 0.12],
-    ];
+    const windows: [number, number][] = nw
+      ? [
+          // The page; the reply and the booking; the quote; the invoice; how did it go; the reminder.
+          [19.36, B.nSent - 0.04],
+          [B.nSent + 0.02, 20.88],
+          [22.42, 22.62],
+          [23.36, 23.64],
+          [23.9, 24.4],
+          [25.0, 25.38],
+        ]
+      : [
+          [B.lift[0], B.fold[1]],
+          [B.year[1] + 0.02, B.search[1] + 0.12],
+        ];
     let lift = 0;
     let show = false;
     for (const [a, b] of windows)
@@ -1198,7 +1217,8 @@ export class World {
     if (show && phoneG.visible) {
       carry(pc.group, dev, air, settle(lift, 0.35));
       // Turn toward the camera about the vertical as it lifts.
-      const camYaw = Math.atan2(this.camera.position.x - pc.group.position.x, this.camera.position.z - pc.group.position.z);
+      const eye = this.split.on ? this.panes[0].position : this.camera.position;
+      const camYaw = Math.atan2(eye.x - pc.group.position.x, eye.z - pc.group.position.z);
       const cur = new THREE.Euler().setFromQuaternion(pc.group.quaternion, "YXZ");
       pc.group.rotation.set(cur.x * (1 - lift) + fold * 1.2, lerp(cur.y, camYaw, lift * 0.85), cur.z * (1 - lift), "YXZ");
       if (fold > 0) pc.group.scale.multiplyScalar(1 - fold * 0.7);
@@ -1387,99 +1407,88 @@ export class World {
   }
 
   /* ---------------------------------------------------------------- */
-  /* The new way: the drop                                              */
+  /* The new way: the office's screen                                  */
   /* ---------------------------------------------------------------- */
 
   /**
-   * THE DROP at P: where it is (journey.ts, plus a breath while it floats),
-   * what it is (a drop, or a panel showing one of its screens), which way a
-   * panel faces, the customer's amber points inside it, and its light.
+   * THE OFFICE'S SCREEN (the business's side of each moment): what the
+   * laptop is doing, lifted off it as a card over the desk and turned to the
+   * shopfront, where pane B looks in. In the empty office it writes the reply
+   * on its own; it fills in the calendar, the quote and the invoice; it asks
+   * for the review and sends the reminder; at six it shows the day.
    */
-  private theDrop(P: number, t: number, hours: number, night: number) {
-    const me = being(P, this.me);
-    const p = this.pose;
-    const br = this.reduced ? 0 : 1;
-    dropPos(P, p.pos);
-    dropVel(P, p.vel);
-    const speed = p.vel.length();
-    // A slow breath while it hangs still; none while it travels.
-    const still = 1 - Math.min(1, speed / 6);
-    p.pos.y += Math.sin(t * 1.3) * 0.02 * still * br * (1 - me.shape);
-    p.r = me.r;
-    p.shape = me.shape;
-    p.w = me.w;
-    p.h = me.h;
-    p.glow = me.glow * (1 + 0.35 * Math.min(1, speed / 60));
-    p.motes = me.motes;
-    p.wobble = me.wobble * br + 0.08 * br;
-    p.vis = me.vis;
-    // A panel faces the camera (turned on the vertical), the owner across the desk, or the street.
-    if (me.facing === "owner") p.q.setFromEuler(new THREE.Euler(0, Math.PI, 0));
-    else if (me.facing === "street") p.q.setFromEuler(new THREE.Euler(0, 0, 0));
-    else {
-      const yaw = Math.atan2(this.camera.position.x - p.pos.x, this.camera.position.z - p.pos.z);
-      const pitch = -Math.atan2(this.camera.position.y - p.pos.y, Math.hypot(this.camera.position.x - p.pos.x, this.camera.position.z - p.pos.z)) * 0.5;
-      p.q.setFromEuler(new THREE.Euler(pitch * me.shape, yaw, 0, "YXZ"));
-    }
-    // Its screen.
-    const time = uiTime(hours);
-    let tex: THREE.Texture | null = null;
-    if (me.face === "phone") tex = this.phoneScreen.tex;
-    else if (me.face) {
-      const sc = this.faces[me.face];
-      tex = sc.tex;
-      if (me.face === "cal") {
-        const bookings: UI.Booking[] = [
-          { day: 0, h: 9, len: 3, label: "Fence", who: "Aroha", at: 0 },
-          { day: 1, h: 13, len: 4, label: "Bathroom", who: "Jono", at: 0 },
-          { day: 3, h: 8, len: 2, label: "Repair", who: "Ravi", at: 0 },
-          { day: 2, h: 14, len: 1, label: "Measure-up", who: "Sam", at: 1, auto: true },
-        ];
-        const now = 1 + range(P, 20.84, 20.9) * 0.2;
-        sc.draw(`cal|${now.toFixed(2)}`, (c) => UI.calendar(c, { bookings, now, week: "This week" }));
-      } else if (me.face === "hand") sc.draw("hand", (c) => UI.handover(c, { show: 1 }));
-      else if (me.face === "quote") {
-        // Sam's three answers land in their lines, one by one; then the price, typed.
-        const typed = P < 22.06 ? 0 : P < 22.12 ? 3 : P < 22.18 ? 18 : P < 22.24 ? 53 : 60 + Math.floor(range(P, 22.24, 22.32) * 60);
-        const sent = P >= B.nQuoteSent ? 1 : 0;
-        sc.draw(`quote|${typed}|${sent}`, (c) => UI.docCard(c, { kind: "quote", typed, stamp: 0, auto: false, sent, filled: typed >= 53 }));
-      } else if (me.face === "today") {
-        const n = ke(P, B.nToday) * 5;
-        sc.draw(`today|${n.toFixed(1)}`, (c) => UI.today(c, { n }));
-      } else if (me.face === "night") sc.draw(`night|${time}`, (c) => UI.phoneReplyTo(c, { time, at: "3:12am", name: "Aroha", subject: "A deck, and consent", lines: ["Hi Aroha, thanks for your message about a deck.", "Whether it needs consent depends on your site, so I’ve passed that question to the team. You’ll hear back by 10am.", "Meanwhile, here are times for a free measure-up."] }));
-      else if (me.face === "late") sc.draw(`late|${time}`, (c) => UI.phoneReplyTo(c, { time, at: "6:21pm", name: "Hemi", subject: "Deck repair", lines: ["Hi Hemi, thanks for getting in touch about your deck.", "We can usually start a repair within the week. Here are times to come and have a look:"] }));
-    }
-    p.ui = tex;
-    p.uiK = me.faceK;
-    // A sweep of light down a panel as it opens.
-    p.sweep = 0;
-    for (const sp of PANELS) if (P >= sp.a && P < sp.a + 0.1) p.sweep = range(P, sp.a + 0.02, sp.a + 0.1);
-    // Sam's amber points: three small lights circling inside it.
-    for (let i = 0; i < 3; i++) {
-      const a = t * (0.9 + i * 0.27) * br + i * 2.094;
-      const rr = p.r * 0.42 * (1 - p.shape * 0.6);
-      this.motes[i].set(Math.cos(a) * rr, Math.sin(a * 1.3 + i) * rr * 0.5, Math.sin(a) * rr);
-      if (P >= 22.0 && P < 22.26) {
-        // Flowing out into the quote's lines (left column, one each).
-        const kk = smoother(range(P, 22.0 + i * 0.06, 22.06 + i * 0.06));
-        this.motes[i].lerp(V(-p.w * 0.28, p.h * (0.2 - i * 0.06), 0.05), kk);
+  private office(P: number, t: number, hours: number) {
+    const card = this.officeCard;
+    const part = this.officePart;
+    const beat = isNew(P) ? OFFICE.find((o) => P >= o.a && P < o.b) : undefined;
+    const lp = this.shop.laptop.screen.material as THREE.MeshBasicMaterial;
+    // The laptop is left open in the empty office, asleep; it wakes for each moment.
+    const awake = isNew(P) ? OFFICE.reduce((m, o) => Math.max(m, bump(P, o.a - 0.02, o.b + 0.04, 0.04)), 0) : -1;
+    if (awake >= 0) {
+      lp.color.setScalar(0.03 + 1.12 * awake);
+      this.shop.screenLight.intensity = Math.max(this.shop.screenLight.intensity, 0.9 * awake);
+      if (lp.map !== card.screen.tex) {
+        lp.map = card.screen.tex;
+        lp.needsUpdate = true;
       }
-      this.motes[i].applyQuaternion(p.q).add(p.pos);
     }
-    this.drop.update(p, t, this.camera, { uiScale: uiScale.k, night, motes: this.motes });
-    // The turn's sparks.
-    this.gather.update(P, P > B.fall[0] && P < 16.2, this.h * Math.min(2, this.gl.getPixelRatio?.() ?? 1) * 0.6);
-    // What it is, for the pointer.
-    const part = this.dropPart;
-    part.on = me.vis > 0.5;
-    part.id = P < 19.8 ? "site" : P < 20.62 ? "reply" : P < 21.0 ? "booking" : P < 21.86 ? "reply" : P < 22.6 ? "quote" : P < 23.8 ? "invoice" : P < 25.7 ? "followup" : "reply";
-    const ext = Math.max(p.r, me.shape * Math.max(me.w, me.h) * 0.5) + 0.1;
-    part.box.setFromCenterAndSize(p.pos, V(ext * 2, ext * 2, ext * 2));
+    if (!beat) {
+      card.show(0);
+      part.on = false;
+      return;
+    }
+    const { a, b, id } = beat;
+    const time = uiTime(hours);
+    const sc = card.screen;
+    if (id === "reply") {
+      const typed = Math.floor(k(P, B.nWrite) * 150 / 3) * 3;
+      const sent = P >= B.nSent ? 1 : 0;
+      sc.draw(`reply|${typed}|${sent}`, (c) => UI.officeReply(c, { typed, sent }));
+    } else if (id === "booked") {
+      const now = range(P, B.nPick, B.nPick + 0.06);
+      sc.draw(`booked|${now.toFixed(2)}`, (c) => UI.officeBooked(c, { now }));
+    } else if (id === "night") {
+      const typed = Math.floor(k(P, B.nNightWrite) * 120 / 3) * 3;
+      const over = range(P, B.nNightWrite[1] + 0.02, B.nNightWrite[1] + 0.08);
+      sc.draw(`night|${typed}|${over.toFixed(2)}`, (c) => UI.officeNight(c, { typed, over }));
+    } else if (id === "hand") {
+      const done = range(P, B.nHand[1] - 0.04, B.nHand[1]);
+      sc.draw(`hand|${done.toFixed(2)}`, (c) => UI.officeHand(c, { done }));
+    } else if (id === "quote") {
+      // Sam's answers already in their lines; the price typed in; sent.
+      const fill = range(P, B.nQuote[0], B.nQuote[0] + 0.1);
+      const price = Math.floor(range(P, B.nQuote[0] + 0.14, B.nQuote[1] - 0.04) * 6);
+      const sent = P >= B.nQuoteSent ? 1 : 0;
+      const ok = P >= B.nAccept[1] ? 1 : 0;
+      sc.draw(`quote|${fill.toFixed(2)}|${price}|${sent}|${ok}`, (c) => UI.officeQuote(c, { fill, price, sent, ok }));
+    } else if (id === "invoice") {
+      const sent = P >= B.nInvoice[0] + 0.12 ? 1 : 0;
+      const paid = range(P, B.nPaid, B.nPaid + 0.05);
+      sc.draw(`invoice|${sent}|${paid.toFixed(2)}`, (c) => UI.officeInvoice(c, { sent, paid }));
+    } else if (id === "review") {
+      const asked = P >= B.nReview[0] + 0.06 ? 1 : 0;
+      const stars = ke(P, [24.06, 24.26]) * 5;
+      sc.draw(`review|${asked}|${stars.toFixed(2)}`, (c) => UI.officeReview(c, { asked, stars }));
+    } else if (id === "remind") {
+      const sent = P >= B.nRemind[0] + 0.06 ? 1 : 0;
+      const booked = range(P, 25.24, 25.3);
+      sc.draw(`remind|${sent}|${booked.toFixed(2)}`, (c) => UI.officeRemind(c, { sent, booked }));
+    } else if (id === "today") {
+      const n = ke(P, B.nToday) * 5;
+      sc.draw(`today|${n.toFixed(1)}`, (c) => UI.today(c, { n }));
+    }
+    void time;
+    // Up off the laptop with a little weight; down into it again as the moment ends.
+    const from = { p: this.shop.laptop.hinge.clone().add(V(0, 0.14, 0.03)), q: Q(0, 0, 0), s: 0.18 };
+    const to = { p: S(-3.9, 2.0 + Math.sin(t * 0.6) * 0.004, 5.35), q: Q(0, 0, 0), s: 1 };
+    const kk = smoother(range(P, a, a + 0.1)) * (1 - smoother(range(P, b - 0.08, b)));
+    carry(card.group, from, to, settle(kk, 0.45), 0.12);
+    card.show(Math.min(1, kk * 3), 1.05);
+    part.on = kk > 0.5;
+    part.id = beat.part;
+    part.box.setFromObject(card.group);
     // The sounds of its moments.
-    if (P > this.prevP && P - this.prevP < 0.3) {
-      if (this.prevP < 15.96 && P >= 15.96) this.events.push({ type: "drop", pos: p.pos.clone() });
-      for (const sp of PANELS) if (this.prevP < sp.a && P >= sp.a) this.events.push({ type: "node", pos: p.pos.clone() });
-    }
+    if (P > this.prevP && P - this.prevP < 0.3 && this.prevP < a + 0.02 && P >= a + 0.02) this.events.push({ type: "node", pos: to.p.clone() });
   }
 
   /* ---------------------------------------------------------------- */
@@ -1520,12 +1529,15 @@ export class World {
     }
     // The turn: the dark takes the room; then the town at dusk again.
     g.black = 0.82 * smooth(range(P, B.black[0], B.black[0] + 0.1)) * (1 - smooth(range(P, B.black[1] - 0.1, B.black[1])));
+    // (While the camera leaves the room for the sky, nothing at all: it jumps in the dark.)
+    const cover = smooth(range(P, 16.02, 16.1)) * (1 - smooth(range(P, 16.26, 16.34)));
     // The end: light out of the brights, then paper.
     g.fill = smooth(range(P, B.end[0], B.end[1])) * 0.9;
     g.flashColor.set(0.965, 0.961, 0.949);
+    if (cover > 0) g.flashColor.set(0, 0, 0);
     g.exposure *= 1 + 1.5 * smooth(range(P, B.end[0], B.end[1] - 0.2));
     g.paper = smooth(range(P, B.end[1] - 0.1, B.end[1] + 0.45));
-    g.flash = 0;
+    g.flash = cover;
   }
 
   /* ---------------------------------------------------------------- */
@@ -1543,7 +1555,7 @@ export class World {
     let bd = Infinity;
     const hit = new THREE.Vector3();
     for (const part of this.parts) {
-      if (part === this.dropPart && !part.on) continue;
+      if (part === this.officePart && !part.on) continue;
       if (this.ray.ray.intersectBox(part.box, hit)) {
         const d = hit.distanceTo(this.camera.position);
         if (d < bd) {
@@ -1555,18 +1567,77 @@ export class World {
     this.hover = best;
   }
 
-  private overlay = {
-    color: null as unknown as THREE.Scene,
-    depth: null as unknown as THREE.Scene,
-    on: () => this.drop.mesh.visible,
-  };
+  private views: View[] = [
+    { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
+    { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
+  ];
+  /** Put a camera where its shot says, alive: the slow push and drift (each pane on its own beat), a shake, the lens shift. */
+  private aim(cam: THREE.PerspectiveCamera, c: CamOut, aspect: number, t: number, br: number, shake: number, since: number, seed: number) {
+    // (A pane showing its share of the one picture breathes with it, so the halves meet.)
+    const ph = seed * 2.1 * (1 - c.sub);
+    cam.position.copy(c.eye);
+    if (shake > 0) {
+      cam.position.x += Math.sin(since * 150) * 0.022 * shake;
+      cam.position.y += Math.sin(since * 123 + 1.3) * 0.03 * shake;
+    }
+    // A living camera: never quite still. A slow push toward the subject and
+    // back (a hair over a percent of its distance, a dozen seconds a cycle),
+    // a breath beside it.
+    const push = (0.5 - 0.5 * Math.cos(t * 0.5 + ph)) * 0.013 * br;
+    cam.position.lerp(c.at, push);
+    // ...and a slow drift round it (under a degree, a quarter of a minute a turn): the picture keeps its depth.
+    {
+      const a = Math.sin(t * 0.27 + ph) * 0.012 * br;
+      const co = Math.cos(a);
+      const sn = Math.sin(a);
+      const dx = cam.position.x - c.at.x;
+      const dz = cam.position.z - c.at.z;
+      cam.position.x = c.at.x + dx * co - dz * sn;
+      cam.position.z = c.at.z + dx * sn + dz * co;
+    }
+    cam.position.x += Math.sin(t * 0.37 + ph) * 0.01 * br;
+    cam.position.y += Math.sin(t * 0.29 + 1 + ph) * 0.008 * br;
+    cam.up.set(Math.sin(c.roll), Math.cos(c.roll), 0);
+    cam.lookAt(c.at);
+    cam.fov = c.fov;
+    cam.aspect = aspect;
+    cam.updateProjectionMatrix();
+    // Where the subject sits on screen: a lens shift, not a turn.
+    const pm = cam.projectionMatrix;
+    pm.elements[8] = -(c.ppx - 0.5) * 2;
+    pm.elements[9] = (c.ppy - 0.5) * 2;
+    cam.projectionMatrixInverse.copy(pm).invert();
+    cam.updateMatrixWorld(true);
+  }
+
   render(time: number) {
-    this.overlay.color = this.drop.scene;
-    this.overlay.depth = this.drop.depthScene;
     // The sky as light: captured again when it has changed (sky.ts).
     const env = this.sky.env(this.gl, time);
     if (env && this.scene.environment !== env) this.scene.environment = env;
-    this.post.render(this.gl, this.scene, this.camera, this.grade, time, undefined, this.overlay);
+    const g = this.grade;
+    if (!this.split.on) {
+      const v = this.views[0];
+      v.camera = this.camera;
+      v.rect = [0, 0, 1, 1];
+      v.focus = g.focus;
+      v.aperture = g.aperture;
+      v.before = undefined;
+      this.post.render(this.gl, this.scene, this.views.slice(0, 1), g, time);
+      return;
+    }
+    for (let i = 0; i < 2; i++) {
+      const v = this.views[i];
+      const cam = this.panes[i];
+      const c = this.paneCam[i];
+      v.camera = cam;
+      v.rect = this.rects[i];
+      v.focus = cam.position.distanceTo(c.at);
+      v.aperture = this.camOverride ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
+      // Each pane's shadows are spent on its own subject.
+      const r = Math.min(150, Math.max(3, v.focus * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
+      v.before = () => this.sky.aimShadow(c.at, r);
+    }
+    this.post.render(this.gl, this.scene, this.views, g, time);
   }
 }
 

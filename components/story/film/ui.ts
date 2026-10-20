@@ -1121,3 +1121,146 @@ export function nodeLabel(ctx: Ctx, w: number, h: number, title: string, line: s
   text(ctx, title, h + 6, h / 2 - 4, { size: h * 0.25, weight: 700, color: dark ? "#f3f2fa" : C.ink, max: w - h - 46 });
   text(ctx, line, h + 6, h / 2 + h * 0.22, { size: h * 0.16, color: dark ? "rgba(255,255,255,0.62)" : C.mute, max: w - h - 46 });
 }
+
+/*
+ * THE OFFICE'S SCREENS (the new way, round 27): what the laptop does on its
+ * own, lifted off it as a card over the desk and read through the shopfront
+ * from the street. Set large (a card is about half a pane wide): a label and
+ * a time, one line that says what happened, a few short lines, a status.
+ */
+function officeFrame(ctx: Ctx, label: string, tone: string) {
+  const W = DESK.w;
+  const H = DESK.h;
+  ctx.fillStyle = C.surface;
+  ctx.fillRect(0, 0, W, H);
+  circle(ctx, 78, 92, 13, tone);
+  text(ctx, label, 106, 104, { size: 36, weight: 600, color: C.mute });
+  return { W, H };
+}
+function pill(ctx: Ctx, x: number, y: number, label: string, fill: string, fg: string, size = 34, tick = false) {
+  font(ctx, size, 600);
+  const w = ctx.measureText(label).width + (tick ? 112 : 72);
+  rr(ctx, x, y, w, size * 2.1, size * 1.05, fill);
+  if (tick) check(ctx, x + 50, y + size * 1.05, size * 0.75, fg, 5);
+  text(ctx, label, x + (tick ? 84 : 36), y + size * 1.42, { size, weight: 600, color: fg });
+  return w;
+}
+
+/** The enquiry lands in the empty office, and the reply writes itself. */
+export function officeReply(ctx: Ctx, s: { typed: number; sent: number }) {
+  const { W, H } = officeFrame(ctx, "New enquiry · 7:40pm", C.amber);
+  text(ctx, "Sam: a new deck, about 20 m²", 64, 196, { size: 58, weight: 650, color: C.ink, max: W - 128 });
+  text(ctx, "Three answers and a photo", 64, 256, { size: 34, color: C.mute });
+  ctx.fillStyle = C.line;
+  ctx.fillRect(64, 300, W - 128, 3);
+  const reply = "Hi Sam, thanks for getting in touch. We can come and measure up for free: Tue 9am, Wed 2pm or Thu 4:30pm.";
+  wrap(ctx, typed(reply, s.typed, s.sent <= 0), 64, 376, W - 128, 56, { size: 42, color: C.ink2 }, 4);
+  if (s.sent > 0) pill(ctx, 64, H - 128, "Replied 7:41pm", C.greenL, C.green, 36, true);
+  else pill(ctx, 64, H - 128, "Writing a reply", C.indigoL, C.indigo, 36);
+}
+
+/** Sam picks a time: it lands in the week. */
+export function officeBooked(ctx: Ctx, s: { now: number }) {
+  const { W, H } = officeFrame(ctx, "This week", C.indigo);
+  const rows: [string, string, string, boolean][] = [
+    ["Mon", "8:00am", "Fence · Ravi", false],
+    ["Tue", "1:00pm", "Bathroom · Jono", false],
+    ["Wed", "2:00pm", "Measure-up · Sam", true],
+    ["Thu", "9:00am", "Repair · Lucy", false],
+  ];
+  rows.forEach(([d, t, l, fresh], i) => {
+    const y = 160 + i * 118;
+    const k = fresh ? Math.max(0, Math.min(1, s.now * 1.4)) : 1;
+    ctx.globalAlpha = fresh ? k : 1;
+    rr(ctx, 64, y, W - 128, 96, 20, fresh ? C.indigo : C.wash);
+    text(ctx, d, 104, y + 62, { size: 38, weight: 650, color: fresh ? "#fff" : C.ink });
+    text(ctx, t, 230, y + 62, { size: 38, color: fresh ? "rgba(255,255,255,0.86)" : C.ink2 });
+    text(ctx, l, W - 104, y + 62, { size: 38, weight: 600, color: fresh ? "#fff" : C.ink2, align: "right" });
+    ctx.globalAlpha = 1;
+  });
+  if (s.now > 0.5) pill(ctx, 64, H - 150, "Booked by Sam, 7:43pm", C.greenL, C.green, 36, true);
+}
+
+/** 3am: another enquiry; it answers what it can and keeps the rest for you. */
+export function officeNight(ctx: Ctx, s: { typed: number; over: number }) {
+  const { W, H } = officeFrame(ctx, "New enquiry · 3:12am", C.amber);
+  text(ctx, "Aroha: a deck, and consent", 64, 196, { size: 58, weight: 650, color: C.ink, max: W - 128 });
+  ctx.fillStyle = C.line;
+  ctx.fillRect(64, 250, W - 128, 3);
+  const reply = "Hi Aroha, thanks for your message. Whether it needs consent depends on your site, so I’ve passed that question to the team.";
+  wrap(ctx, typed(reply, s.typed, s.over <= 0), 64, 326, W - 128, 56, { size: 42, color: C.ink2 }, 4);
+  if (s.over > 0) {
+    ctx.globalAlpha = Math.min(1, s.over * 1.5);
+    const w = pill(ctx, 64, H - 150, "Replied 3:12am", C.greenL, C.green, 34, true);
+    pill(ctx, 64 + w + 24, H - 150, "Over to you", C.amberL, C.amber, 34);
+    ctx.globalAlpha = 1;
+  }
+}
+
+/** The morning: the question it kept for you. */
+export function officeHand(ctx: Ctx, s: { done: number }) {
+  const { W, H } = officeFrame(ctx, "Over to you · from 3:12am", C.amber);
+  text(ctx, "Aroha asked:", 64, 196, { size: 40, weight: 600, color: C.mute });
+  wrap(ctx, "“Do I need council consent for a deck that’s over a metre off the ground?”", 64, 266, W - 128, 64, { size: 50, weight: 600, color: C.ink }, 3);
+  if (s.done > 0) pill(ctx, 64, H - 150, "Answered 8:06am", C.greenL, C.green, 36, true);
+  else pill(ctx, 64, H - 150, "Waiting for you", C.amberL, C.amber, 36);
+}
+
+/** The quote, filled in from the enquiry: you add the price and send it. */
+export function officeQuote(ctx: Ctx, s: { fill: number; price: number; sent: number; ok: number }) {
+  const { W, H } = officeFrame(ctx, "Quote Q-1042 · Sam", C.indigo);
+  const lines = ["New deck, about 20 m²", "Treated pine, steps and a planter", "Take away the old deck"];
+  lines.forEach((l, i) => {
+    const k = Math.max(0, Math.min(1, s.fill * 3 - i));
+    ctx.globalAlpha = k;
+    text(ctx, l, 64, 200 + i * 74, { size: 42, color: C.ink2 });
+    ctx.globalAlpha = 1;
+  });
+  ctx.fillStyle = C.ink;
+  ctx.fillRect(64, 440, W - 128, 3);
+  text(ctx, "Total incl. GST", 64, 520, { size: 40, weight: 600, color: C.ink });
+  const p = "$8,950".slice(0, s.price);
+  if (s.price > 0) text(ctx, p + (s.price < 6 && s.sent <= 0 ? "|" : ""), W - 64, 526, { size: 64, weight: 700, color: C.ink, align: "right" });
+  else rr(ctx, W - 364, 470, 300, 76, 12, null, C.indigo, 4);
+  if (s.ok > 0) pill(ctx, 64, H - 140, "Accepted by Sam", C.greenL, C.green, 36, true);
+  else if (s.sent > 0) pill(ctx, 64, H - 140, "Sent 8:20am", C.indigoL, C.indigo, 36, true);
+  else pill(ctx, 64, H - 140, "Filled in from Sam’s enquiry", C.indigoL, C.indigo, 34);
+}
+
+/** The invoice, made from the quote, sent on its own; paid online. */
+export function officeInvoice(ctx: Ctx, s: { sent: number; paid: number }) {
+  const { W, H } = officeFrame(ctx, "Invoice INV-0318 · Sam", C.indigo);
+  text(ctx, "New deck, as quoted", 64, 210, { size: 46, color: C.ink2 });
+  text(ctx, "Made from quote Q-1042", 64, 276, { size: 36, color: C.mute });
+  ctx.fillStyle = C.ink;
+  ctx.fillRect(64, 330, W - 128, 3);
+  text(ctx, "Total incl. GST", 64, 410, { size: 40, weight: 600, color: C.ink });
+  text(ctx, "$8,950", W - 64, 416, { size: 64, weight: 700, color: C.ink, align: "right" });
+  if (s.paid > 0) {
+    ctx.globalAlpha = Math.min(1, s.paid * 2);
+    pill(ctx, 64, H - 150, "Paid online, 4:31pm", C.greenL, C.green, 36, true);
+    ctx.globalAlpha = 1;
+  } else if (s.sent > 0) pill(ctx, 64, H - 150, "Sent to Sam, 4:02pm", C.indigoL, C.indigo, 36, true);
+  else pill(ctx, 64, H - 150, "Ready to send", C.wash, C.ink2, 36);
+}
+
+/** Two days on: how did it go? The answer comes back. */
+export function officeReview(ctx: Ctx, s: { asked: number; stars: number }) {
+  const { W } = officeFrame(ctx, s.stars >= 5 ? "New review · Sam" : "Sent to Sam: how did it go?", s.stars >= 5 ? C.green : C.indigo);
+  for (let i = 0; i < 5; i++) {
+    const on = s.stars > i + 0.5;
+    star(ctx, 130 + i * 130, 250, 50, on ? "#f2b33d" : C.wash, on ? undefined : C.line2);
+  }
+  if (s.stars >= 5) wrap(ctx, "“Tidy, on time, and they kept us posted the whole way. Love the new deck.”", 64, 400, W - 128, 60, { size: 46, color: C.ink2 }, 3);
+  else wrap(ctx, "A thank-you and a question, two days after the job.", 64, 400, W - 128, 60, { size: 42, color: C.mute }, 2);
+  void s.asked;
+}
+
+/** A year on: the reminder goes by itself; Sam books. */
+export function officeRemind(ctx: Ctx, s: { sent: number; booked: number }) {
+  const { W, H } = officeFrame(ctx, "A year on · Sam’s deck", C.indigo);
+  text(ctx, "Reminder sent: time for an oil", 64, 200, { size: 52, weight: 650, color: C.ink, max: W - 128 });
+  wrap(ctx, "It’s a year since we built your deck. Pine looks its best with an oil every year, before summer.", 64, 290, W - 128, 56, { size: 40, color: C.ink2 }, 3);
+  if (s.booked > 0) pill(ctx, 64, H - 150, "Booked: Saturday, 9:00am", C.greenL, C.green, 36, true);
+  else if (s.sent > 0) pill(ctx, 64, H - 150, "Sent 9:00am", C.indigoL, C.indigo, 36, true);
+}

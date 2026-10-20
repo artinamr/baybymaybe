@@ -326,7 +326,15 @@ export class Sky {
       this.focus.lerp(focus, 0.2);
       this.focusR += (radius - this.focusR) * 0.2;
     }
-    const R = Math.max(2.5, this.focusR);
+    this.place(this.focus, Math.max(2.5, this.focusR));
+    // The haze: denser low down, a touch thinner when we look across the town from high.
+    this.fog.density = lerp(a.fogD, b.fogD, k) * fogScale;
+    return this.out;
+  }
+
+  /** The shadow map over a subject and the frame round it, its centre snapped to the map's texels. */
+  private place(focus: THREE.Vector3, R: number) {
+    const keyDir = this.out.keyDir;
     const sc = this.key.shadow.camera as THREE.OrthographicCamera;
     sc.left = -R;
     sc.right = R;
@@ -338,18 +346,21 @@ export class Sky {
     const lz = keyDir.clone().negate();
     const lx = new THREE.Vector3(0, 1, 0).cross(lz).normalize();
     const ly = lz.clone().cross(lx);
-    const fx = Math.round(this.focus.dot(lx) / texel) * texel;
-    const fy = Math.round(this.focus.dot(ly) / texel) * texel;
-    const fz = this.focus.dot(lz);
+    const fx = Math.round(focus.dot(lx) / texel) * texel;
+    const fy = Math.round(focus.dot(ly) / texel) * texel;
+    const fz = focus.dot(lz);
     const c = lx.multiplyScalar(fx).add(ly.multiplyScalar(fy)).add(lz.multiplyScalar(fz));
     this.key.target.position.copy(c);
     this.key.position.copy(c).addScaledVector(keyDir, 250);
     this.key.target.updateMatrixWorld();
+    this.key.updateMatrixWorld();
     this.key.shadow.bias = -0.00025 - 0.000004 * R;
     this.key.shadow.normalBias = 0.012 + R * 0.0012;
-    // The haze: denser low down, a touch thinner when we look across the town from high.
-    this.fog.density = lerp(a.fogD, b.fogD, k) * fogScale;
-    return this.out;
+  }
+
+  /** BOTH SIDES: before each pane is drawn, its own shadows (the panes' subjects are a town apart). */
+  aimShadow(focus: THREE.Vector3, radius: number) {
+    this.place(focus, Math.max(2.5, radius));
   }
 
   /**

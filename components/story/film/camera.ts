@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { B, k } from "./script";
 import { flightAt, type Flight } from "./mail";
-import { dropPos, dropVel, HOUSES, SPOT } from "./journey";
 
 /**
  * THE CAMERA: one unbroken flight through the film, keyed on the film's
@@ -22,8 +21,12 @@ export type Ctx = {
   van: (P: number) => THREE.Vector3;
 };
 type Pt = (c: Ctx, P: number) => THREE.Vector3;
-/** `dof`: the aperture, 0 (everything sharp) … 1 (the subject alone sharp); left out, a third. */
-export type Key = { P: number; eye: Pt; at: Pt; fov: number; ppx?: number; ppy?: number; roll?: number; dof?: number };
+/**
+ * `dof`: the aperture, 0 (everything sharp) … 1 (the subject alone sharp);
+ * left out, a third. `sub` (a pane's keys only): 1 shows the pane's share of
+ * the one picture (the main camera's frame cut to the pane), 0 its own shot.
+ */
+export type Key = { P: number; eye: Pt; at: Pt; fov: number; ppx?: number; ppy?: number; roll?: number; dof?: number; sub?: number };
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 const fix = (x: number, y: number, z: number): Pt => () => V(x, y, z);
@@ -39,10 +42,6 @@ const env =
     if (!fl) return V(0, 0, 0);
     return flightAt(fl.f, fl.t).add(V(dx, dy, dz));
   };
-const van =
-  (dx: number, dy: number, dz: number): Pt =>
-  (c, P) =>
-    c.van(P).clone().add(V(dx, dy, dz));
 
 /** Reading Sam's lifted phone (in the garden, looking into the living room). */
 const READ_EYE = H(-3.0, 1.62, -6.3);
@@ -50,37 +49,15 @@ const READ_AT = H(-3.1, 1.45, -2.2);
 /** Reading it on the deck (Sam standing, the card beside them). */
 const DECK_EYE = H(0.9, 1.85, -11.2);
 const DECK_AT = H(-1.0, 1.45, -6.2);
-/** Ride with the drop (journey.ts): an offset from it. */
-const dr =
-  (dx: number, dy: number, dz: number): Pt =>
-  (_c, P) =>
-    dropPos(P).add(V(dx, dy, dz));
-/** The drop's way at P, level-ish (its climb counts a little), never zero. */
-function way(P: number) {
-  const v = dropVel(P);
-  v.y *= 0.35;
-  if (v.lengthSq() < 1e-6) v.set(0, 0, -1);
-  return v.normalize();
-}
-/** Chase the drop: `back` metres behind it along its way, `up` above, `side` to its right. */
-const chase =
-  (back: number, up: number, side = 0): Pt =>
-  (_c, P) => {
-    const w = way(P);
-    return dropPos(P).addScaledVector(w, -back).add(V(0, up, 0)).addScaledVector(V(-w.z, 0, w.x), side);
-  };
-/** Aroha's window at 3am, and where to read the drop's reply from: back along the way it came (toward the workshop). */
-const nightWindow = () => HOUSES.night.door.clone().addScaledVector(HOUSES.night.fwd, 3.4).setY(2.1);
-const atHouseEye = () => {
-  const w = nightWindow();
-  const home = V(40.1, w.y, -11).sub(w).normalize();
-  return w.clone().addScaledVector(home, 6.4).add(V(-home.z * 0.8, 0.7, home.x * 0.8));
+
+/**
+ * The houses that ask on their own in the new way (3am; six o'clock): the
+ * world sets them from the nearest real houses to these points.
+ */
+export const CALLERS = {
+  night: { door: V(-6, 0, 33), fwd: V(0, 0, -1) },
+  late: { door: V(88, 0, -55), fwd: V(0, 0, 1) },
 };
-/** Look ahead of the drop along its way (and a little down, to the town under it). */
-const ahead =
-  (d: number, down = 0): Pt =>
-  (_c, P) =>
-    dropPos(P).addScaledVector(way(P), d).add(V(0, -down, 0));
 
 /** A composed frame held for a moment either side of P (a rest sits still). */
 function hold(P: number, eye: Pt, at: Pt, fov: number, ppx = 0.6, half = 0.05, ppy?: number, dof?: number): Key[] {
@@ -89,6 +66,23 @@ function hold(P: number, eye: Pt, at: Pt, fov: number, ppx = 0.6, half = 0.05, p
     { P: P + half, eye, at, fov, ppx, ppy, dof },
   ];
 }
+/** A pane's composed frame, held (its subject where the pane wants it). */
+function still(P: number, half: number, eye: Pt, at: Pt, fov: number, o: { ppx?: number; ppy?: number; dof?: number; sub?: number } = {}): Key[] {
+  const k = { eye, at, fov, ppx: o.ppx ?? 0.5, ppy: o.ppy, dof: o.dof, sub: o.sub ?? 0 };
+  return [
+    { P: P - half, ...k },
+    { P: P + half, ...k },
+  ];
+}
+
+/**
+ * THE ONE PICTURE OVER THE TOWN (the rewind; the end): high in the south,
+ * looking north over the roofs to the bay. Sam's house is on the left (its
+ * garden toward us), the workshop on the right (its shopfront toward us).
+ */
+const WIDE_EYE = fix(0, 30, 96);
+const WIDE_AT = fix(0, 4, -10);
+const WIDE_FAR = fix(0, 38, 116);
 
 export const KEYS: Key[] = [
   // OPEN: the town at dusk, then down to one lit room.
@@ -145,103 +139,100 @@ export const KEYS: Key[] = [
   ...hold(14.4, fix(16, 34, 48), fix(40, 2, -13), 28, 0.56, 0.06, undefined, 0.45),
   { P: 14.78, eye: S(-2.6, 1.15, 9.2), at: S(-3.9, 1.0, 3.8), fov: 40, ppx: 0.5 },
   { P: 15.04, eye: S(-2.85, 1.1, 5.3), at: S(-3.9, 1.0, 3.7), fov: 40, ppx: 0.5, ppy: 0.53 },
-  // THE TURN: the hands; the jobs burn to light round them and run together into the drop over the keys.
+  // THE TURN: the hands come off the keys; the jobs round the desk burn away.
   ...hold(15.4, S(-2.62, 1.22, 4.1), S(-3.9, 1.0, 3.68), 40, 0.5, 0.06, 0.52),
   { P: 15.66, eye: S(-2.3, 1.75, 2.25), at: S(-4.1, 1.55, 4.4), fov: 54, ppx: 0.5 },
-  { P: 15.92, eye: S(-2.25, 1.8, 2.35), at: S(-4.0, 1.45, 4.3), fov: 52, ppx: 0.5 },
-  // In to it, close: the room dark round its light.
-  { P: 16.08, eye: S(-3.35, 1.46, 3.18), at: () => SPOT.birth.clone(), fov: 44, ppx: 0.5, dof: 0.5 },
-  { P: 16.2, eye: dr(0.62, 0.16, -1.18), at: dr(0, 0, 0), fov: 40, ppx: 0.5, dof: 0.45 },
-  // Out with it through the glass (between the mullions), and up over the town as the night runs back.
-  { P: 16.3, eye: S(-3.9, 1.6, 4.05), at: S(-3.9, 1.95, 6.6), fov: 46, ppx: 0.5, dof: 0.3 },
-  { P: 16.4, eye: S(-3.9, 2.05, 7.4), at: dr(0, 0, 0), fov: 48, ppx: 0.5, dof: 0.2 },
-  { P: 16.5, eye: chase(9, 3.5), at: ahead(5, 4), fov: 50, ppx: 0.5, dof: 0 },
-  { P: 16.64, eye: chase(11, 4), at: ahead(6, 6), fov: 50, ppx: 0.5, dof: 0 },
-  { P: 16.78, eye: chase(12, 5), at: ahead(4, 9), fov: 48, ppx: 0.5, dof: 0 },
-  // The town at dusk again, the drop hanging over it.
-  ...hold(16.92, dr(3.2, 1.6, 5.6), fix(-10, 34, 23), 46, 0.5, 0.06, undefined, 0.25),
-  // The dive: down behind it over the roofs, along the main street, over Sam's roof, into the garden.
-  { P: 17.06, eye: chase(8, 3), at: ahead(6, 2), fov: 56, ppx: 0.5, dof: 0 },
-  { P: 17.16, eye: chase(7, 2.2), at: ahead(7, 1), fov: 60, ppx: 0.5, roll: -0.06, dof: 0 },
-  { P: 17.24, eye: chase(6.5, 2.0), at: ahead(7, 0.5), fov: 60, ppx: 0.5, roll: 0.08, dof: 0 },
-  { P: 17.32, eye: chase(6.5, 2.4), at: ahead(6, 1.5), fov: 58, ppx: 0.5, roll: 0.03, dof: 0 },
-  { P: 17.4, eye: chase(6.5, 2.6), at: ahead(5, 1.2), fov: 54, ppx: 0.5, dof: 0.1 },
-  // In the garden, the drop just outside the open doors; Sam on the sofa beyond.
-  ...hold(17.7, H(-2.2, 1.95, -10.6), H(-3.0, 1.45, -3.6), 36, 0.56, 0.2, undefined, 0.3),
-  // NEW WEBSITE: in it goes to Sam's phone and opens into the page.
-  { P: 18.06, eye: H(-2.4, 1.9, -9.4), at: H(-3.0, 1.5, -2.6), fov: 34, ppx: 0.6 },
-  ...hold(18.4, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
-  { P: 18.7, eye: fix(-50, 17, 34), at: fix(-36, 7, 9), fov: 44, ppx: 0.6 },
-  ...hold(19.0, fix(-52, 19, 37), fix(-35, 7, 8), 44, 0.6, 0.05, undefined, 0.5),
-  ...hold(19.4, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
-  // NEW AI: the reply, where Sam sits.
-  ...hold(20.0, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
-  ...hold(20.5, READ_EYE, READ_AT, 32, 0.6, 0.06, undefined, 0.14),
-  // Up and back as it comes out past us; after it across the town to the workshop.
-  { P: 20.62, eye: H(-2.6, 2.6, -9.8), at: dr(0, 0, 0), fov: 46, ppx: 0.5, dof: 0 },
-  { P: 20.68, eye: H(-1.2, 7.4, -8.6), at: dr(0, 0, 0), fov: 50, ppx: 0.5, dof: 0 },
-  { P: 20.745, eye: chase(10, 4), at: ahead(6, 2), fov: 54, ppx: 0.5, roll: 0.04, dof: 0 },
-  { P: 20.79, eye: chase(10, 4), at: ahead(4, 2), fov: 50, ppx: 0.5, dof: 0 },
-  // The calendar, in the dark office, seen through the glass.
-  ...hold(20.88, S(-3.2, 1.9, 10.6), S(-3.9, 1.82, 5.2), 38, 0.5, 0.05, undefined, 0.2),
-  // 3AM: high over the dark town. A window lights up; the drop crosses to it, answers, comes back.
-  { P: 20.99, eye: S(-3.0, 3.6, 13.0), at: S(-3.9, 1.6, 5.0), fov: 44, ppx: 0.5, dof: 0 },
-  { P: 21.05, eye: S(-3.6, 4.4, 15.5), at: dr(0, 0, 0), fov: 48, ppx: 0.5, dof: 0 },
-  { P: 21.08, eye: chase(9, 3.5), at: ahead(5, 2), fov: 54, ppx: 0.5, dof: 0 },
-  ...hold(21.17, () => atHouseEye(), () => nightWindow(), 36, 0.56, 0.06, undefined, 0.2),
-  // Back it goes, past us; we watch it streak home over the dark roofs.
-  { P: 21.27, eye: () => atHouseEye().add(V(0, 0.4, 0)), at: dr(0, 0, 0), fov: 40, ppx: 0.5, dof: 0 },
-  { P: 21.33, eye: () => atHouseEye().add(V(0, 1.4, 0)), at: dr(0, 0, 0), fov: 44, ppx: 0.5, dof: 0 },
-  // Then home ourselves as the day comes up; the question it couldn't answer waits over the desk.
-  { P: 21.46, eye: fix(20, 14, 12), at: S(-3.9, 1.9, 5.25), fov: 44, ppx: 0.5, dof: 0 },
-  // NEW PLATFORM: the morning; the owner comes in; in through the glass to the desk; the quote.
-  { P: 21.64, eye: S(-3.0, 2.0, 10.2), at: S(-3.8, 1.5, 4.6), fov: 40, ppx: 0.55 },
-  { P: 21.74, eye: S(-5.82, 1.85, 5.55), at: S(-4.6, 1.4, 2.5), fov: 46, ppx: 0.56 },
-  { P: 21.8, eye: S(-6.0, 1.85, 4.2), at: S(-3.9, 1.35, 4.2), fov: 48, ppx: 0.56 },
-  { P: 21.85, eye: S(-5.0, 1.85, 2.7), at: S(-3.9, 1.5, 4.7), fov: 49, ppx: 0.56 },
-  ...hold(22.14, S(-3.3, 1.86, 2.12), S(-3.9, 1.95, 5.2), 48, 0.56, 0.06),
-  ...hold(22.3, S(-3.3, 1.86, 2.12), S(-3.9, 1.95, 5.2), 48, 0.56, 0.04),
-  // Sent: out after it through the glass and across the town to Sam.
-  { P: 22.385, eye: S(-3.3, 2.25, 3.6), at: dr(0, 0, 0), fov: 50, ppx: 0.5, dof: 0 },
-  { P: 22.415, eye: S(-3.9, 2.0, 7.1), at: dr(0, 0, 0), fov: 52, ppx: 0.5, dof: 0 },
-  { P: 22.44, eye: chase(10, 4), at: ahead(6, 2), fov: 54, ppx: 0.5, dof: 0 },
-  { P: 22.48, eye: chase(10, 4), at: ahead(6, 2), fov: 54, ppx: 0.5, roll: -0.04, dof: 0 },
-  ...hold(22.57, READ_EYE, READ_AT, 32, 0.6, 0.035, undefined, 0.14),
-  // The build: a slow arc round the deck as its pieces drop in, the drop over it.
-  { P: 22.66, eye: H(4.6, 4.0, -11.8), at: H(-1.0, 0.9, -6.8), fov: 38, ppx: 0.6 },
-  { P: 23.06, eye: H(2.8, 6.0, -19.0), at: H(-1.2, 0.8, -6.5), fov: 38, ppx: 0.6 },
-  ...hold(23.4, DECK_EYE, DECK_AT, 34, 0.64, 0.08, undefined, 0.14),
-  // NEW FOLLOW-UP: the review; a year in a drop of dew; the reminder; our van.
-  ...hold(24.24, DECK_EYE, DECK_AT, 34, 0.64, 0.14, undefined, 0.14),
-  ...hold(24.7, H(-4.0, 0.86, -10.3), () => SPOT.dew.clone(), 26, 0.62, 0.18, undefined, 0.75),
-  ...hold(25.2, DECK_EYE, DECK_AT, 34, 0.64, 0.08, undefined, 0.14),
-  { P: 25.4, eye: fix(-40.5, 10.5, 16.0), at: fix(-43.5, 1.0, 6.0), fov: 42, ppx: 0.6 },
-  ...hold(25.6, fix(-30.5, 8.5, -5.5), fix(-43.6, 1.4, 5.0), 40, 0.6, 0.04),
-  // NEW YOU: up off the van it goes, past us; we turn and follow it home along the main street in the late sun.
-  { P: 25.69, eye: fix(-30.6, 8.6, -5.6), at: dr(0, 0, 0), fov: 44, ppx: 0.5, dof: 0 },
-  { P: 25.75, eye: fix(-31.4, 10.2, -5.2), at: dr(0, 0, 0), fov: 48, ppx: 0.5, dof: 0 },
-  { P: 25.81, eye: chase(11, 4.5), at: ahead(8, 3), fov: 50, ppx: 0.5, dof: 0 },
-  { P: 25.88, eye: chase(11, 4.5), at: ahead(8, 3), fov: 50, ppx: 0.5, dof: 0 },
-  { P: 25.98, eye: S(-3.3, 2.0, 10.4), at: S(-3.9, 1.4, 3.8), fov: 36, ppx: 0.6 },
-  // In through the glass between two mullions and round by the side wall (the day hangs over the desk).
-  { P: 26.08, eye: S(-5.82, 1.9, 5.55), at: S(-4.6, 1.5, 2.6), fov: 46, ppx: 0.56 },
-  { P: 26.18, eye: S(-6.0, 1.85, 4.2), at: S(-3.9, 1.5, 4.4), fov: 48, ppx: 0.56 },
-  { P: 26.22, eye: S(-5.0, 1.85, 2.7), at: S(-3.9, 1.6, 4.8), fov: 49, ppx: 0.56 },
-  ...hold(26.3, S(-3.5, 1.8, 2.12), S(-3.9, 1.75, 5.0), 50, 0.56, 0.035),
-  ...hold(26.62, S(-2.75, 1.3, 3.3), S(-4.1, 1.0, 4.0), 40, 0.5, 0.05),
-  // Out through the glass (between two mullions) to watch them leave; it goes out once more.
-  { P: 26.84, eye: S(-2.6, 1.6, 8.0), at: S(-3.0, 1.2, 4.0), fov: 44, ppx: 0.56 },
-  { P: 27.0, eye: S(-0.5, 2.0, 13.0), at: S(-1.6, 1.2, 6.5), fov: 40, ppx: 0.56 },
-  { P: 27.3, eye: S(4.0, 2.6, 17.0), at: S(3.0, 1.2, 9.0), fov: 40, ppx: 0.56 },
-  ...hold(27.7, van(-14, 9, 16), van(0, 1, 0), 40, 0.56, 0.06, undefined, 0.45),
-  // END: up over the town at dusk; the drop rises to meet us and its light is the whole picture.
-  { P: 28.05, eye: fix(32, 30, 60), at: fix(10, 6, -2), fov: 44, ppx: 0.5, dof: 0 },
-  { P: 28.3, eye: fix(30, 40, 70), at: dr(0, -2, 0), fov: 44, ppx: 0.5, dof: 0 },
-  { P: 28.66, eye: fix(28.9, 45.9, 76.1), at: dr(0, 0, 0), fov: 46, ppx: 0.5, dof: 0 },
-  { P: 29.6, eye: fix(28.2, 49.8, 80.6), at: dr(0, 0, 0), fov: 46, ppx: 0.5, dof: 0 },
+  ...hold(16.0, S(-2.25, 1.8, 2.35), S(-4.0, 1.45, 4.3), 52, 0.5, 0.1),
+  // In the black the camera leaves the room: the picture comes back high over the sleeping town.
+  ...hold(16.32, WIDE_FAR, WIDE_AT, 36, 0.5, 0.06, undefined, 0),
+  // THE REWIND, then the same evening: one still frame over the town, coming in slowly.
+  { P: 16.9, eye: fix(0, 33, 104), at: WIDE_AT, fov: 35, ppx: 0.5, dof: 0 },
+  ...hold(17.7, fix(0, 31.5, 100), WIDE_AT, 35.5, 0.5, 0.08, undefined, 0),
+  ...hold(18.5, WIDE_EYE, WIDE_AT, 36, 0.5, 0.12, undefined, 0),
+  { P: 19.3, eye: fix(0, 29, 93), at: WIDE_AT, fov: 36, ppx: 0.5, dof: 0 },
+  // (While the picture is in two, each pane has its own camera: PANE_KEYS.)
+  { P: 27.3, eye: fix(0, 29, 93), at: WIDE_AT, fov: 36, ppx: 0.5, dof: 0 },
+  // ONE PICTURE AGAIN: the town at dusk with both places in it; then up, and the paper.
+  ...hold(27.9, WIDE_EYE, WIDE_AT, 36, 0.5, 0.1, undefined, 0),
+  { P: 28.6, eye: fix(0, 36, 110), at: fix(0, 7, -14), fov: 37, ppx: 0.5, dof: 0 },
+  { P: 29.6, eye: fix(0, 46, 132), at: fix(0, 12, -20), fov: 39, ppx: 0.5, dof: 0 },
 ];
 
-export type CamOut = { eye: THREE.Vector3; at: THREE.Vector3; fov: number; ppx: number; ppy: number; roll: number; dof: number };
+/*
+ * THE PANES' CAMERAS (round 27). Each pane is locked off: one composed frame
+ * per beat, a slow push at most (the world's living camera), and a new frame
+ * only when both panes reframe together. Pane A is the customer, pane B the
+ * business (split.ts). Before the picture divides and after it is one again,
+ * a pane shows its share of the main camera's frame (`sub` 1).
+ */
+
+/** Sam on the sofa, through the open sliders (the phone's page lifted beside them). */
+const A_SOFA_EYE = H(-2.75, 1.42, -6.0);
+const A_SOFA_AT = H(-2.75, 1.12, -1.4);
+/** Sam's garden by day: the deck (old, then new), Sam on it with the phone. */
+const A_DECK_EYE = H(3.0, 3.4, -13.6);
+const A_DECK_AT = H(-1.4, 1.0, -6.6);
+/** Sam's kerb, across the street: the van pulling up. */
+const A_KERB_EYE = fix(-35.5, 3.2, -4.5);
+const A_KERB_AT = fix(-43.5, 1.4, 4.2);
+/** 3am: the window that lights up across the dark town (Aroha's). */
+const nightWindow = () => CALLERS.night.door.clone().addScaledVector(CALLERS.night.fwd, 3.4).setY(2.1);
+const A_NIGHT_EYE: Pt = () => {
+  const w = nightWindow();
+  return w.clone().addScaledVector(CALLERS.night.fwd, 16).add(V(0, 9, 0));
+};
+const A_NIGHT_AT: Pt = () => nightWindow().add(V(0, -0.4, 0));
+
+/** The shopfront: the office through the glass, its desk, its chair, the laptop's light. */
+const B_WIN_EYE = S(-3.9, 1.62, 9.4);
+const B_WIN_AT = S(-3.9, 1.72, 4.8);
+const B_WIN = { dof: 0.14, ppy: 0.42 };
+
+const A = (P: number, eye: Pt, at: Pt, fov: number, o: { ppx?: number; ppy?: number; dof?: number; sub?: number } = {}): Key => ({ P, eye, at, fov, ppx: o.ppx ?? 0.5, ppy: o.ppy, dof: o.dof, sub: o.sub ?? 0 });
+
+export const KEYS_A: Key[] = [
+  // The one picture (its left share) until it divides.
+  A(18.3, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
+  A(18.98, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
+  // Down into Sam's garden, as the film first came down to it.
+  A(19.14, fix(-20, 30, 82), fix(-26, 3, 8), 40, { sub: 0.2, dof: 0 }),
+  A(19.3, fix(-36.5, 11, 44), fix(-40.5, 2.0, 17), 40, { dof: 0 }),
+  A(19.42, fix(-40.6, 3.2, 28.5), fix(-41.0, 1.5, 17.6), 40, { dof: 0.1 }),
+  ...still(19.62, 0.08, A_SOFA_EYE, A_SOFA_AT, 40, { dof: 0.14 }),
+  ...still(20.6, 0.24, A_SOFA_EYE, A_SOFA_AT, 40, { dof: 0.14 }),
+  // 3am: across the dark town to the window that lights up.
+  ...still(21.16, 0.18, A_NIGHT_EYE, A_NIGHT_AT, 40, { dof: 0.2 }),
+  // The garden by day: the old deck; the quote accepted; the build; a year; the reminder.
+  ...still(22.4, 0.7, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
+  ...still(24.4, 0.9, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
+  // The kerb: our van pulls up.
+  ...still(25.76, 0.08, A_KERB_EYE, A_KERB_AT, 40, { dof: 0.1 }),
+  // Six o'clock: the deck again.
+  ...still(26.6, 0.62, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
+  // Up and back into the one picture.
+  A(27.48, fix(-30, 24, 74), fix(-22, 2, 6), 39, { sub: 0.35, dof: 0 }),
+  A(27.66, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
+  A(28.2, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
+];
+
+export const KEYS_B: Key[] = [
+  A(18.3, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
+  A(18.98, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
+  // Down to the workshop, to the lit office window.
+  A(19.14, fix(20, 30, 80), fix(26, 3, -6), 40, { sub: 0.2, dof: 0 }),
+  A(19.3, fix(36.5, 10, 22), fix(39.8, 2.0, -11), 40, { dof: 0 }),
+  A(19.42, fix(40.1, 2.6, 0.5), fix(40.1, 1.7, -12.4), 40, { dof: 0.1 }),
+  ...still(19.62, 0.08, B_WIN_EYE, B_WIN_AT, 40, B_WIN),
+  // The empty office through the night, the morning, the job, a year: the business stays where it is.
+  ...still(27.12, 0.06, B_WIN_EYE, B_WIN_AT, 40, B_WIN),
+  A(27.48, fix(30, 24, 70), fix(24, 2, -6), 39, { sub: 0.35, dof: 0 }),
+  A(27.66, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
+  A(28.2, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
+];
+
+export const PANE_KEYS: [Key[], Key[]] = [KEYS_A, KEYS_B];
+
+export type CamOut = { eye: THREE.Vector3; at: THREE.Vector3; fov: number; ppx: number; ppy: number; roll: number; dof: number; sub: number };
 
 function hermite(p0: number, p1: number, m0: number, m1: number, t: number) {
   const t2 = t * t;
@@ -263,31 +254,34 @@ function shotCurve(p0: number, p1: number, p2: number, p3: number, h0: number, h
 }
 
 const DOF_DEFAULT = 0.34;
-const cache = KEYS.map(() => ({ eye: new THREE.Vector3(), at: new THREE.Vector3() }));
+/** Each list of keys keeps its own scratch points. */
+const caches = new WeakMap<Key[], { eye: THREE.Vector3; at: THREE.Vector3 }[]>();
 
-/** The camera at film time P. */
-export function cameraAt(P: number, c: Ctx, out: CamOut) {
+/** The camera at film time P (the main camera's keys, or a pane's). */
+export function cameraAt(P: number, c: Ctx, out: CamOut, keys: Key[] = KEYS) {
+  let cache = caches.get(keys);
+  if (!cache) caches.set(keys, (cache = keys.map(() => ({ eye: new THREE.Vector3(), at: new THREE.Vector3() }))));
   let i = 0;
-  while (i < KEYS.length - 2 && P >= KEYS[i + 1].P) i++;
+  while (i < keys.length - 2 && P >= keys[i + 1].P) i++;
   const i0 = Math.max(0, i - 1);
   const i1 = i;
-  const i2 = Math.min(KEYS.length - 1, i + 1);
-  const i3 = Math.min(KEYS.length - 1, i + 2);
+  const i2 = Math.min(keys.length - 1, i + 1);
+  const i3 = Math.min(keys.length - 1, i + 2);
   for (const j of [i0, i1, i2, i3]) {
-    cache[j].eye.copy(KEYS[j].eye(c, P));
-    cache[j].at.copy(KEYS[j].at(c, P));
+    cache[j].eye.copy(keys[j].eye(c, P));
+    cache[j].at.copy(keys[j].at(c, P));
   }
-  const A = KEYS[i1];
-  const Bk = KEYS[i2];
+  const A = keys[i1];
+  const Bk = keys[i2];
   const span = Math.max(1e-4, Bk.P - A.P);
   const t = Math.min(1, Math.max(0, (P - A.P) / span));
-  const h0 = KEYS[i1].P - KEYS[i0].P;
-  const h2 = KEYS[i3].P - KEYS[i2].P;
+  const h0 = keys[i1].P - keys[i0].P;
+  const h2 = keys[i3].P - keys[i2].P;
   for (const f of ["eye", "at"] as const)
     for (const ax of ["x", "y", "z"] as const) out[f][ax] = shotCurve(cache[i0][f][ax], cache[i1][f][ax], cache[i2][f][ax], cache[i3][f][ax], h0, span, h2, t);
-  for (const field of ["fov", "ppx", "ppy", "roll", "dof"] as const) {
-    const fb = field === "roll" ? 0 : field === "fov" ? 40 : field === "dof" ? DOF_DEFAULT : 0.5;
-    out[field] = shotCurve(KEYS[i0][field] ?? fb, A[field] ?? fb, Bk[field] ?? fb, KEYS[i3][field] ?? fb, h0, span, h2, t);
+  for (const field of ["fov", "ppx", "ppy", "roll", "dof", "sub"] as const) {
+    const fb = field === "roll" || field === "sub" ? 0 : field === "fov" ? 40 : field === "dof" ? DOF_DEFAULT : 0.5;
+    out[field] = shotCurve(keys[i0][field] ?? fb, A[field] ?? fb, Bk[field] ?? fb, keys[i3][field] ?? fb, h0, span, h2, t);
   }
 }
 
@@ -298,42 +292,23 @@ export function cameraAt(P: number, c: Ctx, out: CamOut) {
  */
 const SM_N = 4;
 const SM_STEP = 0.0175;
-/**
- * While it chases the drop the camera smooths over a narrower window (the
- * drop's own path is smooth; a wide window would average the camera across
- * a flight that lasts less than the window, and lose it): these are its
- * flights, eased in and out so the width never jumps.
- */
-const CHASES: [number, number][] = [
-  [16.42, 16.84],
-  [16.98, 17.46],
-  [20.6, 20.82],
-  [21.0, 21.32],
-  [22.38, 22.54],
-  [25.66, 25.95],
-];
-function sigmaAt(P: number) {
-  let fast = 0;
-  for (const [a, b] of CHASES) {
-    const e = 0.05;
-    const kk = Math.min(1, Math.max(0, (P - (a - e)) / e)) * Math.min(1, Math.max(0, (b + e - P) / e));
-    fast = Math.max(fast, kk * kk * (3 - 2 * kk));
-  }
-  return 0.034 - 0.024 * fast;
-}
-const _o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0 };
-export function cameraSmooth(P: number, c: Ctx, out: CamOut, end: number) {
+const SM_SIGMA = 0.034;
+const SM_W = (() => {
+  const w: number[] = [];
+  let sum = 0;
+  for (let i = 0; i <= SM_N * 2; i++) sum += Math.exp(-0.5 * Math.pow(((i - SM_N) * SM_STEP) / SM_SIGMA, 2));
+  for (let i = 0; i <= SM_N * 2; i++) w.push(Math.exp(-0.5 * Math.pow(((i - SM_N) * SM_STEP) / SM_SIGMA, 2)) / sum);
+  return w;
+})();
+const _o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0, sub: 0 };
+export function cameraSmooth(P: number, c: Ctx, out: CamOut, end: number, keys: Key[] = KEYS) {
   out.eye.set(0, 0, 0);
   out.at.set(0, 0, 0);
-  out.fov = out.ppx = out.ppy = out.roll = out.dof = 0;
-  const sg = sigmaAt(P);
-  const step = SM_STEP * (sg / 0.034);
-  let sum = 0;
-  for (let i = 0; i <= SM_N * 2; i++) sum += Math.exp(-0.5 * Math.pow(((i - SM_N) * step) / sg, 2));
+  out.fov = out.ppx = out.ppy = out.roll = out.dof = out.sub = 0;
   for (let i = 0; i <= SM_N * 2; i++) {
-    const Pk = Math.min(end, Math.max(0, P + (i - SM_N) * step));
-    const w = Math.exp(-0.5 * Math.pow(((i - SM_N) * step) / sg, 2)) / sum;
-    cameraAt(Pk, c, _o);
+    const Pk = Math.min(end, Math.max(0, P + (i - SM_N) * SM_STEP));
+    const w = SM_W[i];
+    cameraAt(Pk, c, _o, keys);
     out.eye.addScaledVector(_o.eye, w);
     out.at.addScaledVector(_o.at, w);
     out.fov += _o.fov * w;
@@ -341,7 +316,34 @@ export function cameraSmooth(P: number, c: Ctx, out: CamOut, end: number) {
     out.ppy += _o.ppy * w;
     out.roll += _o.roll * w;
     out.dof += _o.dof * w;
+    out.sub += _o.sub * w;
   }
+}
+
+/**
+ * A pane's share of the one picture: the main camera's frame cut to the
+ * pane (the same eye and aim; the lens and its shift for the pane's part of
+ * the frame). `r` is the pane [x0, y0, x1, y1] as shares of the frame, y down.
+ * Blended into the pane's own shot by its `sub`.
+ */
+export function paneShare(main: CamOut, pane: CamOut, r: [number, number, number, number]) {
+  const s = pane.sub;
+  if (s <= 0) return pane;
+  const rad = THREE.MathUtils.degToRad;
+  const w = Math.max(1e-3, r[2] - r[0]);
+  const h = Math.max(1e-3, r[3] - r[1]);
+  // Vertically: the pane's height is h of the frame's.
+  const fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(rad(main.fov) / 2) * h));
+  const ppx = (main.ppx - r[0]) / w;
+  const ppy = (main.ppy - r[1]) / h;
+  pane.eye.lerp(main.eye, s);
+  pane.at.lerp(main.at, s);
+  pane.fov += (fov - pane.fov) * s;
+  pane.ppx += (ppx - pane.ppx) * s;
+  pane.ppy += (ppy - pane.ppy) * s;
+  pane.roll += (main.roll - pane.roll) * s;
+  pane.dof += (main.dof - pane.dof) * s;
+  return pane;
 }
 
 /** Inside one of the two rooms (where the camera must not back away through a wall). */
@@ -381,7 +383,7 @@ export type Air = { c: THREE.Vector3; r: number; from: number };
 export function phoneBackBase(c: Ctx, end: number, field: { get: (x: number, z: number) => number; bld: (x: number, z: number) => number }, air: Air[] = []): BackBase {
   const n = Math.ceil(end / BACK_STEP) + 1;
   const base = { free: new Float32Array(n), d: new Float32Array(n), fov: new Float32Array(n) };
-  const o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0 };
+  const o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0, sub: 0 };
   const dir = new THREE.Vector3();
   const p = new THREE.Vector3();
   const q = new THREE.Vector3();

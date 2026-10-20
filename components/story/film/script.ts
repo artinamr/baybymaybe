@@ -65,45 +65,46 @@ export const B = {
   freeze: [15.42, 15.62] as W,
   fall: [15.62, 16.12] as W,
   black: [16.0, 16.34] as W,
-  /** THE REWIND: the whole old half runs backward while the drop climbs over the town (world.ts). */
+  /** THE REWIND: the whole old half runs backward under one high frame over the town (world.ts). */
   rewind: [16.42, 16.88] as W,
-  /** The drop's dive to Sam's garden. */
-  assemble: [16.94, 17.48] as W,
-  // NEW WEBSITE.
-  nLift: [18.04, 18.2] as W,
-  nTap: 19.16,
-  nOver: [18.5, 19.06] as W,
-  nForm: [19.2, 19.56] as W,
-  nSend: 19.6,
-  // NEW AI.
-  nFly: [19.84, 20.0] as W,
-  nBack: [20.0, 20.14] as W,
-  nRead: [20.16, 20.5] as W,
+  // NEW WEBSITE: the town's phones, all lit (still one picture); the picture divides (split.ts); Sam on the page.
+  nOver: [18.08, 18.7] as W,
+  nTap: 19.5,
+  nForm: [19.54, 19.68] as W,
+  nSend: 19.72,
+  // NEW AI: in the empty office the screen wakes, the reply writes itself and goes; Sam's phone lights; the booking.
+  nWake: [19.78, 19.86] as W,
+  nWrite: [19.88, 20.08] as W,
+  nSent: 20.1,
+  nBack: [20.1, 20.18] as W,
+  nRead: [20.18, 20.5] as W,
   nPick: 20.56,
   nBook: [20.58, 20.82] as W,
-  n3am: [20.96, 21.5] as W,
-  nHand: [21.35, 21.5] as W,
-  // NEW PLATFORM.
-  nQuote: [21.86, 22.34] as W,
-  nQuoteSent: 22.36,
-  nAccept: [22.55, 22.61] as W,
-  nBuild: [22.6, 23.1] as W,
+  // 3AM: a window lights up across the dark town; the screen answers; the question it can't answer waits.
+  nNight: [20.98, 21.38] as W,
+  nNightWrite: [21.04, 21.2] as W,
+  // NEW PLATFORM: the morning; the question answered; the quote filled in, priced and sent; accepted; the job; paid.
+  nMorning: [21.52, 21.82] as W,
+  nHand: [21.86, 22.02] as W,
+  nQuote: [22.04, 22.36] as W,
+  nQuoteSent: 22.38,
+  nAccept: [22.5, 22.58] as W,
+  nBuild: [22.66, 23.1] as W,
   nInvoice: [23.14, 23.4] as W,
   nPaid: 23.5,
   // NEW FOLLOW-UP.
   nReview: [23.86, 24.36] as W,
   nYear: [24.44, 24.96] as W,
   nRemind: [25.0, 25.34] as W,
-  nVan: [25.36, 25.56] as W,
+  nVan: [25.42, 25.72] as W,
   // NEW YOU.
   nToday: [26.12, 26.42] as W,
   nClose: [26.46, 26.6] as W,
   nLamp: [26.62, 26.7] as W,
   nStand: [26.7, 26.84] as W,
-  nWalk: [26.84, 27.26] as W,
-  nIn: [27.28, 27.44] as W,
-  nDrive: [27.5, 28.06] as W,
-  nLater: [27.34, 27.84] as W,
+  nWalk: [26.84, 27.12] as W,
+  nIn: [27.12, 27.28] as W,
+  nDrive: [27.3, 28.1] as W,
   // END.
   end: [28.45, 29.0] as W,
 };
@@ -170,38 +171,38 @@ const CLOCK: [number, number][] = [
   [16.42, 19 + 37 / 60],
   [16.88, 19 + 37 / 60],
   [18.0, 19 + 38 / 60],
-  [19.6, 19 + 40 / 60],
-  [20.0, 19 + 41 / 60],
+  [19.72, 19 + 40 / 60],
+  [20.1, 19 + 41 / 60],
   [20.82, 19 + 43 / 60],
-  // Through the night to 3am.
-  [20.96, 19.75],
-  [21.1, D + 3 + 12 / 60],
-  [21.5, D + 3.5],
-  // Wednesday: the measure-up, the quote.
-  [21.5, 2 * D + 3.5],
-  [21.86, 2 * D + 15.0],
-  [22.36, 2 * D + 16.2],
-  [22.54, 2 * D + 19.0],
-  // The job, a week on: overnight into the morning it starts.
-  [22.54, 8 * D + 19.0],
-  [22.68, 9 * D + 7.5],
-  [23.1, 9 * D + 16.0],
-  [23.6, 9 * D + 16.5],
-  // Two days on: how did we do; then a year.
-  [23.6, 11 * D + 16.5],
-  [24.36, 11 * D + 17.0],
-  [24.44, 11 * D + 17.0],
-  [24.96, 14 * D + 9.0],
-  [24.96, 376 * D + 9.0],
-  [25.36, 376 * D + 9.2],
+  // The night runs to 3am.
+  [20.86, 19 + 45 / 60],
+  [21.02, D + 3 + 11 / 60],
+  [21.36, D + 3 + 18 / 60],
+  // ...and on to the morning.
+  [21.52, D + 7 + 50 / 60],
+  [21.82, D + 8.0],
+  [22.38, D + 8 + 20 / 60],
+  [22.6, D + 8 + 34 / 60],
+  // The job, a week on: its day, from the morning.
+  [22.6, 8 * D + 8 + 34 / 60],
+  [22.66, 8 * D + 8.6],
+  [23.1, 8 * D + 16.0],
+  [23.6, 8 * D + 16.6],
+  // Two days on: how did it go; then a year.
+  [23.6, 10 * D + 16.6],
+  [24.36, 10 * D + 17.0],
+  [24.44, 10 * D + 17.0],
+  [24.96, 13 * D + 9.0],
+  [24.96, 375 * D + 9.0],
+  [25.36, 375 * D + 9.2],
   // Saturday morning: the van.
-  [25.4, 378 * D + 9.0],
-  [25.76, 378 * D + 9.3],
-  // Six o'clock, back at the workshop (the day runs by as we cross the town).
-  [25.92, 378 * D + 17.92],
-  [27.26, 378 * D + 18.15],
-  [27.84, 378 * D + 19.2],
-  [29.6, 378 * D + 19.5],
+  [25.4, 377 * D + 9.0],
+  [25.76, 377 * D + 9.3],
+  // That day runs on to six o'clock.
+  [26.0, 377 * D + 17.92],
+  [27.12, 377 * D + 18.12],
+  [27.84, 377 * D + 19.2],
+  [29.6, 377 * D + 19.5],
 ];
 
 export function clockAt(P: number): number {
