@@ -1282,7 +1282,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "Can I move my website off a site builder later?",
-        a: "A .nz domain in your name can always move: your provider must give you its authorisation code on request and free of charge, and the code is valid for 30 days. The site itself may not: Wix says a Wix site has to run on Wix’s servers, and Squarespace exports only some content. Keep your own copies of the words and photos, so a move means rebuilding pages, not rewriting everything.",
+        a: "A .nz domain in your name can move: your provider must give you its authorisation code on request and free of charge, and the code is valid for 30 days. The site itself may not: Wix says a Wix site has to run on Wix’s servers, and Squarespace exports only some content. Keep your own copies of the words and photos, so a move means rebuilding pages, not rewriting everything.",
       },
       {
         q: "When should a small business hire a web designer?",

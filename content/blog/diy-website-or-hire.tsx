@@ -254,7 +254,8 @@ export default function Body() {
           </>,
           <>
             <strong>A privacy statement if the site has a form.</strong> It says why you’re collecting people’s details,
-            how you’ll use them, who you’ll pass them to, and that people can see and correct what you hold. The Privacy
+            how you’ll use them, who you’ll pass them to, whether they have to give them and what happens if they don’t,
+            and that people can see and correct what you hold. The Privacy
             Commissioner says privacy statements are used to comply with principle 3 of the{" "}
             <Term id="privacy-act">Privacy Act</Term>; its online generator, the Priv-o-matic, helps you write one.
             <Cite n={9} />
@@ -306,7 +307,7 @@ export default function Body() {
       <p>Neither choice locks you in for good, but some things move more easily than others.</p>
       <ul>
         <li>
-          <strong>The domain can always move, if it’s in your name.</strong> A .nz name moves to another registrar with
+          <strong>The domain can move, if it’s in your name.</strong> A .nz name moves to another registrar with
           its <Term id="udai">authorisation code</Term> (it used to be called the UDAI). Your provider must give it to
           you on request and free of charge,
           <Cite n={10} /> and the current registrar can’t charge an exit fee.
