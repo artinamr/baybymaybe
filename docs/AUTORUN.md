@@ -2,7 +2,7 @@
 
 The owner asked for the rest of this week's usage to go into the site
 overnight. A scheduled task in the desktop app ("nerodyn-overnight", every
-20 minutes, plus one-off starts just after each usage reset) starts a
+10 minutes, plus one-off starts just after each usage reset) starts a
 fresh, unattended session; this file is its brief. **Nobody is awake to
 answer questions.** Work carefully and well; never leave the live site
 broken (every push to master deploys it to GitHub Pages).
@@ -21,15 +21,18 @@ Backups: tags `pre-round26` (before 2026-10-20's story rebuild) and
 2. **Usage.** `mcp__ccd_session_mgmt__get_usage`. Stop if "Weekly · all
    models" is 99% or more, or the "5-hour limit" is 96% or more. Check again
    after every commit and every half hour; past those marks, wind down (step 8).
+   From 90% of the 5-hour window, start only steps that can be finished and
+   shipped in a few minutes. Hitting a limit mid-step is survivable (the next
+   session finishes or stashes it), but a clean stop is better. The task
+   retries every 10 minutes, so after a reset a new session picks up within
+   about ten minutes.
 3. **The lock** (`.autorun/lock.json`, git-ignored, never committed). If it
-   exists and its `heartbeat` is less than 40 minutes old, another session
-   is working: stop at once and change nothing. Also stop if any source file
-   changed in the last 15 minutes:
-   `find app components content docs lib tools scripts shaders -type f -mmin -15 2>/dev/null | head -1`
-   prints anything. Otherwise create `.autorun/` if needed and write
-   `{"holder": "<short id>", "heartbeat": "<now, ISO UTC>"}`. Rewrite the
-   heartbeat after every step, before and after every build, and at least
-   every 20 minutes.
+   exists and its `heartbeat` is less than 25 minutes old, another session
+   is working: stop at once and change nothing. Otherwise create `.autorun/`
+   if needed and write `{"holder": "<short id>", "heartbeat": "<now, ISO UTC>"}`.
+   Rewrite the heartbeat at least every 10 minutes, and right before and
+   after every build or other long command (a stale lock is how the next
+   session knows you are gone).
 4. **Git.** `git fetch origin`, `git status -sb`.
    - Uncommitted changes (a session that hit its limit mid-step): read
      `git diff --stat`, the diff and the log below. If they are a finished,
