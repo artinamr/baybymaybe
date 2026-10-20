@@ -3,6 +3,7 @@ import { SERVICES } from "@/content/services";
 import { KIND_LABEL, WORK_ITEMS } from "@/content/work";
 import { PUBLISHED } from "@/content/blog";
 import { GLOSSARY } from "@/content/blog/glossary";
+import { minuteWords, storyMinutes } from "@/lib/storyLength";
 
 // Written once at build time into the static export (out/llms.txt).
 export const dynamic = "force-static";
@@ -36,7 +37,7 @@ export function GET() {
     `- [Methodology](${abs(PAGES.methodology)}): five stages, from first call to launch.`,
     ...STAGES.map((s) => `  - ${s.title} (${s.when}): ${s.line} ${s.happens}`),
     `- [Investment](${abs(PAGES.pricing)}): how projects are priced, what moves the price, and the running costs to plan for.`,
-    `- [The quiet leak](${abs(PAGES.story)}): a four-minute film (with a full transcript) about where a business loses customers without seeing it: a slow website (Google: 53% of mobile visits are likely to be abandoned if a page takes longer than 3 seconds to load), an inbox answered tomorrow (Harvard Business Review: firms that answered within an hour were nearly seven times as likely to qualify the lead), retyping between systems, and no follow-up; then the same business rebuilt as one system.`,
+    `- [The quiet leak](${abs(PAGES.story)}): a ${minuteWords(storyMinutes())} film (with a full transcript) about where a business loses customers without seeing it: a slow website (Google: 53% of mobile visits are likely to be abandoned if a page takes longer than 3 seconds to load), an inbox answered tomorrow (Harvard Business Review: firms that answered within an hour were nearly seven times as likely to qualify the lead), retyping between systems, and no follow-up; then the same business rebuilt as one system.`,
     "",
     "## Articles",
     ...PUBLISHED.map((a) => `- [${a.title}](${abs(PAGES.article(a.slug))}): ${a.short}`),
@@ -60,6 +61,7 @@ export function GET() {
     `- [All questions](${abs(PAGES.faq)})`,
     "",
     "## Optional",
+    `- [Every article in full](${abs(`${PAGES.home}llms-full.txt`)}): each article's short answer, sections, questions and sources, in Markdown`,
     `- [Blog index](${abs(PAGES.blog)}) and [RSS feed](${abs(PAGES.blog)}feed.xml)`,
     `- [Privacy policy](${abs(PAGES.privacy)})`,
     `- [Terms of use](${abs(PAGES.terms)})`,
