@@ -15,10 +15,12 @@
  *   2. Camera distance + principal-point y are solved by projecting the stone's
  *      real defining points through the K0 camera, so apex/culet land exactly on
  *      their screen fractions (perspective included, not the orthographic fit).
- *   3. The stone axis starts at wordLeft + 0.63·wordWidth, clamped to 0.55–0.66W,
- *      then moves to the NEAREST x where the occlusion rule holds: no glyph more
- *      than 55 % hidden, the I's stem visible on every row, and the stone still
- *      cutting at least one glyph. It is checked against a conservative
+ *   3. The stone axis starts at the centre of the last A (the stone stands IN
+ *      it: the A's legs frame the pavilion; round 27, the owner wanted it
+ *      further right), then moves to the NEAREST x where the occlusion rule
+ *      holds: no other glyph more than 55 % hidden, the A's feet showing, the
+ *      I's stem visible on every row, the stone inside the frame, and the stone
+ *      still cutting at least one glyph. It is checked against a conservative
  *      envelope — the widest idle yaw, the end of the Ken-Burns dolly and the
  *      principal-point parallax — so the rule holds for the whole idle loop,
  *      not just one frame.
@@ -153,6 +155,8 @@ const L2_TRACK = -0.028;
 
 /** Occlusion rule (SPEC §2). */
 const MAX_HIDDEN = 0.55;
+/** The A the stone stands in shows at least this much of its width across its feet. */
+const A_FEET_VISIBLE = 0.25;
 /** The I's stem keeps at least this fraction of its width on every row — "never fully hidden". */
 const I_MIN_VISIBLE = 0.2;
 /** Line clearance to the stone flank (SPEC §2: 0.025W). */
@@ -532,9 +536,9 @@ export function computeLayout(vw: number, vh: number): Layout {
   const l1CapTop = (mobile ? 0.142 : 0.2) * Hh; // phone: a clear 16 px under the eyebrow
   const l2Baseline = (mobile ? 0.28 : 0.43) * Hh;
   const eyebrowTop = (mobile ? 0.1 : 0.155) * Hh;
-  const culetY = mobile ? 0.71 : tablet ? 0.85 : 0.88;
-  const apexWanted = mobile ? 0.31 : tablet ? 0.15 : 0.12;
-  const axisRange: [number, number] = mobile ? [0.56, 0.72] : tablet ? [0.56, 0.7] : [0.55, 0.66];
+  const culetY = mobile ? 0.71 : tablet ? 0.87 : 0.91;
+  const apexWanted = mobile ? 0.31 : tablet ? 0.14 : 0.12;
+  const axisRange: [number, number] = [0.55, 0.88];
 
   /* ---- fonts ---- */
   const sansFallback = "Inter, system-ui, sans-serif";
@@ -571,7 +575,7 @@ export function computeLayout(vw: number, vh: number): Layout {
   });
 
   /* ---- 2. camera distance + principal-point y (perspective-exact) ---- */
-  const apexFloor = (navH + 24) / Hh;
+  const apexFloor = (navH + 26) / Hh;
   // The Ken-Burns dolly grows the stone ×(1/0.965) about the principal point, lifting
   // the apex; start it low enough that it still clears nav bottom + 24 px at the end.
   const kbLift = 1 / KB_MIN - 1;
@@ -611,7 +615,19 @@ export function computeLayout(vw: number, vh: number): Layout {
 
   /* ---- 3. stone axis + occlusion rule ---- */
   const iIndex = POT_TEXT.indexOf("I");
-  const prefAxis = mobile || tablet ? 0.64 : clamp((wordLeft + 0.63 * wordWidth) / W, axisRange[0], axisRange[1]);
+  // The stone stands IN the last A (round 27): its pavilion fills the A's
+  // counter and the A's legs frame it, so the word still reads and the stone
+  // stands well to the right of the lines. The A may be mostly hidden as long
+  // as its feet show; every other glyph keeps the 55 % rule.
+  const aIndex = POT_TEXT.lastIndexOf("A");
+  const aBox = glyphs[aIndex];
+  const aFeet: Box = { x0: aBox.x0, y0: aBox.y1 - 0.3 * (aBox.y1 - aBox.y0), x1: aBox.x1, y1: aBox.y1 };
+  // …and the L after it keeps its stem (the left quarter of its box).
+  const lBox = glyphs[glyphs.length - 1];
+  const lStemBox: Box = { x0: lBox.x0, y0: lBox.y0, x1: lBox.x0 + 0.25 * (lBox.x1 - lBox.x0), y1: lBox.y1 };
+  const prefAxis = clamp((aBox.x0 + 0.72 * (aBox.x1 - aBox.x0)) / W, axisRange[0], axisRange[1]);
+  let envRight = -Infinity;
+  for (let i = 0; i < envelope.length; i += 2) envRight = Math.max(envRight, envelope[i]);
 
   const evalAxis = (ax: number) => {
     const dx = ax * W;
@@ -620,11 +636,16 @@ export function computeLayout(vw: number, vh: number): Layout {
     let cuts = false;
     for (let g = 0; g < glyphs.length; g++) {
       const c = coverage(envelope, glyphs[g], dx, pad);
-      worst = Math.max(worst, c.hidden);
-      if (g === iIndex) iVis = c.minVisible;
+      if (g !== aIndex) worst = Math.max(worst, c.hidden);
+      // The I's stem at rest (beside the A it is in reach of the widest sway).
+      if (g === iIndex) iVis = coverage(rest, glyphs[g], dx, 0).minVisible;
       if (!cuts && coverage(rest, glyphs[g], dx, 0).hidden > 0.02) cuts = true;
     }
-    const violation = Math.max(0, worst - MAX_HIDDEN) + Math.max(0, I_MIN_VISIBLE - iVis) + (cuts ? 0 : 0.5);
+    const feet = coverage(rest, aFeet, dx, 0).minVisible;
+    const lStem = coverage(rest, lStemBox, dx, 0).minVisible;
+    const overEdge = Math.max(0, (envRight + dx + pad - (W - (mobile ? 6 : 0.5 * G))) / W);
+    const violation =
+      Math.max(0, worst - MAX_HIDDEN) + Math.max(0, I_MIN_VISIBLE - iVis) + Math.max(0, A_FEET_VISIBLE - feet) + Math.max(0, 0.5 - lStem) + overEdge + (cuts ? 0 : 0.5);
     return violation;
   };
 
@@ -723,7 +744,7 @@ export function computeLayout(vw: number, vh: number): Layout {
   const navBottom = navH + 24;
   if (apexPx < navBottom - 0.5) notes.push(`apex ${apexPx.toFixed(1)}px enters the nav band (< ${navBottom}px)`);
   if (!glyphs.some((g) => coverage(rest, g, dxAxis, 0).hidden > 0.02)) notes.push("stone overlaps no POTENTIAL glyph");
-  for (const g of glyphs) if (g.hidden > MAX_HIDDEN + 1e-3) notes.push(`glyph ${g.ch} ${(g.hidden * 100).toFixed(0)}% hidden`);
+  for (const g of glyphs) if (g !== aBox && g.hidden > MAX_HIDDEN + 1e-3) notes.push(`glyph ${g.ch} ${(g.hidden * 100).toFixed(0)}% hidden`);
   if (l2Size < (mobile ? 0.13 * W : l1Size) - 0.5) notes.push(`L2 shrunk to ${l2Size.toFixed(1)}px to clear the stone`);
 
   /* ---- per-chapter principal points (SPEC §6; mobile: 3D in a top band) ---- */

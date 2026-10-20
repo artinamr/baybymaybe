@@ -179,7 +179,8 @@ function keys(L: Layout): Key[] {
   return [
     { S: 0, pivot: [0, cY, 0], az: 0, el: 4, dist: heroD, fov: 30, pp: heroPP },
     // LOOK UP: the camera sinks and looks up at the stone…
-    { S: 0.3, pivot: [0, -0.3, 0], az: -22, el: -6, dist: heroD * 0.86, fov: 34, pp: mob ? [0.5, 0.36] : [0.6, 0.5] },
+    // (It sets off from where the hero stands it: in the A, on a wide screen.)
+    { S: 0.3, pivot: [0, -0.3, 0], az: -22, el: -6, dist: heroD * 0.86, fov: 34, pp: mob ? [0.5, 0.36] : [Math.max(0.6, 0.6 * heroPP[0] + 0.21), 0.5] },
     // …THE PASS: close, the stone filling the frame, the veins waking…
     { S: 0.64, pivot: [0, -0.1, 0], az: -62, el: 1, dist: heroD * 0.56, fov: 40, pp: [0.52, 0.5] },
     // …and settles behind the statement (the letters invert where it passes).

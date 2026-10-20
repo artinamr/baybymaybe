@@ -106,6 +106,8 @@ function relayout(force = false) {
     scroll.vh = h;
     layout.current = computeLayout(w, h);
     writeLayoutVars(layout.current);
+    // `?debug=safe`: the solve, asserts and all, for look-dev scripts.
+    if (location.search.includes("debug=safe")) (window as unknown as { __layout: Layout }).__layout = layout.current;
   }
   sections = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
   measure();

@@ -150,3 +150,4 @@ Backups: tags `pre-round26` (before 2026-10-20's story rebuild) and
 ## Log (one line per finished step: time UTC, what, commit)
 
 - 2026-10-20 07:00Z: story round 26 shipped (the drop; the town on its bay), c6e844d. Backups tagged.
+- 2026-10-20 08:02Z: home hero, step 1: the stone a little bigger on desktop (culet 0.88 to 0.91 H) and standing IN the last A of POTENTIAL (axis about 0.81 W at 1440, was 0.60; the A's legs frame the pavilion, the L keeps its stem); the look-up key sets off from there. Phones unchanged (the A cannot hold the stone at that width).
