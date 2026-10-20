@@ -28,6 +28,9 @@ for (const c of list) {
     window.__story.jump(c.P);
   }, c);
   await new Promise((r) => setTimeout(r, 1500));
+  // (Frozen look-dev holds the page's own transitions: finish them, so a still shows what the film shows.)
+  await page.evaluate(() => document.getAnimations().forEach((x) => { try { if (x.effect?.getComputedTiming().endTime !== Infinity) x.finish(); } catch {} }));
+  await new Promise((r) => setTimeout(r, 120));
   await page.screenshot({ path: `${out}/${c.name}.jpg`, type: "jpeg", quality: 84 });
 }
 await browser.close();

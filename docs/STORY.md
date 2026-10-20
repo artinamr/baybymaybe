@@ -246,8 +246,27 @@ message.
   the customer is answered on the other side in the same moment; at the end
   the business and its customers are one calm picture, and the owner has gone
   home.
+- **Shot like photographs** (round 27, second pass): inside each room, a
+  three-quarter angle at seated eye height, a longer lens (30 to 36 degrees)
+  and depth of field on the subject: Sam on a deep green sofa under a warm
+  lamp, the phone's light on Sam; the empty office from just inside the
+  shopfront, the laptop's glow on the empty chair, the shelves behind. The
+  cards are small and sit beside their device (the phone's card at Sam's
+  shoulder, the office's just over the laptop). Night is deep blue outside
+  and warm inside (the practicals up, the ceiling light off, the sky's light
+  in a closed room cut to under half, split toning without magenta); day is
+  warm and clean. The living room is dressed: a rust wool rug with a cream
+  border, three prints of a coloured landscape in black frames, books with
+  real spines.
+- **Each pane draws only the place it can see** (`world.ts` `render`): the
+  office pane, once inside, draws the workshop alone (no town, land, house or
+  sky), and Sam's pane never draws the workshop; the sky is left out of a
+  closed room. The new half's frames cost less than round 26's (median 20 ms
+  against 23.6 on the same integrated GPU, `tools/qa/story-gpu.mjs`). A
+  smaller shadow map for the panes was tried and backed out: resizing the
+  map stopped every shadow-receiving draw.
 - **Who asks on their own**: at 3am a house's window lights up across the
-  town (`world.ts` `callers`, the nearest real house to a point; `CALLERS`).
+  fence: Aroha next door (`world.ts` `callers`, the nearest real house to a point; `CALLERS`). On the Saturday the owner comes out onto Sam's deck to oil it, and the grey goes out of the boards (`script.ts` `nOil`).
 - Look-dev: `window.__story.world.paneOverride = [{ eye, at, fov, ppy }, null]`
   sets a pane's camera by hand; `tools/qa/story-cands.mjs` renders a list of
   such candidates.

@@ -27,7 +27,10 @@ await page.waitForFunction(() => !!window.__story, { timeout: 300000, polling: 5
 await new Promise((r) => setTimeout(r, 3500));
 for (const P of Ps) {
   await page.evaluate((P) => window.__story.jump(P), P);
-  await new Promise((r) => setTimeout(r, 1800));
+  await new Promise((r) => setTimeout(r, 2600));
+  // (Frozen look-dev holds the page's own transitions: finish them, so a still shows what the film shows.)
+  await page.evaluate(() => document.getAnimations().forEach((x) => { try { if (x.effect?.getComputedTiming().endTime !== Infinity) x.finish(); } catch {} }));
+  await new Promise((r) => setTimeout(r, 120));
   const file = `${out}/P${P.toFixed(2).padStart(5, "0")}.jpg`;
   await page.screenshot({ path: file, type: "jpeg", quality: 84 });
 }
