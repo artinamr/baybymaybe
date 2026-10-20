@@ -19,7 +19,7 @@ const CARDS = [
   ["blog-after-launch-ownership", "Blog · Websites", "Who owns your website? Domain, hosting, code and support", "", "/blog/after-launch-ownership.webp"],
   ["blog-what-is-seo", "Blog · Websites", "What is SEO, and what should a small business do first?", "", "/blog/what-is-seo.webp", "50% 50%"],
   ["blog-website-hacked", "Blog · Websites", "What to do if your website is hacked", "", "/blog/website-hacked.webp"],
-  ["blog-website-chat-assistant", "Blog · Automation", "Should our website have a chat assistant?", "", "/blog/website-chat-assistant.webp"],
+  ["blog-website-chat-assistant", "Blog · Automation", "Should our website have a chat assistant?", "", "/blog/website-chat-assistant.webp", "24% 50%"],
   ["blog-google-business-profile", "Blog · Websites", "How to get your business on Google Search and Maps", "", "/blog/google-business-profile.webp"],
   ["blog-diy-website-or-hire", "Blog · Websites", "Build your own website or hire someone: how to decide", "", "/blog/diy-website-or-hire.webp"],
   ["services-websites", "Services · Websites", "Your business,", "properly presented.", "/services/websites-wide.webp"],
