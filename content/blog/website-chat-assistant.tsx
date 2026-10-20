@@ -137,8 +137,10 @@ export default function Body() {
         items={[
           <>
             <strong>Answers only from approved material.</strong> Point the assistant at your written sheet and your
-            pages, and instruct it to say “I don’t know” rather than improvise. Have a person review what it produces
-            before an action is taken on it, as the Commissioner’s guidance recommends.
+            pages, and instruct it to say “I don’t know” rather than improvise. Its answers reach visitors before anyone
+            checks them, so the approved wording, the topics it must always hand to a person, a weekly read of the
+            conversations and a way to switch it off stand in for review. Where your business acts on what it produces,
+            the Commissioner’s guidance is for a person to review it first.
             <Cite n={1} />
           </>,
           <>
@@ -188,8 +190,8 @@ export default function Body() {
             details go.
           </>,
           <>
-            <strong>Nothing personal goes into the prompts:</strong> no health details, no payment information, no
-            scanned documents.
+            <strong>Keep personal details out:</strong> ask visitors not to share them in the chat, take contact details
+            through a form instead, and use a provider you have confirmed doesn’t keep or reuse the conversations.
             <Cite n={1} />
           </>,
           <>

@@ -261,7 +261,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "platforms",
     keywords: ["CRM integration", "website booking system", "connect website to CRM", "field mapping", "Unsolicited Electronic Messages Act", "New Zealand"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-connect"],
     faq: [
@@ -281,12 +281,12 @@ export const ARTICLES: ArticleMeta[] = [
     related: { services: ["platforms", "websites"], work: ["operations-portal", "practice-website"], articles: ["when-you-need-a-client-portal", "ai-automation-workflows"] },
     sources: [
       {
-        title: "Principle 3: Collection of information from the individual",
+        title: "Principle 3: Collection of information directly from subject (what to tell the individual)",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/3/",
         accessed: CHECKED_1012,
       },
-      { title: "Spam: three steps", publisher: "Department of Internal Affairs", url: "https://www.dia.govt.nz/Spam-Three-Steps", accessed: CHECKED_1012 },
+      { title: "Three steps to ensure you are not spamming", publisher: "Department of Internal Affairs", url: "https://www.dia.govt.nz/Spam-Three-Steps", accessed: CHECKED_1012 },
       {
         title: "Principle 5: Storage and security of information",
         publisher: "Office of the Privacy Commissioner",
@@ -800,7 +800,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "automation",
     keywords: ["chatbot for website", "should i add a chatbot", "ai chat assistant for business", "website live chat", "ai assistant small business nz", "chatbot privacy"],
     published: "2026-10-08",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-chat"],
     faq: [
@@ -814,7 +814,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "Is a chatbot bad for privacy?",
-        a: "It depends on the design. Keep personal information out of the prompts, use a tool you have confirmed doesn’t retain or disclose what it is given, tell visitors plainly, and have a person review what it says before anyone acts on it. The Privacy Commissioner also expects a privacy impact assessment first.",
+        a: "It depends on the design. Ask visitors not to share personal details in the chat and take them through a form, use a tool you have confirmed doesn’t keep or disclose what it is given, tell visitors plainly, and read the conversations regularly: a live assistant answers before anyone can check it. The Privacy Commissioner also expects a privacy impact assessment first.",
       },
     ],
     related: { services: ["ai-automation"], work: ["enquiry-desk"], articles: ["ai-automation-workflows", "what-is-seo"] },
