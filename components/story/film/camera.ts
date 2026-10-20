@@ -169,9 +169,6 @@ export const KEYS: Key[] = [
 /** Sam on the sofa, through the open sliders (the phone's page lifted beside them). */
 const A_SOFA_EYE = fix(-44.25, 1.38, 18.45);
 const A_SOFA_AT = fix(-41.9, 1.15, 15.6);
-/** Sam's garden by day: the deck (old, then new), Sam on it with the phone. */
-const A_DECK_EYE = fix(-46.9, 1.3, 27.4);
-const A_DECK_AT = fix(-43.05, 1.3, 21.7);
 /** 3am: up out of Sam's garden over the sleeping town, where one window lights up (Aroha's, next door). */
 const A_NIGHT_EYE = fix(-38, 17, 47);
 const A_NIGHT_AT = fix(-33.5, 1.5, 17.5);
@@ -201,13 +198,12 @@ export const KEYS_A: Key[] = [
   A(20.9, fix(-44.3, 2.2, 23.0), fix(-42.2, 1.3, 17.0), 32, { dof: 0.1 }),
   A(21.0, fix(-45.0, 9.0, 30.0), fix(-36, 1.5, 18), 32, { dof: 0 }),
   ...still(21.18, 0.12, A_NIGHT_EYE, A_NIGHT_AT, 30, { dof: 0.25 }),
-  A(21.52, fix(-47.0, 8.0, 33.0), fix(-43, 1.2, 22), 32, { dof: 0 }),
+  // (Shut in the gap as the night runs to morning, the camera moves inside: two keys a hair apart.)
+  A(21.439, A_NIGHT_EYE, A_NIGHT_AT, 30, { dof: 0.25 }),
+  A(21.441, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
   // The garden by day: the old deck; the quote accepted; the build; a year; the reminder.
-  ...still(22.4, 0.44, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
-  // (Shut in the gap, the camera moves inside: two keys a hair apart.)
-  A(22.839, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
-  A(22.841, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
-  ...still(24.4, 1.5, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
+  // The mornings and the days: Sam's room from inside, out through the sliders to the deck.
+  ...still(24.4, 2.9, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
   // The Saturday (you come and oil the deck) and six o'clock: the garden still.
   ...still(26.6, 0.62, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
   // Out through the sliders, then up and back into the one picture (clear of the garden tree).

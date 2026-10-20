@@ -1755,7 +1755,7 @@ export class World {
       const sky = !room;
       const inside = room;
       // (Sam's room by day: the shadows cover the room and the deck, so the sun through the windows lays its shapes.)
-      const roomDay = i === 0 && c.sub < 0.05 && P0 > 22.84 && P0 < 27.3;
+      const roomDay = i === 0 && c.sub < 0.05 && P0 > 21.44 && P0 < 27.3;
       v.before = () => {
         if (roomDay) this.sky.aimShadow(H(-2.4, 1.0, -3.6), 6.5);
         else this.sky.aimShadow(c.at, r);

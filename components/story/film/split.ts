@@ -24,12 +24,12 @@ export const splitOn = (P: number) => P >= SPLIT.open[0] && P < SPLIT.close[1];
 export type SplitState = { on: boolean; open: number; at: number };
 
 /** Sam's pane turned like a page: closing, shut, shut, open again (P). Its camera changes while it is shut. */
-export const TURN_A = [22.68, 22.8, 22.88, 23.0] as const;
+export const TURN_A = [21.3, 21.4, 21.48, 21.6] as const;
 
 export function splitAt(P: number, out: SplitState = { on: false, open: 0, at: 0.5 }): SplitState {
   out.on = splitOn(P);
   out.open = out.on ? smoother(range(P, SPLIT.open[0], SPLIT.open[1])) * (1 - smoother(range(P, SPLIT.close[0], SPLIT.close[1]))) : 0;
-  // (During the build's day Sam's pane folds shut into the gap and opens again on a new shot: a page turned.)
+  // (As the night runs to morning Sam's pane folds shut into the gap and opens again inside the room: a page turned.)
   const fold = smoother(range(P, TURN_A[0], TURN_A[1])) * (1 - smoother(range(P, TURN_A[2], TURN_A[3])));
   out.at = 0.5 * (1 - fold);
   // (As the pane shuts, its gap goes with it: the other pane fills the page.)
