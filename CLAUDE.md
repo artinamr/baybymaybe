@@ -635,6 +635,41 @@ rebuild").**
   look-dev frame kept the first capture).
 - **Round 25 (a system of light over the town) was REJECTED.**
 
+**ROUND 27 (story, 2026-10-20/21 — "too moving from one side to another and
+too uncreative ... step up that game"; worked overnight on story-r27).**
+- **The new way is BOTH SIDES** (docs/STORY.md "The new way: both sides"):
+  after the rewind (one still frame over the town) the picture divides along
+  a gap of the page's paper into two locked-off shots of the same moment:
+  Sam's living room (pane A: left, or the top on a phone) and the office
+  (pane B: right, or the bottom). The office's laptop wakes in the empty room
+  and lifts its screen as a small card over the desk (the reply, the week,
+  3am, the question kept for you, the quote, the invoice, the review, the
+  reminder, the day); Sam's phone lifts beside Sam. The words sit under pane
+  B. At six a year on both panes rise back into one picture of the town at
+  dusk as the gap closes. The drop (drop.ts, journey.ts, gather.ts) is
+  deleted; never bring it back, nor a camera chasing anything.
+- Files: `film/split.ts` (the gap over P, the panes' rects), `camera.ts`
+  `PANE_KEYS` and `paneShare` (a pane's share of the one picture, the `sub`
+  channel), `post.ts` `View` (each pane into its part of the HDR target;
+  per-pane vignette and depth of field; no bloom across the gap; the gap in
+  paper), `world.ts` `office` and `render` (each pane's shadows via
+  `sky.aimShadow`, its own sky and environment), `ui.ts` `office*` (large
+  type for the office's card).
+- **Each pane draws only the place it can see** (the office pane inside its
+  room: the workshop alone; Sam's pane: never the workshop). That is what
+  makes two views cheap: the new half's GPU median is 20 ms against round
+  26's 23.6 on the same machine (`tools/qa/story-gpu.mjs`, A/B against the
+  live site). Never resize a shadow map mid-film: it stopped every
+  shadow-receiving draw.
+- Look-dev: `window.__story.world.paneOverride` and `officeTo`, rendered by
+  `tools/qa/story-cands.mjs`; frozen stills hold the page's CSS transitions,
+  so the stills tools finish them first. The checks fly the panes
+  (`story-camera.mjs`) and project each pane's cards into its rect
+  (`story-overlap.mjs`).
+- Shipping to master from the overnight session was refused by its
+  permission checks (a production deploy): story-r27 needs the owner's
+  approval to go live.
+
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**
 One polished obsidian stone, shaped from the Nerodyn mark, fractured into 40
