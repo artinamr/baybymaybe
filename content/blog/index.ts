@@ -1580,7 +1580,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "Is a chatbot bad for privacy?",
-        a: "It depends on the design. Ask visitors not to share personal details in the chat and take them through a form, use a tool you have confirmed doesn’t keep or disclose what it is given, tell visitors plainly, and read the conversations regularly: a live assistant answers before anyone can check it. The Privacy Commissioner also expects a privacy impact assessment first.",
+        a: "It depends on the design. Ask visitors not to share personal details in the chat and take them through a form, use a tool you have confirmed keeps conversations only for you and doesn’t disclose them or use them to train its AI, tell visitors plainly, and read the conversations regularly: a live assistant answers before anyone can check it. The Privacy Commissioner also expects a privacy impact assessment first.",
       },
     ],
     sources: [

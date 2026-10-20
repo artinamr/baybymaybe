@@ -43,8 +43,8 @@ export default function Body() {
           <strong>Answering:</strong> it replies from your approved information.
         </li>
         <li>
-          <strong>Collecting:</strong> it takes names, contact details or job details for your team. That’s personal
-          information, so <a href="#privacy">the privacy part</a> applies in full.
+          <strong>Collecting:</strong> it gathers names, contact details or job details for your team, best through a
+          form it links to. That’s personal information, so <a href="#privacy">the privacy part</a> applies in full.
         </li>
         <li>
           <strong>Acting:</strong> it books, changes an order or issues a refund. Let it offer, but have the visitor
@@ -71,7 +71,7 @@ export default function Body() {
         <li>Make up a price, a promise or a policy.</li>
         <li>Give health, legal or financial advice.</li>
         <li>Confirm a booking, refund or discount your systems haven’t.</li>
-        <li>Ask for health, payment or other personal details.</li>
+        <li>Ask for health or payment details, or take other personal details in the chat itself.</li>
         <li>Pretend to be a person, or be the only way to reach you.</li>
       </ul>
 
@@ -228,7 +228,8 @@ export default function Body() {
           </>,
           <>
             <strong>Keep personal details out:</strong> ask visitors not to share them in the chat, take contact details
-            through a form instead, and use a provider you have confirmed doesn’t keep or reuse the conversations.
+            through a form instead, and use a provider you have confirmed keeps the conversations only for you, for the
+            period you set, and doesn’t disclose them or use them to train its AI.
             <Cite n={1} /> The NCSC’s advice for chatbots is to collect only what is essential.
             <Cite n={3} />
           </>,
