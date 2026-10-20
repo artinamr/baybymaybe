@@ -165,7 +165,8 @@ export default function Body() {
             t: "Tell the people affected",
             b: (
               <p>
-                If the breach is notifiable, as soon as practicable.
+                If the breach is notifiable, as soon as practicable, not once the clean-up is done. The Act allows a
+                delay only while telling them would risk the security of the information more than it helps them.
                 <Cite n={12} />
               </p>
             ),
@@ -424,12 +425,13 @@ export default function Body() {
         <li>
           <strong>First day.</strong> The way in was an ordering plug-in two versions out of date, and the new account
           opened the orders: names, phone numbers, pickup times. Unable to rule out serious harm (scam texts naming the
-          café, say), the owner notifies the Commissioner that afternoon, reports to the NCSC and calls the insurer.
+          café, say), the owner notifies the Commissioner that afternoon, then emails the affected customers everything
+          the Act requires, including a warning about scam messages. The owner also reports to the NCSC and calls the
+          insurer.
         </li>
         <li>
           <strong>First week.</strong> The host restores a backup from before the account appeared, updates it and
-          removes three unused plug-ins. The owner asks Google for a review, then emails the affected customers
-          everything the Act requires, including a warning about scam messages.
+          removes three unused plug-ins. The owner asks Google for a review.
         </li>
       </ul>
 
