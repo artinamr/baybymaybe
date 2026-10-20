@@ -64,3 +64,6 @@ dev-err.log
 # heavy source models (stripped copies live in public/)
 heart_in_glass.glb
 crystal.glb
+
+# overnight runs (docs/AUTORUN.md): the lock and notes stay local
+/.autorun/
