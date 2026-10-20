@@ -3,13 +3,15 @@ import { H2, Callout, Check, Steps, Cite } from "@/components/blog/Prose";
 import { Term } from "@/components/blog/Term";
 
 export const toc = [
-  { id: "what-it-is", title: "What a Business Profile is" },
+  { id: "what-it-is", title: "What it is, and who can have one" },
   { id: "add-or-claim", title: "Add or claim yours" },
   { id: "verification", title: "Getting verified" },
   { id: "fill-in", title: "What to fill in first" },
   { id: "local-ranking", title: "How local ranking works" },
-  { id: "reviews", title: "Reviews: asking and replying" },
-  { id: "keep-it-working", title: "Keeping it working" },
+  { id: "reviews", title: "Reviews: asking, replying and the rules" },
+  { id: "problems", title: "When it goes wrong" },
+  { id: "example", title: "An example: a mobile dog groomer" },
+  { id: "keep-it-working", title: "Keeping it right: a checklist for today" },
   { id: "yours", title: "How we’d look at yours" },
 ];
 
@@ -17,30 +19,33 @@ export default function Body() {
   return (
     <>
       <p>
-        When someone searches for a plumber, a physio or a café “near me”, the map and the business cards beside the
-        results come from <Term id="google-business-profile">Google Business Profile</Term>. Setting one up costs
-        nothing. Check that your business is eligible, claim or add the profile, then work through verification and
-        the details customers need.
+        To get your business on Google Search and Maps, set up its free{" "}
+        <Term id="google-business-profile">Google Business Profile</Term>: the listing Google shows on the map and
+        beside its results when someone nearby searches for a plumber, a physio or a café. Check you qualify, claim or
+        add the profile, get it verified, then keep its details true, because customers act on them.
       </p>
 
-      <H2 id="what-it-is">What a Business Profile is</H2>
+      <H2 id="what-it-is">What it is, and who can have one</H2>
       <p>
-        A Business Profile lets you manage information about your business on Google Search and Maps: your name,
-        hours, address or service area, phone, web address, photos and services. It also brings customer reviews
-        together. Managing a profile is free, though Google can use other sources to update its information.
+        A Business Profile lets you manage how your business shows up on Google Search and Maps: your name, hours,
+        address or service area, phone, website, photos and services, and the reviews customers leave. It’s free, and
+        Google also updates profiles from other sources, such as user reports, so check yours even if you set it up
+        years ago.
         <Cite n={1} />
       </p>
       <p>
-        Not every business can have one. Eligible businesses generally meet customers in person: a shop, a clinic,
-        a workshop customers visit, or a trade that travels to them.
-        <Cite n={1} /> A business that sells only online, with no premises and no visits, doesn’t qualify; its place
-        is earned in the ordinary search results instead (see <a href={PAGES.article("what-is-seo")}>what SEO involves</a>).
+        Only businesses that make face-to-face contact with customers are eligible: a shop, a clinic, a workshop
+        customers visit, or a trade that travels to them.
+        <Cite n={1} /> Virtual offices and rented mailing addresses aren’t eligible.
+        <Cite n={2} /> If you sell only online, you can’t have a profile; your place is earned in the ordinary search
+        results instead (see <a href={PAGES.article("what-is-seo")}>what SEO involves</a>).
       </p>
-      <Callout title="It is not an ad, and it is not automatic">
+      <Callout title="Yours may already exist">
         <p>
-          A profile can exist for your business before you ever touch it, because anyone can add a place to Google’s
-          map. Until you claim and verify it, you don’t control what it says. Claiming it is what puts it in your
-          hands.
+          Google Maps users can add missing places to the map, and a place shows publicly once it’s added.
+          <Cite n={3} /> So a listing for your business may be there already, with details you didn’t write. Google
+          warns that unclaimed locations make a business more vulnerable to hijacking.
+          <Cite n={4} /> Claiming and verifying it puts it in your hands.
         </p>
       </Callout>
 
@@ -48,12 +53,11 @@ export default function Body() {
       <Steps
         items={[
           {
-            t: "Search Google Maps for your business’s name and city",
+            t: "Search Google Maps for your business’s name and town",
             b: (
               <p>
-                If a listing appears, it already exists in some form, and your job is to claim it: choose “Claim this
-                business”, then “Manage now”.
-                <Cite n={2} />
+                If a listing appears, choose “Claim this business”, then “Manage now”.
+                <Cite n={5} /> If someone else already controls it, see <a href="#problems">when it goes wrong</a>.
               </p>
             ),
           },
@@ -61,182 +65,351 @@ export default function Body() {
             t: "If nothing appears, add your business",
             b: (
               <p>
-                Google’s page for that is business.google.com/add, where “Add your business to Google” starts the
-                same flow: name, address or service area, category, and contact details.
-                <Cite n={2} />
+                Go to business.google.com/add and choose “Add your business to Google”. It asks for the name, the
+                address or service area, the category and contact details.
+                <Cite n={5} />
               </p>
             ),
           },
           {
-            t: "Sign in with an account the business owns",
+            t: "Sign in with an account the business controls",
             b: (
               <p>
-                A profile needs a Google Account.
-                <Cite n={1} /> Our advice: use one tied to your business email rather than a personal account only
-                one person can reach, and turn on two-step verification while you are there.
+                You need a Google Account.
+                <Cite n={1} /> Our advice: use one tied to your business email, not a personal account only one person
+                can reach. Turn on <Term id="two-factor">two-step verification</Term>, as Google suggests.
+                <Cite n={4} /> Own Your Online recommends an authenticator app, token or physical key, as codes sent by
+                text or email can be intercepted.
+                <Cite n={6} />
               </p>
             ),
           },
           {
-            t: "Verify (next section)",
+            t: "Verify it",
             b: (
               <p>
-                Until the profile is verified, you can’t edit what the public sees. This is the step that takes days
-                or weeks, so start it before you need the profile.
+                It can take days or weeks (see <a href="#verification">getting verified</a>), so start before you need
+                the profile.
               </p>
             ),
           },
           {
-            t: "Fill in everything, then keep it true",
+            t: "Fill it in, then keep it true",
             b: (
               <p>
-                Add your hours, services, photos and a link to your site. Complete, accurate information helps
-                Google understand the business and helps customers decide whether to visit.
-                <Cite n={3} />
+                Google says businesses with complete and accurate information are more likely to show up in local
+                search results.
+                <Cite n={7} />
               </p>
             ),
           },
         ]}
       />
       <p>
-        Two rules catch people out. There should be only one profile per business, so don’t create a second because
-        the first one is in an old staff member’s name.
-        <Cite n={4} /> Ask for ownership instead: Google sends your request to the current owner, who has three days
-        to respond; if they don’t, you may be able to claim the profile.
-        <Cite n={5} /> And if you work from home and travel to customers, set the profile up as a service-area
-        business rather than showing your street address.
-        <Cite n={4} />
+        Two rules catch people out. Keep to one profile per business: Google says there should be only one, as more
+        than one can cause problems with how your information shows on Maps and Search.
+        <Cite n={2} /> And if you work from home and travel to customers, set a service area and remove your home
+        address from the profile.
+        <Cite n={8} />
       </p>
 
       <H2 id="verification">Getting verified</H2>
       <p>
-        Verification proves to Google that you speak for the business. The method is chosen by Google and can’t be
-        swapped: depending on the business it may be a video, a code by phone, text or email, or a postcard.
-        <Cite n={6} />
+        Verification is how Google checks that you really run the business. Google chooses the method, and you can’t
+        change it: depending on the business, it may be a video, a code by phone, text or email, or a postcard.
+        <Cite n={9} />
       </p>
       <ul>
         <li>
-          <strong>Video, when offered.</strong> Google recommends this option when it is available.
-          <Cite n={6} /> You record where the business is (street signs, nearby landmarks), that it exists (the sign,
-          the van, the tools or equipment) and that you run it, such as opening the till or reaching areas only staff
-          can. It must be one live, unedited recording of at least 30 seconds, made and uploaded on a mobile device,
-          with no bank, tax or ID numbers and no other people’s faces in it.
-          <Cite n={7} />
+          <strong>Video, when it’s offered.</strong> Google recommends it.
+          <Cite n={9} /> It must be one live, unedited recording of at least 30 seconds with no breaks, made and
+          uploaded on a mobile device through your Business Profile. Keep bank, tax and ID numbers, and other people’s
+          faces, out of shot.
+          <Cite n={10} />
         </li>
         <li>
-          <strong>A postcard, if it comes to that.</strong> Most codes arrive within 14 days, and the code expires
-          after 30 days.
-          <Cite n={6} />
+          <strong>What to film.</strong> Where the business is (street signs or nearby landmarks), that it exists (its
+          name on a permanent sign or, if you travel to customers, your tools and equipment) and that you run it
+          (opening the till, an area only staff can reach, or unlocking your branded van).
+          <Cite n={10} />
         </li>
         <li>
-          <strong>Waiting for a postcard code.</strong> Don’t change the business name, address or category while
-          waiting for it: those changes invalidate the code. Requesting a second code invalidates the first.
-          <Cite n={6} />
+          <strong>A postcard.</strong> Most codes arrive within 14 days, and codes expire after 30 days. While you wait,
+          Google asks you not to edit the business name, address or category, and not to request a new code.
+          <Cite n={9} />
         </li>
         <li>
-          <strong>Then a review.</strong> After you apply, Google says review takes up to five business days, and a
-          confirmation email arrives when it is done.
-          <Cite n={6} />
+          <strong>Then a review.</strong> Verification reviews take up to five business days, and Google emails you
+          when your business is verified.
+          <Cite n={9} />
         </li>
       </ul>
+      <p>
+        Changing the business name after verification might mean verifying again, and moving to a new address means
+        you must.
+        <Cite n={11} />
+      </p>
 
       <H2 id="fill-in">What to fill in first</H2>
-      <p>
-        Google says complete and accurate information makes a business more likely to appear in local results.
-        <Cite n={3} /> Work through these before you polish anything else:
-      </p>
+      <p>Work through these before you polish anything else.</p>
       <ul>
         <li>
-          <strong>Hours, including the odd ones.</strong> Public holidays, the Saturday you close early, the season
-          you shut. Wrong hours are the fastest way to send a customer to a closed door.
+          <strong>The name on your sign.</strong> Google asks for your business’s real-world name, and says including
+          unnecessary information in it isn’t permitted and could get the profile suspended.
+          <Cite n={2} /> So “Smith Plumbing”, not “Smith Plumbing Emergency Plumber Auckland”.
         </li>
         <li>
-          <strong>The right category, then the services.</strong> The one category that says what the business is,
-          then the list of services or products with prices where you can.
+          <strong>As few categories as possible.</strong> Google asks for as few as you need to describe your core
+          business.
+          <Cite n={2} /> Pick the one that says what you are, then list your services.
         </li>
         <li>
-          <strong>Photographs that look like today.</strong> The front of the premises, the team at work, the
-          vehicles. Use clear, recent photographs that show customers what to expect.
+          <strong>Hours, including the odd ones.</strong> Set your regular hours, then special hours for public
+          holidays and closures of up to six days in a row. Google suggests confirming holiday hours even when they
+          match your usual ones, and marking the business temporarily closed for seven days or more.
+          <Cite n={12} />
         </li>
         <li>
-          <strong>A link to the page that helps next,</strong> usually your booking or contact page, and a phone
-          number a human answers.
+          <strong>A description in your own words.</strong> Up to 750 characters, about the business rather than
+          promotions, prices or sales, and with no web addresses.
+          <Cite n={11} />
         </li>
         <li>
-          <strong>A description in your own words,</strong> written for a customer skimming on a phone.
+          <strong>Photos that look like today.</strong> At least three each of the outside, the inside, your work and
+          your team, in focus and well lit, without heavy filters or AI changes.
+          <Cite n={13} />
+        </li>
+        <li>
+          <strong>A phone number and website that reach you.</strong> Give a number that connects to your business,
+          and no number or web address that redirects people elsewhere.
+          <Cite n={2} /> Link the page that helps next, usually booking or contact.
         </li>
       </ul>
+      <Callout title="Dates to set special hours for">
+        <p>
+          Labour Day is Monday 26 October 2026, Christmas Day Friday 25 December 2026 and Matariki Friday 25 June 2027.
+          Each region also has its own anniversary day: Canterbury’s is Friday 13 November 2026, Wellington’s Monday 25
+          January 2027 and Auckland’s Monday 1 February 2027. Employment New Zealand lists them all, and suggests
+          checking regional dates with your local council.
+          <Cite n={14} />
+        </p>
+      </Callout>
 
       <H2 id="local-ranking">How local ranking works</H2>
       <p>
-        Google says local results depend mainly on relevance, distance and popularity.
-        <Cite n={3} /> Relevance is how well the profile matches the search, which clear business details can help.
-        Distance is how far the business is from the person searching.
-        Popularity is how well known the business is, and Google counts the reviews it has and the websites that link
-        to it.
+        Google says local results are mainly based on relevance, distance and popularity.
+        <Cite n={7} /> Relevance is how well your profile matches the search, so complete, detailed information helps.
+        Distance is how far you are from the person searching.
       </p>
       <p>
-        You cannot pay Google for a better local ranking.
-        <Cite n={3} /> If someone promises a particular map position, ask what work they will do and how they can
-        support that promise.
+        Popularity, which Google’s own heading calls prominence, is how well known the business is. Google points to how
+        many websites link to it and how many reviews it has, and says more reviews and positive ratings can help.
+        <Cite n={7} />
+      </p>
+      <p>
+        You can’t buy a better place: Google says there’s no way to request or pay for a better local ranking.
+        <Cite n={7} /> You can’t change distance either, which is why a business across town can outrank you for
+        someone searching near it. If someone promises you a map position, ask what work they’ll do and how they
+        could know.
       </p>
 
-      <H2 id="reviews">Reviews: asking and replying</H2>
+      <H2 id="reviews">Reviews: asking, replying and the rules</H2>
       <p>
-        Make asking for a review part of finishing a job. Google lets you share a review link or a QR code
-        customers can scan.
-        <Cite n={8} /> Asking everyone is fine. Paying, discounting or gifting in exchange for reviews is not:
-        Google prohibits offering incentives for posting or changing a review, or removing a negative one.
-        <Cite n={8} />
+        Ask every customer, as part of finishing the job. You can ask customers to visit a Google link or scan a QR
+        code, and they must be signed in to a Google Account to leave a review.
+        <Cite n={15} />
+      </p>
+      <p>Google’s rules are strict:</p>
+      <ul>
+        <li>
+          <strong>No incentives.</strong> Offering free or discounted goods or services in exchange for reviews is
+          strictly prohibited,
+          <Cite n={15} /> and so is any incentive to change or remove a negative review.
+          <Cite n={16} />
+        </li>
+        <li>
+          <strong>Ask everyone, not only the happy ones.</strong> Google’s policy bans discouraging negative reviews or
+          selectively asking for positive ones, asking staff to collect a set number of reviews, and requiring or
+          pressuring customers to review while they’re on the premises.
+          <Cite n={16} />
+        </li>
+        <li>
+          <strong>No conflicts of interest.</strong> That rules out reviews from staff, past staff, contractors,
+          competitors and family: Google’s policy counts each as a possible conflict of interest.
+          <Cite n={16} />
+        </li>
+      </ul>
+      <p>
+        New Zealand law backs this up. The Commerce Commission says reviews must be genuine and presented in a way that
+        doesn’t mislead the reader about the overall message the reviewer intended.
+        <Cite n={17} />
       </p>
       <p>
-        Replying matters too. Google encourages helpful replies, and reviews contribute to how well known it
-        considers a business.
-        <Cite n={3} /> For a critical review, address the issue calmly and offer a way to resolve it privately.
+        In December 2025 the District Court found The TV Shop guilty on Fair Trading Act charges; among other things,
+        its staff had written positive “customer” reviews.
+        <Cite n={18} /> In 2026 it was ordered to pay $1,104,000 for conduct that included those reviews and holding
+        back reviews of three stars or fewer unless the customer answered a follow-up email.
+        <Cite n={19} />
+      </p>
+      <p>
+        Reply to every review, good or bad. The reviewer is notified when you reply, and an approved reply is posted
+        publicly under their review.
+        <Cite n={20} /> Google’s tips: be direct and honest, address the reviewer by name, acknowledge their specific
+        feedback, and respond to criticism in good time.
+        <Cite n={15} />
+      </p>
+      <p>
+        Report a review only if it breaks Google’s rules, not because you disagree with it. Evaluation typically takes
+        several days, and if the review isn’t removed you can appeal once.
+        <Cite n={21} />
       </p>
 
-      <H2 id="keep-it-working">Keeping it working</H2>
-      <p>Once the profile is live, use this list for a regular check:</p>
+      <H2 id="problems">When it goes wrong</H2>
+      <p>Google’s own advice, problem by problem:</p>
+      <ul>
+        <li>
+          <strong>Someone else controls the profile:</strong> a former staff member, an old agency or a stranger.
+          Don’t create a second profile. At business.google.com/add, find the business, choose “Request Access” and
+          fill in the form. The current owner has three days to respond; if they don’t, you may be able to claim the
+          profile, though that option isn’t always available.
+          <Cite n={22} />
+        </li>
+        <li>
+          <strong>It has been suspended.</strong> Google may suspend or disable a profile that breaks its guidelines;
+          its owners and managers then can’t act on it. Fix what’s wrong, then appeal. You get one appeal, so attach
+          documents showing the profile’s name and address, such as a business registration, licence, tax certificate
+          or utility bill. Don’t create a new profile.
+          <Cite n={23} />
+        </li>
+        <li>
+          <strong>Someone asks for money.</strong> Google says it will never try to convince you to pay to maintain,
+          verify or reinstate your profile, and never asks for a one-time password or PIN.
+          <Cite n={4} /> Nor will it ask for payment information by phone or guarantee a special spot. Hang up, and
+          don’t press any buttons, even if a recording tells you to.
+          <Cite n={24} />
+        </li>
+        <li>
+          <strong>A sudden run of one- and two-star reviews, then a demand.</strong> That’s extortion. Don’t engage
+          with the people behind it or pay them: paying doesn’t guarantee the reviews come down. Gather evidence and
+          report it on Google’s extortion report form.
+          <Cite n={25} />
+        </li>
+        <li>
+          <strong>Someone who left still has access.</strong> Remove them under “People and access”,
+          <Cite n={26} /> and don’t approve access requests unless you know the person asking.
+          <Cite n={4} />
+        </li>
+      </ul>
+      <p>
+        For one location, all of this is work an owner can do, and the profile costs nothing. Paying someone makes most
+        sense when you have many locations, or a problem here that won’t shift.
+      </p>
+
+      <H2 id="example">An example: a mobile dog groomer</H2>
+      <p>
+        An illustration, not a client. A one-person business grooms dogs in customers’ driveways from a signwritten
+        van, and keeps the van at home in Lower Hutt.
+      </p>
+      <ul>
+        <li>
+          <strong>Eligible?</strong> Yes: it goes to its customers. It doesn’t serve them at home, so the home address
+          comes off the public profile.
+          <Cite n={8} />
+        </li>
+        <li>
+          <strong>Name and category.</strong> The name on the van and the invoices, with nothing added,
+          <Cite n={2} /> and the one category that says what it is.
+        </li>
+        <li>
+          <strong>Service area.</strong> Lower Hutt, Upper Hutt, Wellington and Porirua, entered as named areas
+          rather than a radius, and well within about two hours’ drive of base, which Google says the area
+          shouldn’t exceed.
+          <Cite n={8} />
+        </li>
+        <li>
+          <strong>Verification.</strong> If video is offered: a street sign near home, the clippers and the grooming
+          table, then unlocking the van.
+          <Cite n={10} />
+        </li>
+        <li>
+          <strong>Hours.</strong> Regular hours, then special hours for Labour Day, Christmas, New Year and Wellington
+          Anniversary Day.
+          <Cite n={14} />
+        </li>
+        <li>
+          <strong>Reviews.</strong> A card with the review QR code, left with every dog, with nothing offered in
+          return.
+          <Cite n={15} />
+        </li>
+        <li>
+          <strong>The website button.</strong> Straight to the booking page.
+        </li>
+        <li>
+          <strong>Measuring.</strong> Each month the owner reads the profile’s performance figures: calls, website
+          clicks and the searches people used to find it.
+          <Cite n={27} />
+        </li>
+      </ul>
+
+      <H2 id="keep-it-working">Keeping it right: a checklist for today</H2>
+      <p>Go through this list today, then again once a month.</p>
       <Check
         items={[
           <>
-            <strong>Hours checked each term,</strong> and after any change to openings, staffing or holidays. Update
-            the profile the day something changes.
+            <strong>Hours checked</strong> before every public holiday and after any change to opening times or
+            staffing. Update the profile the day something changes.
           </>,
           <>
-            <strong>One primary owner.</strong> A profile can have several owners but only one primary owner, and
-            each person needs their own Google Account.
-            <Cite n={9} /> Keep primary ownership with an account the business controls, so access does not depend on
-            one person’s phone.
+            <strong>The business holds primary ownership.</strong> A profile can have several owners but only one
+            primary owner, and each person needs their own Google Account.
+            <Cite n={26} /> Keep primary ownership with an account the business controls, the same rule as for your{" "}
+            <a href={`${PAGES.article("after-launch-ownership")}#owning`}>domain and hosting</a>.
           </>,
           <>
-            <strong>Access cleaned up</strong> when a staff member or contractor leaves: remove their access the same
-            day.
+            <strong>A second owner, added early.</strong> New owners and managers wait seven days before they can
+            manage some features,
+            <Cite n={26} /> so add one well before anyone leaves.
           </>,
           <>
-            <strong>Two-step verification on the account</strong> that owns the profile. Own Your Online recommends
-            authenticator apps or keys over codes by text.
-            <Cite n={10} />
+            <strong>Access removed</strong> the day someone leaves the business.
+            <Cite n={4} />
           </>,
           <>
-            <strong>Photos refreshed</strong> a few times a year, so the front of the business still matches the
-            front door.
+            <strong>Two-step verification</strong> on every account with access.
+            <Cite n={4} />
+            <Cite n={6} />
+          </>,
+          <>
+            <strong>Photos refreshed</strong> a few times a year, so the front of the business still matches the front
+            door.
           </>,
           <>
             <strong>Every review answered,</strong> good or bad, in good time.
-            <Cite n={8} />
+            <Cite n={15} />
           </>,
           <>
-            <strong>The web address tested monthly:</strong> the button still leads somewhere that works, on a phone.
+            <strong>The website button tested</strong> on a phone.
+          </>,
+          <>
+            <strong>The numbers read:</strong> calls, website clicks, direction requests and the searches that found
+            you. They’re there for verified profiles only, and the searches update at the start of each month.
+            <Cite n={27} />
+          </>,
+          <>
+            <strong>Apple Maps too.</strong> Apple’s free Apple Business service lets you customise your Apple Maps
+            place card with photos, hours and location details, and Apple lists brand and location management for New
+            Zealand.
+            <Cite n={28} />
+            <Cite n={29} />
           </>,
         ]}
       />
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        Your profile and your website should agree on hours, services and contact details. Send us your web address
-        for the free audit and we’ll look at the two together, including the pages visitors reach from the profile.
-        If those pages need work, that falls within our{" "}
+        Your profile and your website should agree on the name, hours, services and contact details. Send us your web
+        address for the free audit and we’ll check the two together, including the page the profile’s website button
+        opens and whether it makes the next step easy. If that page needs work, it falls within our{" "}
         <a href={PAGES.service("websites")}>websites service</a>.
       </p>
     </>
