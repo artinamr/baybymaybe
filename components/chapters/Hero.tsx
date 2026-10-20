@@ -141,19 +141,15 @@ export function Hero({ storyLabel }: { storyLabel: string }) {
         <h1 id="hero-title" className="hero-h1">
           <span className="sr-only">Maximise your digital potential</span>
           <span className="hl hl-1 intro-mask" aria-hidden style={d(560)}>
-            <span>Maximise</span>
+            <span data-t="Maximise" />
           </span>
           <span className="hl hl-2 intro-mask" aria-hidden style={d(660)}>
-            <span>your digital</span>
+            <span data-t="your digital" />
           </span>
           <span className="hl hl-3 intro-mask" aria-hidden style={d(760, { "--dur": "1100ms" })}>
             <span className="pot">
-              <span className="pot-outline" data-pot-outline>
-                POTENTIAL
-              </span>
-              <span className="pot-fill" data-pot-fill ref={fill}>
-                POTENTIAL
-              </span>
+              <span className="pot-outline" data-pot-outline data-t="POTENTIAL" />
+              <span className="pot-fill" data-pot-fill data-t="POTENTIAL" ref={fill} />
             </span>
           </span>
         </h1>

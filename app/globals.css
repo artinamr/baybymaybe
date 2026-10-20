@@ -560,6 +560,11 @@ html[data-intro-skip] .intro-mask > span {
   position: relative;
   display: inline-block;
 }
+/* The hero's visible words are drawn from data-t, so the h1 reads to search
+   engines and assistants as its one sentence (the sr-only text), not twice. */
+.hero-h1 [data-t]::before {
+  content: attr(data-t);
+}
 .pot-outline {
   color: transparent;
   -webkit-text-stroke: max(1px, 0.006em) var(--indigo);
