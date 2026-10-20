@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { evaluate, M0, plan } from "@/lib/choreo";
 import { blendPose, COL_C, fragTarget, fx, pose, poseMatrix, prepareFormations, prepared, STEPS, TOWER_BASE, type FormationCtx } from "@/lib/formations";
-import { CORE } from "@/lib/geo/types";
+import { CORE, STONE } from "@/lib/geo/types";
 import { getStone } from "@/lib/geo/crystal";
 import { fragTex } from "@/lib/fragTex";
 import { layout } from "@/lib/layout";
@@ -35,6 +35,11 @@ const devYaw = devNum("yaw");
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const INTRO_MS = 1500;
 const THREAD_MS = 1280; // 520 crown + 760 pavilion
+/** The invitation's glint: how long (s) it takes to run up the stone, and where it starts and ends along its direction (0.196, 0.976, 0.098) in the stone's own space, a little beyond the culet and the apex. */
+const SWEEP_S = 1.15;
+const sweepD = (p: readonly [number, number, number]) => 0.196 * p[0] + 0.976 * p[1] + 0.098 * p[2];
+const SWEEP_H0 = sweepD(STONE.culet) - 0.15;
+const SWEEP_H1 = sweepD(STONE.apex) + 0.15;
 const PULSE_MS = 1100;
 
 export function Director() {
@@ -94,6 +99,9 @@ export function Director() {
     introThreadFired: false,
     potFired: false,
     lastHoverThread: -10,
+    /** The hero's invitation: whether the pointer (or keyboard focus) was on the stone last frame, and its glint sweep. */
+    inviteWas: false,
+    sweepT0: -10,
     pulseT0: -1,
     pulseKind: 0,
     lastS: 0,
@@ -244,7 +252,26 @@ export function Director() {
       s.introThreadFired = true;
       s.thread = { ridge: frontLeftRidge(yaw), t0: time, dur: THREAD_MS, live: true };
     }
-    if (ui.hoverStone && time - s.lastHoverThread > 3 && !s.thread.live && !reduced) {
+    // The door to the story: the moment the pointer (or keyboard focus) comes
+    // onto the stone it answers — the thread runs down its ridge at once and a
+    // white glint sweeps up through the glass (each piece catches it in turn).
+    const invite = (ui.hoverStone || ui.focusStone) && S < 0.6;
+    if (invite && !s.inviteWas && !reduced) {
+      if (!s.thread.live) {
+        s.lastHoverThread = time;
+        s.thread = { ridge: frontLeftRidge(yaw), t0: time, dur: THREAD_MS, live: true };
+      }
+      if (time - s.sweepT0 > 1.6) s.sweepT0 = time;
+    }
+    s.inviteWas = invite;
+    // The glint: fast off the culet, slowing as it reaches the crown, then gone.
+    const sw = (time - s.sweepT0) / SWEEP_S;
+    if (sw >= 0 && sw < 1.2 && !still && !scroll.cut) {
+      const e = 1 - Math.pow(1 - Math.min(1, sw), 2);
+      u.sweepHead = SWEEP_H0 + (SWEEP_H1 - SWEEP_H0) * e;
+      u.sweepAmp = sw < 0.8 ? 1 : Math.max(0, 1 - (sw - 0.8) / 0.4);
+    } else u.sweepAmp = 0;
+    if (invite && time - s.lastHoverThread > 3 && !s.thread.live && !reduced) {
       s.lastHoverThread = time;
       s.thread = { ridge: frontLeftRidge(yaw), t0: time, dur: THREAD_MS, live: true };
     }
@@ -259,7 +286,7 @@ export function Director() {
       s.lastIdleThread = time;
       s.thread = { ridge: frontLeftRidge(yaw - cam.az), t0: time, dur: THREAD_MS * 1.8, live: true };
     }
-    s.hoverLight = lerp(s.hoverLight, ui.hoverStone ? 1 : 0, 1 - Math.exp(-dt / 0.13));
+    s.hoverLight = lerp(s.hoverLight, invite ? 1 : 0, 1 - Math.exp(-dt / 0.13));
     u.cursorLight *= 1 + 0.5 * s.hoverLight;
     if (s.thread.live) {
       const p = (time - s.thread.t0) / (s.thread.dur / 1000);

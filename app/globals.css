@@ -1696,8 +1696,12 @@ html[data-clip] #stage-frame {
   opacity: var(--ci-frame, 0);
 }
 
-/* The door to the story (/story/) is the stone itself: over it (hero only)
-   the pointer carries a small lens of frosted glass that reads "The story". */
+/* The door to the story (/story/) is the stone itself. Over it (hero only)
+   the pointer carries a lens of frosted glass that opens into an invitation:
+   a play disc, "Watch the story" and the film's length. The disc comes
+   first, under the pointer, and the words open out beside it. On a touch
+   screen the same invitation sits on the stone as a link (.stone-door), and
+   the keyboard finds it there too. */
 .stone-cursor {
   position: fixed;
   left: 0;
@@ -1705,57 +1709,145 @@ html[data-clip] #stage-frame {
   z-index: 70;
   pointer-events: none;
 }
-.stone-cursor-lens {
-  position: absolute;
-  left: 16px;
-  top: 14px;
+.stone-cursor-lens,
+.stone-door {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 9px 15px 9px 12px;
+  gap: 11px;
+  padding: 6px 18px 6px 6px;
   border-radius: 999px;
   white-space: nowrap;
-  font-size: 12.5px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
   color: var(--ink);
-  background: color-mix(in oklab, var(--paper) 58%, transparent);
-  -webkit-backdrop-filter: blur(12px) saturate(1.3);
-  backdrop-filter: blur(12px) saturate(1.3);
-  border: 1px solid color-mix(in oklab, var(--ink) 9%, transparent);
-  box-shadow: 0 12px 30px -16px color-mix(in oklab, var(--ink) 38%, transparent);
+  background: color-mix(in oklab, var(--paper) 64%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in oklab, white 60%, transparent) inset,
+    0 18px 40px -20px color-mix(in oklab, var(--ink) 45%, transparent);
+}
+.stone-cursor-lens {
+  position: absolute;
+  left: 14px;
+  top: 12px;
   opacity: 0;
-  transform: scale(0.55) translateY(8px);
-  transform-origin: 0 0;
+  transform: scale(0.42);
+  transform-origin: 23px 50%;
   transition:
-    opacity 240ms ease,
-    transform 520ms var(--ease-expo);
+    opacity 160ms ease-out,
+    transform 560ms var(--ease-expo);
 }
 html[data-stone-hover]:not([data-scrolled]) .stone-cursor-lens {
   opacity: 1;
   transform: none;
 }
-.stone-cursor-dot {
-  width: 6px;
-  height: 6px;
+/* The play disc: indigo, a white triangle, a slow ring of light breathing out. */
+.si-play {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: var(--indigo);
-  animation: lensPulse 1.8s var(--ease-expo) infinite;
+  box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--indigo) 70%, transparent);
+}
+.si-play svg {
+  width: 12px;
+  height: 12px;
+  fill: #fff;
+  margin-left: 2px;
+}
+.si-play::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: lensPulse 2.2s var(--ease-expo) infinite;
+}
+.si-text {
+  display: grid;
+  gap: 1px;
+  text-align: left;
+}
+.si-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.006em;
+}
+.si-meta {
+  font-size: 12px;
+  line-height: 1.2;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+/* The words open out from the disc, a beat after it. */
+.stone-cursor .si-text {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition:
+    opacity 260ms ease-out 70ms,
+    transform 620ms var(--ease-expo) 40ms;
+}
+html[data-stone-hover]:not([data-scrolled]) .stone-cursor .si-text {
+  opacity: 1;
+  transform: none;
 }
 html[data-stone-hover] {
   cursor: pointer;
 }
 @keyframes lensPulse {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--indigo) 55%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--indigo) 50%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 9px color-mix(in oklab, var(--indigo) 0%, transparent);
+    box-shadow: 0 0 0 12px color-mix(in oklab, var(--indigo) 0%, transparent);
   }
 }
+/* The door on the stone, a little under its girdle. */
+.stone-door {
+  position: absolute;
+  left: var(--hero-axis, 66%);
+  top: calc(var(--stone-top, 30vh) + 0.4 * (var(--stone-bottom, 74vh) - var(--stone-top, 30vh)));
+  translate: -50% -50%;
+  text-decoration: none;
+  transition:
+    opacity 500ms ease,
+    transform 700ms var(--ease-expo);
+}
+/* With a mouse it waits for the keyboard: hidden and out of the pointer's way
+   (the click is the stone's own), shown on keyboard focus. */
+@media (hover: hover) {
+  .chapter > .front a.stone-door {
+    opacity: 0;
+    transform: scale(0.94);
+    pointer-events: none;
+  }
+  .chapter > .front a.stone-door:focus-visible {
+    opacity: 1;
+    transform: none;
+    outline: 2px solid var(--indigo);
+    outline-offset: 4px;
+  }
+}
+/* On a touch screen it is the cue: it settles in after the intro, and leaves
+   once the page is scrolled. */
 @media (hover: none) {
   .stone-cursor {
     display: none;
+  }
+  .stone-door {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  html[data-intro="done"]:not([data-scrolled]) .stone-door {
+    opacity: 1;
+    transform: none;
+    transition-delay: 400ms;
+  }
+  html[data-scrolled] .chapter > .front a.stone-door {
+    pointer-events: none;
   }
 }
 
@@ -3302,9 +3394,17 @@ html[data-render] .stone-cursor {
 html:not([data-intro="wait"]) .ld-glint {
   animation: none;
 }
-html:not([data-stone-hover]) .stone-cursor-dot,
-html[data-scrolled] .stone-cursor-dot {
+html:not([data-stone-hover]) .stone-cursor .si-play::after,
+html[data-scrolled] .si-play::after {
   animation-play-state: paused;
+}
+@media (hover: hover) {
+  .stone-door:not(:focus-visible) .si-play::after {
+    animation-play-state: paused;
+  }
+}
+html[data-reduced] .si-play::after {
+  animation: none;
 }
 #field:not([data-haze])::after {
   animation-play-state: paused;

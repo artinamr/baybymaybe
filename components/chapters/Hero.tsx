@@ -3,19 +3,37 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { Section } from "./Section";
 import { Pill, GhostPill } from "@/components/chrome/Pills";
-import { bus, intro } from "@/lib/stores";
+import { bus, intro, ui } from "@/lib/stores";
 import { jumpToAudit } from "@/lib/scroll";
 import { PAGES } from "@/lib/content";
 
 const d = (ms: number, extra?: Record<string, string>) => ({ "--d": `${ms}ms`, ...extra }) as CSSProperties;
 
+/** The invitation's face: a play disc, "Watch the story" and the film's length. */
+function Invite({ label }: { label: string }) {
+  return (
+    <>
+      <span className="si-play" aria-hidden>
+        <svg viewBox="0 0 12 12" focusable="false">
+          <path d="M4 2.6v6.8L9.6 6z" />
+        </svg>
+      </span>
+      <span className="si-text" aria-hidden>
+        <span className="si-title">Watch the story</span>
+        <span className="si-meta">{label}</span>
+      </span>
+    </>
+  );
+}
+
 /**
- * Over the stone (hero only), the pointer carries a small lens of frosted
- * glass that reads "The story": the stone itself is the door to /story/. It
- * follows the pointer on a soft spring and scales in; it never shows anywhere
- * else.
+ * Over the stone (hero only), the pointer carries a lens of frosted glass
+ * that opens into an invitation, a play disc, "Watch the story" and the
+ * film's length: the stone itself is the door to /story/ (a click on it, see
+ * Stone.tsx). It follows the pointer on a soft spring and opens out from it;
+ * it never shows anywhere else.
  */
-function StoneCursor() {
+function StoneCursor({ label }: { label: string }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;
@@ -47,10 +65,34 @@ function StoneCursor() {
   return (
     <div className="stone-cursor" ref={ref} aria-hidden>
       <span className="stone-cursor-lens">
-        <span className="stone-cursor-dot" />
-        <span className="stone-cursor-label">The story</span>
+        <Invite label={label} />
       </span>
     </div>
+  );
+}
+
+/**
+ * The stone's door as a real link, on the stone. On a touch screen it is the
+ * quiet cue that shows there is a film behind the stone (a tap on the cue, or
+ * on the stone, opens it). With a mouse it stays out of the way until the
+ * keyboard reaches it: then it shows the same invitation and the stone
+ * answers as if the pointer were on it.
+ */
+function StoneDoor({ label, href }: { label: string; href: string }) {
+  const wake = (on: boolean) => {
+    ui.focusStone = on;
+    document.documentElement.toggleAttribute("data-stone-focus", on);
+  };
+  return (
+    <a
+      className="stone-door"
+      href={href}
+      aria-label={`Watch the story, ${label.toLowerCase()}`}
+      onFocus={(e) => wake(e.currentTarget.matches(":focus-visible"))}
+      onBlur={() => wake(false)}
+    >
+      <Invite label={label} />
+    </a>
   );
 }
 
@@ -61,7 +103,7 @@ function StoneCursor() {
  * thread of light runs down the stone and, where it crosses the word, the fill
  * wipes open outward from the stone (docs/SPEC.md §2–3).
  */
-export function Hero() {
+export function Hero({ storyLabel }: { storyLabel: string }) {
   const fill = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -138,7 +180,8 @@ export function Hero() {
           </GhostPill>
         </span>
       </div>
-      <StoneCursor />
+      <StoneDoor label={storyLabel} href={PAGES.story} />
+      <StoneCursor label={storyLabel} />
     </Section>
   );
 }

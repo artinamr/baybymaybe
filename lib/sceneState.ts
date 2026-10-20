@@ -131,6 +131,9 @@ export const sceneState = {
     threadRidge: -1,
     threadHead: 0,
     threadAmp: 0,
+    /** The hero's invitation: a white glint running up the stone's edges — head along the sweep direction in object space, amplitude 0..1. */
+    sweepHead: 0,
+    sweepAmp: 0,
     /** Global multiplier on cut-face glow (per-fragment glow comes from fragTex). */
     cutGlow: 0,
     /** Alpha fog, view-space depth (world units). */

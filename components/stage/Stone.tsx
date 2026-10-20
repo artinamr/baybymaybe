@@ -12,7 +12,6 @@ import { M0 } from "@/lib/choreo";
 
 import { bus, pointer, ready, ui } from "@/lib/stores";
 
-let clickBound = false;
 /** The story's page (PAGES.story, written out so the stage chunk doesn't import the site's registries). */
 const STORY_HREF = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/story/`;
 
@@ -143,6 +142,24 @@ export function Stone() {
     };
   }, []);
 
+  // The stone is the door to the story: a click or a TAP on it (in the hero)
+  // opens /story/. The raycast is at the event's own position, so a finger
+  // that never hovered finds it too.
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (sceneState.S > 0.4 || !sceneState.stone.visible) return;
+      if ((e.target as HTMLElement | null)?.closest("a, button, input, textarea, select, label, [role='dialog']")) return;
+      proxy.matrixWorld.copy(sceneState.stone.matrix);
+      ndc.set((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+      ray.setFromCamera(ndc, camera);
+      hits.length = 0;
+      proxy.raycast(ray, hits);
+      if (hits.length > 0) window.location.assign(STORY_HREF);
+    };
+    window.addEventListener("click", onClick);
+    return () => window.removeEventListener("click", onClick);
+  }, [camera, proxy, ray, ndc, hits]);
+
   useFrame(() => {
     syncObsidianUniforms();
     // The full glass's light fades up after the swap (instant when frozen).
@@ -182,15 +199,6 @@ export function Stone() {
         ui.hoverStone = on;
         bus.emit("stone:hover", { on });
         document.documentElement.toggleAttribute("data-stone-hover", on);
-        if (!clickBound) {
-          // The stone is the door to the story: a click on it (in the hero) opens /story/.
-          clickBound = true;
-          window.addEventListener("click", (e) => {
-            if (!ui.hoverStone || sceneState.S > 0.4) return;
-            if ((e.target as HTMLElement | null)?.closest("a, button, input, textarea")) return;
-            window.location.assign(STORY_HREF);
-          });
-        }
       }
     }
   }, PRIORITY.scene);

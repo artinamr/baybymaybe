@@ -64,6 +64,8 @@ export const ui = {
   hoverNode: -1,
   hoverEmail: false,
   hoverStone: false,
+  /** The hero stone's link has keyboard focus: the stone answers as if hovered. */
+  focusStone: false,
 };
 
 export type IntroState = "wait" | "run" | "done";

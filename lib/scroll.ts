@@ -61,6 +61,9 @@ function writeLayoutVars(L: Layout) {
     ["--cta-left", h.ctaLeft],
     ["--cta-right", h.ctaRight],
     ["--desc-width", h.descWidth],
+    // The stone at rest, apex to culet (its door to the story sits on it).
+    ["--stone-top", h.apexY * L.vh],
+    ["--stone-bottom", h.culetY * L.vh],
   ];
   for (const [k, v] of vars) if (Number.isFinite(v)) s.setProperty(k, px(v));
   s.setProperty("--hero-axis", `${(h.axisX * 100).toFixed(3)}%`);
