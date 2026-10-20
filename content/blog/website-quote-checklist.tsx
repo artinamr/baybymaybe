@@ -38,16 +38,16 @@ export default function Body() {
           <strong>How much is designed.</strong> Reusing a few layouts costs less than designing every page.
         </li>
         <li>
-          <strong>Who writes the words.</strong> Often the largest hidden job. Many quotes assume you’ll supply
-          everything, finished, on time.
+          <strong>Who writes the words.</strong> In our experience, often the largest hidden job: many quotes
+          assume you’ll supply everything, finished, on time.
         </li>
         <li>
           <strong>What it connects to.</strong> A booking system, a <Term id="crm">CRM</Term>, payments or accounting
           software each add work.
         </li>
         <li>
-          <strong>The standard.</strong> Speed on a phone, accessibility and testing take time; a low quote often leaves
-          them out.
+          <strong>The standard.</strong> Speed on a phone, accessibility and testing take time; in our experience, a low
+          quote often leaves them out.
         </li>
         <li>
           <strong>After launch.</strong> Hosting, updates, backups and support: in the quote, in another agreement, or

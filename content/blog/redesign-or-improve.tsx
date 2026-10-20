@@ -7,7 +7,7 @@ export const toc = [
   { id: "the-question", title: "The question behind the question" },
   { id: "sound", title: "Signs the foundations are sound" },
   { id: "rebuild", title: "Signs you need a rebuild" },
-  { id: "diagnosis", title: "A one-week diagnosis" },
+  { id: "diagnosis", title: "A one-week diagnosis you can do yourself" },
   { id: "fixes", title: "The fixes that pay first" },
   { id: "protect", title: "If you rebuild, protect what you’ve earned" },
   { id: "deciding", title: "Deciding, and pricing both" },

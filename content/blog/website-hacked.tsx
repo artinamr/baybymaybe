@@ -111,7 +111,7 @@ export default function Body() {
               <p>
                 If it’s a <Term id="privacy-breach">notifiable privacy breach</Term> (
                 <a href="#tell">the test is below</a>), the Privacy Commissioner asks to hear ideally within 72 hours
-                of you knowing, even if you’re still investigating.
+                of knowing it’s notifiable, even if you’re still investigating.
                 <Cite n={8} />
               </p>
             ),
@@ -246,7 +246,7 @@ export default function Body() {
         Reporting to the NCSC isn’t a legal requirement, but Business.govt.nz says it may be the best thing for your
         business.
         <Cite n={1} /> Nor is it a notification under the <Term id="privacy-act">Privacy Act</Term>: if customers’
-        information is involved, telling the Privacy Commissioner is a separate step.
+        information is involved, deciding whether to notify the Privacy Commissioner is a separate step.
       </p>
       <p>Others to tell:</p>
       <ul>
@@ -445,8 +445,8 @@ export default function Body() {
             <Cite n={18} />
           </>,
           <>
-            <strong>Updates on a rhythm,</strong> with someone named to do them. Own Your Online says patching the
-            site’s software, plug-ins and web server included, is the owner’s responsibility, and suggests automating
+            <strong>Updates on a rhythm,</strong> with someone named to do them. Own Your Online says keeping the
+            site’s software patched, plug-ins and web server included, is the owner’s responsibility, and suggests automating
             it.
             <Cite n={19} />
           </>,

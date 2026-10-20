@@ -223,12 +223,12 @@ export default function Body() {
         </li>
         <li>
           The same thing arrives twice, or out of order. Stripe says its <Term id="webhook">webhooks</Term> can deliver
-          the same event more than once, don’t guarantee the order, and keep retrying for up to three days when your end
-          doesn’t answer.<Cite n={14} />
+          the same event more than once, don’t guarantee the order, and, in live mode, keep retrying for up to three days
+          when your end doesn’t answer.<Cite n={14} />
         </li>
         <li>
-          A connector stops quietly. With autoreplay switched on, Zapier retries a failed step up to five times, and
-          sends no error email until the last attempt fails.<Cite n={15} />
+          A connector stops quietly. With autoreplay switched on (on paid plans), Zapier retries a failed step up to
+          five times over more than 10 hours, and sends no error email until the last attempt fails.<Cite n={15} />
         </li>
       </ul>
       <p>Build these protections in:</p>

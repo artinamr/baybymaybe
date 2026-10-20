@@ -32,7 +32,7 @@ export const GLOSSARY_SOURCES = {
     accessed: "2026-10-20",
   },
   dncCode: {
-    title: "Get an authentication code (UDAI)?",
+    title: "Get an authorisation code (UDAI)?",
     publisher: "Domain Name Commission",
     url: "https://dnc.org.nz/tools-and-services/how-do-i-2/get-a-udai/",
     accessed: "2026-10-20",
@@ -468,7 +468,7 @@ export const GLOSSARY = [
     term: "Unsolicited Electronic Messages Act 2007",
     also: "New Zealand’s anti-spam law",
     group: "privacy",
-    def: "The law on commercial emails and texts. Each one needs the person’s consent (express, inferred or deemed), must say clearly who sent it and how to contact them, and must have a working unsubscribe, with requests honoured within five working days.",
+    def: "The law on commercial emails and texts. Each one needs the person’s consent (express, inferred or deemed), must say clearly which business it is from and how to contact it, and must have a working unsubscribe, with requests honoured within five working days.",
     cite: ["uema"],
     see: { slug: "connect-website-crm-booking", id: "consent" },
   },
@@ -485,7 +485,7 @@ export const GLOSSARY = [
     id: "malware",
     term: "Malware",
     group: "privacy",
-    def: "Software put on a system without the owner’s consent to damage it, spy on it or use it. On a website it is usually the reason a host or a browser warns visitors away, and the clean-up is to remove it, restore a clean backup and close the way in.",
+    def: "Software put on a system without the owner’s consent to damage it, spy on it or use it. On a website it is a common reason a host or a browser warns visitors away, and the clean-up is to remove it, restore a clean backup and close the way in.",
     see: { slug: "website-hacked", id: "restore" },
   },
 ] as const satisfies readonly GlossaryTerm[];

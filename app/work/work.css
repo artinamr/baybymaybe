@@ -466,6 +466,7 @@
   color: var(--indigo);
 }
 .ss-feature-t {
+  text-wrap: balance;
   font-family: var(--display);
   font-weight: 500;
   font-size: min(3.4vw, 44px);

@@ -178,6 +178,7 @@
   display: none;
 }
 .jr-t {
+  text-wrap: balance;
   margin: 4px 0 0;
   font-family: var(--display);
   font-weight: 500;
@@ -416,6 +417,7 @@
   color: var(--indigo);
 }
 .svc-spec-t {
+  text-wrap: balance;
   margin: 0 0 14px;
   font-family: var(--display);
   font-weight: 500;

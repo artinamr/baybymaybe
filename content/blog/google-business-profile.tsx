@@ -139,7 +139,7 @@ export default function Body() {
           <Cite n={9} />
         </li>
         <li>
-          <strong>Then a review.</strong> Verification reviews take up to five business days, and Google emails you
+          <strong>Then a review.</strong> Verification reviews usually take up to five business days, and Google emails you
           when your business is verified.
           <Cite n={9} />
         </li>
