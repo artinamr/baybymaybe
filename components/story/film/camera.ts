@@ -170,8 +170,8 @@ export const KEYS: Key[] = [
 const A_SOFA_EYE = fix(-44.25, 1.38, 18.45);
 const A_SOFA_AT = fix(-41.9, 1.15, 15.6);
 /** Sam's garden by day: the deck (old, then new), Sam on it with the phone. */
-const A_DECK_EYE = fix(-46.6, 1.35, 27.6);
-const A_DECK_AT = fix(-42.6, 1.3, 21.9);
+const A_DECK_EYE = fix(-46.9, 1.3, 27.4);
+const A_DECK_AT = fix(-43.05, 1.3, 21.7);
 /** 3am: up out of Sam's garden over the sleeping town, where one window lights up (Aroha's, next door). */
 const A_NIGHT_EYE = fix(-38, 17, 47);
 const A_NIGHT_AT = fix(-33.5, 1.5, 17.5);
