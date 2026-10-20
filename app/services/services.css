@@ -921,3 +921,9 @@
     transform: none;
   }
 }
+
+/* The services index: a shorter hero, so the first service's photograph is
+   in view in the first screen. */
+.sp-hero.svc-index-hero {
+  padding-bottom: calc(var(--vh) * 3);
+}

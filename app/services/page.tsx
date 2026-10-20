@@ -120,7 +120,7 @@ export default function Services() {
     <Page here="services" crumbs={[{ name: "Services", href: PAGES.services }]}>
       <PageLd type="CollectionPage" href={PAGES.services} name="Services" description={DESCRIPTION} />
       <QaLd items={QA} />
-      <section className="sp-hero">
+      <section className="sp-hero svc-index-hero">
         <Kicker>Services</Kicker>
         <Title lines={["Better websites.", "Better ways to work."]} />
         <p className="sp-lede" data-rv>
