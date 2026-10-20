@@ -1,4 +1,5 @@
 import { Crumbs, Kicker, Closing, type Crumb } from "@/components/site/Page";
+import { Reading, readingFor } from "./Reading";
 import { LiveSite } from "./LiveSite";
 import { PAGES } from "@/lib/content";
 import { WORK_ITEMS, type Project, type Shot } from "@/content/work";
@@ -382,6 +383,8 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
           ))}
         </div>
       </nav>
+
+      <Reading articles={readingFor(p.slug, p.services)} />
 
       <Closing
         title="Put this care into your website."

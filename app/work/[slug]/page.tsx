@@ -5,6 +5,7 @@ import { WorkTitle } from "@/components/work/WorkTitle";
 import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { SiteStudy } from "@/components/work/SiteStudy";
+import { Reading, readingFor } from "@/components/work/Reading";
 import { KIND_LABEL, WORK_ITEMS, project } from "@/content/work";
 import { service } from "@/content/services";
 
@@ -204,6 +205,8 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
           ))}
         </div>
       </nav>
+
+      <Reading articles={readingFor(p.slug, p.services)} />
 
       <Closing
         title="Let’s look at your workflow."
