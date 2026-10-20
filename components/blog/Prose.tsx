@@ -12,9 +12,9 @@ export function H2({ id, children }: { id: string; children: ReactNode }) {
   return (
     <h2 id={id} className="ar-h2">
       {children}
-      <a className="ar-anchor" href={`#${id}`} tabIndex={-1} aria-hidden>
-        #
-      </a>
+      {/* The # is drawn by CSS (::before), so the heading
+          text that search engines and assistants read stays clean. */}
+      <a className="ar-anchor" href={`#${id}`} tabIndex={-1} aria-hidden />
     </h2>
   );
 }
