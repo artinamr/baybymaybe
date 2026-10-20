@@ -8,7 +8,7 @@
   --panel: #ffffff;
   --line: #e3e7ee;
   --text: #1a2233;
-  --mute: #6b7486;
+  --mute: #646d7e;
   --accent: #e0672b;
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);
