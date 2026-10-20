@@ -1023,9 +1023,9 @@ export class World {
     // The Saturday: in through Sam's house, out onto the deck to oil it, and back (a time-lapse of the morning).
     if (P >= B.nVan[0] && P < 25.8) {
       const h = this.home;
-      const way = [...this.samWay(true).slice(0, 5), H(-2.6, 0, -6.4), H(-3.5, 0, -7.6)];
+      const way = [...this.samWay(true).slice(0, 5), H(-0.6, 0, -6.2), H(0.3, 0, -7.5)];
       const len = pathLength(way);
-      const spot = H(-3.5, 0.6, -7.6);
+      const spot = H(0.3, 0.6, -7.5);
       if (P < 25.56) {
         walk(this.poseA, way, smooth(range(P, B.nVan[0], 25.56)) * len, t, 0, null, this.homeFloor);
         const st = smooth(range(P, 25.52, 25.56));
@@ -1033,11 +1033,11 @@ export class World {
         stand(this.poseB, spot, 0, t, H(-1.6, 1.0, -6.3));
         return blend(this.poseA, this.poseB, st, o);
       }
-      if (P < 25.68) return stand(o, spot, 0, t, H(-2.4, 0.4, -7.4));
+      if (P < 25.68) return stand(o, spot, 0, t, H(-0.6, 0.35, -7.9));
       walk(this.poseA, way.slice().reverse(), smooth(range(P, 25.68, 25.8)) * len, t, 0, null, this.homeFloor);
       const go = smooth(range(P, 25.68, 25.72));
       if (go >= 1) return copyPose(this.poseA, o);
-      stand(this.poseB, spot, 0, t, H(-2.4, 0.4, -7.4));
+      stand(this.poseB, spot, 0, t, H(-0.6, 0.35, -7.9));
       void h;
       return blend(this.poseB, this.poseA, go, o);
     }
