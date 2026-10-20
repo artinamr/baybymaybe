@@ -97,7 +97,7 @@ export default function Body() {
         does="Turns a call recording or rough notes into a tidy summary, the agreed next steps and follow-up dates, saved against the right contact."
         person="The person who took the call checks the summary while it’s fresh, before it’s saved."
         wrong="A summary drops a detail that mattered, or invents a commitment nobody made. Keeping the summary short and asking the caller to confirm it is the protection."
-        need="Your CRM’s fields, a summary format your team likes, and consent from callers if calls are recorded."
+        need="Your CRM’s fields, a summary format your team likes, and, if calls are recorded, telling callers so at the start of the call."
       />
 
       <H2 id="assistant">4. A website assistant that answers from approved information</H2>
@@ -109,8 +109,9 @@ export default function Body() {
       />
       <Callout title="It should say it’s an assistant">
         <p>
-          People should be able to tell they are talking to software, and how to reach a person. The Privacy Commissioner
-          expects businesses using generative AI to be open about how, when and why they use it.
+          People should be able to tell they are talking to software, and how to reach a person. Where a generative AI
+          tool is likely to affect customers and their personal information, the Privacy Commissioner expects them to be
+          told how, when and why it is used, in plain language, before their information is collected.
           <Cite n={1} />
         </p>
       </Callout>
@@ -176,12 +177,19 @@ export default function Body() {
           privacy principle 12 limits disclosing personal information to someone overseas unless one of a set of
           conditions applies: for example, that the recipient is subject to comparable privacy safeguards, or that the
           person has authorised it after being told it may not be protected in the same way.
-          <Cite n={2} /> Know where each service processes and stores data, what its terms say about keeping it, and take
-          advice if you’re unsure which rules apply.
+          <Cite n={2} /> But a provider that only stores or processes information for you isn’t receiving a disclosure:
+          the law treats you as still holding the information, and you stay fully responsible for it. It can become a
+          disclosure (one that principle 11 must allow, and principle 12 too if the provider is overseas) when the
+          provider uses the information for its own purposes, such as training its AI.
+          <Cite n={3} /> So ask each provider whether it uses your data for itself, where it processes and stores it,
+          and what its terms say about keeping it, and take advice if you’re unsure which rules apply.
         </li>
         <li>
-          <strong>If something goes wrong.</strong> The Commissioner expects a privacy breach that has caused, or might
-          cause, serious harm to be notified within 72 hours of becoming aware of it.
+          <strong>If something goes wrong.</strong> If a privacy breach has caused, or might cause, serious harm, the
+          Privacy Act requires you to notify the Commissioner, ideally within 72 hours of becoming aware of it, even while
+          you are still investigating, and to tell the people affected as soon as you can, unless an exception applies.
+          <Cite n={4} /> If your provider has the breach, the clock starts when the provider knows about it, not when it
+          tells you.
           <Cite n={3} /> An automation that sends a reply to the wrong person is a breach like any other.
         </li>
       </ul>

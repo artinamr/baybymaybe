@@ -232,7 +232,7 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
-        title: "Privacy breaches: notify us",
+        title: "NotifyUs of a serious privacy breach",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
         accessed: CHECKED_1012,
@@ -323,7 +323,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "What does the Privacy Act mean for AI tools?",
-        a: "It applies to them as it does to everything else. The Privacy Commissioner expects businesses to assess the privacy risks before using a tool, be open with customers about it, have a person review output before acting on it, and keep personal information out of tools that may keep or disclose it. Sending information overseas has its own rules, in principle 12.",
+        a: "It applies to them as it does to everything else. The Privacy Commissioner expects businesses to assess the privacy risks before using a tool, be open with customers about it, have a person review output before acting on it, and keep personal information out of tools that may keep or disclose it. A provider that only processes information for you leaves you responsible for it; one that uses it for its own purposes, such as training its AI, may be receiving a disclosure, with principle 12’s rules if it is overseas.",
       },
       {
         q: "What does AI automation cost to run?",
@@ -339,13 +339,19 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
-        title: "Principle 12: Disclosure of personal information outside New Zealand",
+        title: "Principle 12: Disclosure outside New Zealand",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/12/",
         accessed: CHECKED_1012,
       },
       {
-        title: "Privacy breaches: notify us",
+        title: "Working with third-party providers: understanding your privacy responsibilities",
+        publisher: "Office of the Privacy Commissioner",
+        url: "https://www.privacy.org.nz/resources-and-learning/a-z-topics/working-with-third-party-providers/",
+        accessed: "2026-10-20",
+      },
+      {
+        title: "NotifyUs of a serious privacy breach",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
         accessed: CHECKED_1012,
@@ -672,7 +678,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "Should we pay a ransom to get our website back?",
-        a: "Own Your Online says do not: “Do not pay the ransom, even if the amount seems small. There is no guarantee that you’ll get your data back.” Paying funds the next attack and may breach sanctions. Restoring from a clean backup is the way back.",
+        a: "No. Own Your Online’s advice is not to pay, even if the amount seems small: “There is no guarantee that you’ll get your data back, and paying a ransom could put you at risk of further attacks.” Paying may also breach sanctions. Restoring from a clean backup is the way back.",
       },
       {
         q: "Do we have to tell customers if our website was hacked?",
@@ -700,7 +706,7 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
-        title: "Privacy breaches: notify us",
+        title: "NotifyUs of a serious privacy breach",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
         accessed: CHECKED_1012,
