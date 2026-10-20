@@ -274,6 +274,8 @@ export class World {
     // The vans: ours (taken from the workshop so it can drive), and the other business's.
     this.ourVan = this.shop.van.group;
     this.scene.attach(this.ourVan);
+    // (The van's lights had the workshop's glow material: its headlights lit the desk lamp's bulb and the sign.)
+    this.shop.van.lights.material = (this.shop.van.lights.material as THREE.Material).clone();
     this.rival = this.ourVan.clone(true);
     this.rival.traverse((o) => {
       const m = o as THREE.Mesh;
@@ -1724,7 +1726,8 @@ export class World {
       v.before = () => {
         this.sky.aimShadow(c.at, r);
         this.sky.dome.visible = sky;
-        this.scene.environmentIntensity = this.sky.out.envI * (inside ? 0.42 : 1);
+        // (A closed room at night takes less of the sky's light: its lamps light it.)
+        this.scene.environmentIntensity = this.sky.out.envI * (inside ? lerp(1, 0.42, this.sky.out.night) : 1);
         // Each pane draws only the place it can see (the office pane looks into a closed room;
         // Sam's garden never sees the workshop): two views for little more than the cost of one.
         // Only surfaces are left out, never a light: a different set of lights is a new program for
