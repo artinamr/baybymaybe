@@ -1,4 +1,5 @@
 import { Crumbs, Kicker, Closing, type Crumb } from "@/components/site/Page";
+import { Reading, readingFor } from "./Reading";
 import { LiveSite } from "./LiveSite";
 import { PAGES } from "@/lib/content";
 import { WORK_ITEMS, type Project, type Shot } from "@/content/work";
@@ -136,7 +137,7 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
             <ol>
               {s.jobs.map((j, n) => (
                 <li key={j}>
-                  <span className="mono">{String(n + 1).padStart(2, "0")}</span>
+                  <span className="mono" data-n={String(n + 1).padStart(2, "0")} aria-hidden />
                   {j}
                 </li>
               ))}
@@ -189,7 +190,7 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
         <ol className="flow">
           {p.approach.map((it, n) => (
             <li key={it.title} data-rv style={{ transitionDelay: `${n * 90}ms` }}>
-              <span className="flow-n mono">{String(n + 1).padStart(2, "0")}</span>
+              <span className="flow-n mono" data-n={String(n + 1).padStart(2, "0")} aria-hidden />
               <h3 className="item-t">{it.title}</h3>
               <p className="item-b">{it.body}</p>
             </li>
@@ -382,6 +383,8 @@ export function SiteStudy({ p, crumbs }: { p: Project; crumbs: Crumb[] }) {
           ))}
         </div>
       </nav>
+
+      <Reading articles={readingFor(p.slug, p.services)} />
 
       <Closing
         title="Put this care into your website."

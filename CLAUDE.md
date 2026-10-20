@@ -91,10 +91,20 @@ The Web Guys NZ as the "classic, well established and clean" reference; and
 - **Copy is ours, not nerodyn.com's** (the client: "nerodyn.com isn't a good
   website to copy"). Plain, specific, no invented numbers. Awaiting sign-off.
 - **The hero's door to the story** is the stone itself: over it the pointer
-  carries a frosted "The story" lens (`StoneCursor` in Hero.tsx), and at rest
-  a thread of light runs down a ridge every ~7.5 s; a click opens `/story/`.
-  The rotating ring of words was rejected ("should be removed … a nicer more
-  elegant premium thing").
+  carries a frosted lens that opens into an invitation, a play disc, "Watch
+  the story" and the film's length ("A five-minute film", computed on the
+  server from the story's own autoplay in `lib/storyLength.ts`), and the
+  stone answers at once: the light inside wakes, the ridge thread runs and
+  ONE white glint climbs the whole stone along its edges (`uSweepHead/Amp`,
+  in the stone's own space, never per shard: that read as a mosaic of the
+  fracture). At rest a thread of light runs down a ridge every ~7.5 s. A
+  click or a tap on the stone opens `/story/` (raycast at the event, so
+  touch works); on touch screens the same invitation sits on the stone as a
+  link (`.stone-door`), and the keyboard reaches it (the stone wakes on
+  focus). The rotating ring of words was rejected ("should be removed … a
+  nicer more elegant premium thing"). Round 27 (the owner, live): the stone
+  is ~13% bigger and stands as far right as it can while still cutting into
+  POTENTIAL (lib/layout.ts step 3; `?heroaxis=` for look-dev).
 - **The story is its own page, `/story/`** (round 22, below). The old story
   mode (`lib/story.ts`, `lib/storyFilm.ts`, the old `components/story/`,
   played over the home stone) is deleted; `/#story` forwards to `/story/`.

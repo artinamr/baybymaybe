@@ -72,6 +72,8 @@ export type ArticleMeta = {
 
 /** Sources fetched and read during the editorial revision, including primary-source checks. */
 const CHECKED_1012 = "2026-10-12";
+/** Revised in the accuracy pass of 20 October 2026 (corrections from the research memos). */
+const REVISED_1020 = "2026-10-20";
 
 export const ARTICLES: ArticleMeta[] = [
   {
@@ -93,7 +95,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website redesign", "website improvements", "rebuild or refresh a website", "Core Web Vitals", "301 redirects", "New Zealand small business website"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 8,
     cover: PHOTOS["cover-redesign"],
     faq: [
@@ -150,7 +152,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website quote", "web design quote", "website proposal checklist", "website cost", "website ownership", "New Zealand"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-quote"],
     faq: [
@@ -199,7 +201,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "platforms",
     keywords: ["client portal", "customer portal", "client portal for small business", "multi-factor authentication", "Privacy Act 2020", "custom portal vs off-the-shelf"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-portal"],
     faq: [
@@ -219,7 +221,7 @@ export const ARTICLES: ArticleMeta[] = [
     related: { services: ["platforms"], work: ["operations-portal"], articles: ["connect-website-crm-booking", "after-launch-ownership"] },
     sources: [
       {
-        title: "Principle 5: Storage and security of personal information",
+        title: "Principle 5: Storage and security of information",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/5/",
         accessed: CHECKED_1012,
@@ -232,7 +234,7 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
-        title: "Privacy breaches: notify us",
+        title: "NotifyUs of a serious privacy breach",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
         accessed: CHECKED_1012,
@@ -286,7 +288,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       { title: "Spam: three steps", publisher: "Department of Internal Affairs", url: "https://www.dia.govt.nz/Spam-Three-Steps", accessed: CHECKED_1012 },
       {
-        title: "Principle 5: Storage and security of personal information",
+        title: "Principle 5: Storage and security of information",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/5/",
         accessed: CHECKED_1012,
@@ -313,7 +315,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "automation",
     keywords: ["AI automation", "AI for small business", "workflow automation", "ai tools for business", "human in the loop", "Privacy Act 2020 and AI"],
     published: "2026-10-04",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-ai"],
     faq: [
@@ -323,7 +325,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "What does the Privacy Act mean for AI tools?",
-        a: "It applies to them as it does to everything else. The Privacy Commissioner expects businesses to assess the privacy risks before using a tool, be open with customers about it, have a person review output before acting on it, and keep personal information out of tools that may keep or disclose it. Sending information overseas has its own rules, in principle 12.",
+        a: "It applies to them as it does to everything else. The Privacy Commissioner expects businesses to assess the privacy risks before using a tool, be open with customers about it, have a person review output before acting on it, and keep personal information out of tools that may keep or disclose it. A provider that only processes information for you leaves you responsible for it; one that uses it for its own purposes, such as training its AI, may be receiving a disclosure, with principle 12’s rules if it is overseas.",
       },
       {
         q: "What does AI automation cost to run?",
@@ -339,13 +341,19 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
-        title: "Principle 12: Disclosure of personal information outside New Zealand",
+        title: "Principle 12: Disclosure outside New Zealand",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/privacy-principles/12/",
         accessed: CHECKED_1012,
       },
       {
-        title: "Privacy breaches: notify us",
+        title: "Working with third-party providers: understanding your privacy responsibilities",
+        publisher: "Office of the Privacy Commissioner",
+        url: "https://www.privacy.org.nz/resources-and-learning/a-z-topics/working-with-third-party-providers/",
+        accessed: "2026-10-20",
+      },
+      {
+        title: "NotifyUs of a serious privacy breach",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
         accessed: CHECKED_1012,
@@ -439,7 +447,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["what is seo", "search engine optimisation", "seo for small business", "seo new zealand", "how to rank on google", "how does google search work"],
     published: "2026-10-07",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-seo"],
     faq: [
@@ -483,6 +491,12 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
+        title: "Spam policies for Google web search",
+        publisher: "Google Search Central",
+        url: "https://developers.google.com/search/docs/essentials/spam-policies",
+        accessed: "2026-10-20",
+      },
+      {
         title: "Creating helpful, reliable, people-first content",
         publisher: "Google Search Central",
         url: "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
@@ -503,7 +517,7 @@ export const ARTICLES: ArticleMeta[] = [
     description:
       "Set up a Google Business Profile, check your eligibility, complete verification and keep the details customers rely on up to date.",
     short:
-      "A Google Business Profile is the free listing that controls how your business appears on Google Search and Maps. Add or claim it, verify it, keep its hours, services and photos complete and accurate, and reply to every review. Google ranks local results on relevance, distance and prominence, and there is no way to pay for a better place.",
+      "A Google Business Profile is the free listing that controls how your business appears on Google Search and Maps. Add or claim it, verify it, keep its hours, services and photos complete and accurate, and reply to every review. Google ranks local results on relevance, distance and popularity, and there is no way to pay for a better place.",
     audience: {
       for: "Any New Zealand business with premises customers can visit, or that travels to its customers.",
       skip: "You sell only online, with no face-to-face contact. Google’s rules leave profiles to businesses customers can visit, or that visit them.",
@@ -515,7 +529,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["google business profile", "google my business", "add business to google maps", "get on google maps", "google maps listing", "local search new zealand"],
     published: "2026-10-07",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-gbp"],
     faq: [
@@ -559,16 +573,34 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
+        title: "Request ownership of a Business Profile",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/4566671",
+        accessed: "2026-10-20",
+      },
+      {
         title: "Verify your business on Google",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/7107242",
         accessed: CHECKED_1012,
       },
       {
+        title: "Verify your business with a video recording",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/14271705",
+        accessed: "2026-10-20",
+      },
+      {
         title: "Tips to get more reviews",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/3474122",
         accessed: CHECKED_1012,
+      },
+      {
+        title: "Manage your Business Profile owners & managers",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/3403100",
+        accessed: "2026-10-20",
       },
       {
         title: "Protect your business with two-factor authentication (2FA)",
@@ -662,7 +694,7 @@ export const ARTICLES: ArticleMeta[] = [
     topic: "websites",
     keywords: ["website hacked", "what to do if website is hacked", "hacked website fix", "report cyber attack nz", "malware on website", "website security new zealand"],
     published: "2026-10-08",
-    updated: CHECKED_1012,
+    updated: REVISED_1020,
     minutes: 7,
     cover: PHOTOS["cover-hacked"],
     faq: [
@@ -672,7 +704,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "Should we pay a ransom to get our website back?",
-        a: "Own Your Online says do not: “Do not pay the ransom, even if the amount seems small. There is no guarantee that you’ll get your data back.” Paying funds the next attack and may breach sanctions. Restoring from a clean backup is the way back.",
+        a: "No. Own Your Online’s advice is not to pay, even if the amount seems small: “There is no guarantee that you’ll get your data back, and paying a ransom could put you at risk of further attacks.” Paying may also breach sanctions. Restoring from a clean backup is the way back.",
       },
       {
         q: "Do we have to tell customers if our website was hacked?",
@@ -700,7 +732,7 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
-        title: "Privacy breaches: notify us",
+        title: "NotifyUs of a serious privacy breach",
         publisher: "Office of the Privacy Commissioner",
         url: "https://www.privacy.org.nz/responsibilities/privacy-breaches/notify-us/",
         accessed: CHECKED_1012,

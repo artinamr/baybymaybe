@@ -82,6 +82,8 @@ export const obsidianUniforms: {
   uThreadRidge: U<number>;
   uThreadHead: U<number>;
   uThreadAmp: U<number>;
+  uSweepHead: U<number>;
+  uSweepAmp: U<number>;
   uCutGlow: U<number>;
   uFogNear: U<number>;
   uFogFar: U<number>;
@@ -133,6 +135,8 @@ export const obsidianUniforms: {
   uThreadRidge: { value: -1 },
   uThreadHead: { value: 0 },
   uThreadAmp: { value: 0 },
+  uSweepHead: { value: 0 },
+  uSweepAmp: { value: 0 },
   uCutGlow: { value: 0 },
   uFogNear: { value: 60 },
   uFogFar: { value: 90 },
@@ -195,6 +199,8 @@ export function syncObsidianUniforms(): void {
   U.uThreadRidge.value = u.threadRidge;
   U.uThreadHead.value = u.threadHead;
   U.uThreadAmp.value = u.threadAmp;
+  U.uSweepHead.value = u.sweepHead;
+  U.uSweepAmp.value = u.sweepAmp;
   U.uCutGlow.value = u.cutGlow;
   U.uFogNear.value = u.fogNear;
   U.uFogFar.value = u.fogFar;
@@ -338,6 +344,8 @@ uniform vec3 uPulsePos;
 uniform float uThreadRidge;
 uniform float uThreadHead;
 uniform float uThreadAmp;
+uniform float uSweepHead;
+uniform float uSweepAmp;
 uniform float uCutGlow;
 uniform float uFogNear;
 uniform float uFogFar;
@@ -753,6 +761,16 @@ const FRAG_EMISSIVE = /* glsl */ `
       float obsHead = mix(-0.75, 0.75, 1.0 - vFx.y);
       float obsBand = exp(-pow((obsPh - obsHead) / 0.055, 2.0));
       obsGlint = vec3(0.86, 0.87, 0.92) * obsBand * (0.22 + 0.78 * obsBevel + 0.3 * (1.0 - obsCut)) * smoothstep(0.02, 0.25, vFx.y);
+    }
+    // THE INVITATION (the hero, when the pointer comes onto the stone): ONE
+    // band of white light running up the whole stone, culet to crown, in the
+    // stone's own space, so it crosses every piece as one (never a mosaic of
+    // the fracture), and caught mostly on the bevels: light running along
+    // its edges inside the glass.
+    if (uSweepAmp > 0.001) {
+      float obsSw = dot(vObs, vec3(0.196, 0.976, 0.098)) - uSweepHead;
+      float obsSwB = exp(-(obsSw * obsSw) / 0.007);
+      obsGlint += vec3(0.86, 0.87, 0.92) * obsSwB * uSweepAmp * (0.1 + 0.9 * obsBevel) * (1.0 - 0.6 * obsCut);
     }
     // The light inside: strong through a polished cut (a window into the
     // glass), faint through the outer faces (dark glass, mostly reflection).

@@ -28,7 +28,7 @@ export function Journey({ focus }: { focus?: Slug }) {
         <li key={s.t} className="jr-step" data-by={s.by} data-dim={focus && s.by !== focus ? "" : undefined}>
           <span className="jr-tag">{TAG[s.by]}</span>
           <span className="jr-dot" aria-hidden>
-            <span className="mono">{String(i + 1).padStart(2, "0")}</span>
+            <span className="mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
           </span>
           <p className="jr-t">
             {s.t}

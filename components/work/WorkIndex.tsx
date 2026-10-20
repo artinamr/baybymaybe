@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react";
 
-export type WorkCard = { slug: string; kind: string; href: string; client: string; title: string; summary: string; cover: string; coverAlt: string; label: string; services: { slug: string; name: string }[] };
+export type WorkCard = { slug: string; kind: string; href: string; client: string; title: string; summary: string; cover: string; coverAlt: string; label: string; services: { slug: string; name: string }[]; srcSet: string; preview?: string };
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -49,9 +49,18 @@ export function WorkIndex({ items }: { items: WorkCard[] }) {
               </div>
             ) : null}
           <article className="wk-card" data-kind={w.kind} data-featured={i === 0 ? "" : undefined} hidden={!shown(w)} data-rv>
-            <a className="wk-img" href={w.href} tabIndex={-1} aria-hidden>
+            <a className="wk-img" href={w.href} tabIndex={-1} aria-hidden style={w.preview ? { backgroundImage: `url(${w.preview})` } : undefined}>
               {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
-              <img src={w.cover} alt="" width={2400} height={1500} loading={i ? "lazy" : "eager"} decoding="async" />
+              <img
+                src={w.cover}
+                srcSet={w.srcSet}
+                sizes={i === 0 ? "(max-width: 760px) 92vw, 66vw" : "(max-width: 760px) 92vw, (max-width: 1100px) 46vw, 600px"}
+                alt=""
+                width={2400}
+                height={1500}
+                loading={i ? "lazy" : "eager"}
+                decoding="async"
+              />
             </a>
             <p className="wk-kind">
               <b>{w.services.map((s) => s.name).join(" · ")}</b>

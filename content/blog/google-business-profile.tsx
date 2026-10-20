@@ -71,9 +71,9 @@ export default function Body() {
             t: "Sign in with an account the business owns",
             b: (
               <p>
-                A profile needs a Google Account. Use one tied to your business email rather than a personal account
-                only one person can reach, and turn on two-step verification while you are there.
-                <Cite n={1} />
+                A profile needs a Google Account.
+                <Cite n={1} /> Our advice: use one tied to your business email rather than a personal account only
+                one person can reach, and turn on two-step verification while you are there.
               </p>
             ),
           },
@@ -100,8 +100,10 @@ export default function Body() {
       />
       <p>
         Two rules catch people out. There should be only one profile per business, so don’t create a second because
-        the first one is in an old staff member’s name. Use Google’s ownership request process instead.
-        <Cite n={4} /> And if you work from home and travel to customers, set the profile up as a service-area
+        the first one is in an old staff member’s name.
+        <Cite n={4} /> Ask for ownership instead: Google sends your request to the current owner, who has three days
+        to respond; if they don’t, you may be able to claim the profile.
+        <Cite n={5} /> And if you work from home and travel to customers, set the profile up as a service-area
         business rather than showing your street address.
         <Cite n={4} />
       </p>
@@ -110,29 +112,31 @@ export default function Body() {
       <p>
         Verification proves to Google that you speak for the business. The method is chosen by Google and can’t be
         swapped: depending on the business it may be a video, a code by phone, text or email, or a postcard.
-        <Cite n={5} />
+        <Cite n={6} />
       </p>
       <ul>
         <li>
-          <strong>Video, when offered.</strong> Google recommends this option when it is available. You record the
-          outside of the premises, anything that shows the business is what it claims (the sign, the van, the
-          equipment), and proof that you run it, such as access to areas only staff reach.
-          <Cite n={5} />
+          <strong>Video, when offered.</strong> Google recommends this option when it is available.
+          <Cite n={6} /> You record where the business is (street signs, nearby landmarks), that it exists (the sign,
+          the van, the tools or equipment) and that you run it, such as opening the till or reaching areas only staff
+          can. It must be one live, unedited recording of at least 30 seconds, made and uploaded on a mobile device,
+          with no bank, tax or ID numbers and no other people’s faces in it.
+          <Cite n={7} />
         </li>
         <li>
           <strong>A postcard, if it comes to that.</strong> Most codes arrive within 14 days, and the code expires
           after 30 days.
-          <Cite n={5} />
+          <Cite n={6} />
         </li>
         <li>
           <strong>Waiting for a postcard code.</strong> Don’t change the business name, address or category while
           waiting for it: those changes invalidate the code. Requesting a second code invalidates the first.
-          <Cite n={5} />
+          <Cite n={6} />
         </li>
         <li>
           <strong>Then a review.</strong> After you apply, Google says review takes up to five business days, and a
           confirmation email arrives when it is done.
-          <Cite n={5} />
+          <Cite n={6} />
         </li>
       </ul>
 
@@ -181,9 +185,9 @@ export default function Body() {
       <p>
         Make asking for a review part of finishing a job. Google lets you share a review link or a QR code
         customers can scan.
-        <Cite n={6} /> Asking everyone is fine. Paying, discounting or gifting in exchange for reviews is not:
+        <Cite n={8} /> Asking everyone is fine. Paying, discounting or gifting in exchange for reviews is not:
         Google prohibits offering incentives for posting or changing a review, or removing a negative one.
-        <Cite n={6} />
+        <Cite n={8} />
       </p>
       <p>
         Replying matters too. Google encourages helpful replies, and reviews contribute to how well known it
@@ -200,9 +204,10 @@ export default function Body() {
             the profile the day something changes.
           </>,
           <>
-            <strong>One primary owner.</strong> Keep primary ownership with an account the business controls. Add
-            other owners or managers through their own accounts, so access does not depend on one person’s phone.
-            <Cite n={4} />
+            <strong>One primary owner.</strong> A profile can have several owners but only one primary owner, and
+            each person needs their own Google Account.
+            <Cite n={9} /> Keep primary ownership with an account the business controls, so access does not depend on
+            one person’s phone.
           </>,
           <>
             <strong>Access cleaned up</strong> when a staff member or contractor leaves: remove their access the same
@@ -211,15 +216,15 @@ export default function Body() {
           <>
             <strong>Two-step verification on the account</strong> that owns the profile. Own Your Online recommends
             authenticator apps or keys over codes by text.
-            <Cite n={7} />
+            <Cite n={10} />
           </>,
           <>
             <strong>Photos refreshed</strong> a few times a year, so the front of the business still matches the
             front door.
           </>,
           <>
-            <strong>Every review answered,</strong> good or bad, within a few days.
-            <Cite n={3} />
+            <strong>Every review answered,</strong> good or bad, in good time.
+            <Cite n={8} />
           </>,
           <>
             <strong>The web address tested monthly:</strong> the button still leads somewhere that works, on a phone.

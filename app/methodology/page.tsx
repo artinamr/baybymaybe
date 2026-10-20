@@ -218,7 +218,7 @@ export default function Methodology() {
           <ol className="mf-decide">
             {DECIDE.map((d, i) => (
               <li key={d.title} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
-                <span className="mf-decide-n mono">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mf-decide-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                 <span className="mf-decide-s">{d.stage}</span>
                 <h3 className="item-t">{d.title}</h3>
                 <p className="item-b">{d.body}</p>

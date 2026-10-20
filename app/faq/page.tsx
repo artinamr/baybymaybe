@@ -73,7 +73,7 @@ export default function Questions() {
             {FAQ_ALL.map((g, gi) => (
               <section key={g.group} id={slug(g.group)} className="fq-group" aria-labelledby={`${slug(g.group)}-h`} data-rv>
                 <h2 id={`${slug(g.group)}-h`} className="fq-h">
-                  <span className="mono">{String(gi + 1).padStart(2, "0")}</span>
+                  <span className="mono" data-n={String(gi + 1).padStart(2, "0")} aria-hidden />
                   {g.group}
                 </h2>
                 <QaList items={g.items} id={slug(g.group)} first={gi === 0 ? 0 : -1} />

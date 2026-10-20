@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/meta";
 
 export const metadata: Metadata = pageMeta({
   title: "Terms of use",
-  description: "The terms of using the Nerodyn website: its content, the free audit, links, liability and the law that applies.",
+  description: "The terms of using the Nerodyn website: its content, the free audit, links to other websites, liability, and the New Zealand law that applies.",
   path: "terms/",
 });
 

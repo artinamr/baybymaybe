@@ -141,7 +141,7 @@ export default function Body() {
         </li>
         <li>
           <strong>No mention of redirects</strong> when you are replacing an existing site. Google’s guidance for
-          moving a site is to redirect each old address to its new one, and to keep those redirects for at least a year.
+          moving a site is to redirect each old address to its new one, and to keep them in place, generally for at least a year.
           <Cite n={3} /> A quote that ignores this puts your existing search traffic at risk.
         </li>
         <li>

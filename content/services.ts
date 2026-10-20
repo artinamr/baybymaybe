@@ -150,7 +150,7 @@ export const SERVICES: Service[] = [
       },
       {
         q: "How long does it take?",
-        a: "Most websites go live in about fourteen days from the agreed scope. Larger sites take longer; your quote gives the date, and that is the date we work to.",
+        a: "Most websites go live in about fourteen days from the first call, when the content is ready on time. Larger sites take longer; your quote gives the date, and that is the date we work to.",
       },
       {
         q: "Can we update the site ourselves?",
@@ -211,7 +211,7 @@ export const SERVICES: Service[] = [
     ],
     runs: {
       title: "From first call to live.",
-      lede: "About fourteen days is a typical programme for a focused website, once the scope and content are ready. Your quote sets the dates for your project.",
+      lede: "About fourteen days from the first call is a typical programme for a focused website, when the content is ready on time. Your quote sets the dates for your project.",
       steps: [
         { when: "Days 1–2", title: "Discover", body: "A call and the free audit: what you have, and what your customers need from it." },
         { when: "By day 3", title: "Define", body: "The written scope, the fixed price and the launch date. Nothing is built until you sign it." },

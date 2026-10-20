@@ -15,12 +15,11 @@
  *   2. Camera distance + principal-point y are solved by projecting the stone's
  *      real defining points through the K0 camera, so apex/culet land exactly on
  *      their screen fractions (perspective included, not the orthographic fit).
- *   3. The stone axis starts at the centre of the last A (the stone stands IN
- *      it: the A's legs frame the pavilion; round 27, the owner wanted it
- *      further right), then moves to the NEAREST x where the occlusion rule
- *      holds: no other glyph more than 55 % hidden, the A's feet showing, the
- *      I's stem visible on every row, the stone inside the frame, and the stone
- *      still cutting at least one glyph. It is checked against a conservative
+ *   3. Round 27 (the owner: the stone bigger, further right, still covering
+ *      some of the word). The axis is the RIGHTMOST x where the word's last
+ *      letter keeps its stem (the L's left quarter half visible on every row
+ *      at rest) and the widest sway stays inside the frame: over the A on a
+ *      16:10 screen, over the A and the L's edge on a wide window. It is checked against a conservative
  *      envelope — the widest idle yaw, the end of the Ken-Burns dolly and the
  *      principal-point parallax — so the rule holds for the whole idle loop,
  *      not just one frame.
@@ -96,7 +95,7 @@ export type Layout = {
 
   /** Additive: everything `?debug=safe` draws, and the result of the solve's asserts. */
   safe: {
-    /** No 3D above this y at rest (nav bottom + 24 px). */
+    /** No 3D above this y at rest (nav bottom + 10 px; round 27 let the stone grow). */
     navBottom: number;
     /** Projected apex y (px) at the end of the Ken-Burns dolly — must be ≥ navBottom. */
     apexPx: number;
@@ -153,12 +152,14 @@ const POT_TRACK = -0.02;
 const L1_TRACK = -0.028;
 const L2_TRACK = -0.028;
 
-/** Occlusion rule (SPEC §2). */
+/** Occlusion (round 27): the L, the word's last letter, keeps this much of its stem on every row. */
+const L_STEM_VISIBLE = 0.5;
+/** …and the stone hides at least this much of some letter (it stands IN the word). */
+const COVERS = 0.3;
+/** …but no more than about two letters of it in all (phones: the stone is wide against the word). */
+const MAX_HIDDEN_SUM = 1.9;
+/** Reported (?debug=safe) when a glyph is more hidden than this. */
 const MAX_HIDDEN = 0.55;
-/** The A the stone stands in shows at least this much of its width across its feet. */
-const A_FEET_VISIBLE = 0.25;
-/** The I's stem keeps at least this fraction of its width on every row — "never fully hidden". */
-const I_MIN_VISIBLE = 0.2;
 /** Line clearance to the stone flank (SPEC §2: 0.025W). */
 const FLANK_GAP = 0.025;
 
@@ -518,7 +519,7 @@ function flankLeft(poly: number[], y0: number, y1: number, dx: number): number {
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
-export function computeLayout(vw: number, vh: number): Layout {
+export function computeLayout(vw: number, vh: number, axisOverride?: number): Layout {
   const W = Math.max(1, vw);
   const Hh = Math.max(1, vh);
   // Mobile means a real portrait phone; a small near-square window is a tablet.
@@ -536,8 +537,8 @@ export function computeLayout(vw: number, vh: number): Layout {
   const l1CapTop = (mobile ? 0.142 : 0.2) * Hh; // phone: a clear 16 px under the eyebrow
   const l2Baseline = (mobile ? 0.28 : 0.43) * Hh;
   const eyebrowTop = (mobile ? 0.1 : 0.155) * Hh;
-  const culetY = mobile ? 0.71 : tablet ? 0.87 : 0.91;
-  const apexWanted = mobile ? 0.31 : tablet ? 0.14 : 0.12;
+  const culetY = mobile ? 0.74 : tablet ? 0.9 : 0.95;
+  const apexWanted = mobile ? 0.29 : tablet ? 0.12 : 0.1;
   const axisRange: [number, number] = [0.55, 0.88];
 
   /* ---- fonts ---- */
@@ -555,27 +556,26 @@ export function computeLayout(vw: number, vh: number): Layout {
   const inkW1 = Math.max(0.1, pInk1.right - pInk1.left);
   const sizeByWidth = (W - 2 * G) / inkW1;
   const sizeByCap = potCapMax / capRatio;
-  const potSize = Math.min(sizeByWidth, sizeByCap);
-  const potLeft = G - pInk1.left * potSize; // P's ink starts exactly at G
-  const potWidth = (pm.advance + POT_TRACK * POT_TEXT.length) * potSize; // CSS inline box width
-  const potCapTop = potBaseline - capRatio * potSize;
   const wordLeft = G;
-  const wordWidth = inkW1 * potSize;
-
-  const glyphs: GlyphBox[] = Array.from(POT_TEXT).map((ch, i) => {
-    const o = potLeft + (pm.pos[i] + i * POT_TRACK) * potSize;
-    return {
-      ch,
-      x0: o + pm.inkL[i] * potSize,
-      x1: o + pm.inkR[i] * potSize,
-      y0: potBaseline - pm.asc[i] * potSize,
-      y1: potBaseline + pm.desc[i] * potSize,
-      hidden: 0,
-    };
-  });
+  const glyphsAt = (size: number): GlyphBox[] => {
+    const left = G - pInk1.left * size;
+    return Array.from(POT_TEXT).map((ch, i) => {
+      const o = left + (pm.pos[i] + i * POT_TRACK) * size;
+      return {
+        ch,
+        x0: o + pm.inkL[i] * size,
+        x1: o + pm.inkR[i] * size,
+        y0: potBaseline - pm.asc[i] * size,
+        y1: potBaseline + pm.desc[i] * size,
+        hidden: 0,
+      };
+    });
+  };
+  const potSize = Math.min(sizeByWidth, sizeByCap);
+  const glyphs = glyphsAt(potSize);
 
   /* ---- 2. camera distance + principal-point y (perspective-exact) ---- */
-  const apexFloor = (navH + 26) / Hh;
+  const apexFloor = (navH + 12) / Hh;
   // The Ken-Burns dolly grows the stone ×(1/0.965) about the principal point, lifting
   // the apex; start it low enough that it still clears nav bottom + 24 px at the end.
   const kbLift = 1 / KB_MIN - 1;
@@ -614,70 +614,56 @@ export function computeLayout(vw: number, vh: number): Layout {
   const apexPx = tmp[1];
 
   /* ---- 3. stone axis + occlusion rule ---- */
-  const iIndex = POT_TEXT.indexOf("I");
-  // The stone stands IN the last A (round 27): its pavilion fills the A's
-  // counter and the A's legs frame it, so the word still reads and the stone
-  // stands well to the right of the lines. The A may be mostly hidden as long
-  // as its feet show; every other glyph keeps the 55 % rule.
-  const aIndex = POT_TEXT.lastIndexOf("A");
-  const aBox = glyphs[aIndex];
-  const aFeet: Box = { x0: aBox.x0, y0: aBox.y1 - 0.3 * (aBox.y1 - aBox.y0), x1: aBox.x1, y1: aBox.y1 };
-  // …and the L after it keeps its stem (the left quarter of its box).
-  const lBox = glyphs[glyphs.length - 1];
-  const lStemBox: Box = { x0: lBox.x0, y0: lBox.y0, x1: lBox.x0 + 0.25 * (lBox.x1 - lBox.x0), y1: lBox.y1 };
-  const prefAxis = clamp((aBox.x0 + 0.72 * (aBox.x1 - aBox.x0)) / W, axisRange[0], axisRange[1]);
   let envRight = -Infinity;
   for (let i = 0; i < envelope.length; i += 2) envRight = Math.max(envRight, envelope[i]);
 
-  const evalAxis = (ax: number) => {
+  // Round 27 (the owner: bigger, further right, and still covering some of
+  // the word). The stone stands as far RIGHT as it can while it still hides
+  // a good part of a letter, the word's last letter keeps its stem (the L's
+  // left quarter shows on every row at rest) and its sway stays inside the
+  // frame. On a 16:10 screen that puts it over the A with the I and the L
+  // whole; on a wide window, where the word is held by its cap height and
+  // ends early, over the L's foot at the end of the word; on a phone over
+  // the T and the I (two letters at most).
+  const lBox = glyphs[glyphs.length - 1];
+  const lStemBox: Box = { x0: lBox.x0, y0: lBox.y0, x1: lBox.x0 + 0.25 * (lBox.x1 - lBox.x0), y1: lBox.y1 };
+  const frameX = (W - (mobile ? 6 : 0.5 * G) - pad - envRight) / W;
+  let axisX = NaN;
+  // If no x hides two letters or fewer (a tall phone), the one that hides least.
+  let leastX = axisRange[0];
+  let leastSum = Infinity;
+  for (let ax = Math.min(axisRange[1], frameX); ax >= axisRange[0]; ax -= 0.001) {
     const dx = ax * W;
-    let worst = 0;
-    let iVis = 1;
-    let cuts = false;
-    for (let g = 0; g < glyphs.length; g++) {
-      const c = coverage(envelope, glyphs[g], dx, pad);
-      if (g !== aIndex) worst = Math.max(worst, c.hidden);
-      // The I's stem at rest (beside the A it is in reach of the widest sway).
-      if (g === iIndex) iVis = coverage(rest, glyphs[g], dx, 0).minVisible;
-      if (!cuts && coverage(rest, glyphs[g], dx, 0).hidden > 0.02) cuts = true;
+    const hid = glyphs.map((g) => coverage(rest, g, dx, 0).hidden);
+    const sum = hid.reduce((a, h) => a + h, 0);
+    if (coverage(rest, lStemBox, dx, 0).minVisible < L_STEM_VISIBLE || Math.max(...hid) < COVERS) continue;
+    if (sum <= MAX_HIDDEN_SUM) {
+      axisX = ax;
+      break;
     }
-    const feet = coverage(rest, aFeet, dx, 0).minVisible;
-    const lStem = coverage(rest, lStemBox, dx, 0).minVisible;
-    const overEdge = Math.max(0, (envRight + dx + pad - (W - (mobile ? 6 : 0.5 * G))) / W);
-    const violation =
-      Math.max(0, worst - MAX_HIDDEN) + Math.max(0, I_MIN_VISIBLE - iVis) + Math.max(0, A_FEET_VISIBLE - feet) + Math.max(0, 0.5 - lStem) + overEdge + (cuts ? 0 : 0.5);
-    return violation;
-  };
-
-  let axisX = prefAxis;
-  let bestV = evalAxis(prefAxis);
-  if (bestV > 0) {
-    // Nearest valid x, scanning outward from the preference in 0.1 % steps.
-    const step = 0.001;
-    const span = Math.max(prefAxis - axisRange[0], axisRange[1] - prefAxis);
-    let found = false;
-    let bestX = prefAxis;
-    for (let d = step; d <= span + 1e-9 && !found; d += step) {
-      for (const ax of [prefAxis - d, prefAxis + d]) {
-        if (ax < axisRange[0] - 1e-9 || ax > axisRange[1] + 1e-9) continue;
-        const v = evalAxis(ax);
-        if (v === 0) {
-          bestX = ax;
-          bestV = 0;
-          found = true;
-          break;
-        }
-        if (v < bestV - 1e-6) {
-          bestV = v;
-          bestX = ax;
-        }
-      }
+    if (sum < leastSum - 1e-3) {
+      leastSum = sum;
+      leastX = ax;
     }
-    axisX = bestX;
-    if (bestV > 0) notes.push(`occlusion rule unsatisfiable in [${axisRange.join(", ")}]; least-bad axis ${axisX.toFixed(3)}`);
   }
+  if (mobile) {
+    // A phone: the word is narrow against the stone, so wherever it stands it
+    // hides two letters; over the T and the I it stands furthest right while
+    // POTENTIAL still reads (POTEN·AL) and "your digital" keeps its size.
+    const t = glyphs[POT_TEXT.lastIndexOf("T")];
+    const i = glyphs[POT_TEXT.indexOf("I")];
+    axisX = Math.min((t.x0 + i.x1) / 2 / W, frameX);
+  } else if (Number.isNaN(axisX)) {
+    axisX = leastX;
+    notes.push(`the stone hides ${leastSum.toFixed(2)} letters at least (axis ${axisX.toFixed(3)})`);
+  }
+  if (axisOverride !== undefined) axisX = axisOverride;
   const dxAxis = axisX * W;
   for (const g of glyphs) g.hidden = coverage(envelope, g, dxAxis, pad).hidden;
+  const potLeft = G - pInk1.left * potSize; // P's ink starts exactly at G
+  const potWidth = (pm.advance + POT_TRACK * POT_TEXT.length) * potSize; // CSS inline box width
+  const potCapTop = potBaseline - capRatio * potSize;
+  const wordWidth = inkW1 * potSize;
 
   /* ---- 4. L1 / L2 against the stone's flank ---- */
   const gap = FLANK_GAP * W;
@@ -741,10 +727,11 @@ export function computeLayout(vw: number, vh: number): Layout {
     : { x0: W - G - 264, y0: 0.835 * Hh, x1: W - G, y1: 0.955 * Hh };
 
   /* ---- asserts (SPEC §13) ---- */
-  const navBottom = navH + 24;
+  const navBottom = navH + 10;
   if (apexPx < navBottom - 0.5) notes.push(`apex ${apexPx.toFixed(1)}px enters the nav band (< ${navBottom}px)`);
   if (!glyphs.some((g) => coverage(rest, g, dxAxis, 0).hidden > 0.02)) notes.push("stone overlaps no POTENTIAL glyph");
-  for (const g of glyphs) if (g !== aBox && g.hidden > MAX_HIDDEN + 1e-3) notes.push(`glyph ${g.ch} ${(g.hidden * 100).toFixed(0)}% hidden`);
+  for (const g of glyphs) if (g.hidden > MAX_HIDDEN + 1e-3) notes.push(`glyph ${g.ch} ${(g.hidden * 100).toFixed(0)}% hidden`);
+  if (coverage(rest, lStemBox, dxAxis, 0).minVisible < L_STEM_VISIBLE) notes.push("the L loses its stem");
   if (l2Size < (mobile ? 0.13 * W : l1Size) - 0.5) notes.push(`L2 shrunk to ${l2Size.toFixed(1)}px to clear the stone`);
 
   /* ---- per-chapter principal points (SPEC §6; mobile: 3D in a top band) ---- */

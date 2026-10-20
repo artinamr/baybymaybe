@@ -36,7 +36,7 @@ export const SITE_PROJECTS: Project[] = [
     client: "Butter Days",
     title: "A website for a neighbourhood bakery, from the morning menu to the wedding cake",
     summary:
-      "A fictional bakery in Kelburn, Wellington, and its eight-page website: the menu, a pastry box you can build, a cake planner and opening hours that know the time.",
+      "A fictional bakery in Kelburn, Wellington, and its eight-page website: the menu, a pastry box to build, a cake planner and opening hours that know the time.",
     services: ["websites"],
     url: "butterdays.example",
     year: "2026",

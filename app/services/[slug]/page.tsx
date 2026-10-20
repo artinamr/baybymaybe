@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { coverSrcSet } from "@/lib/covers";
 import { Page, Crumbs, Kicker, Closing } from "@/components/site/Page";
 import { QaList } from "@/components/site/QaList";
 import { QaLd, ServiceLd } from "@/components/site/JsonLd";
@@ -50,8 +51,16 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   if (!s) notFound();
   const others = SERVICES.filter((o) => o.slug !== s.slug);
   const work = s.work.map((slug) => project(slug)!).filter(Boolean);
-  // What the blog says about this discipline: up to three articles, newest first.
-  const reading = PUBLISHED.filter((a) => a.related.services.includes(s.slug)).slice(0, 3);
+  // What the blog says about this discipline: up to six articles (two rows).
+  // Those mainly about it come first, and among them the buying guides (an
+  // article with a `situation` answers a buyer's starting point), then the
+  // others that touch it; newest first within each (PUBLISHED is).
+  const rank = (a: (typeof PUBLISHED)[number]) => (a.related.services[0] === s.slug ? 0 : 2) + (a.situation ? 0 : 1);
+  const reading = PUBLISHED.filter((a) => a.related.services.includes(s.slug))
+    .map((a, i) => ({ a, i }))
+    .sort((x, y) => rank(x.a) - rank(y.a) || x.i - y.i)
+    .map((x) => x.a)
+    .slice(0, 6);
   const crumbs = [
     { name: "Services", href: PAGES.services },
     { name: s.name, href: PAGES.service(s.slug) },
@@ -159,7 +168,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <a key={p.slug} className="wk-card svc-work-card" href={PAGES.project(p.slug)} data-rv style={{ transitionDelay: `${(i % 3) * 80}ms` }}>
                 <span className="wk-img">
                   {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
-                  <img src={p.cover} alt="" width={2400} height={1500} loading="lazy" decoding="async" />
+                  <img src={p.cover} srcSet={coverSrcSet(p.cover)} sizes="(max-width: 760px) 92vw, 600px" alt="" width={2400} height={1500} loading="lazy" decoding="async" />
                 </span>
                 <span className="wk-kind">
                   <b>{p.client}</b>
@@ -186,7 +195,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           <ul className="items">
             {s.deliver.map((it, i) => (
               <li key={it.title} data-rv style={{ transitionDelay: `${(i % 2) * 90}ms` }}>
-                <span className="item-n mono">{String(i + 1).padStart(2, "0")}</span>
+                <span className="item-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                 <h3 className="item-t">{it.title}</h3>
                 <p className="item-b">{it.body}</p>
               </li>
@@ -211,7 +220,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                 <details key={g.group} className="svc-spec-group" open={i === 0}>
                   <summary>
                     <h3 className="svc-spec-summary">
-                      <span className="svc-spec-n mono">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="svc-spec-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                       <span className="svc-spec-t">{g.group}</span>
                       <span className="svc-spec-toggle" aria-hidden>+</span>
                     </h3>
@@ -271,7 +280,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           <ol className="flow">
             {s.built.map((it, i) => (
               <li key={it.title} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
-                <span className="flow-n mono">{String(i + 1).padStart(2, "0")}</span>
+                <span className="flow-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
                 <h3 className="item-t">{it.title}</h3>
                 <p className="item-b">{it.body}</p>
               </li>

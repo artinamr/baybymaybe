@@ -5,6 +5,7 @@ import { WorkTitle } from "@/components/work/WorkTitle";
 import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { SiteStudy } from "@/components/work/SiteStudy";
+import { Reading, readingFor } from "@/components/work/Reading";
 import { KIND_LABEL, WORK_ITEMS, project } from "@/content/work";
 import { service } from "@/content/services";
 
@@ -146,7 +147,7 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
         <ol className="flow">
           {p.approach.map((it, n) => (
             <li key={it.title} data-rv style={{ transitionDelay: `${n * 90}ms` }}>
-              <span className="flow-n mono">{String(n + 1).padStart(2, "0")}</span>
+              <span className="flow-n mono" data-n={String(n + 1).padStart(2, "0")} aria-hidden />
               <h3 className="item-t">{it.title}</h3>
               <p className="item-b">{it.body}</p>
             </li>
@@ -204,6 +205,8 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
           ))}
         </div>
       </nav>
+
+      <Reading articles={readingFor(p.slug, p.services)} />
 
       <Closing
         title="Let’s look at your workflow."

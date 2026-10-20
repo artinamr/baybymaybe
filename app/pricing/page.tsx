@@ -88,7 +88,7 @@ export default function Pricing() {
         <ol className="flow flow-4">
           {QUOTE.map((it, i) => (
             <li key={it.title} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
-              <span className="flow-n mono">{String(i + 1).padStart(2, "0")}</span>
+              <span className="flow-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
               <h3 className="item-t">{it.title}</h3>
               <p className="item-b">{it.body}</p>
             </li>
@@ -106,7 +106,7 @@ export default function Pricing() {
         <ul className="items">
           {MOVES.map((it, i) => (
             <li key={it.title} data-rv style={{ transitionDelay: `${(i % 2) * 90}ms` }}>
-              <span className="item-n mono">{String(i + 1).padStart(2, "0")}</span>
+              <span className="item-n mono" data-n={String(i + 1).padStart(2, "0")} aria-hidden />
               <h3 className="item-t">{it.title}</h3>
               <p className="item-b">{it.body}</p>
             </li>

@@ -134,8 +134,10 @@ export default function Body() {
           three weeks ago, last night’s backup may carry the intruder with it. Your host can help find the line.
         </li>
         <li>
-          <strong>For ransomware, contain it first.</strong> Own Your Online says to “get your network offline
-          immediately” (unplug the cable, switch off the router) so it cannot spread.
+          <strong>If ransomware has also locked your office computers,</strong> that is a separate first step: Own
+          Your Online’s ransomware guide says to “get your network offline immediately” by taking out network cables,
+          turning off Wi-Fi and unplugging the router, so it cannot spread. It does nothing for a website on your host’s
+          servers; there, your host contains it.
           <Cite n={3} />
         </li>
         <li>
@@ -143,9 +145,9 @@ export default function Body() {
           software. Old versions are the usual door.
         </li>
         <li>
-          <strong>Don’t pay a ransom.</strong> “Do not pay the ransom, even if the amount seems small. There is no
-          guarantee that you’ll get your data back,” says Own Your Online, which adds that paying funds the next attack
-          and may even breach sanctions.
+          <strong>If someone demands a ransom, don’t pay it.</strong> “There is no guarantee that you’ll get your data
+          back, and paying a ransom could put you at risk of further attacks,” says Own Your Online, which adds that
+          paying may even breach sanctions.
           <Cite n={3} />
         </li>
       </ul>
@@ -153,8 +155,9 @@ export default function Body() {
       <H2 id="tell">Telling your customers</H2>
       <p>
         If personal information was affected, assess whether the breach has caused or might cause serious harm.
-        The Privacy Commissioner says a breach at that threshold must be notified. Its NotifyUs self-assessment
-        tool can help you work through the decision.
+        The Privacy Commissioner says notifying a breach at that threshold is a legal obligation under the Privacy
+        Act. Its website has a self-assessment to check whether your breach needs to be notified (a guide, not a final
+        ruling) and NotifyUs, the form for making the report.
         <Cite n={4} />
       </p>
       <p>
@@ -166,8 +169,8 @@ export default function Body() {
 
       <H2 id="how">Find the way in</H2>
       <p>
-        Recovery should include investigating how the attacker got in. Own Your Online puts it in the
-        recovery list: “work out how the malware got in so it doesn’t happen again.”
+        Recovery should include finding out how the attacker got in, or they can come back the same way. Own Your
+        Online’s recovery steps include identifying how an attack got in, to stop it happening again.
         <Cite n={3} /> Ask your provider to investigate:
       </p>
       <ul>
@@ -200,8 +203,8 @@ export default function Body() {
             <Cite n={5} />
           </>,
           <>
-            <strong>Backups on the government’s pattern:</strong> Business.govt.nz describes the 3-2-1-1 method, “3
-            copies of back up data” on “2 types of storage media”, 1 off-site and 1 offline.
+            <strong>Backups on the government’s pattern:</strong> Business.govt.nz recommends the 3-2-1-1 method:
+            three copies of your data on two types of storage, with one copy off-site and one offline.
             <Cite n={1} /> Test that you can restore from a <Term id="backup">backup</Term> before relying on it.
           </>,
           <>

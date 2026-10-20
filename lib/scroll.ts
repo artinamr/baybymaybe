@@ -61,6 +61,9 @@ function writeLayoutVars(L: Layout) {
     ["--cta-left", h.ctaLeft],
     ["--cta-right", h.ctaRight],
     ["--desc-width", h.descWidth],
+    // The stone at rest, apex to culet (its door to the story sits on it).
+    ["--stone-top", h.apexY * L.vh],
+    ["--stone-bottom", h.culetY * L.vh],
   ];
   for (const [k, v] of vars) if (Number.isFinite(v)) s.setProperty(k, px(v));
   s.setProperty("--hero-axis", `${(h.axisX * 100).toFixed(3)}%`);
@@ -104,7 +107,9 @@ function relayout(force = false) {
     document.documentElement.style.setProperty("--vh", px(vhPx));
     scroll.vw = w;
     scroll.vh = h;
-    layout.current = computeLayout(w, h);
+    // Look-dev `?heroaxis=0.72`: stand the hero stone there (a fraction of the width).
+    const ax = Number(new URLSearchParams(location.search).get("heroaxis") || NaN);
+    layout.current = computeLayout(w, h, Number.isFinite(ax) ? ax : undefined);
     writeLayoutVars(layout.current);
     // `?debug=safe`: the solve, asserts and all, for look-dev scripts.
     if (location.search.includes("debug=safe")) (window as unknown as { __layout: Layout }).__layout = layout.current;

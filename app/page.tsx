@@ -10,6 +10,7 @@ import { Audit } from "@/components/chapters/Audit";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PageReveal } from "@/components/chapters/PageReveal";
 import { OrgLd } from "@/components/site/JsonLd";
+import { minuteWords, storyMinutes } from "@/lib/storyLength";
 
 // The home page's own canonical address (the layout's title and card are its).
 export const metadata = { alternates: { canonical: "./" } };
@@ -24,7 +25,7 @@ export default function Home() {
     <Experience>
       <Chrome />
       <main id="main">
-        <Hero />
+        <Hero storyLabel={`A ${minuteWords(storyMinutes())} film`} />
         <Statement />
         <Build />
         <Work />

@@ -134,6 +134,9 @@
 .ar-h2:hover .ar-anchor {
   opacity: 0.7;
 }
+.ar-anchor::before {
+  content: "#";
+}
 .ar-h3 {
   font-family: var(--display);
   font-weight: 500;
