@@ -34,6 +34,8 @@ export type ToolKind = "Checklist" | "Steps" | "Decision path" | "Comparison" | 
 export type ArticleMeta = {
   slug: string;
   title: string;
+  /** The title in search results and the browser tab when the title is too long for them (the page title plus " | Nerodyn" stays within 60 characters). */
+  seoTitle?: string;
   /** For search results: at most 155 characters. */
   description: string;
   /** The two-or-three-sentence answer at the top of the article. It must stand on its own. */
@@ -299,6 +301,7 @@ export const ARTICLES: ArticleMeta[] = [
   {
     slug: "ai-automation-workflows",
     title: "Five practical AI automation workflows for NZ businesses",
+    seoTitle: "AI automation workflows for NZ businesses",
     description:
       "Five practical workflows for AI, with the input each needs, the checks a person makes and the privacy questions to answer first.",
     short:
@@ -364,6 +367,7 @@ export const ARTICLES: ArticleMeta[] = [
   {
     slug: "after-launch-ownership",
     title: "Who owns your website? Domain, hosting, code and support",
+    seoTitle: "Who owns your website? Domain, hosting and code",
     description:
       "Check who controls your domain, hosting, content and code. Use the handover checklist and compare the options for care after launch.",
     short:
@@ -455,6 +459,7 @@ export const ARTICLES: ArticleMeta[] = [
   {
     slug: "what-is-seo",
     title: "What is SEO, and what should a small business do first?",
+    seoTitle: "What is SEO? What a small business should do first",
     description:
       "Understand SEO before paying for it. Start with five useful jobs, check your pages and learn what a provider should explain.",
     short:
@@ -638,6 +643,7 @@ export const ARTICLES: ArticleMeta[] = [
   {
     slug: "diy-website-or-hire",
     title: "Build your own website or hire someone: how to decide",
+    seoTitle: "Build your own website or hire someone?",
     description:
       "Compare a site builder with hiring a professional, including your time after launch and the ownership details to protect either way.",
     short:

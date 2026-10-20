@@ -7,8 +7,12 @@ import { PHOTOS } from "@/content/images";
 
 export const dynamic = "force-static";
 
-/** When the pages last changed in substance (the round that rewrote them). Bump a page's date when you change it. */
-const SITE_UPDATED = "2026-10-05";
+/**
+ * When every page last changed: the night of 20 October 2026 touched them all
+ * (descriptions, links, layout, headings). A page changed after that gets its
+ * own `modified` below; articles carry theirs in the blog's registry.
+ */
+const SITE_UPDATED = "2026-10-20";
 
 type Row = { path: string; priority: number; modified?: string; images?: string[] };
 

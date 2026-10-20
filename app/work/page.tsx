@@ -2,15 +2,17 @@ import { Page, Kicker, Title, Closing } from "@/components/site/Page";
 import { WorkIndex } from "@/components/work/WorkIndex";
 import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
+import { PageLd } from "@/components/site/JsonLd";
 import { KIND_LABEL, WORK_ITEMS } from "@/content/work";
 import { service } from "@/content/services";
 import { COVER_PREVIEW } from "@/content/coverPreviews";
 import { coverName, coverSrcSet } from "@/lib/covers";
 
+const DESCRIPTION = "Explore complete concept websites and working studio demonstrations. Try the interactions, read the decisions and see what a live version would need.";
+
 export const metadata = pageMeta({
   title: "Work",
-  description:
-    "Explore complete concept websites and working studio demonstrations. Try the interactions, read the decisions and see what a live version would need.",
+  description: DESCRIPTION,
   path: "work/",
 });
 
@@ -32,6 +34,7 @@ export default function Work() {
   }));
   return (
     <Page here="work" crumbs={[{ name: "Work", href: PAGES.work }]}>
+      <PageLd type="CollectionPage" href={PAGES.work} name="Work" description={DESCRIPTION} />
       <section className="sp-hero">
         <Kicker>Work</Kicker>
         <Title lines={["Work you can", "put to the test."]} />

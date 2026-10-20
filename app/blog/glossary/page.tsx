@@ -12,7 +12,7 @@ const DESCRIPTION =
   "Plain-English definitions of the words that come up when a New Zealand business plans a website, platform or AI automation, from DNS and UDAI to consent.";
 
 export const metadata = pageMeta({
-  title: "Glossary: web, platform and AI terms in plain English",
+  title: "Glossary: web and AI terms in plain English",
   description: DESCRIPTION,
   path: "blog/glossary/",
   image: ogCard("blog-glossary", "Web words, in plain English: the Nerodyn glossary."),
