@@ -667,6 +667,14 @@ too uncreative ... step up that game"; worked overnight on story-r27).**
   van's lights once lit the office's lamp bulb; give a changing glow its own
   material. Wheel-scroll recordings: `tools/qa/story-motion.mjs` (interleave
   with the live site; the shared GPU swings p95 by 2x).
+  The Canvas names its shadows (`shadows="percentage"`, Film.tsx): with no
+  `shadows` prop, R3F re-applied its default when the adaptive render scale
+  called `setDpr` and turned the sun's shadows OFF mid-film; every object
+  first drawn afterwards compiled again (a 500 ms freeze at the deck's first
+  boards), and the film ran without shadows from then on. Keeping them costs
+  frame time (a wheel-scroll median of about 33 ms against 17 ms without them
+  on the integrated AMD, before the render scale steps down): an open choice
+  for the owner.
 - Look-dev: `window.__story.world.paneOverride` and `officeTo`, rendered by
   `tools/qa/story-cands.mjs`; frozen stills hold the page's CSS transitions,
   so the stills tools finish them first. The checks fly the panes

@@ -264,6 +264,9 @@ export default function Film() {
     <Canvas
       gl={{ antialias: false, alpha: false, depth: true, stencil: false, powerPreference: "high-performance" }}
       dpr={start}
+      // (The canvas re-applies its shadow settings when the render scale changes: named here as the world
+      // sets them, or every material compiles again on its first draw after it: a half-second freeze.)
+      shadows="percentage"
       flat
       frameloop="always"
       style={{ position: "absolute", inset: 0 }}
