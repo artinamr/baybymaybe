@@ -1235,15 +1235,23 @@ html[data-stone-hover] {
   background: currentColor;
   opacity: 0.45;
 }
+/* Body copy on the sub-pages: no lone word on a last line. :where() keeps it
+   at zero specificity, so any class that sets its own wrapping wins. */
+:where(.sp) :where(p, li, dd, figcaption, blockquote) {
+  text-wrap: pretty;
+}
 .sp-h1 {
   font-family: var(--display);
   font-weight: 500;
   font-size: min(8vw, 120px);
   line-height: 0.98;
   letter-spacing: -0.035em;
+  text-wrap: balance;
   margin: 0 0 32px;
 }
+/* Each half of the title (either side of its <br>) balances on its own. */
 .sp-h1 em {
+  display: block;
   font-style: normal;
   color: var(--indigo);
 }
@@ -1253,6 +1261,7 @@ html[data-stone-hover] {
   font-size: min(4.6vw, 64px);
   line-height: 1.02;
   letter-spacing: -0.03em;
+  text-wrap: balance;
   margin: 0;
 }
 .sp-lede {
@@ -1450,6 +1459,7 @@ html[data-stone-hover] {
   font-weight: 500;
   font-size: min(3vw, 40px);
   line-height: 1.05;
+  text-wrap: balance;
   letter-spacing: -0.025em;
   margin: 0 0 14px;
 }
@@ -1690,6 +1700,7 @@ html[data-stone-hover] {
   font-size: 20px;
   font-weight: 500;
   letter-spacing: -0.012em;
+  text-wrap: balance;
   color: var(--ink);
 }
 .qa-n {
@@ -2212,6 +2223,7 @@ html[data-render] .stone-cursor {
   font-size: 24px;
   line-height: 1.15;
   letter-spacing: -0.015em;
+  text-wrap: balance;
   margin: 0 0 10px;
 }
 .item-b {
@@ -2878,6 +2890,7 @@ html[data-render] .stone-cursor {
   font-size: min(2.8vw, 40px);
   line-height: 1.06;
   letter-spacing: -0.025em;
+  text-wrap: balance;
   margin: 0;
 }
 .wk-card:first-child .wk-title {
