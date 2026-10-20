@@ -45,7 +45,8 @@ const film = (f) => jiti.import(new URL(`components/story/film/${f}`, root).href
 const THREE = await jiti.import("three");
 const { MeshBVH } = await jiti.import("three-mesh-bvh");
 const { World } = await film("world.ts");
-const { cameraSmooth, phoneAdjust } = await film("camera.ts");
+const { cameraSmooth, phoneAdjust, paneShare, PANE_KEYS } = await film("camera.ts");
+const { splitAt, paneRects } = await film("split.ts");
 const { FILM_LEN } = await jiti.import(new URL("components/story/timeline.ts", root).href);
 
 const args = process.argv.slice(2);
@@ -154,18 +155,36 @@ const vanGap = (eye) => {
   return best;
 };
 const rows = [];
+const paneCam = [0, 1].map(() => ({ eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0, sub: 0 }));
 for (let P = from; P <= to + 1e-9; P += step) {
   cameraSmooth(P, ctx, cam, FILM_LEN);
   if (PHONE) phoneAdjust(cam, 390 / 844, world.phoneBack(P));
-  const r = bvh.closestPointToPoint(cam.eye, target, 0, 5);
-  const clear = r ? target.distance : 5;
-  const ground = !inRoom(cam.eye) && cam.eye.y < 0.3 ? "below 0.3 m over the ground" : "";
   world.update({ dt: 0, time: 8, P, pointer: { x: 0, y: 0, has: false } });
-  const card = cardGap(world.camera.position);
-  const mover = vanGap(world.camera.position);
-  rows.push({ P: +P.toFixed(3), clear: +clear.toFixed(3), ground, card: +card.toFixed(3), mover: +mover.toFixed(3), eye: cam.eye.toArray().map((x) => +x.toFixed(2)) });
+  // (While the picture is covered in black the camera may jump: nothing is seen.)
+  if (world.grade.flash > 0.9) continue;
+  // Both sides: while the picture is in two, each pane's camera is flown instead.
+  const sp = splitAt(P);
+  const eyes = [];
+  if (sp.on) {
+    const rects = paneRects(sp, PHONE);
+    for (let i = 0; i < 2; i++) {
+      cameraSmooth(P, ctx, paneCam[i], FILM_LEN, PANE_KEYS[i]);
+      paneShare(cam, paneCam[i], rects[i]);
+      eyes.push([paneCam[i].eye.clone(), "AB"[i]]);
+    }
+  } else eyes.push([cam.eye.clone(), ""]);
+  for (const [eye, tag] of eyes) {
+    const r = bvh.closestPointToPoint(eye, target, 0, 5);
+    const clear = r ? target.distance : 5;
+    const ground = !inRoom(eye) && eye.y < 0.3 ? "below 0.3 m over the ground" : "";
+    const card = cardGap(eye);
+    const mover = vanGap(eye);
+    rows.push({ P: +P.toFixed(3), pane: tag, clear: +clear.toFixed(3), ground, card: +card.toFixed(3), mover: +mover.toFixed(3), eye: eye.toArray().map((x) => +x.toFixed(2)) });
+  }
 }
 
+// (A pane's rows run on their own.)
+rows.sort((a, b) => a.pane.localeCompare(b.pane) || a.P - b.P);
 /** Contiguous runs of rows matching a test, as [from, to, worst]. */
 function runs(test, worst) {
   const out = [];
@@ -193,13 +212,13 @@ const report = (title, list, fmt, fail) => {
   }
 };
 const near = runs((r) => r.clear < 0.5, (rs) => rs.reduce((a, b) => (b.clear < a.clear ? b : a)));
-report("CLEARANCE (eye within 0.5 m of a surface)", near, (r) => `closest ${r.worst.clear} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}`, (r) => r.worst.clear < 0.2);
+report("CLEARANCE (eye within 0.5 m of a surface)", near, (r) => `closest ${r.worst.clear} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}${r.worst.pane ? " (pane " + r.worst.pane + ")" : ""}`, (r) => r.worst.clear < 0.2);
 const low = runs((r) => !!r.ground, (rs) => rs[0]);
 report("GROUND", low, (r) => r.worst.ground, () => true);
 const close = runs((r) => r.card < 0.6, (rs) => rs.reduce((a, b) => (b.card < a.card ? b : a)));
-report("CARDS (a card in the air within 0.6 m of the lens)", close, (r) => `closest ${r.worst.card} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}`, (r) => r.worst.card < 0.25);
+report("CARDS (a card in the air within 0.6 m of the lens)", close, (r) => `closest ${r.worst.card} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}${r.worst.pane ? " (pane " + r.worst.pane + ")" : ""}`, (r) => r.worst.card < 0.25);
 const movers = runs((r) => r.mover < 0.6, (rs) => rs.reduce((a, b) => (b.mover < a.mover ? b : a)));
-report("MOVERS (a van or a person within 0.6 m of the lens)", movers, (r) => `closest ${r.worst.mover} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}`, (r) => r.worst.mover < 0.25);
+report("MOVERS (a van or a person within 0.6 m of the lens)", movers, (r) => `closest ${r.worst.mover} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}${r.worst.pane ? " (pane " + r.worst.pane + ")" : ""}`, (r) => r.worst.mover < 0.25);
 if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify(rows));
 console.log(`\n${fails ? "FAIL" : "PASS"}: ${fails} problem run(s)`);
 process.exitCode = fails ? 1 : 0;

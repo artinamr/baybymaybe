@@ -55,7 +55,7 @@ const DECK_AT = H(-1.0, 1.45, -6.2);
  * world sets them from the nearest real houses to these points.
  */
 export const CALLERS = {
-  night: { door: V(-6, 0, 33), fwd: V(0, 0, -1) },
+  night: { door: V(-33, 0, 16.7), fwd: V(0, 0, -1) },
   late: { door: V(88, 0, -55), fwd: V(0, 0, 1) },
 };
 
@@ -142,7 +142,7 @@ export const KEYS: Key[] = [
   // THE TURN: the hands come off the keys; the jobs round the desk burn away.
   ...hold(15.4, S(-2.62, 1.22, 4.1), S(-3.9, 1.0, 3.68), 40, 0.5, 0.06, 0.52),
   { P: 15.66, eye: S(-2.3, 1.75, 2.25), at: S(-4.1, 1.55, 4.4), fov: 54, ppx: 0.5 },
-  ...hold(16.0, S(-2.25, 1.8, 2.35), S(-4.0, 1.45, 4.3), 52, 0.5, 0.1),
+  ...hold(16.04, S(-2.25, 1.8, 2.35), S(-4.0, 1.45, 4.3), 52, 0.5, 0.1),
   // In the black the camera leaves the room: the picture comes back high over the sleeping town.
   ...hold(16.32, WIDE_FAR, WIDE_AT, 36, 0.5, 0.06, undefined, 0),
   // THE REWIND, then the same evening: one still frame over the town, coming in slowly.
@@ -172,16 +172,9 @@ const A_SOFA_AT = H(-2.75, 1.12, -1.4);
 /** Sam's garden by day: the deck (old, then new), Sam on it with the phone. */
 const A_DECK_EYE = H(3.0, 3.4, -13.6);
 const A_DECK_AT = H(-1.4, 1.0, -6.6);
-/** Sam's kerb, across the street: the van pulling up. */
-const A_KERB_EYE = fix(-35.5, 3.2, -4.5);
-const A_KERB_AT = fix(-43.5, 1.4, 4.2);
-/** 3am: the window that lights up across the dark town (Aroha's). */
-const nightWindow = () => CALLERS.night.door.clone().addScaledVector(CALLERS.night.fwd, 3.4).setY(2.1);
-const A_NIGHT_EYE: Pt = () => {
-  const w = nightWindow();
-  return w.clone().addScaledVector(CALLERS.night.fwd, 16).add(V(0, 9, 0));
-};
-const A_NIGHT_AT: Pt = () => nightWindow().add(V(0, -0.4, 0));
+/** 3am: from Sam's dark garden, over the side fence to the neighbour's window that lights up (Aroha's). */
+const A_NIGHT_EYE = fix(-46.0, 2.4, 27.6);
+const A_NIGHT_AT = fix(-33.5, 2.2, 19.5);
 
 /** The shopfront: the office through the glass, its desk, its chair, the laptop's light. */
 const B_WIN_EYE = S(-3.9, 1.62, 9.4);
@@ -196,18 +189,16 @@ export const KEYS_A: Key[] = [
   A(18.98, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
   // Down into Sam's garden, as the film first came down to it.
   A(19.14, fix(-20, 30, 82), fix(-26, 3, 8), 40, { sub: 0.2, dof: 0 }),
-  A(19.3, fix(-36.5, 11, 44), fix(-40.5, 2.0, 17), 40, { dof: 0 }),
-  A(19.42, fix(-40.6, 3.2, 28.5), fix(-41.0, 1.5, 17.6), 40, { dof: 0.1 }),
+  A(19.3, fix(-50, 9, 40), fix(-42, 1.8, 17), 40, { dof: 0 }),
+  A(19.42, fix(-43.5, 2.8, 26.0), fix(-41.4, 1.5, 17.4), 40, { dof: 0.1 }),
   ...still(19.62, 0.08, A_SOFA_EYE, A_SOFA_AT, 40, { dof: 0.14 }),
   ...still(20.6, 0.24, A_SOFA_EYE, A_SOFA_AT, 40, { dof: 0.14 }),
   // 3am: across the dark town to the window that lights up.
-  ...still(21.16, 0.18, A_NIGHT_EYE, A_NIGHT_AT, 40, { dof: 0.2 }),
+  ...still(21.16, 0.18, A_NIGHT_EYE, A_NIGHT_AT, 36, { dof: 0.2 }),
   // The garden by day: the old deck; the quote accepted; the build; a year; the reminder.
   ...still(22.4, 0.7, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
   ...still(24.4, 0.9, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
-  // The kerb: our van pulls up.
-  ...still(25.76, 0.08, A_KERB_EYE, A_KERB_AT, 40, { dof: 0.1 }),
-  // Six o'clock: the deck again.
+  // The Saturday (you come and oil the deck) and six o'clock: the garden still.
   ...still(26.6, 0.62, A_DECK_EYE, A_DECK_AT, 40, { dof: 0.14 }),
   // Up and back into the one picture.
   A(27.48, fix(-30, 24, 74), fix(-22, 2, 6), 39, { sub: 0.35, dof: 0 }),

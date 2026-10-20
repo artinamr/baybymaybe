@@ -677,7 +677,6 @@ export class Post {
     (this.dofDown.uniforms.uPanes.value as THREE.Vector4).copy(sp);
     const T = this.timer;
     T?.poll();
-    T?.begin("scene");
     const st = this.scene;
     this._full.set(0, 0, this.w, this.h);
     if (split) {
@@ -690,6 +689,7 @@ export class Post {
     }
     r.autoClear = true;
     for (const v of views) {
+      T?.begin(split ? (v === views[0] ? "paneA" : "paneB") : "scene");
       v.before?.();
       const vp = split ? this.px(v, this.w, this.h, this._vp) : this._full;
       st.viewport.copy(vp);
@@ -697,11 +697,11 @@ export class Post {
       st.scissorTest = split;
       r.setRenderTarget(st);
       r.render(scene, v.camera);
+      T?.end();
     }
     st.viewport.copy(this._full);
     st.scissor.copy(this._full);
     st.scissorTest = false;
-    T?.end();
     r.autoClear = false;
 
     // Depth of field: the depth at half size (each view in its part), the soft copy, the gather.
@@ -734,6 +734,7 @@ export class Post {
         dc.projectionMatrixInverse.copy(pc.projectionMatrixInverse);
         dc.matrixWorld.copy(pc.matrixWorld);
         dc.matrixWorldInverse.copy(pc.matrixWorldInverse);
+        v.before?.();
         const vp = split ? this.px(v, hw, hh, this._vp) : this._vp.set(0, 0, hw, hh);
         dt.viewport.copy(vp);
         dt.scissor.copy(vp);

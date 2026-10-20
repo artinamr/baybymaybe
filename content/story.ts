@@ -177,7 +177,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "This time, they hear back in a minute.",
     line: "An assistant replies at 7:41pm, asks what you’d ask and offers times to measure up. Anything it can’t answer, it passes to you.",
     scene:
-      "In the empty office the laptop wakes. Sam’s enquiry comes in and a reply writes itself: thanks for getting in touch, and three times for a free measure-up. It goes at 7:41pm, and on the other side Sam’s phone lights up with it. Sam taps Wednesday at 2pm and the booking appears in your week. At 3am a window lights up across the dark town: Aroha asks whether a deck needs council consent. The reply goes, and the question it can’t answer is kept for you.",
+      "In the empty office the laptop wakes. Sam’s enquiry comes in and a reply writes itself: thanks for getting in touch, and three times for a free measure-up. It goes at 7:41pm, and on the other side Sam’s phone lights up with it. Sam taps Wednesday at 2pm and the booking appears in your week. At 3am a window lights up next door: Aroha asks whether a deck needs council consent. The reply goes, and the question it can’t answer is kept for you.",
     machine: "new",
   },
   {
@@ -197,7 +197,7 @@ export const CHAPTERS: StoryChapter[] = [
     title: "The end becomes a way back.",
     line: "A thank-you, a review, and a reminder a year on when the deck needs oiling. Sam books again.",
     scene:
-      "Two days after the job, a thank-you goes to Sam with a question: how did it go? Five stars come back. A year passes in both pictures at once, the garden turning through its seasons. Then a reminder goes on its own: it’s been a year, time for an oil. Sam books, and on the Saturday it’s your van that pulls up outside.",
+      "Two days after the job, a thank-you goes to Sam with a question: how did it go? Five stars come back. A year passes in both pictures at once, the garden turning through its seasons. Then a reminder goes on its own: it’s been a year, time for an oil. Sam books, and on the Saturday you come out onto the deck and the grey goes out of it.",
     machine: "new",
   },
   {

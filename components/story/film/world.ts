@@ -87,6 +87,9 @@ const JOB_SPOTS: [number, number, number, number, number][] = [
 /** When each job's card burns away at the turn. */
 const burnAt = (i: number): [number, number] => [B.fall[0] + 0.02 + i * 0.04, B.fall[0] + 0.3 + i * 0.04];
 
+/** How far each pane can see into the town (m): Sam's garden opens over the fence; the office is a closed room. */
+const PANE_REACH = [70, 26];
+
 /** THE OFFICE'S MOMENTS (the new way): when the office's screen is up, what it shows, and what the pointer calls it. */
 const OFFICE: { a: number; b: number; id: string; part: string }[] = [
   { a: B.nWake[0], b: 20.34, id: "reply", part: "reply" },
@@ -199,6 +202,8 @@ export class World {
     }) as [THREE.PerspectiveCamera, THREE.PerspectiveCamera];
     this.post = new Post(4, 6, opts.quality > 0);
     this.sky = new Sky(this.scene, opts.quality === 0 ? 1024 : 2048);
+    this.shadowFull = opts.quality === 0 ? 1024 : 2048;
+    this.shadowSmall = opts.quality === 0 ? 512 : 1024;
     this.town = buildTown(this.scene, opts.quality);
     this.land = buildLand(this.scene);
     this.home = buildHome(this.scene);
@@ -666,7 +671,7 @@ export class World {
     this.deck(kb, weathered(P));
 
     // SHOP: who is in, which lights are on.
-    const ownerIn = (!nw && P >= B.ownerIn[0] && P < 10.42) || (!nw && P >= B.late[0] && P < B.black[1]) || (nw && P >= B.nMorning[0] + 0.2 && P < 22.8) || (nw && P >= 25.86 && P < B.nWalk[1]);
+    const ownerIn = (!nw && P >= B.ownerIn[0] && P < 10.42) || (!nw && P >= B.late[0] && P < B.black[1]) || (nw && P >= B.nMorning[0] + 0.2 && P < 22.8) || (nw && P >= 25.9 && P < B.nWalk[1]);
     const lampOn = ownerIn && (hod > 18 || hod < 6.5) && !(nw && P > B.nLamp[0] + 0.03);
     s.lamp.spot.intensity = lampOn ? 7 * (1 - (nw ? 0 : range(P, B.black[0], B.black[0] + 0.12))) : 0;
     // Its shadow map is drawn only while it shines.
@@ -993,10 +998,31 @@ export class World {
       return [V(60, 0, -1.6), V(44.4, 0, -2.4), V(43.2, 0, -8.0), V(door.x, 0, door.z), S(-1.62, 0, 5.6), S(-2.0, 0, 4.4), S(-3.0, 0, 2.7), V(s.seat.x, 0, s.seat.z + 0.05)];
     };
     // The morning after 3am: in along the footpath to the desk (the question waiting); the quote priced and sent.
+    // The Saturday: in through Sam's house, out onto the deck to oil it, and back (a time-lapse of the morning).
+    if (P >= B.nVan[0] && P < 25.8) {
+      const h = this.home;
+      const way = [...this.samWay(true).slice(0, 5), H(-2.6, 0, -6.4), H(-3.5, 0, -7.6)];
+      const len = pathLength(way);
+      const spot = H(-3.5, 0.6, -7.6);
+      if (P < 25.56) {
+        walk(this.poseA, way, smooth(range(P, B.nVan[0], 25.56)) * len, t, 0, null, this.homeFloor);
+        const st = smooth(range(P, 25.52, 25.56));
+        if (st <= 0) return copyPose(this.poseA, o);
+        stand(this.poseB, spot, 0, t, H(-1.6, 1.0, -6.3));
+        return blend(this.poseA, this.poseB, st, o);
+      }
+      if (P < 25.68) return stand(o, spot, 0, t, H(-2.4, 0.4, -7.4));
+      walk(this.poseA, way.slice().reverse(), smooth(range(P, 25.68, 25.8)) * len, t, 0, null, this.homeFloor);
+      const go = smooth(range(P, 25.68, 25.72));
+      if (go >= 1) return copyPose(this.poseA, o);
+      stand(this.poseB, spot, 0, t, H(-2.4, 0.4, -7.4));
+      void h;
+      return blend(this.poseB, this.poseA, go, o);
+    }
     // In again at the end of the Saturday, in the long afternoon (a time-lapse).
     for (const [w0, w1] of [
       [B.nMorning[0], 22.62],
-      [25.78, B.nStand[0]],
+      [25.82, B.nStand[0]],
     ] as const) {
       if (P >= w0 && P < w1 && P < B.nStand[0]) {
         const path = inPath();
@@ -1575,6 +1601,9 @@ export class World {
     this.hover = best;
   }
 
+  private chunks: THREE.InstancedMesh[] | null = null;
+  private shadowFull = 2048;
+  private shadowSmall = 1024;
   private views: View[] = [
     { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
     { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
@@ -1623,6 +1652,14 @@ export class World {
     const env = this.sky.env(this.gl, time);
     if (env && this.scene.environment !== env) this.scene.environment = env;
     const g = this.grade;
+    // A pane's shadows cover a few metres round its subject: a smaller map draws twice for the cost of one.
+    const want = this.split.on ? this.shadowSmall : this.shadowFull;
+    const ks = this.sky.key.shadow;
+    if (ks.mapSize.x !== want) {
+      ks.mapSize.set(want, want);
+      ks.map?.dispose();
+      ks.map = null;
+    }
     if (!this.split.on) {
       const v = this.views[0];
       v.camera = this.camera;
@@ -1633,6 +1670,17 @@ export class World {
       this.post.render(this.gl, this.scene, this.views.slice(0, 1), g, time);
       return;
     }
+    // Each pane looks into a room: the town far beyond what it can see is left out of its draw (its own pass only).
+    this.chunks ??= this.town.group.children.filter((o) => (o as THREE.InstancedMesh).isInstancedMesh) as THREE.InstancedMesh[];
+    const was = this.chunks.map((m) => m.visible);
+    const cull = (i: number) => {
+      const cam = this.panes[i];
+      const far = this.paneCam[i].sub > 0.05 ? Infinity : PANE_REACH[i];
+      this.chunks!.forEach((m, j) => {
+        const b = m.boundingSphere;
+        m.visible = was[j] && (!b || cam.position.distanceTo(b.center) - b.radius < far);
+      });
+    };
     for (let i = 0; i < 2; i++) {
       const v = this.views[i];
       const cam = this.panes[i];
@@ -1643,9 +1691,13 @@ export class World {
       v.aperture = this.camOverride ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
       // Each pane's shadows are spent on its own subject.
       const r = Math.min(150, Math.max(3, v.focus * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
-      v.before = () => this.sky.aimShadow(c.at, r);
+      v.before = () => {
+        this.sky.aimShadow(c.at, r);
+        cull(i);
+      };
     }
     this.post.render(this.gl, this.scene, this.views, g, time);
+    this.chunks.forEach((m, j) => (m.visible = was[j]));
   }
 }
 

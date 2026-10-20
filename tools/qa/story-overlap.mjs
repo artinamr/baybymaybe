@@ -32,7 +32,7 @@ const res = await page.evaluate(
   async (from, to, step) => {
     const raf = () => new Promise((r) => requestAnimationFrame(() => r()));
     const w = window.__story.world;
-    const names = ["phone", "sheet", "quote", "invoice", "pend0", "pend1", "pend2", "pend3", "pend4", "drop"];
+    const names = ["phone", "sheet", "quote", "invoice", "pend0", "pend1", "pend2", "pend3", "pend4", "office"];
     const label = (i) => names[i] ?? "card" + i;
     const V3 = w.camera.position.constructor;
     const v = new V3();
@@ -56,10 +56,14 @@ const res = await page.evaluate(
         const cs = getComputedStyle(el.classList.contains("st-count") ? el : el.closest(".st-card") || el);
         if (r.right > r.left && r.bottom > r.top && cs.visibility !== "hidden" && cs.display !== "none") texts.push({ n: el.className.split(" ")[0], x0: r.left, y0: r.top, x1: r.right, y1: r.bottom });
       }
-      const cam = w.camera;
-      cam.updateMatrixWorld();
+      w.camera.updateMatrixWorld();
       const cards = w.allCards();
       cards.forEach((c, i) => {
+        // Both sides: the phone is seen by pane A, the office by pane B, each in its own part of the frame.
+        const pane = !w.split.on ? -1 : c === cards[cards.length - 1] ? 1 : i === 0 ? 0 : -1;
+        const cam = pane < 0 ? w.camera : w.panes[pane];
+        const r = pane < 0 ? [0, 0, 1, 1] : w.rects[pane];
+        cam.updateMatrixWorld();
         for (let p = c.group; p; p = p.parent) if (!p.visible) return;
         if (c.faceMat.opacity < 0.15) return;
         c.group.updateMatrixWorld(true);
@@ -79,8 +83,8 @@ const res = await page.evaluate(
         let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
         for (const p of clipped) {
           v.copy(p).applyMatrix4(cam.projectionMatrix);
-          const px = ((v.x + 1) / 2) * iw;
-          const py = ((1 - v.y) / 2) * ih;
+          const px = (r[0] + ((v.x + 1) / 2) * (r[2] - r[0])) * iw;
+          const py = (r[1] + ((1 - v.y) / 2) * (r[3] - r[1])) * ih;
           x0 = Math.min(x0, px);
           x1 = Math.max(x1, px);
           y0 = Math.min(y0, py);
@@ -92,8 +96,9 @@ const res = await page.evaluate(
           const oy = Math.min(y1, t.y1) - Math.max(y0, t.y0);
           if (ox > 4 && oy > 4) out.push({ P: +P.toFixed(3), card: label(i), text: t.n, frac: +((ox * oy) / ((t.x1 - t.x0) * (t.y1 - t.y0))).toFixed(2), op: +c.faceMat.opacity.toFixed(2) });
         }
-        const edge = x0 < -2 || y0 < -2 || x1 > iw + 2 || y1 > ih + 2;
-        const area = (Math.min(x1, iw) - Math.max(x0, 0)) * (Math.min(y1, ih) - Math.max(y0, 0));
+        const [L, T, R, B] = [r[0] * iw, r[1] * ih, r[2] * iw, r[3] * ih];
+        const edge = x0 < L - 2 || y0 < T - 2 || x1 > R + 2 || y1 > B + 2;
+        const area = (Math.min(x1, R) - Math.max(x0, L)) * (Math.min(y1, B) - Math.max(y0, T));
         if (edge && area > iw * ih * 0.04) out.push({ P: +P.toFixed(3), card: label(i), text: "EDGE", frac: +(area / (iw * ih)).toFixed(2), op: +c.faceMat.opacity.toFixed(2) });
       });
     }

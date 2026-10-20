@@ -97,6 +97,8 @@ export const B = {
   nYear: [24.44, 24.96] as W,
   nRemind: [25.0, 25.34] as W,
   nVan: [25.42, 25.72] as W,
+  /** The Saturday: you come out onto Sam's deck and oil it (the grey goes). */
+  nOil: [25.52, 25.68] as W,
   // NEW YOU.
   nToday: [26.12, 26.42] as W,
   nClose: [26.46, 26.6] as W,
@@ -254,5 +256,6 @@ export function weathered(P: number) {
   if (P < B.rewind[1]) return smooth(k(P, B.year));
   if (P < B.nBuild[0]) return 1;
   if (P < B.nYear[0]) return 0;
-  return smooth(k(P, B.nYear)) * 0.85;
+  // A year greys it; the Saturday's oil brings it back.
+  return smooth(k(P, B.nYear)) * 0.85 * (1 - smooth(k(P, B.nOil)));
 }
