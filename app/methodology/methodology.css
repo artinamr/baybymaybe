@@ -675,6 +675,7 @@
   background: var(--indigo);
 }
 .ma-title {
+  text-wrap: balance;
   margin: 0 0 16px;
   font-family: var(--display);
   font-weight: 500;
