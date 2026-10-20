@@ -92,6 +92,12 @@ export const GLOSSARY_SOURCES = {
     url: "https://www.privacy.org.nz/resources-and-learning/a-z-topics/ai/generative-artificial-intelligence/",
     accessed: "2026-10-08",
   },
+  privacyAct: {
+    title: "Privacy Act 2020, sections 112 and 114",
+    publisher: "New Zealand Legislation",
+    url: "https://www.legislation.govt.nz/act/public/2020/0031/latest/whole.html",
+    accessed: "2026-10-20",
+  },
   ipps: {
     title: "Privacy Act 2020: the privacy principles",
     publisher: "Office of the Privacy Commissioner",
@@ -452,8 +458,8 @@ export const GLOSSARY = [
     id: "privacy-breach",
     term: "Notifiable privacy breach",
     group: "privacy",
-    def: "A privacy breach that has caused, or might cause, serious harm. The business must notify the Privacy Commissioner as soon as practicable; the Commissioner says ideally within 72 hours of becoming aware of it.",
-    cite: ["notify"],
+    def: "A privacy breach that it’s reasonable to believe has caused serious harm, or is likely to. The business must notify the Privacy Commissioner as soon as practicable; the Commissioner says ideally within 72 hours of becoming aware of it.",
+    cite: ["privacyAct", "notify"],
     see: { slug: "when-you-need-a-client-portal", id: "security" },
   },
   {
