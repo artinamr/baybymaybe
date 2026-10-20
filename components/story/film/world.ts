@@ -276,6 +276,8 @@ export class World {
     this.scene.attach(this.ourVan);
     // (The van's lights had the workshop's glow material: its headlights lit the desk lamp's bulb and the sign.)
     this.shop.van.lights.material = (this.shop.van.lights.material as THREE.Material).clone();
+    // (Nor may the desk lamp's bulb share the wall light's: it shone in the empty office every night.)
+    this.shop.lamp.bulb.material = (this.shop.lamp.bulb.material as THREE.Material).clone();
     this.rival = this.ourVan.clone(true);
     this.rival.traverse((o) => {
       const m = o as THREE.Mesh;
@@ -564,6 +566,16 @@ export class World {
     }
     this.drive(t);
     this.keepClear(f.dt);
+    // What the pointer can ask about: the old way's pile and admin only in the old way; Sam's phone where its card is.
+    for (const part of this.parts) {
+      if (part === this.officePart) continue;
+      part.on = part.id === "inbox" || part.id === "admin" ? !nw : part.id === "owner" ? this.owner.root.visible : true;
+      if (part.id === "phone") {
+        if (this.phoneCard.group.visible) part.box.setFromObject(this.phoneCard.group);
+        else part.box.setFromCenterAndSize(this.samPhone.group.position, V(0.5, 0.5, 0.5));
+        part.on = this.samPhone.group.visible || this.phoneCard.group.visible;
+      }
+    }
     this.pointer(f.pointer);
     this.prevP = P;
     this.lastP = P;
@@ -1606,14 +1618,29 @@ export class World {
       this.hover = null;
       return;
     }
-    this.ray.setFromCamera(new THREE.Vector2(p.x, p.y), this.camera);
+    // While the picture is in two, the pointer looks through the pane it is over.
+    let cam: THREE.PerspectiveCamera = this.camera;
+    let x = p.x;
+    let y = p.y;
+    if (this.split.on) {
+      const sx = (p.x + 1) / 2;
+      const sy = (1 - p.y) / 2;
+      for (let i = 0; i < 2; i++) {
+        const r = this.rects[i];
+        if (sx < r[0] || sx > r[2] || sy < r[1] || sy > r[3]) continue;
+        cam = this.panes[i];
+        x = ((sx - r[0]) / (r[2] - r[0])) * 2 - 1;
+        y = 1 - ((sy - r[1]) / (r[3] - r[1])) * 2;
+      }
+    }
+    this.ray.setFromCamera(new THREE.Vector2(x, y), cam);
     let best: string | null = null;
     let bd = Infinity;
     const hit = new THREE.Vector3();
     for (const part of this.parts) {
-      if (part === this.officePart && !part.on) continue;
+      if (!part.on) continue;
       if (this.ray.ray.intersectBox(part.box, hit)) {
-        const d = hit.distanceTo(this.camera.position);
+        const d = hit.distanceTo(cam.position);
         if (d < bd) {
           bd = d;
           best = part.id;
