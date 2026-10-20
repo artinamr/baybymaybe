@@ -364,9 +364,9 @@ export default function Body() {
             b: (
               <p>
                 If a <Term id="privacy-breach">privacy breach</Term> has caused, or might cause, serious harm, the
-                Privacy Act requires you to notify the Commissioner, ideally within 72 hours of becoming aware of it,
-                even while you’re still investigating, and to tell the people affected as soon as you can, unless an
-                exception applies.
+                Privacy Act requires you to notify the Commissioner and to tell the people affected as soon as you can,
+                unless an exception applies. On timing, the Commissioner’s guidance is: “Ideally you’ll do that within
+                72 hours after you’re aware that you have a notifiable breach, even if you’re still investigating it.”
                 <Cite n={16} /> If your provider has the breach, the clock starts when the provider knows, not when it
                 tells you, so agree how fast it must tell you.
                 <Cite n={14} />
