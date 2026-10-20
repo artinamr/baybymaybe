@@ -1,5 +1,5 @@
 import { PAGES } from "@/lib/content";
-import { H2, Callout, Steps, Compare, Figure, Cite } from "@/components/blog/Prose";
+import { H2, Callout, Steps, Compare, Figure, Check, Cite } from "@/components/blog/Prose";
 import { DecisionTree } from "@/components/blog/Diagrams";
 import { Term } from "@/components/blog/Term";
 
@@ -10,7 +10,8 @@ export const toc = [
   { id: "diagnosis", title: "A one-week diagnosis" },
   { id: "fixes", title: "The fixes that pay first" },
   { id: "protect", title: "If you rebuild, protect what you’ve earned" },
-  { id: "deciding", title: "Deciding" },
+  { id: "deciding", title: "Deciding, and pricing both" },
+  { id: "example", title: "An example: an accounting practice" },
   { id: "yours", title: "How we’d look at yours" },
 ];
 
@@ -18,220 +19,264 @@ export default function Body() {
   return (
     <>
       <p>
-        Rebuild when the problems run through the whole site: the message, the structure, the platform or the way it
-        works. If those foundations are sound, start with the pages that are losing enquiries. You may get the result
-        you need without replacing everything.
+        Most websites that disappoint don’t need replacing. A few pages, or the route an enquiry takes, do most of the
+        damage, and those can be fixed without starting again. A rebuild earns its cost when the problem sits under
+        every page: what the site says, the software it runs on or the way it’s built.
       </p>
-      <p>This is how to tell the difference before you spend anything.</p>
+      <p>You can find out which you have in a week, before anyone quotes you for anything.</p>
 
       <H2 id="the-question">The question behind the question</H2>
-      <p>“Should we redesign?” usually hides three different questions:</p>
+      <p>
+        “Should we redesign?” mixes up two things. The look (colours, type, photographs) is what people notice first
+        and what most redesigns change. The foundations decide whether the site works. There are four:
+      </p>
       <ul>
         <li>
-          <strong>Is the site saying the right thing to the right people?</strong> That is the message and the structure.
+          <strong>The message.</strong> Does the site describe the business you run today, to the customers you want,
+          in pages organised the way they think?
         </li>
         <li>
-          <strong>Can we change it ourselves when the business changes?</strong> That is the platform, and who owns it.
+          <strong>Control.</strong> Can your team change it, and are the domain, hosting and logins in your business’s
+          name?
         </li>
         <li>
-          <strong>Does it work for the people using it</strong>, on a phone, quickly, for everyone? That is speed and
-          accessibility.
+          <strong>Support.</strong> Does the software it runs on still get security updates?
+        </li>
+        <li>
+          <strong>Performance.</strong> Is it quick and easy to use on a phone, for everyone?
         </li>
       </ul>
       <p>
-        A redesign answers all three at once, at the price of starting again. A targeted improvement answers one of them,
-        on one part of the site, and keeps everything else. Which is right depends on which of the three is actually
-        broken, and how deep it goes.
-      </p>
-      <p>
-        It helps to separate the look from the foundations. The look (colours, type, photography) is what people notice
-        first, and what most redesigns change. The foundations are what decide whether a site works: what it says, how its
-        pages are organised, what it is built on, and how it performs. A tired look on sound foundations needs a refresh. A
-        fresh look on broken foundations is a rebuild that hasn’t been admitted yet.
+        A tired look on sound foundations needs a refresh. In our experience, one broken foundation can usually be
+        repaired in place. A rebuild makes sense when the repair means replacing what the site is built on, or when two
+        or more are broken at once.
       </p>
 
       <H2 id="sound">Signs the foundations are sound</H2>
       <ul>
         <li>
-          Someone landing on the home page or a service page can tell within a few seconds what you do, who it’s for
-          and how to start. (Ask someone outside the business to try it on their phone, and watch without helping.)
+          A stranger can tell within seconds, on a phone, what you do and how to start. (Ask an outsider to try it
+          while you watch.)
+        </li>
+        <li>There’s a page for each service people search for, not one long page listing everything.</li>
+        <li>
+          Your team can edit and publish pages without waiting on a developer, the accounts are in your business’s name,
+          and someone keeps the software updated.
         </li>
         <li>
-          The pages follow the way customers think about what you sell: a page for each service they’d search for,
-          not one long page listing everything.
+          Its problems sit in particular places, such as an oversized image or a slow plug-in, rather than everywhere.
         </li>
-        <li>You, or someone on your team, can change the words, add a page and publish without waiting on a developer.</li>
-        <li>
-          It works on a phone, or its problems sit in particular places (oversized images, a slow plug-in, a chat widget)
-          rather than everywhere.
-        </li>
-        <li>It brings in enquiries, just not enough of them, or not enough of the right ones.</li>
+        <li>It brings in enquiries, just not enough, or not enough of the right ones.</li>
       </ul>
-      <p>
-        If most of these are true, you probably don’t need a new website. You need particular pages to work harder.
-      </p>
+      <p>If most of these are true, keep the site and make particular pages work harder.</p>
 
       <H2 id="rebuild">Signs you need a rebuild</H2>
       <ul>
         <li>
-          <strong>The business has changed and the site describes the old one.</strong> Different services, different
-          customers, a different way of working. Rewriting every page and reorganising the menu is a rebuild whether or not
-          anyone calls it one.
+          <strong>The business has changed, or the structure fights you.</strong> New services, new customers, or
+          everything on a few long pages under a menu that mirrors your departments. Fixing that means rewriting every
+          page and reorganising the menu: a rebuild, whatever anyone calls it.
         </li>
         <li>
-          <strong>The structure fights you.</strong> Everything lives on a few long pages, or the menu mirrors your internal
-          departments instead of what customers are looking for.
+          <strong>The software is past its support.</strong> The platform, theme or plug-ins no longer get security
+          updates, or can’t be updated without breaking the site.
         </li>
         <li>
-          <strong>You can’t change it.</strong> The platform is tied to one provider, the theme breaks when you edit
-          it, or small changes cost money and take weeks.
+          <strong>The problems are built in.</strong> The theme loads heavy scripts on every page, important words are
+          set inside images or menus can’t be used with a keyboard, and fixing it means replacing the theme.
         </li>
         <li>
-          <strong>The slowness is built in.</strong> The theme loads heavy scripts on every page, important words are set
-          inside images, menus can’t be used with a keyboard, and fixing it means replacing the theme anyway.
-        </li>
-        <li>
-          <strong>The site can’t leave its provider.</strong> A domain or hosting account in someone else’s name is not
-          a reason to rebuild on its own: ask for them to be moved into your business’s name first. The{" "}
+          <strong>The site can’t leave its provider.</strong> A domain or hosting account in someone else’s name isn’t
+          a reason to rebuild on its own: ask for them to be moved into your business’s name (the{" "}
           <a href={`${PAGES.article("after-launch-ownership")}#today`}>ownership guide</a> shows how to find out what you
-          own. But if the site itself is locked to a provider’s platform and can’t be moved, a rebuild in your own name
-          may be the cleanest way out.
+          own). But if the site itself is locked to a provider’s platform, a rebuild in your own name may be the
+          cleanest way out.
         </li>
       </ul>
       <p>
-        One of these on its own can sometimes be fixed in place. Two or three together usually mean you would spend most
-        of a rebuild’s cost on patches, and still have the old site underneath.
+        Support is easy to miss: nothing looks wrong. WordPress runs on a server language called PHP, and each PHP
+        version is supported for a limited time. In October 2026, php.net listed 8.2 as the oldest supported
+        version, with security fixes until 31 December 2026, and told anyone on an unsupported version to upgrade as
+        soon as possible.<Cite n={1} /> WordPress recommends 8.3 or greater.<Cite n={2} />
       </p>
+      <p>
+        If the theme or plug-ins can’t run on a supported version, updating means replacing them: most of a rebuild.
+        Own Your Online, from the National Cyber Security Centre, says keeping a website’s software updated and
+        patched, plug-ins and web server included, is the business owner’s responsibility.<Cite n={3} />
+      </p>
+      <Callout title="If your old web designer holds the domain">
+        <p>
+          That alone isn’t a reason for a new website. For a .nz name, the Domain Name Commission says your business
+          should be the registrant, and if your web developer is listed instead, to contact your{" "}
+          <Term id="registrar">registrar</Term> to have it transferred to the business.<Cite n={4} /> If the holder
+          won’t transfer a name you believe is yours, the Commission has a dispute resolution service.<Cite n={5} />
+        </p>
+      </Callout>
 
       <H2 id="diagnosis">A one-week diagnosis you can do yourself</H2>
       <p>
-        Before you talk to anyone who sells websites, spend a week finding out what is actually happening. None of this
-        needs technical skill, and the answers are worth more than any opinion of how the site looks.
+        Before you talk to anyone who sells websites, spend a week finding out what’s happening. None of it needs
+        technical skill. Note each problem and the page it’s on.
       </p>
       <Steps
         items={[
           {
-            t: "Follow the journeys (day 1)",
+            t: "Find the pages that do the work (day 1)",
             b: (
               <p>
-                In your analytics, find the pages people arrive on, where they go next and where they leave. Most sites
-                have a handful of pages doing most of the work, and one or two where most people give up.
+                If you use <Term id="analytics">Google Analytics</Term>, open Engagement, then Landing page: it shows
+                the first page people land on and how many land on each.<Cite n={6} /> List the top 10. If enquiries
+                aren’t counted yet, have form submissions recorded as a key event (Google’s term for an action that’s
+                particularly important to your business), so you have a baseline.<Cite n={7} />
               </p>
             ),
           },
           {
-            t: "List the top ten arrival pages (day 1)",
+            t: "Try them on a phone (day 2)",
             b: (
               <p>
-                These matter most. A redesign that changes them without care puts at risk the visits they already bring
-                in.
-              </p>
-            ),
-          },
-          {
-            t: "Do the phone test (day 2)",
-            b: (
-              <p>
-                On your own phone, on mobile data, open each of those ten pages. Can you tell what you’d get and how
-                to get it without zooming, waiting or hunting? Write down every moment of friction.
+                On your own phone, on mobile data, open each one. Can you tell what you’d get and how to start,
+                without zooming, waiting or hunting? Note every moment of friction. The mobile version is also the one
+                Google uses for indexing and ranking.<Cite n={8} />
               </p>
             ),
           },
           {
             t: "Check the speed (day 3)",
             b: (
+              <>
+                <p>
+                  Put the same pages through Google’s <Term id="pagespeed-insights">PageSpeed Insights</Term>. Where a
+                  page has enough visitors, it shows what real users experienced over the previous 28 days.
+                  <Cite n={9} />{" "}
+                  Google’s <Term id="core-web-vitals">Core Web Vitals</Term> count a page as good when, for
+                  three-quarters of visits, the main content appears within 2.5 seconds, a tap gets a response within
+                  200 milliseconds and the layout shifts by 0.1 or less.<Cite n={10} />
+                </p>
+                <p>
+                  Small sites often lack the visitors, so the report falls back to the whole site or shows no real-user
+                  data. Google says its lab test is useful for debugging.<Cite n={9} /> If the lab test blames the same
+                  thing on every page, suspect the theme.
+                </p>
+              </>
+            ),
+          },
+          {
+            t: "Run a first accessibility check (day 4)",
+            b: (
               <p>
-                Put the same pages through Google’s <Term id="pagespeed-insights">PageSpeed Insights</Term>. It reports two kinds of result. Field data is
-                what real Chrome users experienced over the previous 28 days, where the site has enough visitors. Lab
-                data is a controlled test, most useful for finding causes.
-                <Cite n={1} /> Google calls a page good when, for three-quarters of visits, the main content appears within
-                2.5 seconds, the page responds to a tap or click within 200 milliseconds, and the layout barely jumps
-                (a layout-shift score of 0.1 or less).
-                <Cite n={2} /> Note which pages fail, and what the report blames.
+                Try the Easy Checks from the W3C, the web’s standards body, on your three busiest pages: titles,
+                headings, image descriptions, colour contrast, keyboard focus, zoom and form labels, among others. The
+                W3C warns that they cover only a few issues, and a page can seem to pass yet still have significant
+                barriers.<Cite n={11} /> What they catch is still worth fixing.
               </p>
             ),
           },
           {
-            t: "Look at what people search for (day 4)",
+            t: "Look at what people search for (day 5)",
             b: (
               <p>
-                If you have <Term id="search-console">Google Search Console</Term>, it shows the searches your pages appear for. Searches where you appear
-                but are rarely chosen usually point to a weak title or description. Searches you’d expect to appear
-                for, and don’t, usually point to a page that doesn’t exist.
+                If you have <Term id="search-console">Google Search Console</Term>, its Performance report shows the
+                searches your site appears for, how often it appeared and how often people clicked.<Cite n={12} />{" "}
+                Searches where you appear often but are rarely clicked usually point to a weak{" "}
+                <Term id="title-and-description">title or description</Term>. Searches you’d expect to appear for, and
+                don’t, point to a missing page.
               </p>
             ),
           },
           {
-            t: "Walk your own enquiry path (day 5)",
+            t: "Walk your own enquiry path (day 6)",
             b: (
               <p>
-                Fill in your own form, book your own appointment, call your own number from the site. Time it. Then see
-                where the enquiry lands and how long it takes for someone to reply. A surprising number of
-                “website problems” turn out to live here.
+                Fill in your own form, book your own appointment, call the number on the site. Time each one, then see
+                where the enquiry lands and how long a reply takes. A surprising number of “website problems” live here.
+              </p>
+            ),
+          },
+          {
+            t: "Check the foundations (day 7)",
+            b: (
+              <p>
+                Who is the domain registered to? For a .nz name, the Domain Name Commission says you can find out by
+                searching the domain name.<Cite n={4} /> Whose name are the hosting and admin logins in? Do the
+                platform, theme and plug-ins still get updates? On WordPress, ask your host which PHP version the site
+                runs and compare it with php.net’s list.<Cite n={1} /> When did the last{" "}
+                <Term id="backup">backup</Term> run, and has anyone restored one? Own Your Online recommends automatic
+                backups, with copies kept in different places.<Cite n={3} />
               </p>
             ),
           },
         ]}
       />
       <p>
-        At the end of the week you have a short list of specific problems, attached to specific pages. That list decides
-        between a rebuild and targeted work far more reliably than how the site looks.
+        By the end of the week you have specific problems on specific pages, and an answer for each foundation.
+        That’s all you need to <a href="#deciding">decide</a>.
       </p>
 
-      <H2 id="fixes">The targeted fixes that pay first</H2>
-      <p>When the foundations are sound, these usually do the most for the least:</p>
+      <H2 id="fixes">The fixes that pay first</H2>
+      <p>When the foundations are sound, these do the most for the least.</p>
       <ul>
         <li>
-          <strong>The first screen.</strong> On the home page and every service page, the first thing people see should say
-          what you do, for whom, and the one next step. Underperforming pages often bury this under a slogan or a slideshow.
+          <strong>The first screen.</strong> On the home page and each service page, the first thing people see says
+          what you do, for whom, and the one next step, rather than a slogan or a slideshow.
         </li>
         <li>
-          <strong>The service pages.</strong> One page for each service people actually look for, each answering what
-          buyers ask: what it includes, who it’s for, how it works, how pricing works, and how to start.
+          <strong>One page per service.</strong> Each answers what buyers ask: what it includes, who it’s for, how it
+          works, how pricing works and how to start.
         </li>
         <li>
           <strong>The enquiry route.</strong> Fewer form fields, a clear promise of what happens next and when, and a
-          confirmation that says it worked. If people book, let them book a time rather than request one.
+          confirmation that says it worked. If people book, let them pick a time.
         </li>
         <li>
           <strong>Speed.</strong> Usually images far larger than they’re shown, scripts from tools you no longer use,
           and third-party widgets. Fixing those can take a page from failing to passing without touching the design.
         </li>
         <li>
-          <strong>Titles and descriptions.</strong> Google’s own guidance is that every page should have its own
-          descriptive title, not a vague one like “Home”, and that identical descriptions on every page
-          don’t help anyone choosing between results.
-          <Cite n={3} />
-          <Cite n={4} /> They are small edits with a large effect on whether people click.
+          <strong>Titles and descriptions.</strong> Google asks for a title on every page and warns against vague ones
+          such as “Home”.<Cite n={13} /> Identical descriptions on every page don’t help either, it says.
+          <Cite n={14} /> These are what people read before they click.
         </li>
       </ul>
-      <p>
-        Where you can, change one thing at a time and write down the date, so you can see what each change did.
-      </p>
+      <p>Change one thing at a time and note the date, so you can see what each change did.</p>
 
       <H2 id="protect">If you rebuild, protect what you’ve earned</H2>
       <p>
-        A new site can lose much of what the old one had earned in search, and break every link people have saved, if
-        its addresses change carelessly. Three things prevent most of the damage:
+        A new site can lose much of what the old one earned in search, and break saved links, if its addresses change
+        carelessly. Google warns that rankings may fluctuate while it recrawls and reindexes a changed site.
+        <Cite n={15} /> These keep the damage small:
       </p>
-      <ul>
-        <li>
-          <strong>A content inventory.</strong> List every page on the current site, with its visits and what links to it.
-          Decide for each one: keep, merge, rewrite or retire.
-        </li>
-        <li>
-          <strong>A redirect map.</strong> Every old address that changes should send people (and search engines) to its
-          closest new page with a <Term id="redirect">permanent redirect</Term>. Google recommends server-side permanent redirects (301 or 308),
-          keeping them for as long as possible and generally at least a year, and warns that rankings can fluctuate while
-          it recrawls the site; on a medium-sized site it can take a few weeks or more before the new addresses replace
-          the old ones in results.
-          <Cite n={5} />
-        </li>
-        <li>
-          <strong>Continuity in your analytics.</strong> Keep the same analytics property and note the launch date, so you
-          can compare like with like afterwards.
-        </li>
-      </ul>
+      <Check
+        items={[
+          <>
+            <strong>A content inventory.</strong> List every page with its visits and what links to it, and decide for
+            each: keep, merge, rewrite or retire.
+          </>,
+          <>
+            <strong>A redirect map.</strong> Send each old address that changes to its closest new page. Google
+            recommends <Term id="redirect">permanent redirects</Term> (301 or 308), kept for as long as possible,
+            generally at least a year, and warns against sending many to one irrelevant page, such as the home page.
+            <Cite n={15} />
+          </>,
+          <>
+            <strong>Links and the sitemap.</strong> Point the new site’s own links at the new addresses, and submit the
+            new <Term id="sitemap">sitemap</Term> in Search Console.<Cite n={15} />
+          </>,
+          <>
+            <strong>Nothing left blocked.</strong> Some owners hide a new site from search engines while it’s built,
+            with a robots.txt rule or a noindex tag. Google says to remove any such block when you’re ready to move.
+            <Cite n={16} /> Check on launch day.
+          </>,
+          <>
+            <strong>The same analytics.</strong> Keep the same analytics property and note the launch date, to
+            compare like with like.
+          </>,
+        ]}
+      />
+      <p>
+        Then give it time. Google says a small to medium-sized site can take a few weeks for most pages to move.
+        <Cite n={15} />
+      </p>
       <Callout title="Keep the addresses that work">
         <p>
           If a page already ranks and brings in enquiries, the safest redirect is none at all: give its replacement the
@@ -239,47 +284,92 @@ export default function Body() {
         </p>
       </Callout>
 
-      <H2 id="deciding">Deciding</H2>
-      <p>Put what your week found against these. Most findings point one way clearly.</p>
+      <H2 id="deciding">Deciding, and pricing both</H2>
+      <p>Count the broken foundations (message, control, support, performance), then follow the path below.</p>
       <Compare
-        caption="What the diagnosis found, and what it usually means"
-        head={["What you found", "Usually means", "Why"]}
+        caption="What to do, by how many foundations are broken"
+        head={["Broken", "What to do"]}
         rows={[
-          ["A few pages say the wrong thing", "Improve in place", "Rewrite those pages; the rest is working."],
-          ["The whole business has changed", "Rebuild", "Every page and the menu change anyway."],
-          ["A few pages are slow", "Improve in place", "Images, scripts and widgets can be fixed page by page."],
-          ["Every page is slow, whatever you remove", "Rebuild", "The weight is in the theme or platform."],
-          ["You can’t edit it, or don’t own it", "Rebuild (or move it first)", "A site you can’t change can’t keep up."],
-          ["Enquiries get lost after the form", "Improve in place", "Fix the route; the pages may be fine."],
-          ["Search visits are falling on particular pages", "Improve in place", "Work on those pages’ content, titles and speed."],
+          ["None", "Improve in place, starting with the fixes above."],
+          ["One", "Repair it, then improve. If only a new theme or platform can repair it, price a rebuild too."],
+          [
+            "Two or more",
+            "Get a rebuild priced alongside the list of fixes, and compare both over the next two or three years.",
+          ],
         ]}
       />
-      <Figure caption="The same decision as a path: answer down the left; the first “no” is your answer.">
+      <p>Patching a site on unsupported software still leaves it unsupported.</p>
+      <Figure caption="Where to start: answer down the left, and the first “no” is your first job.">
         <DecisionTree
           steps={[
             {
               q: "Does the site still describe the business you run today?",
-              no: { t: "Rebuild the message first", b: "Rewrite what you offer and for whom. If most pages change, plan a rebuild." },
+              no: { t: "Rewrite the message first", b: "If most pages change, plan a rebuild." },
             },
             {
-              q: "Can your team change it, and is it in your name?",
-              no: { t: "Rebuild on something you control", b: "Or move it into your name first, if the platform itself is sound." },
+              q: "Are the domain and accounts in your name, and can your team edit the site?",
+              no: {
+                t: "Fix control first",
+                b: "Move them into your name. Rebuild only if the site is locked to its provider’s platform.",
+              },
             },
             {
-              q: "Are the speed and accessibility problems limited to particular pages?",
-              no: { t: "Rebuild the foundations", b: "Problems built into a theme cost less to replace than to keep patching." },
+              q: "Is the software still supported, and can it be updated?",
+              no: { t: "Rebuild on supported software", b: "Keep the content and the addresses that already work." },
+            },
+            {
+              q: "Are the speed and accessibility problems limited to a few pages?",
+              no: {
+                t: "Rebuild the foundations",
+                b: "Problems built into a theme cost less to replace than to keep patching.",
+              },
             },
           ]}
-          end={{ t: "Improve in place", b: "Fix the pages your week pointed to, one at a time, and measure each change." }}
+          end={{ t: "Improve in place", b: "Fix what your week found, one change at a time, and measure each." }}
         />
       </Figure>
 
+      <H2 id="example">An example: an accounting practice</H2>
+      <p>
+        An illustration, not a real client. A two-partner accounting practice in Tauranga has a site built eight years
+        ago. The partners want a new one: it looks dated. Their week finds:
+      </p>
+      <ul>
+        <li>
+          <strong>Day 1:</strong> the home page and two service pages bring most visits, which mostly end on the
+          contact page.
+        </li>
+        <li>
+          <strong>Day 3:</strong> there’s no real-user data, and the lab test blames a large slideshow on every page.
+        </li>
+        <li>
+          <strong>Day 5:</strong> the site appears for “GST returns Tauranga” but is rarely clicked. That page’s title
+          is “Services”.
+        </li>
+        <li>
+          <strong>Day 6:</strong> the contact form still sends to a former employee’s inbox.
+        </li>
+        <li>
+          <strong>Day 7:</strong> the agency that built the site holds the domain, the site runs on a PHP version
+          php.net no longer lists as supported, and the theme’s maker stopped updating it years ago.
+        </li>
+      </ul>
+      <p>
+        The message is fine, but control and support are broken, and moving to a supported PHP version means replacing
+        the theme: most of a rebuild. They get both priced and choose the rebuild, moving the domain into the practice’s
+        name first and keeping the addresses of the pages that bring visits.
+      </p>
+      <p>
+        Had the software been current, fixing the domain, the slideshow, the title and the form would have done the job
+        without a rebuild.
+      </p>
+
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        Send us your site for the free audit. We’ll look at the pages, the enquiry route and the way they work on a
-        phone, then reply within two days with the changes we would make first. If a rebuild is warranted, our{" "}
-        <a href={PAGES.service("websites")}>websites service</a> covers the plan through to handover. If a few changes will
-        do, you can take the list to whoever looks after your site.
+        Send us your site for the free audit, with your week’s notes if you have them. Within two days we’ll reply
+        with the changes we would make first. If a rebuild is warranted, our{" "}
+        <a href={PAGES.service("websites")}>websites service</a> covers the plan through to handover; if a few changes
+        will do, take the list to whoever looks after your site.
       </p>
     </>
   );
