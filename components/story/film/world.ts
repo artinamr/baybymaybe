@@ -1754,8 +1754,11 @@ export class World {
       const room = c.sub < 0.05 && (i === 1 ? P0 > 19.72 && P0 < 27.3 : P0 > 19.48 && P0 < 20.86);
       const sky = !room;
       const inside = room;
+      // (Sam's room by day: the shadows cover the room and the deck, so the sun through the windows lays its shapes.)
+      const roomDay = i === 0 && c.sub < 0.05 && P0 > 22.84 && P0 < 27.3;
       v.before = () => {
-        this.sky.aimShadow(c.at, r);
+        if (roomDay) this.sky.aimShadow(H(-2.4, 1.0, -3.6), 6.5);
+        else this.sky.aimShadow(c.at, r);
         this.sky.dome.visible = sky;
         // (A closed room at night takes less of the sky's light: its lamps light it.)
         this.scene.environmentIntensity = this.sky.out.envI * (inside ? lerp(1, 0.42, this.sky.out.night) : 1);

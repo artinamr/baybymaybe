@@ -23,10 +23,17 @@ export const splitOn = (P: number) => P >= SPLIT.open[0] && P < SPLIT.close[1];
 
 export type SplitState = { on: boolean; open: number; at: number };
 
+/** Sam's pane turned like a page: closing, shut, shut, open again (P). Its camera changes while it is shut. */
+export const TURN_A = [22.68, 22.8, 22.88, 23.0] as const;
+
 export function splitAt(P: number, out: SplitState = { on: false, open: 0, at: 0.5 }): SplitState {
   out.on = splitOn(P);
   out.open = out.on ? smoother(range(P, SPLIT.open[0], SPLIT.open[1])) * (1 - smoother(range(P, SPLIT.close[0], SPLIT.close[1]))) : 0;
-  out.at = 0.5;
+  // (During the build's day Sam's pane folds shut into the gap and opens again on a new shot: a page turned.)
+  const fold = smoother(range(P, TURN_A[0], TURN_A[1])) * (1 - smoother(range(P, TURN_A[2], TURN_A[3])));
+  out.at = 0.5 * (1 - fold);
+  // (As the pane shuts, its gap goes with it: the other pane fills the page.)
+  out.open *= Math.min(1, out.at / 0.06);
   return out;
 }
 
@@ -36,13 +43,15 @@ export function splitAt(P: number, out: SplitState = { on: false, open: 0, at: 0
  */
 export function paneRects(s: SplitState, stacked: boolean): [number, number, number, number][] {
   const h = (GAP * s.open) / 2;
+  const a = Math.max(0.002, s.at - h);
+  const b = Math.min(0.998, s.at + h);
   if (stacked)
     return [
-      [0, 0, 1, s.at - h],
-      [0, s.at + h, 1, 1],
+      [0, 0, 1, a],
+      [0, b, 1, 1],
     ];
   return [
-    [0, 0, s.at - h, 1],
-    [s.at + h, 0, 1, 1],
+    [0, 0, a, 1],
+    [b, 0, 1, 1],
   ];
 }

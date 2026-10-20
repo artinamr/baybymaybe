@@ -176,6 +176,10 @@ const A_DECK_AT = fix(-43.05, 1.3, 21.7);
 const A_NIGHT_EYE = fix(-38, 17, 47);
 const A_NIGHT_AT = fix(-33.5, 1.5, 17.5);
 
+/** Sam's room by day, from inside: from the corner by the bookshelf, past the sofa and the lamp, out through the open sliders to the deck. */
+const A_ROOM_EYE = H(-4.45, 1.6, 0.2);
+const A_ROOM_AT = H(-1.8, 0.9, -6.0);
+
 /** The shopfront: the office through the glass, its desk, its chair, the laptop's light. */
 const B_WIN_EYE = S(-2.4, 1.25, 6.2);
 const B_WIN_AT = S(-3.98, 1.3, 3.75);
@@ -199,12 +203,16 @@ export const KEYS_A: Key[] = [
   ...still(21.18, 0.12, A_NIGHT_EYE, A_NIGHT_AT, 30, { dof: 0.25 }),
   A(21.52, fix(-47.0, 8.0, 33.0), fix(-43, 1.2, 22), 32, { dof: 0 }),
   // The garden by day: the old deck; the quote accepted; the build; a year; the reminder.
-  ...still(22.4, 0.7, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
-  ...still(24.4, 0.9, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
+  ...still(22.4, 0.44, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
+  // (Shut in the gap, the camera moves inside: two keys a hair apart.)
+  A(22.839, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
+  A(22.841, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
+  ...still(24.4, 1.5, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
   // The Saturday (you come and oil the deck) and six o'clock: the garden still.
-  ...still(26.6, 0.62, A_DECK_EYE, A_DECK_AT, 32, { dof: 0.45 }),
-  // Up and back into the one picture (straight up first, clear of the garden tree).
-  A(27.36, fix(-47.2, 6.2, 29.6), fix(-42, 2, 16), 36, { dof: 0.1 }),
+  ...still(26.6, 0.62, A_ROOM_EYE, A_ROOM_AT, 46, { dof: 0.35 }),
+  // Out through the sliders, then up and back into the one picture (clear of the garden tree).
+  A(27.3, H(-2.6, 1.6, -4.8), H(-1.8, 1.2, -8.0), 36, { dof: 0.05 }),
+  A(27.36, fix(-46.4, 4.6, 28.4), fix(-42, 2, 16), 36, { dof: 0.05 }),
   A(27.48, fix(-30, 24, 74), fix(-22, 2, 6), 39, { sub: 0.35, dof: 0 }),
   A(27.66, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
   A(28.2, WIDE_EYE, WIDE_AT, 38, { sub: 1, dof: 0 }),
@@ -299,6 +307,7 @@ const SM_W = (() => {
 })();
 const _o: CamOut = { eye: new THREE.Vector3(), at: new THREE.Vector3(), fov: 40, ppx: 0.5, ppy: 0.5, roll: 0, dof: 0, sub: 0 };
 export function cameraSmooth(P: number, c: Ctx, out: CamOut, end: number, keys: Key[] = KEYS) {
+  if (keys !== KEYS) return cameraAt(Math.min(end, Math.max(0, P)), c, out, keys);
   out.eye.set(0, 0, 0);
   out.at.set(0, 0, 0);
   out.fov = out.ppx = out.ppy = out.roll = out.dof = out.sub = 0;
