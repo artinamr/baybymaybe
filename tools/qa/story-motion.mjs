@@ -50,3 +50,5 @@ const over = (ms) => g.filter((x) => x > ms).length;
 console.log(`frames ${g.length}, median ${s[Math.floor(s.length / 2)].toFixed(1)} ms, p95 ${s[Math.floor(s.length * 0.95)].toFixed(1)} ms, over 25 ms: ${over(25)}, over 50 ms: ${over(50)}, max ${s[s.length - 1].toFixed(0)} ms`);
 const worst = gaps.slice(5).filter((x) => x[0] > 40).map((x) => `${x[0].toFixed(0)}ms@P${x[1].toFixed(2)}`);
 console.log("long gaps:", worst.slice(0, 20).join(" "));
+const top = gaps.slice(5).map((x, i) => [x[0], x[1], i]).sort((a, b) => b[0] - a[0]).slice(0, 8);
+console.log("longest:", top.map((x) => `${x[0].toFixed(0)}ms@P${x[1].toFixed(3)}(#${x[2]})`).join(" "));
