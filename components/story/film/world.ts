@@ -556,6 +556,7 @@ export class World {
     this.keepClear(f.dt);
     this.pointer(f.pointer);
     this.prevP = P;
+    this.lastP = P;
   }
 
   /**
@@ -1597,6 +1598,7 @@ export class World {
     this.hover = best;
   }
 
+  private lastP = 0;
   private views: View[] = [
     { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
     { camera: undefined as unknown as THREE.PerspectiveCamera, rect: [0, 0, 1, 1], focus: 5, aperture: 0 },
@@ -1666,15 +1668,23 @@ export class World {
       v.aperture = this.camOverride || (i === 1 && c.sub < 0.05) ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
       // Each pane's shadows are spent on its own subject.
       const r = Math.min(150, Math.max(3, v.focus * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
-      // The office pane looks into a closed room: no sky to draw behind it.
-      const sky = i === 0 || c.sub > 0.05;
+      // A pane that looks into a closed room has no sky to draw behind it (the office; Sam on the sofa).
+      const sky = c.sub > 0.05 || (i === 0 && !(this.lastP > 19.48 && this.lastP < 20.86));
       v.before = () => {
         this.sky.aimShadow(c.at, r);
         this.sky.dome.visible = sky;
+        // Each pane draws only the place it can see (the office pane looks into a closed room;
+        // Sam's garden never sees the workshop): two views for little more than the cost of one.
+        const own = c.sub < 0.05;
+        this.town.group.visible = !own || i === 0;
+        this.land.group.visible = !own || i === 0;
+        this.home.group.visible = !own || i === 0;
+        this.shop.group.visible = !own || i === 1;
       };
     }
     this.post.render(this.gl, this.scene, this.views, g, time);
     this.sky.dome.visible = true;
+    this.town.group.visible = this.land.group.visible = this.home.group.visible = this.shop.group.visible = true;
   }
 }
 
