@@ -32,10 +32,8 @@ const res = await page.evaluate(
   async (from, to, step) => {
     const raf = () => new Promise((r) => requestAnimationFrame(() => r()));
     const w = window.__story.world;
-    const names = ["phone", "sheet", "quote", "invoice", "pend0", "pend1", "pend2", "pend3", "pend4", "cal", "hand", "nQuote", "today"];
-    const cards = [...w.allCards(), ...w.system.cards];
-    const nodeNames = ["n-website", "n-reply", "n-booking", "n-quote", "n-invoice", "n-followup"];
-    const label = (i) => (i < names.length ? names[i] : nodeNames[i - names.length]);
+    const names = ["phone", "sheet", "quote", "invoice", "pend0", "pend1", "pend2", "pend3", "pend4", "drop"];
+    const label = (i) => names[i] ?? "card" + i;
     const V3 = w.camera.position.constructor;
     const v = new V3();
     const out = [];
@@ -60,6 +58,7 @@ const res = await page.evaluate(
       }
       const cam = w.camera;
       cam.updateMatrixWorld();
+      const cards = [...w.allCards(), w.dropCard];
       cards.forEach((c, i) => {
         for (let p = c.group; p; p = p.parent) if (!p.visible) return;
         if (c.faceMat.opacity < 0.15) return;

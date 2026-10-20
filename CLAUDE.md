@@ -578,7 +578,7 @@ not longer, but the bar really raised").**
   round the deck build. Judged from recordings at the scroll ceiling; the
   user asked for building over looking (keep image checks to one per
   feature).
-- **ROUND 25 (2026-10-20, "not super premium … completely rebuild the part
+- **ROUND 25 (REJECTED; replaced by the drop in round 26) (2026-10-20, "not super premium … completely rebuild the part
   after 'take your hands off' … more sci-fi, more crazy … make the few
   elements perfect")**: the new way rebuilt as a SYSTEM OF LIGHT
   (docs/STORY.md "The new way: a system of light"): a clean loop of two
@@ -599,6 +599,31 @@ not longer, but the bar really raised").**
   warm sun, low fill, a day-only S-curve); the harshest camera moves spread
   out. New checks: `story-overlap.mjs`, `story-pops.mjs`, `story-flow.mjs`,
   and `story-camera.mjs --phone` with vans and people as moving obstacles.
+
+**ROUND 26 (2026-10-20 — "the background and the houses ... still terrible
+... you basically took the exact same method, the wire in the air, and just
+added ring to it ... completely come up with a creative idea for the
+rebuild").**
+- **The new way is THE DROP** (`film/drop.ts`, `journey.ts`, `gather.ts`;
+  docs/STORY.md "The new way: the drop"): at the turn the owner's jobs burn to
+  light and run together into a drop of liquid glass with an indigo heart; it
+  carries Sam's job and opens into each screen (page, reply, calendar, quote,
+  invoice, review, reminder, the day), flies between them with the camera
+  chasing, rests as dew through the year, and comes to the lens at the end.
+  The loop, stations, rings, comets and `system.ts` are deleted. Never bring
+  back a line, wire or rings in the air.
+- **The world rebuilt** (`atmos.ts`, `sky.ts`, `land.ts`, `glass.ts`,
+  `trees.ts`, `mats.ts` `houseMat`): the town on its bay with a beach road,
+  pohutukawa, the sea, an island and hills; coloured houses, steel roofs,
+  white trim, shader weatherboards; rooms behind every window; leaf-card
+  trees and hedges; the sky as the world's light (a captured, convolved
+  cube); a height haze in the horizon's own colour. Gotchas: GLSL `pow` of a
+  negative base is NaN on D3D (one NaN in the sky's capture blacked out the
+  whole frame: square it instead); r184's `vColor` is a vec4; a
+  ShaderMaterial's fragment has no `projectionMatrix` (use gl_FragCoord);
+  the sky capture is throttled by real time, not the film's (a frozen
+  look-dev frame kept the first capture).
+- **Round 25 (a system of light over the town) was REJECTED.**
 
 **THE HOME FILM (round 13, 2026-09-27 — "I don't like the water and the cloud
 thingy … the animations are still cheap and unimpressive and non premium").**

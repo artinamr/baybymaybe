@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Post, makeGrade, type Grade } from "./post";
 import { Sky } from "./sky";
+import { buildLand, type Land } from "./land";
 import { buildTown, SHOP, type Town } from "./town";
 import { buildHome, buildShop, inFrame, type Home, type Shop } from "./places";
 import { Figure } from "./figure";
@@ -9,7 +10,9 @@ import { Card, Screen, Strips, carry, uiScale } from "./cards";
 import { MIST, WIND, hookMist } from "./mats";
 import { Crowd } from "./crowd";
 import { Envelope, type Flight } from "./mail";
-import { CARD_DROP, Fields, NODES, System, TAG_DROP } from "./system";
+import { Drop, dropPose } from "./drop";
+import { being, dropPos, dropVel, HOUSES, PANELS, SPOT, type Being } from "./journey";
+import { Gather, type CardRest } from "./gather";
 import { ContactShade } from "./shade";
 import { BACK_STEP, cameraSmooth, phoneAdjust, phoneBackBase, phoneBackTable, type BackBase, type CamOut, type Ctx as CamCtx } from "./camera";
 import { B, bump, clockAt, inW, isNew, k, ke, lapseHours, weathered, type W } from "./script";
@@ -66,7 +69,25 @@ function whenHours(hours: number, a: number, b: number) {
   return hi;
 }
 
-type Drop = { t0: number; house: number; lost: boolean; stage: string; done: boolean };
+type UserDrop = { t0: number; house: number; lost: boolean; stage: string; done: boolean };
+
+/** 11:47PM: the jobs still waiting, round the desk (shop-local x, y, z, yaw, roll). */
+const JOBS: [string, string, string, "amber" | "red" | "ink"][] = [
+  ["To quote", "Lucy", "Pergola, measured last week", "amber"],
+  ["Overdue", "Jono", "Invoice 0311, 34 days", "red"],
+  ["Call back", "Kiri", "Never got the quote", "red"],
+  ["To quote", "Ana", "Asked if you take new jobs", "amber"],
+  ["Reply", "Hemi", "Deck repair, how soon?", "ink"],
+];
+const JOB_SPOTS: [number, number, number, number, number][] = [
+  [-6.2, 1.3, 4.6, -0.6, 0.12],
+  [-1.7, 1.25, 4.5, 0.55, -0.1],
+  [-5.0, 2.45, 4.8, -0.25, -0.08],
+  [-2.7, 2.5, 4.9, 0.3, 0.1],
+  [-6.05, 2.1, 3.9, -0.95, 0.05],
+];
+/** When each job's card burns away at the turn. */
+const burnAt = (i: number): [number, number] => [B.fall[0] + 0.02 + i * 0.04, B.fall[0] + 0.3 + i * 0.04];
 
 export class World {
   readonly scene = new THREE.Scene();
@@ -75,6 +96,7 @@ export class World {
   readonly grade: Grade = makeGrade();
   readonly sky: Sky;
   readonly town: Town;
+  readonly land: Land;
   readonly home: Home;
   readonly shop: Shop;
   readonly phone: boolean;
@@ -100,8 +122,16 @@ export class World {
   private samPose = newPose();
   private ownerPose = newPose();
   private crowd: Crowd;
-  private system: System;
-  private fields: Fields;
+  /** THE NEW WAY: the drop (drop.ts, journey.ts) and the turn's gathering (gather.ts). */
+  readonly drop: Drop;
+  private gather: Gather;
+  private pose = dropPose();
+  private me: Being = { vis: 0, r: 0.3, shape: 0, w: 1, h: 1, face: null, faceK: 0, facing: "camera", glow: 1, motes: 0, wobble: 0 };
+  private motes = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+  private faces: Record<string, Screen> = {};
+  private dropPart: { id: string; box: THREE.Box3; on: boolean };
+  /** The houses whose enquiries the drop answers on its own (3am, six o'clock). */
+  private callers = { night: -1, late: -1 };
   private mailA: Envelope;
   private mailB: Envelope;
   private mailC: Envelope;
@@ -115,10 +145,6 @@ export class World {
   private quoteCard: Card;
   private invoiceCard: Card;
   private pend: Card[] = [];
-  private calCard: Card;
-  private handCard: Card;
-  private nQuoteCard: Card;
-  private todayCard: Card;
   private rival: THREE.Group;
   private ourVan: THREE.Group;
   private phoneLight: THREE.PointLight;
@@ -134,7 +160,7 @@ export class World {
   private w = 1;
   private h = 1;
   private prevP = -1;
-  private drops: Drop[] = [];
+  private drops: UserDrop[] = [];
   private lastTime = 0;
 
   constructor(gl: THREE.WebGLRenderer, opts: { phone: boolean; quality: Quality; reduced: boolean }) {
@@ -150,6 +176,7 @@ export class World {
     this.post = new Post(4, 6, opts.quality > 0);
     this.sky = new Sky(this.scene, opts.quality === 0 ? 1024 : 2048);
     this.town = buildTown(this.scene, opts.quality);
+    this.land = buildLand(this.scene);
     this.home = buildHome(this.scene);
     this.shop = buildShop(this.scene);
     // The two places, the garden's tree, the deck and the pile's van in the camera's height field.
@@ -179,8 +206,30 @@ export class World {
     this.traffic.body.castShadow = true;
     this.traffic.body.frustumCulled = this.traffic.dark.frustumCulled = false;
     this.scene.add(this.traffic.body, this.traffic.dark);
-    this.system = new System(this.scene, H(-2, 0, -1), S(-4, 0, 4));
-    this.fields = new Fields(this.scene);
+    this.drop = new Drop(this.scene);
+    this.gather = new Gather(this.scene);
+    // The houses it answers on its own: the nearest real ones.
+    const near = (x: number, z: number) => this.town.houses.reduce((a, b) => (Math.hypot(b.x - x, b.z - z) < Math.hypot(a.x - x, a.z - z) ? b : a));
+    for (const [key, x, z] of [
+      ["night", -6, 33],
+      ["late", 88, -58],
+    ] as const) {
+      const hh = near(x, z);
+      this.callers[key] = hh.id;
+      HOUSES[key].door.copy(hh.door);
+      HOUSES[key].fwd.set(Math.sin(hh.yaw), 0, Math.cos(hh.yaw));
+    }
+    // The jobs' cards at the turn, where they stand when they burn: the sparks leave from them.
+    const rests: CardRest[] = JOB_SPOTS.map(([x, y, z, yaw, roll], i) => ({
+      m: new THREE.Matrix4().compose(S(x, y, z), Q(0, Math.PI + yaw, roll), V(1, 1, 1)),
+      w: 1.0,
+      h: 0.625,
+      t0: burnAt(i)[0],
+      t1: burnAt(i)[1],
+    }));
+    // ...and the inbox's pile outside, which goes with them.
+    rests.push({ m: new THREE.Matrix4().compose(COLUMN_BASE.clone().setY(7), Q(0, 0, 0), V(1, 1, 1)), w: 3.6, h: 10, t0: B.fall[0], t1: B.fall[0] + 0.3 });
+    this.gather.build(rests, SPOT.birth);
     this.mailA = new Envelope(this.scene);
     this.mailB = new Envelope(this.scene);
     this.mailC = new Envelope(this.scene);
@@ -203,11 +252,9 @@ export class World {
     this.quoteCard = deskCard(1.4, 0.875, false);
     this.invoiceCard = deskCard(1.4, 0.875, false);
     for (let i = 0; i < 5; i++) this.pend.push(deskCard(1.0, 0.625));
-    const holoCard = (w: number, h: number) => new Card(new Screen(UI.DESK.w, UI.DESK.h, UI.DESK.s), w, h, 0.05, 0.02, { bezel: 0, body: 0x0b0c16, metal: 0.4, holo: true });
-    this.calCard = holoCard(4.8, 3.0);
-    this.handCard = holoCard(4.8, 3.0);
-    this.nQuoteCard = holoCard(4.8, 3.0);
-    this.todayCard = holoCard(1.4, 0.875);
+    // The drop's own screens (what it becomes besides Sam's phone).
+    for (const id of ["cal", "hand", "quote", "today"]) this.faces[id] = new Screen(UI.DESK.w, UI.DESK.h, UI.DESK.s);
+    for (const id of ["night", "late"]) this.faces[id] = new Screen(UI.PHONE.w, UI.PHONE.h, UI.PHONE.s);
     for (const c of this.allCards()) this.scene.add(c.group);
 
     // The vans: ours (taken from the workshop so it can drive), and the other business's.
@@ -263,27 +310,37 @@ export class World {
     box("admin", S(-3.9, 1.9, 5.15), V(4.6, 1.2, 0.8));
     box("deck", H(-1.3, 0.6, -7.0), V(7.4, 1.2, 5.2));
     box("van", H(0, 1.2, 12.5), V(2.4, 2.4, 5));
-    NODES.forEach((n) => box(n.id === "website" ? "site" : n.id, n.pos.clone().setY(n.pos.y - TAG_DROP), V(5.2, 1.8, 1.2)));
+    // The drop: what it is right now (its box follows it).
+    this.dropPart = { id: "site", box: new THREE.Box3(), on: false };
+    this.parts.push(this.dropPart);
 
     UI.initFonts().then(() => {
       for (const c of this.allCards()) c.screen.dirty();
       this.laptopScreen.dirty();
       this.strips.dirty();
-      this.system.dirty();
+      for (const sc of Object.values(this.faces)) sc.dirty();
     });
   }
 
+  /** The drop, as the checks see a card: its mesh, its size (as a panel, or its drop's width), how much it shows. */
+  get dropCard() {
+    const me = this.me;
+    const r = this.pose.r * me.vis;
+    const panel = me.shape > 0.5;
+    return { group: this.drop.mesh, w: panel ? me.w : r * 2, h: panel ? me.h : r * 2, faceMat: { opacity: me.vis }, shown: me.vis };
+  }
+
   private allCards() {
-    return [this.phoneCard, this.sheetCard, this.quoteCard, this.invoiceCard, ...this.pend, this.calCard, this.handCard, this.nQuoteCard, this.todayCard];
+    return [this.phoneCard, this.sheetCard, this.quoteCard, this.invoiceCard, ...this.pend];
   }
 
   setSize(w: number, h: number, dpr: number) {
     this.w = w;
     this.h = h;
-    this.system.labelScale = w / h < 1 ? 0.72 : 1;
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.post.setSize(w * dpr, h * dpr);
+    this.drop.bind(this.post.sceneCopy, this.post.size.w, this.post.size.h);
   }
 
   /** The phone's pull-back at P (camera.ts phoneBackTable): the free distances once, a table per screen shape. */
@@ -299,7 +356,7 @@ export class World {
         this.camCtx,
         FILM_LEN,
         this.town.field,
-        NODES.map((n) => ({ c: n.pos.clone().setY(n.pos.y - 1.6), r: 5, from: B.assemble[0] }))
+        []
       );
       this.backTables.set(key, (t = phoneBackTable(this.backBase, key)));
     }
@@ -313,24 +370,6 @@ export class World {
     void _n;
   }
 
-  lockTimes(): number[] {
-    const out = NODES.map(() => B.assemble[1]);
-    NODES.forEach((_, i) => {
-      for (let P = B.assemble[0]; P <= B.assemble[1]; P += 0.002)
-        if (this.system.rise(i, this.scanRadius(P)) >= 0.72) {
-          out[i] = P;
-          break;
-        }
-    });
-    return out;
-  }
-
-  /** The scan's radius from the workshop at P (it sweeps out over the first third of the assembly). */
-  private scanRadius(P: number) {
-    const a = B.assemble;
-    return 165 * smooth(range(P, a[0] + 0.02, a[0] + 0.38));
-  }
-
   /* ---------------------------------------------------------------- */
   /* Flights                                                           */
   /* ---------------------------------------------------------------- */
@@ -340,23 +379,15 @@ export class World {
     const indigo = new THREE.Color(0.55, 0.45, 1.0);
     const samCard = H(-3.1, 2.1, -2.4);
     const column = COLUMN_BASE.clone().setY(3.4);
-    const reply = NODES[1].pos.clone();
+    void indigo;
     return {
       old: { from: samCard, to: column, lift: 26, color: amber } as Flight,
-      newOut: { from: samCard, to: reply, lift: 4, color: amber } as Flight,
-      newBack: { from: reply.clone(), to: samCard.clone(), lift: 3, color: indigo } as Flight,
-      remind: { from: NODES[5].pos.clone(), to: H(-1.6, 2.2, -5.4), lift: 3, color: indigo } as Flight,
-      quote: { from: NODES[3].pos.clone().setY(NODES[3].pos.y - CARD_DROP), to: samCard.clone(), lift: 6, color: indigo } as Flight,
     };
   })();
 
   /** The main envelope's flights: when each is in the air (it shows), and its progress. */
   private flightList = (): { show: [number, number]; run: [number, number]; f: Flight }[] => [
     { show: [B.fold[0], B.land + 0.02], run: B.fly, f: this.flights.old },
-    { show: [B.nFly[0] - 0.02, B.nFly[1]], run: B.nFly, f: this.flights.newOut },
-    { show: [B.nBack[0], B.nBack[1] + 0.02], run: B.nBack, f: this.flights.newBack },
-    { show: [22.3, 22.48], run: [22.3, 22.46], f: this.flights.quote },
-    { show: [B.nRemind[0] - 0.02, B.nRemind[0] + 0.14], run: [B.nRemind[0] - 0.02, B.nRemind[0] + 0.12], f: this.flights.remind },
   ];
 
   /** The main envelope's flight at P (or null when none is in the air). */
@@ -446,15 +477,13 @@ export class World {
       const night = hod > 21.4 || hod < 5.0 ? 1 : 0;
       const e = this.cam.eye;
       const inRoom = (e.x > -49.2 && e.x < -38.8 && e.z > 10.8 && e.z < 20.2 && e.y < 3.3) || (e.x > 36.8 && e.x < 51.2 && e.z > -23.2 && e.z < -10.8 && e.y < 4.6);
-      MIST.value = (0.03 * dawn + 0.009 * dusk + 0.006 * night) * (inRoom ? 0 : 1);
+      MIST.value = (0.03 * dawn + 0.006 * dusk + 0.004 * night) * (inRoom ? 0 : 1);
     }
     // An impact shakes the camera: the paper hitting the floor; the landing after the rewind.
-    if (this.prevP < B.fall[0] + 0.03 && P >= B.fall[0] + 0.03) {
+    if (this.prevP < 17.48 && P >= 17.48 && P - this.prevP < 0.3) {
+      // The drop arriving in Sam's garden after the dive.
       this.impactT = t;
-      this.impactK = 1;
-    } else if (this.prevP < B.rewind[1] && P >= B.rewind[1]) {
-      this.impactT = t;
-      this.impactK = 0.4;
+      this.impactK = 0.25;
     }
     cam.position.copy(this.cam.eye);
     const since = t - this.impactT;
@@ -499,13 +528,16 @@ export class World {
     const radius = Math.min(150, Math.max(3, dist * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
     const sky = this.sky.update(hours, t, this.cam.at, radius, dist < 10 ? 1.4 : dist < 40 ? 1.0 : dist < 60 ? 0.8 : 0.45);
     this.town.setLamps(sky.lights > 0.3 ? smooth((sky.lights - 0.3) / 0.3) : 0);
+    this.land.update(this.reduced ? 0 : t, sky.night, this.sky.keyDir);
     const glass = new THREE.Color(0.16, 0.19, 0.24).lerp(new THREE.Color(0.03, 0.035, 0.05), sky.night);
     this.town.setGlass(glass, 2.4);
+    this.town.windows.uniforms.uDay.value = 1 - sky.night * 0.85;
     // Windows: lit by the hour; and every customer who gave up is a window gone dark.
     const dropK = nw ? k(Pw, [B.nOver[0] + 0.2, B.nOver[1] - 0.08]) : k(Pw, B.drop);
     for (const h of this.town.houses) {
       const r = ((h.id * 7919) % 101) / 101;
-      this.town.setWindow(h.id, r < sky.lights * 0.82 && !this.crowd.gone(h.id, dropK, nw) ? 1 : 0);
+      const calling = nw && ((h.id === this.callers.night && P >= 20.99 && P < 21.32) || (h.id === this.callers.late && P >= 27.32 && P < 27.86));
+      this.town.setWindow(h.id, calling || (r < sky.lights * 0.82 && !this.crowd.gone(h.id, dropK, nw)) ? 1 : 0);
     }
 
     this.look(P, sky.night);
@@ -518,7 +550,7 @@ export class World {
     this.column(Pw);
     this.crowdAndCounts(Pw, t, nw);
     this.seasons(Pw);
-    this.route(P, t);
+    this.theDrop(P, t, hours, sky.night);
     this.drive(t);
     this.keepClear(f.dt);
     this.pointer(f.pointer);
@@ -544,9 +576,8 @@ export class World {
     const wd = this.words;
     const cam = this.camera;
     cam.updateMatrixWorld();
-    const sysOn = this.system.group.visible;
-    for (const card of [...this.allCards(), ...this.system.cards]) {
-      if (card.shown <= 0.002 || (!sysOn && this.system.cards.includes(card))) {
+    for (const card of this.allCards()) {
+      if (card.shown <= 0.002) {
         if (card.clear !== 1) {
           card.clear = 1;
           card.apply();
@@ -627,7 +658,7 @@ export class World {
     this.deck(kb, weathered(P));
 
     // SHOP: who is in, which lights are on.
-    const ownerIn = (!nw && P >= B.ownerIn[0] && P < 10.42) || (!nw && P >= B.late[0] && P < B.black[1]) || (nw && P >= 25.8 && P < B.nWalk[1]);
+    const ownerIn = (!nw && P >= B.ownerIn[0] && P < 10.42) || (!nw && P >= B.late[0] && P < B.black[1]) || (nw && P >= 21.8 && P < 22.5) || (nw && P >= 25.8 && P < B.nWalk[1]);
     const lampOn = ownerIn && (hod > 18 || hod < 6.5) && !(nw && P > B.nLamp[0] + 0.03);
     s.lamp.spot.intensity = lampOn ? 7 * (1 - (nw ? 0 : range(P, B.black[0], B.black[0] + 0.12))) : 0;
     // Its shadow map is drawn only while it shines.
@@ -732,6 +763,7 @@ export class World {
   private lidAt(P: number) {
     if (P < B.ownerIn[0]) return 0;
     if (P < 16.4) return smooth(range(P, 7.02, 7.1));
+    if (P >= 21.8 && P < 22.5) return smooth(range(P, 21.84, 21.92));
     if (P < 25.8) return 0;
     return 1 - smooth(k(P, B.nClose));
   }
@@ -958,6 +990,16 @@ export class World {
       o.visible = 0;
       return o;
     }
+    // The morning after 3am: in along the footpath, to the desk (the handover waiting on it); the quote, priced.
+    if (P >= 21.56 && P < 22.44) {
+      const door = s.doorAt;
+      const path = [V(60, 0, -1.6), V(44.4, 0, -2.4), V(43.2, 0, -8.0), V(door.x, 0, door.z), S(-1.62, 0, 5.6), S(-2.0, 0, 4.4), S(-3.0, 0, 2.7), V(s.seat.x, 0, s.seat.z + 0.05)];
+      walk(this.poseA, path, smooth(range(P, 21.56, 21.8)) * pathLength(path), t, 0, null, this.shopFloor);
+      const sit = smooth(range(P, 21.78, 21.86));
+      if (sit <= 0) return copyPose(this.poseA, o);
+      deskType(this.poseB, s.seat, s.seatYaw, F, s.keys, t, inW(P, [22.22, 22.34]) ? 1 : 0.1, 0);
+      return blend(this.poseA, this.poseB, sit, o);
+    }
     if (P >= 25.8 && P < B.nStand[0]) {
       deskType(o, s.seat, s.seatYaw, F, s.keys, t, P < B.nClose[0] ? 0.25 : 0, 0);
       // Close the lid (both hands to its top edge), then the lamp's switch.
@@ -1102,8 +1144,9 @@ export class World {
       const n = ke(P, B.nToday) * 5;
       lp.draw(`today|${n.toFixed(1)}`, (c) => UI.today(c, { n }));
       const mat = this.shop.laptop.screen.material as THREE.MeshBasicMaterial;
-      if (mat.map !== lp.tex) {
-        mat.map = lp.tex;
+      const want = P >= 21.8 && P < 22.5 ? this.faces.quote.tex : lp.tex;
+      if (mat.map !== want) {
+        mat.map = want;
         mat.needsUpdate = true;
       }
     }
@@ -1142,12 +1185,6 @@ export class World {
     const windows: [number, number][] = [
       [B.lift[0], B.fold[1]],
       [B.year[1] + 0.02, B.search[1] + 0.12],
-      [B.nLift[0], B.nSend + 0.16],
-      [B.nBack[1] - 0.02, B.nPick + 0.18],
-      [22.38, 22.6],
-      [23.14, 23.6],
-      [23.88, 24.4],
-      [25.0, 25.36],
     ];
     let lift = 0;
     let show = false;
@@ -1189,102 +1226,40 @@ export class World {
     placeAdmin(this.invoiceCard, B.invoice[0], slot(-2.35, 1.88, 5.0, 0.32));
 
     // 11:47PM: the jobs still waiting crowd in round the desk.
-    const jobs: [string, string, string, "amber" | "red" | "ink"][] = [
-      ["To quote", "Lucy", "Pergola, measured last week", "amber"],
-      ["Overdue", "Jono", "Invoice 0311, 34 days", "red"],
-      ["Call back", "Kiri", "Never got the quote", "red"],
-      ["To quote", "Ana", "Asked if you take new jobs", "amber"],
-      ["Reply", "Hemi", "Deck repair, how soon?", "ink"],
-    ];
-    const spots: [number, number, number, number, number][] = [
-      [-6.2, 1.3, 4.6, -0.6, 0.12],
-      [-1.7, 1.25, 4.5, 0.55, -0.1],
-      [-5.0, 2.45, 4.8, -0.25, -0.08],
-      [-2.7, 2.5, 4.9, 0.3, 0.1],
-      [-6.05, 2.1, 3.9, -0.95, 0.05],
-    ];
     this.pend.forEach((card, i) => {
-      const [tag, title, line, tone] = jobs[i];
+      const [tag, title, line, tone] = JOBS[i];
       card.screen.draw(`pend|${i}`, (c) => UI.pending(c, { tag, title, line, tone }));
       if (this.falling(P, card)) return;
       if (nw || P < B.late[0] || P >= B.fall[0]) {
         card.show(0);
         return;
       }
-      const [x, y, z, yaw, roll] = spots[i];
+      const [x, y, z, yaw, roll] = JOB_SPOTS[i];
       const kk = smoother(range(P, B.late[0] + 0.05 + i * 0.05, B.late[0] + 0.2 + i * 0.05));
       const to = { p: S(x, y + Math.sin(t * 0.6 + i) * 0.01, z), q: Q(0, Math.PI + yaw, roll), s: 1 };
       carry(card.group, { p: to.p.clone().add(V(0, 0.4, 0.6)), q: to.q, s: 0.6 }, to, settle(kk, 0.45));
       card.show(kk, 1.0);
     });
-
-    // THE NEW WAY'S CARDS, under their parts of the route.
-    const under = (card: Card, node: number, on: number, draw: () => void) => {
-      if (on <= 0.002) {
-        card.show(0);
-        return;
-      }
-      draw();
-      const n = NODES[node].pos;
-      const yaw = Math.atan2(this.camera.position.x - n.x, this.camera.position.z - n.z);
-      // Hung under its station's tag, built top-down as it arrives.
-      card.group.position.set(n.x, n.y - CARD_DROP - (1 - on) * 0.5, n.z);
-      card.group.rotation.set(-0.04, yaw, 0);
-      card.group.scale.setScalar(0.85 + 0.15 * on);
-      card.build = smooth(on);
-      card.show(Math.min(1, on * 2.5), 1.0);
-    };
-    const bookings: UI.Booking[] = [
-      { day: 0, h: 9, len: 3, label: "Fence", who: "Aroha", at: 0 },
-      { day: 1, h: 13, len: 4, label: "Bathroom", who: "Jono", at: 0 },
-      { day: 3, h: 8, len: 2, label: "Repair", who: "Ravi", at: 0 },
-      { day: 2, h: 14, len: 1, label: "Measure-up", who: "Sam", at: 1, auto: true },
-      { day: 3, h: 11, len: 1, label: "Measure-up", who: "Aroha", at: 2, auto: true },
-    ];
-    const calNow = P < B.n3am[0] ? 1 + range(P, B.nBook[0], B.nBook[1]) * 0.2 : 2 + range(P, 21.2, 21.36) * 0.2;
-    under(this.calCard, 2, nw ? clamp01(bump(P, B.nBook[0] - 0.02, B.n3am[0] + 0.02, 0.06) + bump(P, 21.12, 21.5, 0.06)) : 0, () =>
-      this.calCard.screen.draw(`cal|${calNow.toFixed(2)}`, (c) => UI.holo(() => UI.calendar(c, { bookings, now: calNow, week: "This week" })))
-    );
-    under(this.handCard, 1, nw ? bump(P, B.nHand[0], B.nHand[1] + 0.02, 0.06) : 0, () => this.handCard.screen.draw("hand", (c) => UI.holo(() => UI.handover(c, { show: 1 }))));
-    const qk = nw ? bump(P, B.nQuote[0], B.nQuoteSent + 0.12, 0.08) : 0;
-    // Typed once: Sam's details fly from the website station into the quote as it builds.
-    this.fields.update(this.system, this.system.nodeU[0], this.system.nodeU[3], nw ? range(P, B.nQuote[0] - 0.04, B.nQuote[0] + 0.2) : 0, this.nQuoteCard.group, qk > 0 ? 1 : 0, this.camera);
-    under(this.nQuoteCard, 3, qk, () => {
-      const sent = P >= B.nQuoteSent ? 1 : 0;
-      this.nQuoteCard.screen.draw(`nquote|${sent}`, (c) => UI.holo(() => UI.docCard(c, { kind: "quote", typed: 999, stamp: 0, auto: true, sent })));
-    });
-    // Six o'clock: the day, on a card over the desk.
-    const tk = nw ? bump(P, B.nToday[0], B.nClose[0] + 0.02, 0.06) : 0;
-    if (tk > 0) {
-      const n = ke(P, B.nToday) * 5;
-      this.todayCard.screen.draw(`today|${n.toFixed(1)}`, (c) => UI.holo(() => UI.today(c, { n })));
-      const arrive = smoother(range(P, B.nToday[0], B.nToday[0] + 0.12));
-      carry(this.todayCard.group, lid, slot(-3.9, 1.98, 5.2, 0), settle(arrive, 0.4));
-      this.todayCard.build = arrive;
-      this.todayCard.show(tk, 1.0);
-    } else this.todayCard.show(0);
   }
 
   /**
-   * THE TURN'S FALL: a card that was in the air lets go and falls like paper,
-   * slow, tipping and sliding side to side, fading as it goes into the dark.
-   * Returns true while it is falling (and places it).
+   * THE TURN: each job's card holds still where it is, then burns away from
+   * its edges (cards.ts `burn`); what it was made of goes as sparks into the
+   * drop (gather.ts). Returns true while it is burning (and places it).
    */
   private falling(P: number, card: Card) {
-    if (isNew(P) || P < B.fall[0] || P >= B.fall[1] + 0.1) {
-      delete card.group.userData.rest;
+    const i = this.pend.indexOf(card);
+    if (i < 0 || isNew(P) || P < B.fall[0] || P >= B.fall[1] + 0.1) {
+      if (card.burn !== 0) card.burn = 0;
       return false;
     }
-    if (!card.group.visible && !card.group.userData.rest) return false;
-    const st = (card.group.userData.rest ??= { p: card.group.position.clone(), q: card.group.quaternion.clone(), seed: Math.random() * 10 }) as { p: THREE.Vector3; q: THREE.Quaternion; seed: number };
-    const u = k(P, B.fall);
-    const sd = st.seed;
-    const delay = (sd % 1) * 0.25;
-    const tt = Math.max(0, u - delay) * 3.2;
-    const drop = tt * tt * 0.5 + tt * 0.35;
-    card.group.position.copy(st.p).add(V(Math.sin(tt * 2.2 + sd) * 0.3 * tt, -drop, Math.cos(tt * 1.7 + sd) * 0.22 * tt));
-    card.group.quaternion.copy(st.q).multiply(Q(Math.sin(tt * 2.6 + sd) * 0.6 * Math.min(1, tt), tt * 0.4, Math.cos(tt * 2.1 + sd) * 0.5 * Math.min(1, tt)));
-    card.show(1 - smooth(range(u, 0.45 + delay, 0.95)), 1.0);
+    const [x, y, z, yaw, roll] = JOB_SPOTS[i];
+    card.group.position.copy(S(x, y, z));
+    card.group.quaternion.copy(Q(0, Math.PI + yaw, roll));
+    card.group.scale.setScalar(1);
+    const [a, b] = burnAt(i);
+    card.burn = range(P, a, b);
+    card.show(card.burn >= 0.999 ? 0 : 1, 1.0);
     return true;
   }
 
@@ -1307,20 +1282,7 @@ export class World {
       this.mailA.update(null, 0, 0, cam);
       this.mailLight.intensity = 0;
     }
-    // 3AM: another house's enquiry goes out and its answer comes back; at 7:12pm, another.
-    const other = (w: [number, number], house: number, env: Envelope) => {
-      if (P < w[0] || P >= w[1]) return false;
-      const hh = this.town.houses[house];
-      const from = hh.top.clone();
-      const to = NODES[1].pos.clone();
-      const u = k(P, w);
-      const out = u < 0.5;
-      const f: Flight = out ? { from, to, lift: 6, color: new THREE.Color(1.0, 0.62, 0.3) } : { from: to, to: from, lift: 5, color: new THREE.Color(0.55, 0.45, 1.0) };
-      const tt = smoother(out ? u * 2 : u * 2 - 1);
-      env.update(f, tt, range(tt, 0, 0.05) * (1 - range(tt, 0.95, 1)), cam, 1.0, true);
-      return true;
-    };
-    if (!other([20.86, 21.06], 41, this.mailB) && !other(B.nLater, 77, this.mailB)) this.mailB.update(null, 0, 0, cam);
+    this.mailB.update(null, 0, 0, cam);
     // Yours (dropped in): out from a house; lost on the old route, answered on the new.
     let used = false;
     for (const d of this.drops) {
@@ -1337,7 +1299,7 @@ export class World {
       if (used) continue;
       used = true;
       const hh = this.town.houses[d.house];
-      const target = d.stage === "new" ? NODES[1].pos.clone() : COLUMN_BASE.clone().setY(8);
+      const target = d.stage === "new" ? S(-3.9, 3.0, 7.0) : COLUMN_BASE.clone().setY(8);
       const f: Flight = { from: hh.top.clone(), to: target, lift: 10, color: d.lost ? new THREE.Color(1, 0.5, 0.3) : new THREE.Color(0.6, 0.5, 1) };
       const u = Math.min(1, age / 3.2);
       const vis = d.lost ? 1 - range(u, 0.4, 0.62) : 1 - range(u, 0.94, 1);
@@ -1392,18 +1354,11 @@ export class World {
     st.commit();
   }
 
-  /** The turn: each strip falls like paper. */
+  /** The turn: the pile goes with the paper (into light), top first. */
   private stripFall(P: number, i: number) {
     if (P < B.fall[0]) return null;
-    const u = k(P, B.fall);
-    const sd = (i * 0.618) % 1;
-    const tt = Math.max(0, u - sd * 0.3) * 3.0;
-    const drop = tt * tt * 1.6 + tt * 0.8;
-    return {
-      p: V(Math.sin(tt * 2.0 + i) * 0.5 * tt, -drop, Math.cos(tt * 1.6 + i) * 0.4 * tt),
-      q: Q(Math.sin(tt * 2.4 + i) * 0.7 * Math.min(1, tt), tt * 0.3, Math.cos(tt * 2.0 + i) * 0.6 * Math.min(1, tt)),
-      k: 1 - smooth(range(u, 0.4 + sd * 0.3, 0.95)),
-    };
+    const sd = 1 - i / Math.max(1, this.strips.n - 1);
+    return { p: V(0, 0, 0), q: new THREE.Quaternion(), k: 1 - smooth(range(P, B.fall[0] + sd * 0.18, B.fall[0] + 0.08 + sd * 0.18)) };
   }
 
   /* ---------------------------------------------------------------- */
@@ -1432,60 +1387,99 @@ export class World {
   }
 
   /* ---------------------------------------------------------------- */
-  /* The new route                                                     */
+  /* The new way: the drop                                              */
   /* ---------------------------------------------------------------- */
 
-  private pulseV = [new THREE.Vector4(), new THREE.Vector4(), new THREE.Vector4()];
-  private route(P: number, t: number) {
-    const sys = this.system;
-    const a = B.assemble;
-    const show = P >= a[0] ? 1 : 0;
-    // THE SCAN sweeps out from the workshop over the first third of the
-    // assembly (the stations rise where it passes); then the line draws
-    // itself round from the customer's house.
-    const scanR = P >= a[0] && P < a[0] + 0.38 ? this.scanRadius(P) : -1;
-    const gs = this.town.ground;
-    (gs.uScan.value as THREE.Vector4).set(sys.shop.x, sys.shop.z, Math.max(0, scanR), 5 + 0.06 * Math.max(0, scanR));
-    gs.uScanK.value = scanR >= 0 ? show * (1 - smooth(range(scanR, 120, 165))) * smooth(range(scanR, 0, 6)) : 0;
-    const draw = smoother(range(P, a[0] + 0.3, a[1]));
-    const U = sys.nodeU;
-    // The customer's comet along the loop: where it is, which way it goes, its warmth (amber = the customer, indigo = the business).
-    const pulse = this.pulseV[0].set(0, 0, 1, 1);
-    const go = (from: number, to: number, kk: number, warm: number) => pulse.set(lerp(from, to, kk), 1, to >= from ? 1 : -1, warm);
-    if (inW(P, B.nFly)) go(0, U[1], smoother(k(P, B.nFly)), 1);
-    else if (inW(P, B.nBack)) go(U[1], 0, smoother(k(P, B.nBack)), 0);
-    else if (inW(P, B.nBook)) go(U[1], U[2], smoother(k(P, B.nBook)), 1);
-    else if (inW(P, [B.nQuote[0], B.nQuoteSent])) go(U[2], U[3], smoother(k(P, [B.nQuote[0], B.nQuote[0] + 0.2])), 0);
-    else if (inW(P, B.nInvoice)) go(U[3], U[4], smoother(k(P, B.nInvoice)), 0);
-    else if (inW(P, B.nReview)) go(U[4], U[5], smoother(k(P, B.nReview)), 0);
-    else if (inW(P, [B.nRemind[0], B.nVan[1]])) go(U[5], 1.0, smoother(k(P, [B.nRemind[0], B.nVan[1]])), 0);
-    // After six o'clock the loop carries other customers by itself, on its own time.
-    const own = smooth(range(P, 25.9, 26.3)) * (1 - smooth(range(P, 28.6, 28.9)));
-    const tt = this.reduced ? 0 : t;
-    this.pulseV[1].set(((tt * 0.05 + 0.3) % 1 + 1) % 1, own > 0.01 ? 1 : 0, 1, 1);
-    this.pulseV[2].set(((tt * 0.038 + 0.72) % 1 + 1) % 1, own > 0.01 ? 1 : 0, 1, 0);
-    // Each station's working windows: lit while it works, a ping as it starts.
-    const windows: [number, number][][] = [
-      [[18.0, 19.8]],
-      [[B.nFly[0], B.nBack[1] + 0.1], [20.86, 21.1], [B.nLater[0], B.nLater[1]]],
-      [[B.nBook[0], B.nBook[1] + 0.2], [21.12, 21.5], [25.3, 25.6]],
-      [[B.nQuote[0], B.nQuoteSent + 0.12]],
-      [[B.nInvoice[0], B.nPaid + 0.1]],
-      [[B.nReview[0], B.nReview[1]], [B.nRemind[0], B.nRemind[1]]],
-    ];
-    const lit = windows.map((ws) => Math.max(0, ...ws.map(([x, y]) => bump(P, x, y, 0.05))));
-    const ping = windows.map((ws) => Math.max(0, ...ws.map(([x]) => (P >= x ? 1 - range(P, x, x + 0.1) : 0))));
-    sys.update(show, scanR, draw, this.pulseV, lit, ping, t, this.camera, this.reduced);
-    // The customer's comet lights the town it passes over.
-    if (pulse.y > 0.5 && show > 0) {
-      sys.at(pulse.x, this.pulseLight.position);
-      this.pulseLight.intensity = 60 * show;
-    } else this.pulseLight.intensity = 0;
-    // Each station's lock is a click.
-    if (P > this.prevP && P - this.prevP < 0.3)
-      this.lockTimes().forEach((lt, i) => {
-        if (this.prevP < lt && P >= lt) this.events.push({ type: "node", pos: NODES[i].pos });
-      });
+  /**
+   * THE DROP at P: where it is (journey.ts, plus a breath while it floats),
+   * what it is (a drop, or a panel showing one of its screens), which way a
+   * panel faces, the customer's amber points inside it, and its light.
+   */
+  private theDrop(P: number, t: number, hours: number, night: number) {
+    const me = being(P, this.me);
+    const p = this.pose;
+    const br = this.reduced ? 0 : 1;
+    dropPos(P, p.pos);
+    dropVel(P, p.vel);
+    const speed = p.vel.length();
+    // A slow breath while it hangs still; none while it travels.
+    const still = 1 - Math.min(1, speed / 6);
+    p.pos.y += Math.sin(t * 1.3) * 0.02 * still * br * (1 - me.shape);
+    p.r = me.r;
+    p.shape = me.shape;
+    p.w = me.w;
+    p.h = me.h;
+    p.glow = me.glow * (1 + 0.35 * Math.min(1, speed / 60));
+    p.motes = me.motes;
+    p.wobble = me.wobble * br + 0.08 * br;
+    p.vis = me.vis;
+    // A panel faces the camera (turned on the vertical), the owner across the desk, or the street.
+    if (me.facing === "owner") p.q.setFromEuler(new THREE.Euler(0, Math.PI, 0));
+    else if (me.facing === "street") p.q.setFromEuler(new THREE.Euler(0, 0, 0));
+    else {
+      const yaw = Math.atan2(this.camera.position.x - p.pos.x, this.camera.position.z - p.pos.z);
+      const pitch = -Math.atan2(this.camera.position.y - p.pos.y, Math.hypot(this.camera.position.x - p.pos.x, this.camera.position.z - p.pos.z)) * 0.5;
+      p.q.setFromEuler(new THREE.Euler(pitch * me.shape, yaw, 0, "YXZ"));
+    }
+    // Its screen.
+    const time = uiTime(hours);
+    let tex: THREE.Texture | null = null;
+    if (me.face === "phone") tex = this.phoneScreen.tex;
+    else if (me.face) {
+      const sc = this.faces[me.face];
+      tex = sc.tex;
+      if (me.face === "cal") {
+        const bookings: UI.Booking[] = [
+          { day: 0, h: 9, len: 3, label: "Fence", who: "Aroha", at: 0 },
+          { day: 1, h: 13, len: 4, label: "Bathroom", who: "Jono", at: 0 },
+          { day: 3, h: 8, len: 2, label: "Repair", who: "Ravi", at: 0 },
+          { day: 2, h: 14, len: 1, label: "Measure-up", who: "Sam", at: 1, auto: true },
+        ];
+        const now = 1 + range(P, 20.84, 20.9) * 0.2;
+        sc.draw(`cal|${now.toFixed(2)}`, (c) => UI.calendar(c, { bookings, now, week: "This week" }));
+      } else if (me.face === "hand") sc.draw("hand", (c) => UI.handover(c, { show: 1 }));
+      else if (me.face === "quote") {
+        // Sam's three answers land in their lines, one by one; then the price, typed.
+        const typed = P < 22.06 ? 0 : P < 22.12 ? 3 : P < 22.18 ? 18 : P < 22.24 ? 53 : 60 + Math.floor(range(P, 22.24, 22.32) * 60);
+        const sent = P >= B.nQuoteSent ? 1 : 0;
+        sc.draw(`quote|${typed}|${sent}`, (c) => UI.docCard(c, { kind: "quote", typed, stamp: 0, auto: false, sent, filled: typed >= 53 }));
+      } else if (me.face === "today") {
+        const n = ke(P, B.nToday) * 5;
+        sc.draw(`today|${n.toFixed(1)}`, (c) => UI.today(c, { n }));
+      } else if (me.face === "night") sc.draw(`night|${time}`, (c) => UI.phoneReplyTo(c, { time, at: "3:12am", name: "Aroha", subject: "A deck, and consent", lines: ["Hi Aroha, thanks for your message about a deck.", "Whether it needs consent depends on your site, so I’ve passed that question to the team. You’ll hear back by 10am.", "Meanwhile, here are times for a free measure-up."] }));
+      else if (me.face === "late") sc.draw(`late|${time}`, (c) => UI.phoneReplyTo(c, { time, at: "6:21pm", name: "Hemi", subject: "Deck repair", lines: ["Hi Hemi, thanks for getting in touch about your deck.", "We can usually start a repair within the week. Here are times to come and have a look:"] }));
+    }
+    p.ui = tex;
+    p.uiK = me.faceK;
+    // A sweep of light down a panel as it opens.
+    p.sweep = 0;
+    for (const sp of PANELS) if (P >= sp.a && P < sp.a + 0.1) p.sweep = range(P, sp.a + 0.02, sp.a + 0.1);
+    // Sam's amber points: three small lights circling inside it.
+    for (let i = 0; i < 3; i++) {
+      const a = t * (0.9 + i * 0.27) * br + i * 2.094;
+      const rr = p.r * 0.42 * (1 - p.shape * 0.6);
+      this.motes[i].set(Math.cos(a) * rr, Math.sin(a * 1.3 + i) * rr * 0.5, Math.sin(a) * rr);
+      if (P >= 22.0 && P < 22.26) {
+        // Flowing out into the quote's lines (left column, one each).
+        const kk = smoother(range(P, 22.0 + i * 0.06, 22.06 + i * 0.06));
+        this.motes[i].lerp(V(-p.w * 0.28, p.h * (0.2 - i * 0.06), 0.05), kk);
+      }
+      this.motes[i].applyQuaternion(p.q).add(p.pos);
+    }
+    this.drop.update(p, t, this.camera, { uiScale: uiScale.k, night, motes: this.motes });
+    // The turn's sparks.
+    this.gather.update(P, P > B.fall[0] && P < 16.2, this.h * Math.min(2, this.gl.getPixelRatio?.() ?? 1) * 0.6);
+    // What it is, for the pointer.
+    const part = this.dropPart;
+    part.on = me.vis > 0.5;
+    part.id = P < 19.8 ? "site" : P < 20.62 ? "reply" : P < 21.0 ? "booking" : P < 21.86 ? "reply" : P < 22.6 ? "quote" : P < 23.8 ? "invoice" : P < 25.7 ? "followup" : "reply";
+    const ext = Math.max(p.r, me.shape * Math.max(me.w, me.h) * 0.5) + 0.1;
+    part.box.setFromCenterAndSize(p.pos, V(ext * 2, ext * 2, ext * 2));
+    // The sounds of its moments.
+    if (P > this.prevP && P - this.prevP < 0.3) {
+      if (this.prevP < 15.96 && P >= 15.96) this.events.push({ type: "drop", pos: p.pos.clone() });
+      for (const sp of PANELS) if (this.prevP < sp.a && P >= sp.a) this.events.push({ type: "node", pos: p.pos.clone() });
+    }
   }
 
   /* ---------------------------------------------------------------- */
@@ -1494,10 +1488,8 @@ export class World {
 
   private look(P: number, night: number) {
     const g = this.grade;
-    // The room's sheen follows the sky's own light: soft by day, nearly nothing at dusk and night.
-    const sky = this.sky.hemi;
-    const lum = sky.color.r * 0.2126 + sky.color.g * 0.7152 + sky.color.b * 0.0722;
-    this.scene.environmentIntensity = Math.min(0.45, 0.8 * sky.intensity * lum);
+    // The sky is the world's light (sky.ts env): its strength by the hour.
+    this.scene.environmentIntensity = this.sky.out.envI;
     g.exposure = lerp(1.0, 1.9, night);
     g.bloom = 0.6;
     g.threshold = 1.35;
@@ -1506,7 +1498,14 @@ export class World {
     const rw = inW(P, B.rewind) ? Math.sin(Math.PI * k(P, B.rewind)) : 0;
     g.grain = 0.03 + 0.05 * rw;
     g.aberration = 0.35 + 1.6 * rw;
-    g.split = 0;
+    // Round sunset and the blue hour, the shadows lean cool and the lights warm (the light itself does the rest).
+    {
+      const hod = ((this.info.hours % 24) + 24) % 24;
+      const dusk = bump(hod, 18.2, 20.4, 0.6) + bump(hod, 5.6, 7.6, 0.5);
+      g.split = 0.55 * dusk;
+      g.shadow.set(-0.25, 0.02, 0.32);
+      g.high.set(0.3, 0.1, -0.25);
+    }
     g.lift.set(0, 0, 0);
     g.gamma.set(1, 1, 1);
     // Daylight: the mid-tones a little apart (a white model in sun reads flat without it).
@@ -1520,7 +1519,7 @@ export class World {
       g.gain.set(1.03, 1.0, 0.97);
     }
     // The turn: the dark takes the room; then the town at dusk again.
-    g.black = smooth(range(P, B.black[0], B.black[0] + 0.1)) * (1 - smooth(range(P, B.black[1] - 0.1, B.black[1])));
+    g.black = 0.82 * smooth(range(P, B.black[0], B.black[0] + 0.1)) * (1 - smooth(range(P, B.black[1] - 0.1, B.black[1])));
     // The end: light out of the brights, then paper.
     g.fill = smooth(range(P, B.end[0], B.end[1])) * 0.9;
     g.flashColor.set(0.965, 0.961, 0.949);
@@ -1544,6 +1543,7 @@ export class World {
     let bd = Infinity;
     const hit = new THREE.Vector3();
     for (const part of this.parts) {
+      if (part === this.dropPart && !part.on) continue;
       if (this.ray.ray.intersectBox(part.box, hit)) {
         const d = hit.distanceTo(this.camera.position);
         if (d < bd) {
@@ -1555,54 +1555,18 @@ export class World {
     this.hover = best;
   }
 
-  /**
-   * The environment the materials reflect: a soft room (a sky-bright top, a
-   * pale horizon, a dark ground, two long light panels), baked once into a
-   * PMREM. Its strength follows the time of day (look), so the model has a
-   * soft sheen by day and only a trace at night; edges catch the panels.
-   */
-  private envReady = false;
-  private makeEnv() {
-    const pm = new THREE.PMREMGenerator(this.gl);
-    const room = new THREE.Scene();
-    const g = new THREE.SphereGeometry(10, 48, 24);
-    const pos = g.getAttribute("position");
-    const col = new Float32Array(pos.count * 3);
-    for (let i = 0; i < pos.count; i++) {
-      const y = pos.getY(i) / 10;
-      const top = new THREE.Color(0.92, 0.95, 1.0);
-      const hor = new THREE.Color(0.78, 0.77, 0.75);
-      const low = new THREE.Color(0.2, 0.19, 0.18);
-      const c = y > 0 ? hor.clone().lerp(top, Math.pow(y, 0.6)) : hor.clone().lerp(low, Math.pow(-y, 0.5));
-      col.set([c.r, c.g, c.b], i * 3);
-    }
-    g.setAttribute("color", new THREE.BufferAttribute(col, 3));
-    room.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
-    for (const [x, z, yaw] of [
-      [0, 7, 0],
-      [-7, -3, 1.9],
-    ] as const) {
-      const p = new THREE.Mesh(new THREE.PlaneGeometry(9, 1.6), new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 3, 3), side: THREE.DoubleSide }));
-      p.position.set(x, 6.5, z);
-      p.rotation.set(-0.9, yaw, 0);
-      room.add(p);
-    }
-    const rt = pm.fromScene(room, 0.02);
-    this.scene.environment = rt.texture;
-    pm.dispose();
-    g.dispose();
-  }
-
+  private overlay = {
+    color: null as unknown as THREE.Scene,
+    depth: null as unknown as THREE.Scene,
+    on: () => this.drop.mesh.visible,
+  };
   render(time: number) {
-    if (!this.envReady) {
-      this.envReady = true;
-      try {
-        this.makeEnv();
-      } catch {
-        /* no environment: the lights carry the picture */
-      }
-    }
-    this.post.render(this.gl, this.scene, this.camera, this.grade, time);
+    this.overlay.color = this.drop.scene;
+    this.overlay.depth = this.drop.depthScene;
+    // The sky as light: captured again when it has changed (sky.ts).
+    const env = this.sky.env(this.gl, time);
+    if (env && this.scene.environment !== env) this.scene.environment = env;
+    this.post.render(this.gl, this.scene, this.camera, this.grade, time, undefined, this.overlay);
   }
 }
 

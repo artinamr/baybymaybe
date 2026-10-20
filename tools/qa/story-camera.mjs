@@ -9,9 +9,9 @@
 //                through it"); < 0.2 m FAIL, < 0.5 m WARN
 //   - GROUND     the eye under 0.3 m above the ground outside the rooms
 //   - CARDS      a card in the air (a screen lifted off a device, a part of the
-//                new route) within 0.6 m of the lens; < 0.25 m FAIL (the world
+//                drop) within 0.6 m of the lens; < 0.25 m FAIL (the world
 //                is run at each P, so the cards are where the film puts them)
-//   - MOVERS     a van, a person (where the film puts them at P) or the new route's line within
+//   - MOVERS     a van or a person (where the film puts them at P) within
 //                0.6 m of the lens; < 0.25 m FAIL
 // Envelopes are left out (they fly with the camera); the decks are taken built.
 // --phone flies the portrait framing (camera.ts phoneAdjust, its pull-back).
@@ -117,11 +117,11 @@ const inRoom = (e) => {
 };
 // The cards in the air move with the film: run the world at each P and measure the
 // lens's distance to every card that shows (its rectangle, in its own frame).
-const cards = [...world["allCards"](), ...world["system"].cards];
+const cards = world["allCards"]();
 const local = new THREE.Vector3();
 const cardGap = (eye) => {
   let best = 9;
-  for (const c of cards) {
+  for (const c of [...cards, world.dropCard]) {
     if (!c.group.visible || c.faceMat.opacity < 0.05) continue;
     c.group.updateMatrixWorld(true);
     local.copy(eye).applyMatrix4(new THREE.Matrix4().copy(c.group.matrixWorld).invert());
@@ -153,14 +153,6 @@ const vanGap = (eye) => {
   }
   return best;
 };
-// The new route's line (a tube along the system's curve) once it is drawn.
-const routePts = world["system"].curve.getSpacedPoints(1200);
-const routeGap = (eye) => {
-  if (!world["system"].group.visible) return 9;
-  let best = 9;
-  for (const p of routePts) best = Math.min(best, p.distanceTo(eye));
-  return Math.max(0, best - 0.1);
-};
 const rows = [];
 for (let P = from; P <= to + 1e-9; P += step) {
   cameraSmooth(P, ctx, cam, FILM_LEN);
@@ -170,7 +162,7 @@ for (let P = from; P <= to + 1e-9; P += step) {
   const ground = !inRoom(cam.eye) && cam.eye.y < 0.3 ? "below 0.3 m over the ground" : "";
   world.update({ dt: 0, time: 8, P, pointer: { x: 0, y: 0, has: false } });
   const card = cardGap(world.camera.position);
-  const mover = Math.min(vanGap(world.camera.position), routeGap(world.camera.position));
+  const mover = vanGap(world.camera.position);
   rows.push({ P: +P.toFixed(3), clear: +clear.toFixed(3), ground, card: +card.toFixed(3), mover: +mover.toFixed(3), eye: cam.eye.toArray().map((x) => +x.toFixed(2)) });
 }
 
@@ -207,7 +199,7 @@ report("GROUND", low, (r) => r.worst.ground, () => true);
 const close = runs((r) => r.card < 0.6, (rs) => rs.reduce((a, b) => (b.card < a.card ? b : a)));
 report("CARDS (a card in the air within 0.6 m of the lens)", close, (r) => `closest ${r.worst.card} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}`, (r) => r.worst.card < 0.25);
 const movers = runs((r) => r.mover < 0.6, (rs) => rs.reduce((a, b) => (b.mover < a.mover ? b : a)));
-report("MOVERS (a van, a person or the new route's line within 0.6 m of the lens)", movers, (r) => `closest ${r.worst.mover} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}`, (r) => r.worst.mover < 0.25);
+report("MOVERS (a van or a person within 0.6 m of the lens)", movers, (r) => `closest ${r.worst.mover} m at P ${r.worst.P}, eye ${r.worst.eye.join(", ")}`, (r) => r.worst.mover < 0.25);
 if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify(rows));
 console.log(`\n${fails ? "FAIL" : "PASS"}: ${fails} problem run(s)`);
 process.exitCode = fails ? 1 : 0;

@@ -557,6 +557,24 @@ export function phoneReply(ctx: Ctx, s: { time: string; at: string; picked: numb
   void s.show;
 }
 
+/** A reply from the business to any customer (the drop answering on its own). */
+export function phoneReplyTo(ctx: Ctx, s: { time: string; at: string; name: string; subject: string; lines: string[] }) {
+  ctx.fillStyle = C.white;
+  ctx.fillRect(0, 0, PHONE.w, PHONE.h);
+  statusBar(ctx, s.time);
+  text(ctx, "‹ Inbox", 18, 78, { size: 17, color: C.indigo });
+  text(ctx, `Re: ${s.subject}`, 22, 132, { size: 24, weight: 600, color: C.ink, max: 346 });
+  avatar(ctx, 44, 186, 22, "YB", C.indigo);
+  text(ctx, "Your Business", 78, 182, { size: 16, weight: 600, color: C.ink });
+  text(ctx, `to ${s.name} · ${s.at}`, 78, 204, { size: 14, color: C.mute });
+  let y = 252;
+  for (const p of s.lines) y += wrap(ctx, p, 22, y, 346, 24, { size: 16, color: C.ink2 }) + 14;
+  ["Tue 9:00am", "Wed 2:00pm", "Thu 4:30pm"].forEach((t, i) => {
+    rr(ctx, 22, y + i * 62, 346, 50, 12, C.white, C.line2, 1.5);
+    text(ctx, t, 44, y + i * 62 + 32, { size: 16, weight: 600, color: C.ink });
+  });
+}
+
 /** A document to agree to on the phone: the quote ("Accept") or the invoice ("Pay"). */
 export function phoneDoc(ctx: Ctx, s: { time: string; kind: "quote" | "invoice"; done: number }) {
   ctx.fillStyle = C.paper;
@@ -873,7 +891,7 @@ export function pending(ctx: Ctx, s: { tag: string; title: string; line: string;
 }
 
 /** A document card: the quote or the invoice, typed out (old) or filled at once (new). */
-export function docCard(ctx: Ctx, s: { kind: "quote" | "invoice"; typed: number; stamp: number; auto: boolean; sent: number }) {
+export function docCard(ctx: Ctx, s: { kind: "quote" | "invoice"; typed: number; stamp: number; auto: boolean; sent: number; filled?: boolean }) {
   const W = DESK.w;
   const H = DESK.h;
   ctx.fillStyle = C.surface;
@@ -926,7 +944,7 @@ export function docCard(ctx: Ctx, s: { kind: "quote" | "invoice"; typed: number;
     text(ctx, "Total incl. GST", W - 420, y + 44, { size: 19, weight: 600, color: C.ink });
     text(ctx, "$8,950.00", W - 64, y + 46, { size: 30, weight: 700, color: C.ink, align: "right" });
   }
-  if (s.auto) {
+  if (s.auto || s.filled) {
     rr(ctx, 64, H - 112, 360, 52, 26, C.indigoL);
     text(ctx, "Filled in from Sam’s enquiry", 244, H - 79, { size: 17, weight: 600, color: C.indigo, align: "center" });
   }

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { at, Batch, block, ball, footAO, gableEnd, gableRoof, hull, interiorAO, rod, tablet, turned, ROOF, LEAF } from "./model";
-import { foliageMat, glowMat, modelMat, satinMat } from "./mats";
+import { glowMat, modelMat, satinMat } from "./mats";
+import { leafMat, wideTree } from "./trees";
 import { HOME, SHOP } from "./town";
 
 /**
@@ -245,24 +246,9 @@ export function buildHome(scene: THREE.Scene): Home {
 
   // THE GARDEN: lawn edging, a tree, the washing line, a bed along the fence.
   const garden = new Batch();
-  const treeB = new Batch();
-  const foliage = foliageMat();
-  {
-    const t = new Batch();
-    t.add(rod(0.2, 2.6, 12), at(-3.2, 0, -16), (p) => 0.6 + 0.4 * Math.min(1, p.y / 2));
-    t.add(rod(0.11, 2.2, 8), at(-2.9, 1.8, -16, 0, 0, -0.7), 0.8);
-    t.add(rod(0.11, 2.2, 8), at(-3.5, 1.9, -16.2, 0.4, 0, 0.6), 0.8);
-    for (const [x, y, z, r] of [
-      [-3.2, 4.1, -16, 2.6],
-      [-1.2, 3.7, -15.4, 2.0],
-      [-5.1, 3.8, -16.6, 2.0],
-      [-2.6, 3.5, -13.9, 1.8],
-      [-3.8, 3.6, -18.0, 1.9],
-    ] as const)
-      t.add(ball(r, 22, 14), at(x, y, z, 0, 0, 0, 1, 0.62, 1), (p) => 0.55 + 0.45 * Math.min(1, Math.max(0, (p.y - 2.5) / 2.4)));
-    // (Its own mesh, in the foliage material: it takes the wind like the town's trees.)
-    treeB.add(t.build(), null, 1, LEAF);
-  }
+  // The garden's tree: a pohutukawa of leaves (trees.ts), in the town's leaf material (the wind, the seasons).
+  const gardenTree = wideTree(77);
+  const foliage = leafMat();
   // A rotary washing line.
   garden.add(rod(0.03, 2.0, 10), at(3.4, 0, -14.5), (p) => 0.6 + 0.4 * Math.min(1, p.y), DARKER);
   for (let i = 0; i < 4; i++) {
@@ -353,7 +339,16 @@ export function buildHome(scene: THREE.Scene): Home {
   interiorAO(meshOf(b, white).geometry, inside, 0.55);
   interiorAO(meshOf(soft, fabric).geometry, inside, 0.55);
   meshOf(garden, white);
-  meshOf(treeB, foliage);
+  {
+    const place = at(-3.2, 0, -16, 0, 0.4, 0, 1.05, 1.05, 1.05);
+    const wood = new THREE.Mesh(gardenTree.wood.clone().applyMatrix4(place), white);
+    const leaves = new THREE.Mesh(gardenTree.leaves.clone().applyMatrix4(place), foliage);
+    for (const m of [wood, leaves]) {
+      m.castShadow = true;
+      m.receiveShadow = true;
+      g.add(m);
+    }
+  }
   const oldDeck = meshOf(deckOld, white);
   const windows = new THREE.Mesh(glass.build(), glow);
   g.add(windows);

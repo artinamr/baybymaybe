@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { ATMOS_GLSL, bindAtmos } from "./atmos";
 
 /**
  * THE FILM'S MATERIALS. The world is an architect's model: matte warm white
@@ -52,20 +53,22 @@ reflectedLight.directDiffuse *= mix(1.0, vAO, ${direct.toFixed(2)});`
 }
 
 /**
- * MIST ON THE GROUND. three's fog is one density everywhere; the model's
- * mornings want a mist that lies low (thick at the lawns, gone at the
- * roofs). The fog chunks are patched for every material: the vertex keeps
- * its world height, the fragment adds an extinction that falls off with
- * height, by the distance looked through. The strength and the height
- * scale are two uniforms shared by every material the world hooks
- * (`hookMist`); a material left unhooked reads them as zero.
+ * THE HAZE AND THE MIST. three's fog is one density and one colour
+ * everywhere; this world wants the air's own: a haze that lies low and thins
+ * with height (an extinction a·e^(-b·y), integrated along the ray, so a hill
+ * far off fades and a roof seen from above stays clear), coloured by the sky
+ * on the horizon in the direction looked (atmos.ts: toward the sunset it is
+ * warm, opposite it rose and blue), and a morning mist on the lawns (thick
+ * at the ground, gone at the roofs). The fog chunks are patched for every
+ * material; the uniforms are shared objects bound by `hookMist` (a
+ * material left unhooked falls back to the fog's own colour).
  */
 export const MIST = { value: 0 };
 export const MIST_H = { value: 6 };
-if (!THREE.ShaderChunk.fog_fragment.includes("fogMist")) {
-  THREE.ShaderChunk.fog_pars_vertex += `
-#ifdef USE_FOG
-	varying float vFogY;
+if (!THREE.ShaderChunk.fog_fragment.includes("atmosHaze( fogDir )")) {
+  THREE.ShaderChunk.fog_pars_vertex = `#ifdef USE_FOG
+	varying float vFogDepth;
+	varying vec3 vFogWorld;
 #endif`;
   THREE.ShaderChunk.fog_vertex = `#ifdef USE_FOG
 	vFogDepth = - mvPosition.z;
@@ -74,27 +77,47 @@ if (!THREE.ShaderChunk.fog_fragment.includes("fogMist")) {
 		#ifdef USE_INSTANCING
 			fogWorld = instanceMatrix * fogWorld;
 		#endif
-		vFogY = ( modelMatrix * fogWorld ).y;
+		vFogWorld = ( modelMatrix * fogWorld ).xyz;
 	}
 #endif`;
-  THREE.ShaderChunk.fog_pars_fragment += `
-#ifdef USE_FOG
-	varying float vFogY;
+  THREE.ShaderChunk.fog_pars_fragment = `#ifdef USE_FOG
+	uniform vec3 fogColor;
+	varying float vFogDepth;
+	varying vec3 vFogWorld;
+	#ifdef FOG_EXP2
+		uniform float fogDensity;
+	#else
+		uniform float fogNear;
+		uniform float fogFar;
+	#endif
 	uniform float fogMist;
 	uniform float fogMistH;
+	uniform float fogFall;
+	uniform float fogAtmos;
+	${ATMOS_GLSL}
 #endif`;
   THREE.ShaderChunk.fog_fragment = `#ifdef USE_FOG
+	vec3 fogRay = vFogWorld - cameraPosition;
+	float fogDist = length( fogRay );
+	vec3 fogDir = fogRay / max( fogDist, 1e-3 );
 	#ifdef FOG_EXP2
-		float fogFactor = 1.0 - exp( - fogDensity * fogDensity * vFogDepth * vFogDepth );
+		float fogY0 = max( cameraPosition.y, 0.0 );
+		float fogK = fogDir.y * fogFall * fogDist;
+		float fogAmt = fogDensity * exp( - fogFall * fogY0 ) * fogDist * ( abs( fogK ) > 1e-4 ? ( 1.0 - exp( - fogK ) ) / fogK : 1.0 );
+		float fogFactor = 1.0 - exp( - fogAmt );
 	#else
 		float fogFactor = smoothstep( fogNear, fogFar, vFogDepth );
 	#endif
-	float mist = 1.0 - exp( - fogMist * exp( - max( vFogY, 0.0 ) / max( fogMistH, 0.1 ) ) * vFogDepth );
+	// The mist: the same integral, its own (short) height.
+	float mistB = 1.0 / max( fogMistH, 0.1 );
+	float mistK = fogDir.y * mistB * fogDist;
+	float mist = 1.0 - exp( - fogMist * exp( - mistB * max( cameraPosition.y, 0.0 ) ) * fogDist * ( abs( mistK ) > 1e-4 ? ( 1.0 - exp( - mistK ) ) / mistK : 1.0 ) );
 	fogFactor = max( fogFactor, mist );
-	gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+	vec3 fogC = fogAtmos > 0.5 ? atmosHaze( fogDir ) : fogColor;
+	gl_FragColor.rgb = mix( gl_FragColor.rgb, fogC, fogFactor );
 #endif`;
 }
-/** Bind the mist's uniforms into a material (once, before it compiles). */
+/** Bind the haze's and the mist's uniforms into a material (once, before it compiles). */
 export function hookMist(m: THREE.Material) {
   if ((m as { fog?: boolean }).fog === false || (m.userData as { mist?: boolean }).mist) return;
   (m.userData as { mist?: boolean }).mist = true;
@@ -103,6 +126,7 @@ export function hookMist(m: THREE.Material) {
     prev.call(m, sh, r);
     sh.uniforms.fogMist = MIST;
     sh.uniforms.fogMistH = MIST_H;
+    bindAtmos(sh.uniforms);
   };
   const key = m.customProgramCacheKey;
   m.customProgramCacheKey = () => `${key.call(m)}-mist`;
@@ -216,7 +240,39 @@ uniform vec4 uPools[${POOLS}];
 uniform vec3 uPoolCol[${POOLS}];
 uniform float uPoolOn;
 uniform vec4 uScan;
-uniform float uScanK;`
+uniform float uScanK;
+float gHash(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+float gNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(gHash(i), gHash(i + vec2(1.0, 0.0)), f.x), mix(gHash(i + vec2(0.0, 1.0)), gHash(i + vec2(1.0, 1.0)), f.x), f.y);
+}`
+      )
+      .replace(
+        "#include <map_fragment>",
+        `#include <map_fragment>
+// Close up, the ground has a surface: lawns mottled and mown in stripes,
+// the road's tar grained, the footpaths' slabs; far off it settles to its plan.
+{
+  vec2 wp = vWorld.xz;
+  float gd = length(vWorld - cameraPosition);
+  float near = exp(-gd / 90.0);
+  float lawn = smoothstep(0.015, 0.06, diffuseColor.g - max(diffuseColor.r, diffuseColor.b) * 0.92);
+  float n = gNoise(wp * 0.16) * 0.45 + gNoise(wp * 0.55) * 0.3 + gNoise(wp * 2.1) * 0.25;
+  diffuseColor.rgb *= 1.0 + (n - 0.5) * (0.26 * lawn + 0.12 * (1.0 - lawn)) * (0.45 + 0.55 * near);
+  // Mowing stripes, along each lawn.
+  diffuseColor.rgb *= 1.0 + lawn * 0.05 * sign(sin(wp.x * 2.4 + gNoise(wp * 0.05) * 3.0)) * near;
+  // Tar: fine grain and darker wheel tracks.
+  float tar = (1.0 - lawn) * smoothstep(0.62, 0.52, dot(diffuseColor.rgb, vec3(0.333)));
+  float grain = gNoise(wp * 7.0) - 0.5;
+  diffuseColor.rgb *= 1.0 + tar * grain * 0.16 * near;
+  // Footpath slabs: a joint every 1.5 m.
+  float path = (1.0 - lawn) * smoothstep(0.66, 0.74, dot(diffuseColor.rgb, vec3(0.333)));
+  vec2 jt = abs(fract(wp / 1.5) - 0.5);
+  float joint = smoothstep(0.47, 0.495, max(jt.x, jt.y));
+  diffuseColor.rgb *= 1.0 - path * joint * 0.18 * near;
+}`
       )
       .replace(
         "#include <aomap_fragment>",
@@ -265,4 +321,96 @@ export function aoTexture(canvas: HTMLCanvasElement) {
   t.magFilter = THREE.LinearFilter;
   t.anisotropy = 4;
   return t;
+}
+
+/** The town's houses: walls take the house's own colour, roofs a colour from the town's palette (see houseMat). */
+export const WALL_WB: [number, number, number] = [0.9, 0.905, 0.91];
+export const WALL_SM: [number, number, number] = [0.8, 0.805, 0.81];
+export const BASE: [number, number, number] = [0.6, 0.595, 0.57];
+
+/**
+ * THE HOUSES' MATERIAL. Each house is one instance of its kind; its walls
+ * take the house's colour (the instance colour: warm whites, creams, greys,
+ * sage, a few dark modern ones), its roof one of the town's roof colours
+ * (Colorsteel greys and charcoals, a few red and green), picked by where it
+ * stands. Weatherboard walls are drawn in the shader (a line of shadow under
+ * each board's lip, the board a shade lighter toward its foot), fading out
+ * where a board falls under a pixel; roofs are steel (a sheen, ribs down
+ * the slope). Trim (frames, fascia, sills) stays white.
+ */
+export function houseMat() {
+  const m = withAO(new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: 0.84, metalness: 0 }), 0.35);
+  const ao = m.onBeforeCompile;
+  const roofs = [0x34322f, 0x45484b, 0x2b2c2e, 0x5c6164, 0x6e3a2e, 0x3d4a3e].map((h) => new THREE.Color(h));
+  m.onBeforeCompile = (s, r) => {
+    ao(s, r);
+    s.uniforms.uRoofs = { value: roofs };
+    s.vertexShader = s.vertexShader
+      .replace("#include <common>", "#include <common>\nuniform vec3 uRoofs[6];\nvarying vec3 vLocal;\nvarying vec3 vLocalN;\nvarying float vWB;\nvarying float vRoof;")
+      .replace(
+        "#include <color_vertex>",
+        `#if defined( USE_COLOR ) || defined( USE_INSTANCING_COLOR )
+  vColor = vec4(1.0);
+#endif
+vLocal = position;
+vLocalN = normal;
+vWB = 0.0;
+vRoof = 0.0;
+#ifdef USE_COLOR
+{
+  float isWB = step(distance(color, vec3(0.9, 0.905, 0.91)), 0.003);
+  float isSM = step(distance(color, vec3(0.8, 0.805, 0.81)), 0.003);
+  float isRoof = step(distance(color, vec3(0.17, 0.18, 0.2)), 0.003);
+  vec3 wallC = vec3(0.86, 0.85, 0.82);
+  #ifdef USE_INSTANCING_COLOR
+    wallC = instanceColor;
+  #endif
+  float hr = 0.5;
+  #ifdef USE_INSTANCING
+    hr = fract(sin(dot(instanceMatrix[3].xz, vec2(7.13, 3.71))) * 9137.31);
+  #endif
+  vec3 roofC = uRoofs[int(min(5.0, floor(hr * 6.0)))];
+  vColor.rgb = isWB + isSM > 0.5 ? wallC : isRoof > 0.5 ? roofC : color;
+  vWB = isWB;
+  vRoof = isRoof;
+}
+#endif`
+      );
+    s.fragmentShader = s.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vLocal;\nvarying vec3 vLocalN;\nvarying float vWB;\nvarying float vRoof;")
+      .replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>
+// Weatherboards: a line of shadow under each board's lip, each board lighter toward its foot.
+if (vWB > 0.5 && abs(vLocalN.y) < 0.5) {
+  float yy = vLocal.y / 0.17;
+  float fw = fwidth(yy);
+  float fade = 1.0 - smoothstep(0.22, 0.55, fw);
+  float f = fract(yy);
+  float lip = smoothstep(0.84, 1.0, f);
+  diffuseColor.rgb *= mix(1.0, (0.95 + 0.07 * (1.0 - f)) * (1.0 - 0.34 * lip), fade);
+}
+// Steel roofs: a rib every 19 cm down the slope.
+if (vRoof > 0.5 && vLocalN.y > 0.15 && vLocalN.y < 0.97) {
+  vec2 sd = normalize(vLocalN.xz + 1e-4);
+  float rr = dot(vLocal.xz, vec2(-sd.y, sd.x)) / 0.19;
+  float fw = fwidth(rr);
+  float fade = 1.0 - smoothstep(0.25, 0.6, fw);
+  float f = fract(rr);
+  float rib = smoothstep(0.0, 0.07, f) * smoothstep(0.2, 0.12, f);
+  float side = smoothstep(0.2, 0.26, f) * smoothstep(0.34, 0.27, f);
+  diffuseColor.rgb *= mix(1.0, 1.0 + 0.32 * rib - 0.22 * side, fade);
+}`
+      )
+      .replace(
+        "#include <metalnessmap_fragment>",
+        `#include <metalnessmap_fragment>
+if (vRoof > 0.5) {
+  roughnessFactor = 0.44;
+  metalnessFactor = 0.22;
+}`
+      );
+  };
+  m.customProgramCacheKey = () => "house-v1";
+  return m;
 }

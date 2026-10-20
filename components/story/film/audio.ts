@@ -93,7 +93,6 @@ export class Score {
   private pulseN = 0;
   private loops: (OscillatorNode | AudioBufferSourceNode)[] = [];
   private clangs: number[] = [];
-  private lockAt: number[] = [];
   private landed = new Set<string>();
 
   attach(ctx: AudioContext) {
@@ -649,6 +648,14 @@ export class Score {
           this.lastLost = t;
           this.fallTone(panOf(e.pos), e.user);
         }
+      } else if (e.type === "drop") {
+        const root = 38;
+        this.bell(root + 36, -0.2, 0.09, 5);
+        this.bell(root + 43, 0.2, 0.07, 5);
+        this.bell(root + 48, 0, 0.05, 6);
+      } else if (e.type === "node" && P > B.rewind[1]) {
+        this.click(2600 + Math.random() * 2400, 18, 0.05, 0.06 + Math.random() * 0.05, panOf(e.pos), 0, 0.6);
+        this.bell(86 + PENTA[this.pulseN % 5], panOf(e.pos), 0.03, 1.6);
       } else if (e.type === "kept") {
         if (this.bellsThisSec < 4) {
           this.bellsThisSec++;
@@ -664,23 +671,30 @@ export class Score {
     // The envelopes: off, and in.
     if (crossed(B.fly[0])) this.whoosh(2.4, -0.2, 0.13);
     if (crossed(B.land)) this.ping(false, 0.045);
-    if (crossed(B.nFly[0])) this.whoosh(1.0, -0.2, 0.1);
-    if (crossed(B.nBack[0])) this.whoosh(1.0, 0.2, 0.08);
+    for (const [k, len, pan] of [
+      [16.34, 2.6, 0],
+      [16.94, 2.2, -0.2],
+      [20.58, 1.4, 0.2],
+      [21.02, 1.2, -0.2],
+      [21.19, 1.0, 0.2],
+      [22.36, 1.3, -0.1],
+      [25.36, 1.0, 0.1],
+      [25.64, 1.8, 0.2],
+      [27.36, 1.4, 0.3],
+      [28.0, 2.6, 0],
+    ] as const)
+      if (crossed(k)) this.whoosh(len, pan, 0.09);
     if (crossed(B.nBack[1])) this.ping(true, 0.06);
-    if (crossed(22.3)) this.whoosh(1.2, 0.1, 0.09);
-    if (crossed(22.46)) this.ping(true, 0.05);
-    if (crossed(B.nRemind[0])) this.whoosh(1.0, 0.1, 0.08);
-    if (crossed(B.nRemind[0] + 0.12)) this.ping(true, 0.06);
     if (crossed(B.replySent + 0.02)) this.ping(false, 0.04);
     // Mail landing on the pile all night, quietly.
     if (inW(B.night[0], B.night[1]) && Math.random() < dt * 1.4) this.click(2900, 6, 0.035, 0.03, 0.4, 0, 0.5);
 
     // The clock: through the night, faster as the hours fly; backward at the turn; 3am.
     const rewinding = inW(B.rewind[0], B.rewind[1]);
-    const ticking = inW(4.7, 7.2) || inW(20.78, 21.1) || rewinding;
+    const ticking = inW(4.7, 7.2) || inW(20.94, 21.12) || rewinding;
     if (ticking && !hush) {
       const speed = Math.min(1, Math.abs(P - prev) / Math.max(dt, 1e-3) / 0.3);
-      const rate = 1 + (rewinding ? 22 : 9) * speed * (inW(5.8, 6.9) || inW(20.8, 21.06) || rewinding ? 1 : 0.2);
+      const rate = 1 + (rewinding ? 22 : 9) * speed * (inW(5.8, 6.9) || inW(20.96, 21.08) || rewinding ? 1 : 0.2);
       this.tickAcc += dt * rate;
       while (this.tickAcc > 1) {
         this.tickAcc -= 1;
@@ -721,11 +735,11 @@ export class Score {
     // THE TURN.
     if (crossed(B.handsOff[0])) this.theme(false, true);
     if (crossed(B.fall[0])) {
-      this.hit();
-      // Paper as it lets go: soft noise bursts spread over the fall.
-      this.clangs = Array.from({ length: 14 }, (_, i) => B.fall[0] + 0.02 + i * 0.045 + Math.random() * 0.04);
+      this.riser(2.4);
+      // The paper as it burns to light: small bright crackles spread over the gathering.
+      this.clangs = Array.from({ length: 22 }, (_, i) => B.fall[0] + 0.02 + i * 0.016 + Math.random() * 0.02);
     }
-    for (const k of this.clangs) if (crossed(k)) this.click(700 + Math.random() * 1600, 0.8, 0.08, 0.18 + Math.random() * 0.2, (Math.random() - 0.5) * 1.4, 0, 0.6);
+    for (const k of this.clangs) if (crossed(k)) this.click(3200 + Math.random() * 3600, 14, 0.035, 0.02 + Math.random() * 0.03, (Math.random() - 0.5) * 1.4, 0, 0.6);
     if (crossed(B.rewind[0])) {
       const secs = Math.max(1.2, (B.rewind[1] - B.rewind[0]) * 8);
       this.riser(secs);
@@ -737,16 +751,6 @@ export class Score {
       this.bell(74, 0, 0.1, 4);
       this.bell(81, -0.3, 0.07, 4);
       this.bell(86, 0.3, 0.05, 4);
-    }
-    // A glass tick as each part of the new route locks into place.
-    if (fwd && P > B.assemble[0] && P < B.assemble[1] + 0.1) {
-      if (!this.lockAt.length) this.lockAt = w.lockTimes();
-      let n = 0;
-      for (const a of this.lockAt) if (prev < a && P >= a) n++;
-      for (let i = 0; i < Math.min(n, 5); i++) {
-        this.click(2600 + Math.random() * 2400, 18, 0.05, 0.06 + Math.random() * 0.05, (Math.random() - 0.5) * 1.6, i * 0.012, 0.6);
-        this.bell(86 + PENTA[(this.pulseN + i) % 5], (Math.random() - 0.5) * 0.6, 0.03, 1.6);
-      }
     }
     // Six o'clock: the lid comes down, the lamp clicks off; the van starts.
     if (crossed(B.nClose[1] - 0.02)) this.click(420, 1.4, 0.2, 0.05, 0, 0, 0.4);

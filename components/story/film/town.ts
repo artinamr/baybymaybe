@@ -1,6 +1,9 @@
 import * as THREE from "three";
-import { at, Batch, block, footAO, gableEnd, gableRoof, hipRoof, ridgeOf, rod, ball, hull, turned, ROOF, LEAF } from "./model";
-import { aoTexture, foliageMat, glowMat, groundMat, modelMat, POOLS, type GroundUniforms } from "./mats";
+import { at, Batch, block, footAO, gableEnd, gableRoof, gableTrim, hipRoof, hipTrim, ridgeOf, rod, hull, ROOF } from "./model";
+import { aoTexture, BASE, glowMat, groundMat, houseMat, modelMat, POOLS, WALL_SM, WALL_WB, type GroundUniforms } from "./mats";
+import { BOX_ZN, coastZ, landH } from "./land";
+import { Panes, windowMat, type WindowMat } from "./glass";
+import { cabbageTree, columnTree, hedgeLeaves, leafMat, mergeHedges, roundTree, wideTree } from "./trees";
 
 /**
  * THE TOWN: a suburb at the scale of an architect's model. Streets on a
@@ -63,7 +66,7 @@ export type House = {
 type Kind = { body: THREE.BufferGeometry; glass: THREE.BufferGeometry; w: number; d: number; h: number };
 
 /** A window or a glazed door in a wall facing `face` (0 +Z, 1 +X, 2 -Z, 3 -X), its centre at (u along the wall, y), on a wall plane at `off`. */
-function opening(b: Batch, g: Batch, face: number, off: number, u: number, y: number, w: number, h: number, sill = true, bars = true) {
+function opening(b: Batch, g: Panes, face: number, off: number, u: number, y: number, w: number, h: number, sill = true, bars = true) {
   const yaw = [0, Math.PI / 2, Math.PI, -Math.PI / 2][face];
   const m = new THREE.Matrix4().makeRotationY(yaw);
   const place = (x: number, yy: number, z: number) => new THREE.Matrix4().multiplyMatrices(m, at(x, yy, z));
@@ -80,57 +83,31 @@ function opening(b: Batch, g: Batch, face: number, off: number, u: number, y: nu
     b.add(block(w, 0.045, 0.06, 0), place(u, y + h * 0.22, off + out), 1);
     if (w > 1.3) b.add(block(0.045, h * 0.72, 0.06, 0), place(u, y - h * 0.14, off + out), 1);
   }
-  g.add(block(w, h, 0.02, 0), place(u, y, off + 0.02), 1);
-}
-
-/** Weatherboards: fine horizontal lines on a wall (thin strips), only on the big kinds' fronts. */
-function boards(b: Batch, face: number, off: number, w: number, y0: number, y1: number, skip: [number, number, number, number][] = []) {
-  const yaw = [0, Math.PI / 2, Math.PI, -Math.PI / 2][face];
-  const m = new THREE.Matrix4().makeRotationY(yaw);
-  for (let y = y0 + 0.2; y < y1 - 0.1; y += 0.2) {
-    // Split each board where an opening is.
-    let segs: [number, number][] = [[-w / 2, w / 2]];
-    for (const [u, yy, ww, hh] of skip) {
-      if (y < yy - hh / 2 - 0.1 || y > yy + hh / 2 + 0.1) continue;
-      const a = u - ww / 2 - 0.1;
-      const c = u + ww / 2 + 0.1;
-      segs = segs.flatMap(([s, e]) => {
-        const r: [number, number][] = [];
-        if (a > s) r.push([s, Math.min(a, e)]);
-        if (c < e) r.push([Math.max(c, s), e]);
-        return r;
-      });
-    }
-    for (const [s, e] of segs) if (e - s > 0.15) b.add(block(e - s, 0.018, 0.012, 0), new THREE.Matrix4().multiplyMatrices(m, at((s + e) / 2, y, off + 0.006)), 0.97);
-  }
+  // The pane, and the room behind it (glass.ts): a door to the floor, a window over a sill.
+  g.add(face, off, u, y, w, h, !sill && h > 1.9 ? (w > 2.5 ? 2 : 1) : 0);
 }
 
 const FLOOR = 0.45;
 
 function bungalow(): Kind {
   const b = new Batch();
-  const g = new Batch();
+  const g = new Panes();
   const w = 11;
   const d = 8;
   const wall = 2.6;
   const top = FLOOR + wall;
   const ao = footAO(0, 1.2, 0.5);
-  b.add(block(w - 0.2, FLOOR, d - 0.2), at(0, FLOOR / 2, 0), 0.62);
-  b.add(block(w, wall, d), at(0, FLOOR + wall / 2, 0), ao);
-  b.add(gableEnd(d, 0.47, 0.2), at(-w / 2 + 0.1, top, 0, 0, Math.PI / 2, 0), 1);
-  b.add(gableEnd(d, 0.47, 0.2), at(w / 2 - 0.1, top, 0, 0, Math.PI / 2, 0), 1);
-  b.add(block(w - 0.4, ridgeOf(d, 0.47) * 0.9, d - 0.4), at(0, top + ridgeOf(d, 0.47) * 0.42, 0), 0.9);
+  b.add(block(w - 0.2, FLOOR, d - 0.2), at(0, FLOOR / 2, 0), 0.62, BASE);
+  b.add(block(w, wall, d), at(0, FLOOR + wall / 2, 0), ao, WALL_WB);
+  b.add(gableEnd(d, 0.47, 0.2), at(-w / 2 + 0.1, top, 0, 0, Math.PI / 2, 0), 1, WALL_WB);
+  b.add(gableEnd(d, 0.47, 0.2), at(w / 2 - 0.1, top, 0, 0, Math.PI / 2, 0), 1, WALL_WB);
+  b.add(block(w - 0.4, ridgeOf(d, 0.47) * 0.9, d - 0.4), at(0, top + ridgeOf(d, 0.47) * 0.42, 0), 0.9, WALL_WB);
   b.add(gableRoof(d, w, 0.47, 0.45, 0.13), at(0, top, 0, 0, Math.PI / 2, 0), (p) => (p.y < top + 0.05 ? 0.75 : 1), ROOF);
+  b.add(gableTrim(d, w, 0.47, 0.45), at(0, top, 0, 0, Math.PI / 2, 0), 0.9);
   // Front: two windows, the door under a little porch roof.
-  const fw: [number, number, number, number][] = [
-    [-3.2, FLOOR + 1.45, 1.6, 1.4],
-    [3.0, FLOOR + 1.45, 1.6, 1.4],
-    [0.2, FLOOR + 1.05, 0.95, 2.1],
-  ];
   opening(b, g, 0, d / 2, -3.2, FLOOR + 1.45, 1.6, 1.4);
   opening(b, g, 0, d / 2, 3.0, FLOOR + 1.45, 1.6, 1.4);
   opening(b, g, 0, d / 2, 0.2, FLOOR + 1.05, 0.95, 2.1, false, false);
-  boards(b, 0, d / 2, w, FLOOR, top, fw);
   b.add(gableRoof(2.2, 1.6, 0.5, 0.15, 0.08), at(0.2, FLOOR + 2.45, d / 2 + 0.8, 0, 0, 0), 1, ROOF);
   b.add(rod(0.06, 2.45), at(-0.8, 0, d / 2 + 1.45), ao);
   b.add(rod(0.06, 2.45), at(1.2, 0, d / 2 + 1.45), ao);
@@ -142,25 +119,26 @@ function bungalow(): Kind {
   opening(b, g, 1, w / 2, 0, FLOOR + 1.45, 1.4, 1.3);
   opening(b, g, 3, w / 2, 1, FLOOR + 1.45, 1.0, 1.2);
   // A chimney.
-  b.add(block(0.6, 1.6, 0.6), at(-2.6, top + 1.4, -1.0), 0.95);
+  b.add(block(0.6, 1.6, 0.6), at(-2.6, top + 1.4, -1.0), 0.95, BASE);
   return { body: b.build(), glass: g.build(), w, d, h: top + ridgeOf(d, 0.47) };
 }
 
 function villa(): Kind {
   const b = new Batch();
-  const g = new Batch();
+  const g = new Panes();
   const w = 10;
   const d = 12;
   const wall = 2.9;
   const top = FLOOR + wall;
   const ao = footAO(0, 1.2, 0.5);
-  b.add(block(w - 0.2, FLOOR, d - 0.2), at(0, FLOOR / 2, 0), 0.62);
-  b.add(block(w, wall, d), at(0, FLOOR + wall / 2, 0), ao);
+  b.add(block(w - 0.2, FLOOR, d - 0.2), at(0, FLOOR / 2, 0), 0.62, BASE);
+  b.add(block(w, wall, d), at(0, FLOOR + wall / 2, 0), ao, WALL_WB);
   b.add(hipRoof(w, d, 0.52, 0.45, 0.16), at(0, top, 0), (p) => (p.y < top + 0.1 ? 0.75 : 1), ROOF);
+  b.add(hipTrim(w, d, 0.45, 0.16), at(0, top, 0), 0.9);
   // The bay: a gabled front room standing forward, with a bay window.
   const bx = -2.6;
-  b.add(block(4.2, wall + FLOOR, 1.8), at(bx, (wall + FLOOR) / 2, d / 2 + 0.9), ao);
-  b.add(gableEnd(4.2, 0.62, 0.2), at(bx, top, d / 2 + 1.7), 1);
+  b.add(block(4.2, wall + FLOOR, 1.8), at(bx, (wall + FLOOR) / 2, d / 2 + 0.9), ao, WALL_WB);
+  b.add(gableEnd(4.2, 0.62, 0.2), at(bx, top, d / 2 + 1.7), 1, WALL_WB);
   b.add(gableRoof(4.2, 2.6, 0.62, 0.35, 0.13), at(bx, top, d / 2 + 0.6, 0, 0, 0), 1, ROOF);
   opening(b, g, 0, d / 2 + 1.8, bx, FLOOR + 1.5, 2.2, 1.6);
   // A verandah across the rest of the front.
@@ -174,20 +152,20 @@ function villa(): Kind {
   opening(b, g, 1, w / 2, -2.5, FLOOR + 1.5, 1.2, 1.5);
   opening(b, g, 1, w / 2, 2.5, FLOOR + 1.5, 1.2, 1.5);
   opening(b, g, 3, w / 2, 0, FLOOR + 1.5, 1.2, 1.5);
-  b.add(block(0.6, 1.8, 0.6), at(2.0, top + 1.6, -2.5), 0.95);
+  b.add(block(0.6, 1.8, 0.6), at(2.0, top + 1.6, -2.5), 0.95, BASE);
   return { body: b.build(), glass: g.build(), w, d: d + 1.8, h: top + 3.0 };
 }
 
 function modern(): Kind {
   const b = new Batch();
-  const g = new Batch();
+  const g = new Panes();
   const ao = footAO(0, 1.2, 0.5);
   // A long low box, an upper box set back, flat roofs with a thin edge.
-  b.add(block(12, 3.0, 8), at(0, 1.5 + 0.15, 0), ao);
+  b.add(block(12, 3.0, 8), at(0, 1.5 + 0.15, 0), ao, WALL_SM);
   b.add(block(12.3, 0.22, 8.3), at(0, 3.25, 0), 0.95);
-  b.add(block(6.5, 2.8, 6.4), at(-2.2, 3.2 + 1.4, -0.6), 1);
+  b.add(block(6.5, 2.8, 6.4), at(-2.2, 3.2 + 1.4, -0.6), 1, WALL_SM);
   b.add(block(6.8, 0.22, 6.7), at(-2.2, 6.2, -0.6), 0.95);
-  b.add(block(12.6, 0.15, 9.6), at(0, 0.075, 0.5), 0.7);
+  b.add(block(12.6, 0.15, 9.6), at(0, 0.075, 0.5), 0.7, BASE);
   opening(b, g, 0, 4, 2.6, 1.55, 4.4, 2.2, false, false);
   opening(b, g, 0, 4, -3.6, 1.7, 1.2, 1.2, true, false);
   opening(b, g, 0, 2.6, -2.2, 4.6, 4.2, 1.5, true, false);
@@ -195,24 +173,25 @@ function modern(): Kind {
   opening(b, g, 1, 6, 0, 1.6, 2.0, 1.5, true, false);
   opening(b, g, 3, 6, 0, 1.6, 1.2, 1.5, true, false);
   // A slatted screen beside the door.
-  for (let i = 0; i < 9; i++) b.add(block(0.05, 2.6, 0.12), at(-1.4 + i * 0.14, 1.45, 4.18), 0.9);
+  for (let i = 0; i < 9; i++) b.add(block(0.05, 2.6, 0.12), at(-1.4 + i * 0.14, 1.45, 4.18), 0.9, [0.62, 0.45, 0.3]);
   return { body: b.build(), glass: g.build(), w: 12.6, d: 9.6, h: 6.4 };
 }
 
 function twoStorey(): Kind {
   const b = new Batch();
-  const g = new Batch();
+  const g = new Panes();
   const w = 8.4;
   const d = 9;
   const wall = 5.4;
   const top = FLOOR + wall;
   const ao = footAO(0, 1.2, 0.5);
-  b.add(block(w - 0.2, FLOOR, d - 0.2), at(0, FLOOR / 2, 0), 0.62);
-  b.add(block(w, wall, d), at(0, FLOOR + wall / 2, 0), ao);
+  b.add(block(w - 0.2, FLOOR, d - 0.2), at(0, FLOOR / 2, 0), 0.62, BASE);
+  b.add(block(w, wall, d), at(0, FLOOR + wall / 2, 0), ao, WALL_WB);
   // The gable faces the street.
-  b.add(gableEnd(w, 0.66, 0.2), at(0, top, d / 2 - 0.1), 1);
-  b.add(gableEnd(w, 0.66, 0.2), at(0, top, -d / 2 + 0.1), 1);
+  b.add(gableEnd(w, 0.66, 0.2), at(0, top, d / 2 - 0.1), 1, WALL_WB);
+  b.add(gableEnd(w, 0.66, 0.2), at(0, top, -d / 2 + 0.1), 1, WALL_WB);
   b.add(gableRoof(w, d, 0.66, 0.4, 0.13), at(0, top, 0), (p) => (p.y < top + 0.05 ? 0.75 : 1), ROOF);
+  b.add(gableTrim(w, d, 0.66, 0.4), at(0, top, 0), 0.9);
   for (const y of [FLOOR + 1.45, FLOOR + 4.1]) {
     opening(b, g, 0, d / 2, -2.2, y, 1.3, 1.5);
     opening(b, g, 0, d / 2, 2.2, y, 1.3, 1.5);
@@ -228,36 +207,37 @@ function twoStorey(): Kind {
 
 function cottage(): Kind {
   const b = new Batch();
-  const g = new Batch();
+  const g = new Panes();
   const w = 8.4;
   const d = 7.4;
   const wall = 2.5;
   const top = FLOOR + wall;
   const ao = footAO(0, 1.2, 0.5);
-  b.add(block(w - 0.2, FLOOR, d - 0.2), at(0, FLOOR / 2, 0), 0.62);
-  b.add(block(w, wall, d), at(0, FLOOR + wall / 2, 0), ao);
+  b.add(block(w - 0.2, FLOOR, d - 0.2), at(0, FLOOR / 2, 0), 0.62, BASE);
+  b.add(block(w, wall, d), at(0, FLOOR + wall / 2, 0), ao, WALL_WB);
   b.add(hipRoof(w, d, 0.6, 0.4, 0.15), at(0, top, 0), (p) => (p.y < top + 0.1 ? 0.75 : 1), ROOF);
+  b.add(hipTrim(w, d, 0.4, 0.15), at(0, top, 0), 0.9);
   opening(b, g, 0, d / 2, -2.2, FLOOR + 1.4, 1.3, 1.3);
   opening(b, g, 0, d / 2, 2.2, FLOOR + 1.4, 1.3, 1.3);
   opening(b, g, 0, d / 2, 0, FLOOR + 1.05, 0.9, 2.05, false, false);
   opening(b, g, 2, d / 2, 0, FLOOR + 1.4, 1.6, 1.3);
   opening(b, g, 1, w / 2, 0, FLOOR + 1.4, 1.1, 1.2);
   opening(b, g, 3, w / 2, 0, FLOOR + 1.4, 1.1, 1.2);
-  b.add(block(0.55, 1.6, 0.55), at(2.4, top + 1.3, 0.8), 0.95);
-  b.add(block(1.2, 0.2, 0.5), at(0, 0.1, d / 2 + 0.35), 0.7);
+  b.add(block(0.55, 1.6, 0.55), at(2.4, top + 1.3, 0.8), 0.95, BASE);
+  b.add(block(1.2, 0.2, 0.5), at(0, 0.1, d / 2 + 0.35), 0.7, BASE);
   return { body: b.build(), glass: g.build(), w, d, h: top + 2.6 };
 }
 
 function skillion(): Kind {
   const b = new Batch();
-  const g = new Batch();
+  const g = new Panes();
   const ao = footAO(0, 1.2, 0.5);
-  b.add(block(10, 0.3, 8), at(0, 0.15, 0), 0.62);
+  b.add(block(10, 0.3, 8), at(0, 0.15, 0), 0.62, BASE);
   // Walls rising toward the front; the roof a single plane over them.
   const front = 4.0;
   const back = 2.9;
   const pts = [V(-5, 0.3, -4), V(5, 0.3, -4), V(5, 0.3, 4), V(-5, 0.3, 4), V(-5, back, -4), V(5, back, -4), V(5, front, 4), V(-5, front, 4)];
-  b.add(hull(pts), null, footAO(0, 1.2, 0.5));
+  b.add(hull(pts), null, footAO(0, 1.2, 0.5), WALL_SM);
   const tilt = Math.atan2(front - back, 8);
   b.add(block(10.8, 0.16, 9.0), at(0, (front + back) / 2 + 0.1, 0, -tilt, 0, 0), 0.95, ROOF);
   opening(b, g, 0, 4, 1.5, 1.7, 4.2, 2.4, false, false);
@@ -273,41 +253,6 @@ function skillion(): Kind {
 /* ------------------------------------------------------------------ */
 /* Trees, cars, lamps                                                  */
 /* ------------------------------------------------------------------ */
-
-const BARK: [number, number, number] = [0.55, 0.5, 0.45];
-
-/** A round tree: a trunk and a canopy of a few overlapping balls (model foam). */
-function treeRound(): THREE.BufferGeometry {
-  const b = new Batch();
-  b.add(rod(0.16, 3.2, 10), at(0, 0, 0), (p) => 0.6 + 0.4 * Math.min(1, p.y / 2), BARK);
-  b.add(ball(2.2, 20, 14), at(0, 4.6, 0, 0, 0, 0, 1, 0.9, 1), (p) => 0.55 + 0.45 * Math.min(1, Math.max(0, (p.y - 3) / 3)), LEAF);
-  b.add(ball(1.6, 18, 12), at(1.3, 3.9, 0.6), (p) => 0.55 + 0.45 * Math.min(1, Math.max(0, (p.y - 2.6) / 2.6)), LEAF);
-  b.add(ball(1.5, 18, 12), at(-1.1, 4.1, -0.7), (p) => 0.55 + 0.45 * Math.min(1, Math.max(0, (p.y - 2.8) / 2.6)), LEAF);
-  return b.build();
-}
-/** A tall narrow tree (a cypress, a poplar). */
-function treeTall(): THREE.BufferGeometry {
-  const b = new Batch();
-  b.add(rod(0.14, 1.6, 10), at(0, 0, 0), 0.7, BARK);
-  b.add(turned([[0.0, 0], [1.1, 0.6], [1.35, 2.4], [1.1, 5.0], [0.6, 7.2], [0.0, 8.4]], 22), at(0, 1.0, 0), (p) => 0.55 + 0.45 * Math.min(1, Math.max(0, (p.y - 1) / 5)), LEAF);
-  return b.build();
-}
-/** A wide, low canopy (a pohutukawa by the street). */
-function treeWide(): THREE.BufferGeometry {
-  const b = new Batch();
-  b.add(rod(0.22, 2.4, 10), at(0, 0, 0), 0.65, BARK);
-  b.add(rod(0.12, 2.2, 8), at(0.3, 1.6, 0, 0, 0, -0.6), 0.75, BARK);
-  b.add(rod(0.12, 2.2, 8), at(-0.3, 1.6, 0.2, 0.3, 0, 0.6), 0.75, BARK);
-  for (const [x, y, z, r] of [
-    [0, 3.6, 0, 2.4],
-    [2.2, 3.3, 0.6, 1.8],
-    [-2.0, 3.4, -0.5, 1.9],
-    [0.4, 3.2, 2.0, 1.6],
-    [-0.6, 3.3, -2.0, 1.7],
-  ] as const)
-    b.add(ball(r, 18, 12), at(x, y, z, 0, 0, 0, 1, 0.62, 1), (p) => 0.55 + 0.45 * Math.min(1, Math.max(0, (p.y - 2.4) / 2.2)), LEAF);
-  return b.build();
-}
 
 /** A car: a body, a cabin, four wheels (dark) in their arches. */
 export function car(): { body: THREE.BufferGeometry; dark: THREE.BufferGeometry } {
@@ -362,7 +307,7 @@ const regionOf = (x: number, z: number) => {
  * be culled (the shadow map and the camera only draw what they can see).
  * Returns, for each item, its mesh and slot.
  */
-function chunked(group: THREE.Group, geo: THREE.BufferGeometry, mat: THREE.Material, items: { m: THREE.Matrix4; x: number; z: number }[], opts: { shadow?: boolean; receive?: boolean; color?: THREE.Color } = {}) {
+function chunked(group: THREE.Group, geo: THREE.BufferGeometry, mat: THREE.Material, items: { m: THREE.Matrix4; x: number; z: number; c?: THREE.Color }[], opts: { shadow?: boolean; receive?: boolean; color?: THREE.Color } = {}) {
   const by = new Map<number, number[]>();
   items.forEach((it, i) => {
     const r = regionOf(it.x, it.z);
@@ -377,7 +322,8 @@ function chunked(group: THREE.Group, geo: THREE.BufferGeometry, mat: THREE.Mater
     im.receiveShadow = opts.receive ?? !!opts.shadow;
     list.forEach((i, slot) => {
       im.setMatrixAt(slot, items[i].m);
-      if (opts.color) im.setColorAt(slot, opts.color);
+      const c = items[i].c ?? opts.color;
+      if (c) im.setColorAt(slot, c);
       where[i] = { mesh: im, slot };
     });
     im.instanceMatrix.needsUpdate = true;
@@ -457,6 +403,8 @@ export type Town = {
   setWindow: (id: number, k: number, col?: THREE.Color) => void;
   /** The dark glass colour (the sky's reflection) and the lights' level, per frame. */
   setGlass: (dark: THREE.Color, lit: number) => void;
+  /** The windows' material: `uDay` (the sky's light in the rooms), `uDim`. */
+  windows: WindowMat;
   ground: GroundUniforms;
   lamps: THREE.Vector3[];
   setLamps: (k: number) => void;
@@ -473,10 +421,12 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   const group = new THREE.Group();
   scene.add(group);
   const white = modelMat(0.84);
-  const foliage = foliageMat();
+  const houseM = houseMat();
+  const foliage = leafMat();
   const glass = glowMat();
+  const panes = windowMat();
   const dark = new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: 0.45, metalness: 0.1 });
-  const mats: THREE.Material[] = [white, foliage, glass, dark];
+  const mats: THREE.Material[] = [white, foliage, glass, dark, houseM];
 
   // The lots.
   type Lot = { x: number; z: number; yaw: number; w: number; d: number };
@@ -517,6 +467,14 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
     placed.push({ lot: l, kind, yaw: l.yaw + (R() - 0.5) * 0.05, x, z });
   }
 
+  // Each house's colour: mostly light (warm whites, creams, greys, sage, a soft blue), a few dark (charcoal, deep blue; the modern ones most).
+  const LIGHT = [0xf1eee6, 0xeae2cf, 0xdedcd6, 0xd2d6c8, 0xc9d1d6, 0xe9e5dc, 0xd9cfbd].map((h) => new THREE.Color(h));
+  const DARK = [0x3a3c3f, 0x2e3438, 0x45505a, 0x5a5650].map((h) => new THREE.Color(h));
+  const colourOf = (kind: number) => {
+    const dark = R() < (kind === 2 || kind === 5 ? 0.5 : 0.12);
+    const list = dark ? DARK : LIGHT;
+    return list[Math.floor(R() * list.length)].clone();
+  };
   // Instanced houses: per kind, per region.
   const houses: House[] = [];
   const q = new THREE.Quaternion();
@@ -524,9 +482,9 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   kinds.forEach((k, ki) => {
     const list = placed.filter((p) => p.kind === ki);
     if (!list.length) return;
-    const items = list.map((p) => ({ m: new THREE.Matrix4().compose(V(p.x, 0, p.z), q.setFromAxisAngle(V(0, 1, 0), p.yaw).clone(), one), x: p.x, z: p.z }));
-    chunked(group, k.body, white, items, { shadow: true });
-    const gw = chunked(group, k.glass, glass, items, { color: new THREE.Color(0.02, 0.025, 0.035) });
+    const items = list.map((p) => ({ m: new THREE.Matrix4().compose(V(p.x, 0, p.z), q.setFromAxisAngle(V(0, 1, 0), p.yaw).clone(), one), x: p.x, z: p.z, c: colourOf(ki) }));
+    chunked(group, k.body, houseM, items, { shadow: true });
+    const gw = chunked(group, k.glass, panes, items, { color: new THREE.Color(0, 0, 0) });
     list.forEach((p, i) => {
       const fwd = V(Math.sin(p.yaw), 0, Math.cos(p.yaw));
       const warm = R() < 0.25 ? new THREE.Color(1.0, 0.86, 0.7) : new THREE.Color(1.0, 0.64 + R() * 0.08, 0.34 + R() * 0.08);
@@ -552,7 +510,8 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   const writeHouse = (h: House) => {
     const k = houseLight[h.id];
     const col = houseCol[h.id] ?? h.warm;
-    tmp.copy(darkGlass).lerp(col.clone().multiplyScalar(litLevel), k);
+    // The rooms' lamps (glass.ts draws the glass and the dark rooms itself).
+    tmp.copy(col).multiplyScalar(litLevel * k);
     h.glass.setColorAt(h.slot, tmp);
     if (h.glass.instanceColor) h.glass.instanceColor.needsUpdate = true;
   };
@@ -587,25 +546,43 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   for (const p of placed) {
     if (R() < 0.75) {
       const back = p.lot.yaw === 0 ? -1 : 1;
-      trees.push({ x: p.lot.x + (R() - 0.5) * (p.lot.w - 4), z: p.lot.z + back * (p.lot.d / 2 - 2.5), kind: R() < 0.3 ? 1 : 0, s: 0.75 + R() * 0.45, r: R() * 6 });
+      const rk = R();
+      trees.push({ x: p.lot.x + (R() - 0.5) * (p.lot.w - 4), z: p.lot.z + back * (p.lot.d / 2 - 2.5), kind: rk < 0.22 ? 1 : rk < 0.36 ? 3 : 0, s: 0.75 + R() * 0.45, r: R() * 6 });
     }
   }
-  for (let i = 0; i < 26; i++) trees.push({ x: 72 + R() * 32, z: 6 + R() * 34, kind: R() < 0.2 ? 1 : R() < 0.6 ? 0 : 2, s: 0.8 + R() * 0.6, r: R() * 6 });
+  for (let i = 0; i < 26; i++) {
+    const rk = R();
+    trees.push({ x: 72 + R() * 32, z: 6 + R() * 34, kind: rk < 0.15 ? 1 : rk < 0.3 ? 3 : rk < 0.65 ? 0 : 2, s: 0.8 + R() * 0.6, r: R() * 6 });
+  }
   // The ring of trees round the town's edge, thinning into the fields.
+  for (let x = -158; x <= 158; x += 11 + R() * 4) {
+    if (bx.some((s) => Math.abs(s - x) < 3)) continue;
+    trees.push({ x: x + (R() - 0.5) * 2, z: coastZ(x) + 19 + R() * 2.5, kind: 2, s: 0.95 + R() * 0.35, r: R() * 6 });
+  }
   for (let i = 0; i < 70; i++) {
     const a = R() * Math.PI * 2;
     const r = 150 + R() * 70;
+    if (landH(Math.cos(a) * r * 1.05, Math.sin(a) * r * 0.9) < 0.3 && Math.sin(a) < 0) continue;
     trees.push({ x: Math.cos(a) * r * 1.05, z: Math.sin(a) * r * 0.9, kind: R() < 0.4 ? 1 : 0, s: 0.9 + R() * 0.8, r: R() * 6 });
   }
-  const treeGeos = [treeRound(), treeTall(), treeWide()];
-  treeGeos.forEach((g, ki) => {
-    const list = trees.filter((t) => t.kind === ki);
-    const items = list.map((t) => ({ m: new THREE.Matrix4().compose(V(t.x, 0, t.z), new THREE.Quaternion().setFromAxisAngle(V(0, 1, 0), t.r), V(t.s, t.s * (0.9 + (t.r % 1) * 0.2), t.s)), x: t.x, z: t.z }));
-    chunked(group, g, foliage, items, { shadow: true });
-  });
+  // Two of each kind (so neighbours differ), each its wood and its leaves.
+  const treeGeos = [
+    [roundTree(11), roundTree(12)],
+    [columnTree(21), columnTree(22)],
+    [wideTree(31), wideTree(32)],
+    [cabbageTree(41), cabbageTree(42)],
+  ];
+  treeGeos.forEach((pair, ki) => pair.forEach((g, vi) => {
+    const list = trees.filter((t, ti) => t.kind === ki && ti % 2 === vi);
+    const items = list.map((t) => ({ m: new THREE.Matrix4().compose(V(t.x, Math.max(0, landH(t.x, t.z)) - 0.2 * (landH(t.x, t.z) > 0.05 ? 1 : 0), t.z), new THREE.Quaternion().setFromAxisAngle(V(0, 1, 0), t.r), V(t.s, t.s * (0.9 + (t.r % 1) * 0.2), t.s)), x: t.x, z: t.z }));
+    if (!list.length) return;
+    chunked(group, g.wood, white, items, { shadow: true });
+    chunked(group, g.leaves, foliage, items, { shadow: true });
+  }));
 
   // Hedges and fences: a low hedge along each front (a gap for the drive), paling fences between yards.
   const fences = new Map<number, Batch>();
+  const hedges = new Map<number, THREE.BufferGeometry[]>();
   for (const p of placed) {
     const reg = regionOf(p.lot.x, p.lot.z);
     let fence = fences.get(reg);
@@ -619,10 +596,53 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
       [gapX + 1.6, l.x + l.w / 2 - 0.2],
     ];
     const hedge = R() < 0.5;
+    let hl = hedges.get(reg);
+    if (!hl) hedges.set(reg, (hl = []));
     for (const [a, b] of segs)
-      if (b - a > 0.5) fence.add(block(b - a, hedge ? 0.95 : 0.8, hedge ? 0.7 : 0.12, hedge ? 0.2 : 0.02), at((a + b) / 2, hedge ? 0.475 : 0.4, fz), footAO(0, 0.6, 0.55));
+      if (b - a > 0.5) {
+        if (hedge) {
+          // A dark core (so it never reads through) inside a skin of leaves.
+          fence.add(block(b - a - 0.2, 0.8, 0.5, 0.15), at((a + b) / 2, 0.42, fz), footAO(0, 0.6, 0.5), [0.16, 0.24, 0.14]);
+          hedgeLeaves({ leaves: hl }, at((a + b) / 2, 0, fz), b - a, 1.0, 0.75, Math.floor((a + fz) * 13.7));
+        } else fence.add(block(b - a, 0.8, 0.12, 0.02), at((a + b) / 2, 0.4, fz), footAO(0, 0.6, 0.55));
+      }
     // A paling fence at the back.
     fence.add(block(l.w - 0.2, 1.7, 0.08), at(l.x, 0.85, l.z - front * (l.d / 2 - 0.1)), footAO(0, 0.9, 0.55));
+  }
+  // Kerbs: a low concrete edge along both sides of every street, broken at the corners.
+  {
+    const kerb = new Batch();
+    const KC: [number, number, number] = [0.74, 0.73, 0.7];
+    const span = (a0: number, a1: number, cross: number[], half: (c: number) => number) => {
+      const cuts = cross.map((c) => [c - half(c) - 2.2, c + half(c) + 2.2]).sort((p, q) => p[0] - q[0]);
+      const out: [number, number][] = [];
+      let at0 = a0;
+      for (const [c0, c1] of cuts) {
+        if (c1 < at0 || c0 > a1) continue;
+        if (c0 > at0) out.push([at0, c0]);
+        at0 = Math.max(at0, c1);
+      }
+      if (at0 < a1) out.push([at0, a1]);
+      return out;
+    };
+    for (const z of bz) {
+      const w = z === 0 ? MAIN_ROAD : ROAD;
+      for (const [x0, x1] of span(-136, 136, bx, () => ROAD / 2))
+        for (const sd of [-1, 1]) kerb.add(block(x1 - x0, 0.15, 0.22, 0.03), at((x0 + x1) / 2, 0.075, z + sd * (w / 2 + 0.11)), 0.85, KC);
+    }
+    for (const x of bx)
+      for (const [z0, z1] of span(bz[0], 118, bz, (c) => (c === 0 ? MAIN_ROAD : ROAD) / 2))
+        for (const sd of [-1, 1]) kerb.add(block(0.22, 0.15, z1 - z0, 0.03), at(x + sd * (ROAD / 2 + 0.11), 0.075, (z0 + z1) / 2), 0.85, KC);
+    const km = new THREE.Mesh(kerb.build(), white);
+    km.receiveShadow = true;
+    group.add(km);
+  }
+  for (const list of hedges.values()) {
+    if (!list.length) continue;
+    const hm = new THREE.Mesh(mergeHedges(list), foliage);
+    hm.castShadow = true;
+    hm.receiveShadow = true;
+    group.add(hm);
   }
   for (const fence of fences.values()) {
     const fenceMesh = new THREE.Mesh(fence.build(), white);
@@ -671,41 +691,6 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   const heads = chunked(group, lg.head, glass, lampItems, { color: new THREE.Color(0, 0, 0) });
   for (const l of lampAt) lamps.push(V(l.x + Math.sin(l.yaw) * 1.22, 6.2, l.z + Math.cos(l.yaw) * 1.22));
 
-  // The hills: a low ring far out, its folds from a few sines.
-  {
-    const seg = 160;
-    const rings = 8;
-    const pos: number[] = [];
-    const idx: number[] = [];
-    for (let j = 0; j <= rings; j++) {
-      const t = j / rings;
-      const r = 230 + t * 260;
-      for (let i = 0; i <= seg; i++) {
-        const a = (i / seg) * Math.PI * 2;
-        const h =
-          Math.max(0, Math.sin(t * Math.PI)) *
-          (18 + 14 * Math.sin(a * 3 + 1.3) + 9 * Math.sin(a * 7 + 0.4) + 5 * Math.sin(a * 13 + 2.2) + (a > 3.6 && a < 5.4 ? 22 : 0) * Math.sin(((a - 3.6) / 1.8) * Math.PI));
-        pos.push(Math.cos(a) * r, h * Math.min(1, t * 3), Math.sin(a) * r);
-      }
-    }
-    for (let j = 0; j < rings; j++)
-      for (let i = 0; i < seg; i++) {
-        const a = j * (seg + 1) + i;
-        const b = a + seg + 1;
-        idx.push(a, b, a + 1, b, b + 1, a + 1);
-      }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-    g.setIndex(idx);
-    g.computeVertexNormals();
-    const n = g.getAttribute("position").count;
-    g.setAttribute("aAO", new THREE.BufferAttribute(new Float32Array(n).fill(0.85), 1));
-    g.setAttribute("color", new THREE.BufferAttribute(new Float32Array(n * 3).fill(0.8), 3));
-    const hills = new THREE.Mesh(g, white);
-    hills.receiveShadow = false;
-    group.add(hills);
-  }
-
   // The ground: its plan and its occlusion, painted.
   const W = quality === 0 ? 2048 : 4096;
   const H = Math.round((W * PLAN.w) / PLAN.z);
@@ -735,9 +720,9 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   };
   // The streets run on past the town and stop short of the plan's edge (its edge pixels stretch out to the horizon).
   for (const z of bz) road(-136, z, 136, z, z === 0 ? MAIN_ROAD : ROAD);
-  for (const x of bx) road(x, -118, x, 118, ROAD);
+  for (const x of bx) road(x, bz[0], x, 118, ROAD);
   for (const z of bz) tar(-136, z, 136, z, z === 0 ? MAIN_ROAD : ROAD);
-  for (const x of bx) tar(x, -118, x, 118, ROAD);
+  for (const x of bx) tar(x, bz[0], x, 118, ROAD);
   // The centre line of the main street.
   c.fillStyle = "#d8d6cf";
   for (let x = -136; x < 136; x += 6) c.fillRect(X(x), Z(-0.06), 3 * sx, 0.12 * sx);
@@ -793,7 +778,7 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   a.fillStyle = "rgba(0,0,0,0.32)";
   for (const t of trees) {
     a.beginPath();
-    a.arc(AX(t.x), AZ(t.z), (t.kind === 2 ? 2.6 : 1.8) * t.s * as, 0, Math.PI * 2);
+    a.arc(AX(t.x), AZ(t.z), (t.kind === 2 ? 2.8 : t.kind === 3 ? 1.0 : 1.9) * t.s * as, 0, Math.PI * 2);
     a.fill();
   }
   a.filter = "none";
@@ -831,19 +816,26 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
 
   const gm = groundMat(planTex, aoTex, lampTex, PLAN);
   mats.push(gm.mat);
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(PLAN.z * 3, PLAN.w * 3), gm.mat);
+  // The town's ground: the plan and a margin in the lawn's colour (the land, land.ts, starts at its edge).
+  const MARGIN_X = 18;
+  const MARGIN_Z = 18;
+  // North it ends at the beach road's verge (the land carries on to the sand).
+  const zN = -BOX_ZN;
+  const zS = PLAN.y + PLAN.w + MARGIN_Z;
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(PLAN.z + MARGIN_X * 2, zS - zN), gm.mat);
   ground.rotation.x = -Math.PI / 2;
-  ground.position.set(PLAN.x + PLAN.z / 2, 0, PLAN.y + PLAN.w / 2);
+  ground.position.set(PLAN.x + PLAN.z / 2, 0, (zN + zS) / 2);
   ground.receiveShadow = true;
   group.add(ground);
-  // The plan's texture covers the town; beyond it, the ground keeps the lawn colour (clamped edge).
   planTex.wrapS = planTex.wrapT = THREE.ClampToEdgeWrapping;
   {
-    // The plane's UVs: so the plan sits on the town and stretches its edge beyond it.
+    // The plane's UVs: the plan on the town, its edge carried out over the margin.
     const uv = ground.geometry.getAttribute("uv") as THREE.BufferAttribute;
-    for (let i = 0; i < uv.count; i++) {
-      uv.setXY(i, uv.getX(i) * 3 - 1, uv.getY(i) * 3 - 1);
-    }
+    // u along x; v from the plan's south edge (v 0) to its north edge (v 1), as the canvas lies.
+    const mu = MARGIN_X / PLAN.z;
+    const vS = (PLAN.y + PLAN.w - zS) / PLAN.w;
+    const vN = (PLAN.y + PLAN.w - zN) / PLAN.w;
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, -mu + uv.getX(i) * (1 + 2 * mu), vS + uv.getY(i) * (vN - vS));
     uv.needsUpdate = true;
   }
 
@@ -870,7 +862,7 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
   // What stands where, for the camera.
   const field = new HeightField();
   for (const p of placed) field.house(p.x, p.z, kinds[p.kind].w, kinds[p.kind].d, p.yaw, kinds[p.kind].h + 0.6);
-  for (const t of trees) field.disc(t.x, t.z, (t.kind === 2 ? 4.0 : t.kind === 1 ? 1.4 : 2.9) * t.s, (t.kind === 1 ? 9.4 : t.kind === 2 ? 5.1 : 6.8) * t.s * 1.1);
+  for (const t of trees) field.disc(t.x, t.z, (t.kind === 2 ? 4.4 : t.kind === 1 ? 1.4 : t.kind === 3 ? 2.0 : 3.2) * t.s, (t.kind === 1 ? 8.6 : t.kind === 2 ? 5.2 : t.kind === 3 ? 5.4 : 6.8) * t.s * 1.1);
   for (const c of cars) field.box(c.x, c.z, 1.9, 4.4, c.yaw, 1.6);
   for (const l of lampAt) field.disc(l.x + Math.sin(l.yaw) * 0.7, l.z + Math.cos(l.yaw) * 0.7, 0.9, 6.6);
   for (const p of placed) {
@@ -879,5 +871,5 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
     field.box(l.x, l.z + front * (l.d / 2 - 0.3), l.w, 0.8, 0, 1.0);
     field.box(l.x, l.z - front * (l.d / 2 - 0.1), l.w, 0.2, 0, 1.8);
   }
-  return { group, houses, setWindow, setGlass, ground: gm.u, lamps, setLamps, pool, mats, field, car: carGeo };
+  return { group, houses, setWindow, setGlass, windows: panes, ground: gm.u, lamps, setLamps, pool, mats, field, car: carGeo };
 }

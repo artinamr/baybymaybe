@@ -65,9 +65,10 @@ export const B = {
   freeze: [15.42, 15.62] as W,
   fall: [15.62, 16.12] as W,
   black: [16.0, 16.34] as W,
-  /** THE REWIND: the whole old half runs backward under a camera high over the town (world.ts). */
-  rewind: [16.26, 16.76] as W,
-  assemble: [16.76, 17.44] as W,
+  /** THE REWIND: the whole old half runs backward while the drop climbs over the town (world.ts). */
+  rewind: [16.42, 16.88] as W,
+  /** The drop's dive to Sam's garden. */
+  assemble: [16.94, 17.48] as W,
   // NEW WEBSITE.
   nLift: [18.04, 18.2] as W,
   nTap: 19.16,
@@ -79,13 +80,13 @@ export const B = {
   nBack: [20.0, 20.14] as W,
   nRead: [20.16, 20.5] as W,
   nPick: 20.56,
-  nBook: [20.6, 20.72] as W,
-  n3am: [20.8, 21.5] as W,
-  nHand: [21.06, 21.5] as W,
+  nBook: [20.58, 20.82] as W,
+  n3am: [20.96, 21.5] as W,
+  nHand: [21.35, 21.5] as W,
   // NEW PLATFORM.
   nQuote: [21.86, 22.34] as W,
   nQuoteSent: 22.36,
-  nAccept: [22.42, 22.54] as W,
+  nAccept: [22.55, 22.61] as W,
   nBuild: [22.6, 23.1] as W,
   nInvoice: [23.14, 23.4] as W,
   nPaid: 23.5,
@@ -104,7 +105,7 @@ export const B = {
   nDrive: [27.5, 28.06] as W,
   nLater: [27.34, 27.84] as W,
   // END.
-  end: [28.0, 28.9] as W,
+  end: [28.45, 29.0] as W,
 };
 
 /** How far through a window (0..1, clamped). */
@@ -164,17 +165,17 @@ const CLOCK: [number, number][] = [
   // The day goes as we cross the town: 11:47pm, any night.
   [12.84, 380 * D + 23 + 47 / 60],
   [15.4, 380 * D + 23 + 48 / 60],
-  [16.26, 380 * D + 23 + 48 / 60],
-  // The rewind (16.26 to 16.66) runs the hours backward itself (world.ts); the clock lands on the first evening.
-  [16.26, 19 + 37 / 60],
-  [16.76, 19 + 37 / 60],
+  [16.42, 380 * D + 23 + 48 / 60],
+  // The rewind (16.42 to 16.88) runs the hours backward itself (world.ts); the clock lands on the first evening.
+  [16.42, 19 + 37 / 60],
+  [16.88, 19 + 37 / 60],
   [18.0, 19 + 38 / 60],
   [19.6, 19 + 40 / 60],
   [20.0, 19 + 41 / 60],
-  [20.72, 19 + 43 / 60],
+  [20.82, 19 + 43 / 60],
   // Through the night to 3am.
-  [20.8, 19.75],
-  [21.06, D + 3 + 12 / 60],
+  [20.96, 19.75],
+  [21.1, D + 3 + 12 / 60],
   [21.5, D + 3.5],
   // Wednesday: the measure-up, the quote.
   [21.5, 2 * D + 3.5],

@@ -45,11 +45,10 @@ const out = await page.evaluate(
       mailC: w.mailC.group,
       crowd: w.crowd.mesh,
       strips: w.strips.mesh,
-      route: w.system.group,
+      drop: w.drop.mesh,
     };
-    const cards = { phone: w.phoneCard, sheet: w.sheetCard, quote: w.quoteCard, invoice: w.invoiceCard, cal: w.calCard, hand: w.handCard, nQuote: w.nQuoteCard, today: w.todayCard };
+    const cards = { phone: w.phoneCard, sheet: w.sheetCard, quote: w.quoteCard, invoice: w.invoiceCard };
     w.pend.forEach((c, i) => (cards["pend" + i] = c));
-    w.system.cards.forEach((c, i) => (cards["node" + i] = c));
     const person = new Set(["sam", "owner", "samPhone"]);
     const flies = (n) => n.startsWith("mail") || n.startsWith("node");
     const vis = (o) => {

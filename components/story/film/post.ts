@@ -216,6 +216,22 @@ void main() {
   gl_FragColor = vec4(wsum > 0.0 ? sum / wsum : c0.rgb, c0.a);
 }`;
 
+// A plain copy of the scene (the glass drawn over it bends this copy).
+const COPY = /* glsl */ `
+precision highp float;
+uniform sampler2D tSrc;
+in vec2 vUv;
+vec3 fin(vec3 c) {
+  bvec3 bad = equal(floatBitsToUint(c) & uvec3(0x7f800000u), uvec3(0x7f800000u));
+  return clamp(mix(c, vec3(0.0), bad), 0.0, 64.0);
+}
+void main() {
+  gl_FragColor = vec4(fin(texture(tSrc, vUv).rgb), 1.0);
+}`;
+
+/** Glass drawn after the scene, over a copy of it (drop.ts), and its depth. */
+export type Overlay = { color: THREE.Scene; depth: THREE.Scene; on: () => boolean };
+
 const COMPOSITE = /* glsl */ `
 precision highp float;
 uniform sampler2D tScene;
@@ -424,6 +440,9 @@ export class Post {
   private dofDown: THREE.ShaderMaterial;
   private dofGather: THREE.ShaderMaterial;
   private levels: number;
+  // The overlay's copy of the scene.
+  private copyRT: THREE.WebGLRenderTarget;
+  private copyMat: THREE.ShaderMaterial;
   private w = 1;
   private h = 1;
   private aaReady = false;
@@ -440,6 +459,8 @@ export class Post {
     this.depthRT.depthBuffer = true;
     this.softA = half(THREE.HalfFloatType, THREE.LinearFilter);
     this.softB = half(THREE.HalfFloatType, THREE.LinearFilter);
+    this.copyRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, format: THREE.RGBAFormat, depthBuffer: false, stencilBuffer: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false });
+    this.copyMat = pass(COPY, { tSrc: { value: null } });
     this.depthCam.matrixAutoUpdate = false;
     this.depthCam.layers.set(0);
     this.dofDown = pass(DOF_DOWN, {
@@ -528,7 +549,15 @@ export class Post {
 
   /** The programs, compiled before the film is shown. */
   materials(): THREE.Material[] {
-    return [this.down, this.up, this.comp, this.dofDown, this.dofGather];
+    return [this.down, this.up, this.comp, this.dofDown, this.dofGather, this.copyMat];
+  }
+
+  /** The scene's copy the overlay's glass bends. */
+  get sceneCopy(): THREE.Texture {
+    return this.copyRT.texture;
+  }
+  get size() {
+    return { w: this.w, h: this.h };
   }
 
   setSize(w: number, h: number) {
@@ -538,6 +567,7 @@ export class Post {
     this.w = w;
     this.h = h;
     this.scene.setSize(w, h);
+    this.copyRT.setSize(w, h);
     let mw = w;
     let mh = h;
     for (const m of this.mips) {
@@ -566,7 +596,7 @@ export class Post {
   }
 
   /** Draw a frame: the scene into HDR, the bloom, the composite to the screen. */
-  render(r: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, g: Grade, time: number, pre?: THREE.Scene) {
+  render(r: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, g: Grade, time: number, pre?: THREE.Scene, overlay?: Overlay) {
     if (!this.aaReady) {
       const gl = r.getContext() as WebGL2RenderingContext;
       const depth = Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, gl.SAMPLES) as Int32Array);
@@ -611,6 +641,14 @@ export class Post {
     } else r.render(scene, camera);
     T?.end();
     r.autoClear = false;
+    // The glass: over a copy of what is behind it, into the same target (it keeps the scene's depth).
+    const glass = !!overlay && overlay.on();
+    if (glass && overlay) {
+      this.copyMat.uniforms.tSrc.value = this.scene.texture;
+      this.blit(r, this.copyMat, this.copyRT);
+      r.setRenderTarget(this.scene);
+      r.render(overlay.color, camera);
+    }
 
     // Depth of field: the depth at half size, the soft copy, the gather.
     const dof = this.dofOn && g.aperture > 0.01 && (camera as THREE.PerspectiveCamera).isPerspectiveCamera;
@@ -637,6 +675,10 @@ export class Post {
       r.render(scene, dc);
       scene.overrideMaterial = override;
       scene.background = bg;
+      if (glass && overlay) {
+        r.autoClear = false;
+        r.render(overlay.depth, dc);
+      }
       r.setClearColor(clear, alpha);
       r.autoClear = false;
       const dd = this.dofDown.uniforms;
@@ -708,6 +750,8 @@ export class Post {
     this.scene.dispose();
     this.mips.forEach((m) => m.dispose());
     this.depthRT.dispose();
+    this.copyRT.dispose();
+    this.copyMat.dispose();
     this.softA.dispose();
     this.softB.dispose();
     this.depthMat.dispose();

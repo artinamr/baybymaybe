@@ -102,6 +102,54 @@ function edgeGeometry(w: number, h: number, r: number, band = 0.05) {
 }
 
 /**
+ * A card that can burn away (the turn): fragments whose noise falls under
+ * the burn's level are gone; a hot edge runs just ahead of it. The noise is
+ * of the card's own face (x, y), so its face and its body burn as one.
+ */
+function burnable(m: THREE.Material, u: { value: number }) {
+  const prev = m.onBeforeCompile;
+  m.onBeforeCompile = (sh, r) => {
+    prev.call(m, sh, r);
+    sh.uniforms.uBurn = u;
+    sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vBurnP;").replace("#include <begin_vertex>", "#include <begin_vertex>\nvBurnP = position.xy;");
+    sh.fragmentShader = sh.fragmentShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+varying vec2 vBurnP;
+uniform float uBurn;
+float bHash(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+float bNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(bHash(i), bHash(i + vec2(1.0, 0.0)), f.x), mix(bHash(i + vec2(0.0, 1.0)), bHash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+float burnN() {
+  // From the edges in: the card's own outline wins over the noise near its rim.
+  float n = bNoise(vBurnP * 7.0) * 0.6 + bNoise(vBurnP * 23.0) * 0.4;
+  float rim = max(abs(vBurnP.x) * 1.2, abs(vBurnP.y) * 1.9);
+  return n * 0.55 + (1.0 - rim) * 0.45;
+}`
+      )
+      .replace(
+        "#include <opaque_fragment>",
+        `if (uBurn > 0.0) {
+  float bn = burnN();
+  if (bn < uBurn) discard;
+}
+#include <opaque_fragment>
+if (uBurn > 0.0) {
+  float edge = 1.0 - smoothstep(0.0, 0.07, burnN() - uBurn);
+  gl_FragColor.rgb += vec3(1.0, 0.68, 0.36) * edge * 4.0;
+}`
+      );
+  };
+  const key = m.customProgramCacheKey;
+  m.customProgramCacheKey = () => `${key.call(m)}-burn`;
+}
+
+/**
  * The screens' light against the film's exposure: a screen is drawn at the
  * same brightness whatever the exposure (the world sets k = 1 / exposure),
  * so white stays paper-white and never blooms.
@@ -150,6 +198,8 @@ export class Card {
       this.edge.layers.set(1);
       this.group.add(this.edge);
     }
+    burnable(this.faceMat, this.burnU);
+    burnable(this.bodyMat, this.burnU);
     this.face = new THREE.Mesh(fg, this.holoMat ?? this.faceMat);
     this.face.position.z = thick / 2 + 0.002;
     const bg = faceGeometry(w - inset * 2, h - inset * 2, Math.max(0.005, radius - inset * 0.7));
@@ -162,6 +212,14 @@ export class Card {
   }
   /** A hologram (dark glass, an edge of light, built top-down), or a card of paper. */
   readonly holo: boolean;
+  private burnU = { value: 0 };
+  /** 0 whole … 1 burnt away (the turn). */
+  set burn(v: number) {
+    this.burnU.value = v;
+  }
+  get burn() {
+    return this.burnU.value;
+  }
   private holoMat: THREE.ShaderMaterial | null = null;
   private edge: THREE.Mesh | null = null;
   private edgeMat: THREE.MeshBasicMaterial | null = null;

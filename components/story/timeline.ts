@@ -75,7 +75,7 @@ export const FACT_DELAY = 0.42;
  */
 export const RESTS: number[] = [
   0, 0.62, 1.66, 2.3, 2.9, 3.5, 4.3, 4.74, 5.42, 5.98, 6.5, 7.1, 7.58, 8.3, 8.9, 9.5, 10.3, 11.0, 11.6, 12.56, 13.3, 14.4, 15.4, 16.9, 17.7, 18.4, 19.0, 19.4,
-  20.5, 21.1, 22.3, 23.1, 24.3, 25.3, 26.3, 27.0, 27.7, FILM_LEN,
+  20.5, 21.18, 22.3, 23.1, 24.3, 25.3, 26.3, 27.0, 27.7, FILM_LEN,
 ];
 
 /** How long autoplay holds on a rest (seconds): time to read what is on screen. */
@@ -92,7 +92,7 @@ export function dwellAt(P: number): number {
 export function paceAt(P: number): number {
   return P > 5.0 && P < 5.7 ? 6.2
     : P > 5.7 && P < 7.0 ? 7.0
-    : P > 16.2 && P < 16.8 ? 11.0
+    : P > 16.36 && P < 16.94 ? 11.0
     : P > 15.0 && P < 17.4 ? 7.4
     : P > 9.0 && P < 9.6 ? 6.4
     : P > 11.0 && P < 12.0 ? 6.4

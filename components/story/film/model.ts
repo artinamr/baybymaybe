@@ -351,3 +351,34 @@ export const ROOF: [number, number, number] = [0.17, 0.18, 0.2];
 export const LEAF: [number, number, number] = [0.33, 0.46, 0.3];
 
 export { mergeGeometries };
+
+/**
+ * The trim along a gable roof's two eaves (the roof as gableRoof makes it:
+ * span along X, length along Z, eaves at y = 0): a white fascia board under
+ * each eave's edge and a gutter along its foot.
+ */
+export function gableTrim(span: number, len: number, pitch: number, over = 0.35): THREE.BufferGeometry {
+  const half = span / 2 + over;
+  const drop = over * Math.tan(pitch);
+  const L = len + over * 2;
+  const parts: THREE.BufferGeometry[] = [];
+  for (const s of [-1, 1]) {
+    parts.push(block(0.035, 0.2, L, 0.006).clone().translate(s * (half + 0.01), -drop - 0.06, 0));
+    parts.push(block(0.12, 0.1, L, 0.02).clone().translate(s * (half + 0.08), -drop - 0.13, 0));
+  }
+  return mergeGeometries(parts)!;
+}
+
+/** The trim round a hip roof's eaves (w by d, overhang `over`, fascia `t`): fascia boards and gutters all round. */
+export function hipTrim(w: number, d: number, over = 0.35, t = 0.16): THREE.BufferGeometry {
+  const W = w / 2 + over;
+  const D = d / 2 + over;
+  const parts: THREE.BufferGeometry[] = [];
+  for (const s of [-1, 1]) {
+    parts.push(block(W * 2 + 0.06, t + 0.04, 0.035, 0.006).clone().translate(0, t / 2 - 0.02, s * (D + 0.012)));
+    parts.push(block(W * 2 + 0.2, 0.1, 0.12, 0.02).clone().translate(0, -0.06, s * (D + 0.08)));
+    parts.push(block(0.035, t + 0.04, D * 2 + 0.06, 0.006).clone().translate(s * (W + 0.012), t / 2 - 0.02, 0));
+    parts.push(block(0.12, 0.1, D * 2 + 0.2, 0.02).clone().translate(s * (W + 0.08), -0.06, 0));
+  }
+  return mergeGeometries(parts)!;
+}

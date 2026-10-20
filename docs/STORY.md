@@ -42,13 +42,13 @@ beat, and the clock).
 | admin | 7.8–10.6 | At the desk: the spreadsheet, the quote (typed at night), the invoice. Each is a card lifted off the laptop, each holds the same details typed again. Other jobs go cold: a quote never sent, a mistyped email. Sam says yes; the invoice is stamped paid. |
 | followup | 10.6–12.8 | Across the town to Sam's new deck as its last boards drop in. A year passes in seconds; the deck greys. Sam searches for someone to oil it, taps the first result, and another company's van pulls up. |
 | you | 12.8–15.0 | 11:47pm. You at the desk under a lamp, typing, crowded by the jobs still waiting. Out over the sleeping town: one lit window and the pile beside it. |
-| turn | 15.0–18.0 | Hands off the keyboard. Silence. The cards fall like paper into the dark. The clock runs back to 7:38pm, the town lights up, and a line of indigo light draws itself over it with six parts locking on: website, instant reply, booking, quote, invoice, follow-up. |
-| new-website | 18.0–19.8 | Sam again, the same evening. The page is there at once, one clear button. Almost every phone over the town stays lit. Three questions and a photo, sent. |
-| new-ai | 19.8–21.8 | The enquiry runs along the line to the instant reply and an answer comes straight back: times for a free measure-up. Sam picks one and it lands in your calendar. 3am: another enquiry answered; one question the assistant can't answer is handed to you for the morning. |
-| new-platform | 21.8–23.8 | The quote fills itself in from the enquiry; you add the price. It flies to Sam, who accepts. The deck goes in board by board. The invoice comes from the quote and Sam pays it online. |
-| new-followup | 23.8–25.8 | How did we do: five stars. A year passes. A reminder: time to oil the deck. Sam books, and your van pulls up. |
-| new-you | 25.8–28.0 | Six o'clock. A card shows the day: nothing waiting on you. You close the laptop, switch off the lamp and drive home while a new enquiry gets its answer. |
-| end | 28.0–29.6 | Up over the town at dusk; the light fills it; paper. "Find your leaks." and the free audit. |
+| turn | 15.0–18.0 | Hands off the keyboard. Silence. The jobs round the desk burn to light from their edges; the sparks run together over the keys into a drop of liquid glass. It rises out through the window and up over the town while the night runs back to 7:37pm, then dives across the roofs into Sam's garden. |
+| new-website | 18.0–19.8 | Sam again, the same evening. The drop goes to Sam's phone and opens into the page, there at once, one clear button. Almost every phone over the town stays lit. Three answers, each an amber point in the glass; sent. |
+| new-ai | 19.8–21.8 | The drop turns into the reply: times for a free measure-up. Sam picks Wednesday; the drop crosses the town and opens into your calendar. 3am: a window lights up; the drop answers Aroha; her consent question waits over your desk for the morning. |
+| new-platform | 21.8–23.8 | Morning: the question waiting. After the measure-up the drop opens into the quote and Sam's three amber points flow into its lines; you add the price. It crosses to Sam, who accepts. The deck goes in board by board; the drop becomes the invoice and Sam pays. |
+| new-followup | 23.8–25.8 | How did we do: five stars. A year passes with the drop resting as dew on the deck's edge. It wakes into the reminder; Sam books, and your van pulls up. |
+| new-you | 25.8–28.0 | The drop flies home with the late sun. Six o'clock: it shows the day, nothing waiting on you. You close the laptop; it settles beside it. As you drive home it goes out to answer a new enquiry. |
+| end | 28.0–29.6 | Up over the town in the evening light; the drop rises to the lens until its light is the picture; paper. "Find your leaks." and the free audit. |
 
 The new chapters answer the old ones in the same places (the same sofa,
 the same desk, the same deck, the same kerb). The turn is a decision, and
@@ -91,21 +91,41 @@ only sources a chapter cites.
 | The deck greying through a year | Time passing with no contact. |
 | Another company's van | The repeat job that went elsewhere. |
 | Cards crowding the desk at 11:47pm | The work still waiting on one person. |
-| Cards falling like paper; the clock running back | Letting go of the old way; the same evening again. |
-| One line of indigo light with six parts on it | The new route: website, instant reply, booking, quote, invoice, follow-up. |
-| A pulse running along the line | The customer moving through it without anyone copying anything. |
-| A card under a part of the line | That part working (the calendar, the handover, the quote). |
+| The cards burning to light and running together into one drop | The old way's paperwork becoming the new way: one system that does the work. |
+| The clock running back while the drop climbs | The same evening again. |
+| A drop of liquid glass with light inside | The new way: website, assistant, booking, quote, invoice, follow-up, as one thing. |
+| The drop opening into a screen | That part working: the page, the reply, the calendar, the quote, the invoice, the review, the reminder, the day. |
+| Three amber points inside the drop | Sam's details, typed once and carried everywhere; they flow into the quote's lines. |
+| A window lighting up across the dark town | Another customer asking, answered at any hour. |
+| The drop as a drop of dew through a year | Ready and waiting until it is time to get in touch again. |
 | The lamp switched off at six | The evening given back. |
 | Warm paper white | Back to the website and the free audit offer. |
 
 ## The look
 
-An architect's model at full size: warm white walls, charcoal roofs, muted
-green trees and lawns, grey roads; light is the only other colour (windows,
-lamps, screens, the customer's amber and the new route's indigo). A sky that
-follows the film's clock (`sky.ts`: dusk, night under a moon, morning, day,
-golden hour), soft shadows from the sun or moon focused on what the camera
-sees, baked occlusion, streetlight pools baked into the ground, bloom on the
+A real New Zealand suburb at the head of a bay (round 26, after "the
+background and the houses are still terrible"): its northern street is the
+beach road (a verge under pohutukawa, a low sea wall, sand, the harbour, a
+volcanic island under dark bush, the far shore); paddocks with shelter belts
+rising to hills on the other three sides (`land.ts`). Houses in their own
+colours (warm whites, creams, greys, sage, a few dark modern ones), steel
+roofs in Colorsteel greys and charcoals with a few red and green, white
+fascia and gutters, weatherboards drawn in the shader (`mats.ts`
+`houseMat`). Every window is glass with a room behind it (`glass.ts`:
+interior mapping, a lamp, furniture, curtains; the sky reflected). Trees are
+leaf cards lit as crowns, with wind and light through them (`trees.ts`);
+hedges too. Lawns are mown, the tar grained, the footpaths jointed, the
+kerbs real.
+
+The sky follows the film's clock (`sky.ts`, `atmos.ts`: golden hour,
+sunset with the Belt of Venus opposite, the blue hour, night under a moon
+with the town's glow on the horizon, morning, day, broken cloud lit by the
+sun's side). The sky is the world's light: captured into a cube as it
+changes and convolved (`scene.environment`). The haze lies low and thins
+with height and takes the horizon's colour in the direction looked, so the
+hills stand in layers and the sea's horizon dissolves; a morning mist on the
+lawns. Soft shadows from the sun or moon focused on what the camera sees,
+baked occlusion, streetlight pools baked into the ground, bloom on the
 lights only. Screens are drawn at the same brightness whatever the
 exposure (`uiScale`), so white stays white and text stays crisp. By day the
 fill is low and the sun warm, so form reads by light and colour (a white
@@ -140,16 +160,15 @@ burning their own faces out.
   with long shadows across the town and runs, continuously, into the blue
   hour as the camera finds Sam's house; the windows come on one by one.
   By the time Sam is on the sofa it is 7:22pm, and the enquiry goes at 7:40.
-- **The rewind.** After the black, the camera hangs high over the town and
-  the whole old half runs backward (`world.ts`: world time `Pw` sweeps from
+- **The rewind.** The camera follows the new drop out of the office and up
+  over the town while the whole old half runs backward (`world.ts`: world time `Pw` sweeps from
   the desk at 11:48pm back to the evening the enquiry was sent, over 0.4
   screens, eased) while the hours spin back through two days (the sun
   wheels backward, the windows blink through two nights, the inbox tower
   unbuilds, the vans reverse, the deck unweathers, the enquiry flies home).
   The lens strains (fringe and grain up), the clock on screen runs
   backward, a tone winds down under the riser. It lands on 7:37pm the first
-  evening and the new route draws itself. The camera's cut from the desk to
-  the sky happens inside the black.
+  evening, the drop hanging over the town at dusk.
 - **A year as a time-lapse** (both halves, `script.ts` `lapseHours`): three
   days with their nights shortened (seven tenths of each turn is daylight),
   so the sun sweeps and the shadows wheel; the town's foliage turns amber,
@@ -185,43 +204,43 @@ burning their own faces out.
   the floor and on landing after the rewind. The new deck's build is a slow
   arc round it as the pieces drop in; Sam starts when the reply lands.
 
-## The new way: a system of light (round 25)
+## The new way: the drop (round 26)
 
-The half after the turn was rebuilt as sci-fi, not as the same town with a
-line on it. Everything about it is in `system.ts`:
+Round 25's loop of light with stations on it was rejected ("the wire in the
+air ... and just added ring to it"). The new way is now one thing: a drop of
+liquid glass with light inside it. It is born at the turn from the owner's
+paperwork, and from then on it carries the job: it becomes each piece of
+software the job needs and travels between them.
 
-- **The loop.** One clean arc (`arcAt`) from Sam's roof over the town to the
-  workshop, bowing south and rising to twenty metres, and a lower return arc
-  bowing north: a closed curve. Five stations stand on the outbound arc
-  (website at Sam's end, reply, booking, quote, invoice at the workshop);
-  the follow-up on the return.
-- **A station** is a ring of light on a hairline beam from the ground (a
-  cylinder with a vertex-colour gradient, additive), a scanner segment that
-  runs round the ring (faster while the station works), a ping ring that
-  spreads as it starts, and a tag of dark glass under it (`nodeLabel` dark).
-  Its work card hangs under the tag (`CARD_DROP`), a hologram.
-- **The scan.** At 16.76 the ground shader draws a ring of indigo sweeping
-  out from the workshop (`uScan` in `groundMat`, with a faint wake); each
-  station rises when the ring reaches it (`rise`: beam, then ring, then
-  tag), so the system reaches out from the business; then the line draws
-  itself from the customer's house round the loop (`draw`).
-- **The comet.** The customer on the loop is a bright head with a long tail
-  the way it came (`uPulse`: u, on, direction, warmth: amber for the
-  customer's own messages, indigo for the business's). Two more pulses
-  (`uPulseB/C`) run the loop on their own after six o'clock.
-- **Holograms** (`cards.ts`, `holo`): dark glass (opacity 0.8, roughness
-  0.18), a band of light round the face (`edgeGeometry`), and the screen
-  built top-down behind a line of light (`HOLO_FRAG`, `card.build`). The
-  screens are drawn in a dark palette by swapping `C` for the call
-  (`ui.ts` `holo()`; the four screens paint their background from
-  `C.surface`).
-- **Light, not paper.** In the new way the envelope is a spark (`Envelope`
-  `spark`: no face, a wider core, a longer trail). "Typed once, used
-  everywhere" is shown: Sam's three answers fly as three bars of light
-  (`Fields`) from the website station along the loop and drop into the
-  quote's lines as it builds.
-- The camera holds at stations are relative to them (`station(i, dx, dy,
-  dz)` in camera.ts): move a station and the shot follows.
+- **The drop** (`drop.ts`): one finely divided sphere whose vertices are
+  placed by a shape blended in the vertex shader, a drop (stretched along its
+  way when it moves fast, trembling after a stop) or a panel (a slab with
+  round edges and soft corners). It is drawn after the scene over a copy of
+  it (`post.ts` overlay), so it bends what is behind it (most at the rim,
+  the colours split there), reflects the sky (`atmos.ts`), and holds its
+  light: an indigo heart, white at the middle, measured along each view ray;
+  the rim lit from inside. As a panel its face shows a screen (`ui.ts`).
+  It has its own soft light in the world and its own depth for the depth of
+  field.
+- **Its journey** (`journey.ts`): where it is at every P (keys joined by a
+  shape-preserving Hermite curve, like the camera's), what it is
+  (`PANELS`: when it opens into which screen, its size, which way it faces),
+  its size and light (resting small on the desk, a drop of dew through the
+  year, growing to fill the lens at the end), and Sam's three amber points
+  (from the form until they flow into the quote's lines).
+- **The turn** (`gather.ts`, `cards.ts` `burn`): the jobs' cards hold
+  still, then burn away from their edges with a hot rim; what they were made
+  of goes off them as sparks that curl round the owner and run together over
+  the keys, where the drop forms. The inbox pile outside goes with them.
+- **The camera** rides with it (`camera.ts` `dr`, `chase`, `ahead`): out
+  through the office glass and up over the town during the rewind, the dive
+  along the main street to Sam's garden, after it across the town with the
+  booking, to Aroha's window at 3am, with the quote to Sam, home in the late
+  sun; and a macro on the dew. While it chases, the camera smooths over a
+  narrower window (`CHASES`): the drop's own path is smooth, and a wide
+  window averaged the camera across a flight shorter than itself and lost it.
+- **Who calls it**: at 3am and at six, a house's window lights up across the
+  town (`world.ts` `callers`, the nearest real houses) before the drop goes.
 
 ## Reading and control
 
@@ -259,13 +278,14 @@ than not the old way, answered the new way).
 
 `world.ts` plays the script: the sky, the two places, the people, the
 screens, the cards, the envelopes, the inbox pile, the town's phones, the
-new route, the camera and the grade. `town.ts` (the suburb, chunked for
+drop, the camera and the grade. `town.ts` (the suburb, chunked for
 culling), `places.ts` (the customer's house, the workshop), `figure.ts` (the
 blank figure: forward kinematics for the body, two-bone IK for the limbs),
 `people.ts` (poses as data, blended: sitting with a phone, typing, standing,
 walking with planted feet), `ui.ts` (every screen), `cards.ts` (screens,
-cards, the inbox strips), `mail.ts` (envelopes), `crowd.ts` (the town's
-phones), `system.ts` (the new route), `camera.ts` (the shot list: Hermite
+cards, the inbox strips), `mail.ts` (envelopes), `crowd.ts` (the town's phones), `drop.ts` and `journey.ts` (the new way), `gather.ts` (the turn's sparks),
+`land.ts` (the land, the bay, the sea), `atmos.ts` (the sky's colours, read everywhere), `glass.ts` (the
+windows' rooms), `trees.ts` (leaf trees and hedges), `camera.ts` (the shot list: Hermite
 keys, holds at every rest, Gaussian smoothing), `script.ts` (beats and the
 clock), `sky.ts`, `mats.ts`, `model.ts`, `post.ts`, `audio.ts`, `dom.ts`.
 
