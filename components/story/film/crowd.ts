@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { halo } from "./mail";
 import { faceGeometry } from "./cards";
 import type { House } from "./town";
 
@@ -94,7 +95,7 @@ export class Crowd {
       const rank = order.indexOf(i);
       return { house, drop: rank < 53 ? when.get(i)! * 0.96 : -1, seed: rnd(), stay: rank >= 53, nDrop: rank < 6 ? rank / 6 : -1 };
     });
-    const g = faceGeometry(1.5, 3.0, 0.24);
+    const g = faceGeometry(1.2, 2.4, 0.2);
     this.state = new THREE.InstancedBufferAttribute(new Float32Array(n * 4), 4);
     g.setAttribute("aState", this.state);
     const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, uniforms: this.u, side: THREE.DoubleSide, toneMapped: false });
@@ -102,7 +103,16 @@ export class Crowd {
     this.mesh.frustumCulled = false;
     this.mesh.visible = false;
     scene.add(this.mesh);
+    // A soft light round each screen (its glow into the night), by instance colour.
+    const hm = new THREE.MeshBasicMaterial({ map: halo(), color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false });
+    this.glow = new THREE.InstancedMesh(new THREE.PlaneGeometry(4.6, 4.6), hm, n);
+    this.glow.frustumCulled = false;
+    this.glow.visible = false;
+    this.glow.layers.set(1);
+    this.glow.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(n * 3), 3);
+    scene.add(this.glow);
   }
+  private glow: THREE.InstancedMesh;
 
   /** The house whose customer has given up by now (its window goes dark): by house id. */
   private byHouse = new Map<number, Phone>();
@@ -120,7 +130,9 @@ export class Crowd {
    */
   update(show: number, t: number, dropK: number, fresh: boolean, time: number, camera: THREE.Camera, glow = 1) {
     this.mesh.visible = show > 0.01;
+    this.glow.visible = this.mesh.visible;
     if (!this.mesh.visible) return 0;
+    const gc = new THREE.Color();
     this.u.uTime.value = time;
     this.u.uGlow.value = glow;
     let lost = 0;
@@ -144,7 +156,15 @@ export class Crowd {
       const s = grow * (1 - leave * 0.35);
       this.m.compose(new THREE.Vector3(p.x, p.y + 1.2 + bob - leave * 3.2 + (1 - show) * 1.5, p.z), this.q, new THREE.Vector3(s, s, s));
       this.mesh.setMatrixAt(i, this.m);
+      // Its light: warm for a page that loaded, cool while it loads, out as it gives up.
+      this.m.compose(new THREE.Vector3(p.x, p.y + 1.2 + bob - leave * 3.2 + (1 - show) * 1.5, p.z), camera.quaternion, new THREE.Vector3(s, s, s));
+      this.glow.setMatrixAt(i, this.m);
+      const warm = fresh || loaded > 0.5;
+      gc.setRGB(warm ? 1.0 : 0.6, warm ? 0.8 : 0.66, warm ? 0.55 : 1.0).multiplyScalar(0.22 * on * show * (0.5 + 0.5 * loaded));
+      this.glow.setColorAt(i, gc);
     });
+    this.glow.instanceMatrix.needsUpdate = true;
+    this.glow.instanceColor!.needsUpdate = true;
     void up;
     this.mesh.instanceMatrix.needsUpdate = true;
     this.state.needsUpdate = true;

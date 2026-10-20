@@ -193,6 +193,8 @@ export class System {
   private u: Record<string, THREE.IUniform>;
   private rings: THREE.Mesh[] = [];
   private pings: THREE.Mesh[] = [];
+  private sweeps: THREE.Mesh[] = [];
+  private sweepMat: THREE.MeshBasicMaterial[] = [];
   private beams: THREE.Mesh[] = [];
   private ringMat: THREE.MeshBasicMaterial[] = [];
   private pingMat: THREE.MeshBasicMaterial[] = [];
@@ -242,6 +244,7 @@ export class System {
     this.group.add(this.line);
     const ringGeo = new THREE.TorusGeometry(1.5, 0.045, 10, 96);
     const pingGeo = new THREE.TorusGeometry(1.5, 0.03, 8, 96);
+    const sweepGeo = new THREE.TorusGeometry(1.5, 0.07, 8, 32, Math.PI * 0.3);
     const beamGeo = beamGeometry();
     NODES.forEach((n) => {
       // The ring, and the ping that spreads from it.
@@ -255,6 +258,14 @@ export class System {
       ping.rotation.x = Math.PI / 2;
       ping.position.copy(n.pos);
       ping.layers.set(1);
+      // A brighter segment that runs round the ring (the station's own scanner).
+      const sm = light(0xc9bfff);
+      const sweep = new THREE.Mesh(sweepGeo, sm);
+      sweep.rotation.x = Math.PI / 2;
+      sweep.position.copy(n.pos);
+      sweep.layers.set(1);
+      this.sweeps.push(sweep);
+      this.sweepMat.push(sm);
       // The beam from the ground.
       const bm = light(0xffffff, true);
       const beam = new THREE.Mesh(beamGeo, bm);
@@ -278,7 +289,7 @@ export class System {
       this.cards.push(card);
       this.flash.push(fl);
       this.flashMat.push(fm);
-      this.group.add(ring, ping, beam, card.group, fl);
+      this.group.add(ring, ping, sweep, beam, card.group, fl);
     });
     this.group.visible = false;
     scene.add(this.group);
@@ -338,6 +349,12 @@ export class System {
       ring.scale.setScalar(Math.max(0.001, ringK));
       ring.visible = ringK > 0.001;
       this.ringMat[i].color.setRGB(0.5, 0.42, 1.0).multiplyScalar((1.2 + 2.0 * on) * show);
+      // The scanner: a bright segment running round the ring, faster while it works.
+      const sw = this.sweeps[i];
+      sw.visible = ringK > 0.5;
+      sw.scale.setScalar(Math.max(0.001, ringK));
+      sw.rotation.z = (reduced ? 0 : time) * (0.7 + 1.6 * on) + i * 1.3;
+      this.sweepMat[i].color.setRGB(0.8, 0.74, 1.0).multiplyScalar((0.8 + 1.6 * on) * show);
       // The ping: a second ring spreading out and fading as the station starts.
       const p = this.pings[i];
       p.visible = pg > 0.001;

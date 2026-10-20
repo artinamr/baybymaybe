@@ -185,6 +185,44 @@ burning their own faces out.
   the floor and on landing after the rewind. The new deck's build is a slow
   arc round it as the pieces drop in; Sam starts when the reply lands.
 
+## The new way: a system of light (round 25)
+
+The half after the turn was rebuilt as sci-fi, not as the same town with a
+line on it. Everything about it is in `system.ts`:
+
+- **The loop.** One clean arc (`arcAt`) from Sam's roof over the town to the
+  workshop, bowing south and rising to twenty metres, and a lower return arc
+  bowing north: a closed curve. Five stations stand on the outbound arc
+  (website at Sam's end, reply, booking, quote, invoice at the workshop);
+  the follow-up on the return.
+- **A station** is a ring of light on a hairline beam from the ground (a
+  cylinder with a vertex-colour gradient, additive), a scanner segment that
+  runs round the ring (faster while the station works), a ping ring that
+  spreads as it starts, and a tag of dark glass under it (`nodeLabel` dark).
+  Its work card hangs under the tag (`CARD_DROP`), a hologram.
+- **The scan.** At 16.76 the ground shader draws a ring of indigo sweeping
+  out from the workshop (`uScan` in `groundMat`, with a faint wake); each
+  station rises when the ring reaches it (`rise`: beam, then ring, then
+  tag), so the system reaches out from the business; then the line draws
+  itself from the customer's house round the loop (`draw`).
+- **The comet.** The customer on the loop is a bright head with a long tail
+  the way it came (`uPulse`: u, on, direction, warmth: amber for the
+  customer's own messages, indigo for the business's). Two more pulses
+  (`uPulseB/C`) run the loop on their own after six o'clock.
+- **Holograms** (`cards.ts`, `holo`): dark glass (opacity 0.8, roughness
+  0.18), a band of light round the face (`edgeGeometry`), and the screen
+  built top-down behind a line of light (`HOLO_FRAG`, `card.build`). The
+  screens are drawn in a dark palette by swapping `C` for the call
+  (`ui.ts` `holo()`; the four screens paint their background from
+  `C.surface`).
+- **Light, not paper.** In the new way the envelope is a spark (`Envelope`
+  `spark`: no face, a wider core, a longer trail). "Typed once, used
+  everywhere" is shown: Sam's three answers fly as three bars of light
+  (`Fields`) from the website station along the loop and drop into the
+  quote's lines as it builds.
+- The camera holds at stations are relative to them (`station(i, dx, dy,
+  dz)` in camera.ts): move a station and the shot follows.
+
 ## Reading and control
 
 **You steer, it keeps its pace** (`clock.ts`, `timeline.ts` `capAt`): the

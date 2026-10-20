@@ -578,6 +578,16 @@ not longer, but the bar really raised").**
   round the deck build. Judged from recordings at the scroll ceiling; the
   user asked for building over looking (keep image checks to one per
   feature).
+- **ROUND 25 (2026-10-20, "not super premium … completely rebuild the part
+  after 'take your hands off' … more sci-fi, more crazy … make the few
+  elements perfect")**: the new way rebuilt as a SYSTEM OF LIGHT
+  (docs/STORY.md "The new way: a system of light"): a clean loop of two
+  arcs with stations (ring, beam, scanner, ping, dark-glass tag, hologram
+  card), a scan sweeping the ground from the workshop that raises them, a
+  comet with a tail for the customer, sparks instead of envelopes, Sam's
+  answers flying into the quote. The hologram look (dark glass, edge of
+  light, scan-line build) is the new way's grammar; the old way stays
+  paper. The camera's station holds follow the stations.
 - **Second pass (same day)**: the words come first (cards fade behind the
   words, `keepClear`; the route's parts framed whole on the right; the
   admin, turn and opening words leave before the 3D crosses them); nothing

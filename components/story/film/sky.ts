@@ -76,6 +76,21 @@ uniform float uTime;
 uniform float uSunOn;
 varying vec3 vDir;
 float hash(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float hash2(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash2(i), hash2(i + vec2(1.0, 0.0)), f.x), mix(hash2(i + vec2(0.0, 1.0)), hash2(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+// Thin high cloud: a few octaves of noise on the sky's plane, stretched along the wind.
+float cirrus(vec3 d, float t) {
+  if (d.y < 0.03) return 0.0;
+  vec2 p = d.xz / (d.y + 0.25) * vec2(2.6, 1.1) + vec2(t * 0.004, t * 0.0015);
+  float n = vnoise(p) * 0.5 + vnoise(p * 2.3 + 7.0) * 0.28 + vnoise(p * 5.1 + 3.0) * 0.14 + vnoise(p * 11.0 + 1.0) * 0.08;
+  float c = smoothstep(0.52, 0.8, n);
+  return c * smoothstep(0.03, 0.2, d.y);
+}
 void main() {
   vec3 d = normalize(vDir);
   float up = clamp(d.y, -0.2, 1.0);
@@ -90,6 +105,10 @@ void main() {
   float band = exp(-abs(d.y - max(s.y, -0.05)) * 6.0);
   float g = pow(cs, 6.0) * 0.55 + pow(cs, 48.0) * 0.6;
   col += uGlow * (g + band * pow(cs, 2.0) * 0.35);
+  // Faint high cloud: lit by the glow where the sun is low, a shade of the top elsewhere.
+  float cl = cirrus(d, uTime);
+  vec3 cloudLit = mix(uTop * 1.35 + uHor * 0.25, uGlow * 0.9 + uHor * 0.3, band * 0.8 + pow(cs, 3.0) * 0.5);
+  col = mix(col, cloudLit, cl * 0.42);
   // The sun's disc (when it is up).
   col += uGlow * smoothstep(0.9993, 0.9997, cs) * 14.0 * uSunOn;
   // The moon: a soft disc with its own halo.
