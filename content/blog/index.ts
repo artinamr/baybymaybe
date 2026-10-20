@@ -1065,7 +1065,7 @@ export const ARTICLES: ArticleMeta[] = [
       },
       {
         q: "Someone else controls our Google listing. How do we get it back?",
-        a: "Don’t create a second profile. Go to business.google.com/add, find your business, choose “Request Access” and fill in the form. The current owner has three days to respond; if they don’t, you may be offered the option to claim the profile yourself, though Google says that option isn’t always available.",
+        a: "Don’t create a second profile. Go to business.google.com/add, find your business, choose “Request Access” and fill in the form. The current owner has three days to respond; if they don’t, you may be offered the option to claim the profile yourself, though Google says that option isn’t always available. A service-area business with no shop or office contacts Google support instead.",
       },
       {
         q: "Can we ask customers for Google reviews?",

@@ -65,8 +65,8 @@ export default function Body() {
             t: "If nothing appears, add your business",
             b: (
               <p>
-                Go to business.google.com/add and choose “Add your business to Google”. It asks for the name, the
-                address or service area, the category and contact details.
+                Go to business.google.com/add and choose “Add your business to Google”. Then follow the on-screen steps
+                to add your business’s details.
                 <Cite n={5} />
               </p>
             ),
@@ -269,9 +269,11 @@ export default function Body() {
       <ul>
         <li>
           <strong>Someone else controls the profile:</strong> a former staff member, an old agency or a stranger.
-          Don’t create a second profile. At business.google.com/add, find the business, choose “Request Access” and
-          fill in the form. The current owner has three days to respond; if they don’t, you may be able to claim the
-          profile, though that option isn’t always available.
+          Don’t create a second profile.
+          <Cite n={2} /> At business.google.com/add, find the business, choose “Request Access” and fill in the form.
+          The current owner has three days to respond; if they don’t, you may be able to claim the profile, though that
+          option isn’t always available. A service-area business with no shop or office contacts Google support
+          instead and asks to “Transfer ownership of listing”.
           <Cite n={22} />
         </li>
         <li>
