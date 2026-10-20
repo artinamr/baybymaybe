@@ -571,16 +571,34 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: CHECKED_1012,
       },
       {
+        title: "Request ownership of a Business Profile",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/4566671",
+        accessed: "2026-10-20",
+      },
+      {
         title: "Verify your business on Google",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/7107242",
         accessed: CHECKED_1012,
       },
       {
+        title: "Verify your business with a video recording",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/14271705",
+        accessed: "2026-10-20",
+      },
+      {
         title: "Tips to get more reviews",
         publisher: "Google Business Profile Help",
         url: "https://support.google.com/business/answer/3474122",
         accessed: CHECKED_1012,
+      },
+      {
+        title: "Manage your Business Profile owners & managers",
+        publisher: "Google Business Profile Help",
+        url: "https://support.google.com/business/answer/3403100",
+        accessed: "2026-10-20",
       },
       {
         title: "Protect your business with two-factor authentication (2FA)",
