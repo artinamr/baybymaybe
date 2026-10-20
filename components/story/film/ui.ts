@@ -1202,7 +1202,7 @@ export function officeHand(ctx: Ctx, s: { done: number }) {
   const { W, H } = officeFrame(ctx, "Over to you · from 3:12am", C.amber);
   text(ctx, "Aroha asked:", 64, 196, { size: 40, weight: 600, color: C.mute });
   wrap(ctx, "“Do I need council consent for a deck that’s over a metre off the ground?”", 64, 266, W - 128, 64, { size: 50, weight: 600, color: C.ink }, 3);
-  if (s.done > 0) pill(ctx, 64, H - 150, "Answered 8:06am", C.greenL, C.green, 36, true);
+  if (s.done > 0) pill(ctx, 64, H - 150, "Answered 9:36am", C.greenL, C.green, 36, true);
   else pill(ctx, 64, H - 150, "Waiting for you", C.amberL, C.amber, 36);
 }
 
@@ -1223,7 +1223,7 @@ export function officeQuote(ctx: Ctx, s: { fill: number; price: number; sent: nu
   if (s.price > 0) text(ctx, p + (s.price < 6 && s.sent <= 0 ? "|" : ""), W - 64, 526, { size: 64, weight: 700, color: C.ink, align: "right" });
   else rr(ctx, W - 364, 470, 300, 76, 12, null, C.indigo, 4);
   if (s.ok > 0) pill(ctx, 64, H - 140, "Accepted by Sam", C.greenL, C.green, 36, true);
-  else if (s.sent > 0) pill(ctx, 64, H - 140, "Sent 8:20am", C.indigoL, C.indigo, 36, true);
+  else if (s.sent > 0) pill(ctx, 64, H - 140, "Sent 10:06am", C.indigoL, C.indigo, 36, true);
   else pill(ctx, 64, H - 140, "Filled in from Sam’s enquiry", C.indigoL, C.indigo, 34);
 }
 

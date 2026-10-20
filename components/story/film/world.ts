@@ -560,7 +560,10 @@ export class World {
     this.office(P, t, hours);
     if (nw) {
       this.home.lampLight.intensity *= 1.6;
-      this.home.roomLight.intensity = 0;
+      // By day the living room is full of the day: a warm light off the garden and the sun on the floor;
+      // at night only the lamp.
+      this.home.roomLight.intensity = 2.4 * (1 - this.sky.out.night);
+      this.home.roomLight.color.setRGB(1.0, 0.9, 0.78);
       this.phoneLight.intensity *= 2.2;
       this.shop.screenLight.intensity *= 2.0;
     }
@@ -1245,8 +1248,8 @@ export class World {
     const onDeck = (P >= 10 && P < 12.8) || P >= 21.5;
     const air = nw
       ? onDeck
-        ? { p: H(-1.37, 1.75, -7.37), q: Q(0, 0.6, 0), s: 0.5 }
-        : { p: H(-1.84, 1.38, -0.96), q: Q(-0.02, 0.6, 0), s: 0.5 }
+        ? { p: H(-1.37, 1.72, -7.37), q: Q(0, 0.6, 0), s: 0.42 }
+        : { p: H(-1.84, 1.36, -0.96), q: Q(-0.02, 0.6, 0), s: 0.42 }
       : onDeck
         ? { p: H(-0.2, 1.62, -6.0), q: Q(0, 0.22, 0), s: 1 }
         : { p: H(-3.25, 1.5, -2.5), q: Q(-0.03, 0.12, 0), s: 1 };
@@ -1540,7 +1543,7 @@ export class World {
     // Up off the laptop with a little weight; down into it again as the moment ends.
     const from = { p: this.shop.laptop.hinge.clone().add(V(0, 0.12, 0.02)), q: Q(0, 0.62, 0), s: 0.12 };
     const ot = this.officeTo;
-    const to = ot ? { p: V(ot[0], ot[1], ot[2]), q: Q(0, ot[3], 0), s: ot[4] } : { p: S(-3.95, 1.5 + Math.sin(t * 0.6) * 0.004, 4.0), q: Q(0, 0.5, 0), s: 0.4 };
+    const to = ot ? { p: V(ot[0], ot[1], ot[2]), q: Q(0, ot[3], 0), s: ot[4] } : { p: S(-3.95, 1.46 + Math.sin(t * 0.6) * 0.004, 4.0), q: Q(0, 0.5, 0), s: 0.34 };
     const kk = smoother(range(P, a, a + 0.1)) * (1 - smoother(range(P, b - 0.08, b)));
     carry(card.group, from, to, settle(kk, 0.45), 0.12);
     card.show(Math.min(1, kk * 3), 1.05);

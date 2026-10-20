@@ -95,11 +95,11 @@ export function paceAt(P: number): number {
   return P > 5.0 && P < 5.7 ? 6.2
     : P > 5.7 && P < 7.0 ? 7.0
     : P > 16.36 && P < 16.94 ? 11.0
-    : P > 15.0 && P < 17.4 ? 7.4
+    : P > 15.0 && P < 16.94 ? 7.4
     : P > 9.0 && P < 9.6 ? 6.4
     : P > 11.0 && P < 12.0 ? 6.4
     // Both sides: the picture parts and each half comes down to its place; a pane's new frame; one picture again.
-    : P > 18.9 && P < 19.46 ? 9.0
+    : P > 18.9 && P < 19.46 ? 6.6
     : P > 20.84 && P < 21.04 ? 7.6
     : P > 21.3 && P < 21.72 ? 8.0
     : P > 25.4 && P < 25.72 ? 7.0

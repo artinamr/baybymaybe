@@ -180,14 +180,14 @@ const CLOCK: [number, number][] = [
   [20.86, 19 + 45 / 60],
   [21.02, D + 3 + 11 / 60],
   [21.36, D + 3 + 18 / 60],
-  // ...and on to the morning.
-  [21.52, D + 7 + 50 / 60],
-  [21.82, D + 8.0],
-  [22.38, D + 8 + 20 / 60],
-  [22.6, D + 8 + 34 / 60],
+  // ...and on into the morning (mid-morning: the sun high enough to clear Sam's side fence).
+  [21.52, D + 9 + 20 / 60],
+  [21.82, D + 9.5],
+  [22.38, D + 10 + 6 / 60],
+  [22.6, D + 10 + 18 / 60],
   // The job, a week on: its day, from the morning.
-  [22.6, 8 * D + 8 + 34 / 60],
-  [22.66, 8 * D + 8.6],
+  [22.6, 8 * D + 10 + 18 / 60],
+  [22.66, 8 * D + 10.4],
   [23.1, 8 * D + 16.0],
   [23.6, 8 * D + 16.6],
   // Two days on: how did it go; then a year.
