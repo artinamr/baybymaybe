@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const a = article((await params).slug);
   if (!a) return {};
   return pageMeta({
-    title: a.title,
+    title: a.seoTitle ?? a.title,
     description: a.description,
     path: `blog/${a.slug}/`,
     type: "article",

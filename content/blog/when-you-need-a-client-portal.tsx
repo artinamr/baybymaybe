@@ -182,8 +182,9 @@ export default function Body() {
         </li>
         <li>
           <strong>A plan for when something goes wrong.</strong> If a privacy breach has caused, or might cause, serious
-          harm, the Privacy Act requires the business to notify the Privacy Commissioner, ideally within 72 hours of
-          becoming aware of it, even while still investigating, and to tell the affected people as soon as it can.
+          harm, the Privacy Act requires the business to notify the Privacy Commissioner and to tell the affected people
+          as soon as it can. The Commissioner’s guidance on timing: “Ideally you’ll do that within 72 hours after you’re
+          aware that you have a notifiable breach, even if you’re still investigating it.”
           <Cite n={4} /> Know in advance who would make that call.
         </li>
       </ul>

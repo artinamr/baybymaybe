@@ -42,13 +42,16 @@ export default function Body() {
         />
       </Figure>
       <p>
-        The domain matters most, because everything else hangs from it. For .nz names, the Domain Name Commission is
-        explicit: if you ask someone to register a domain name on your behalf, they must register it in your name, not
-        theirs, and you can check whose name it is in with a WHOIS search on its website. If you want someone else to
-        manage it for you, their details can go in the admin contact instead.
-        <Cite n={1} /> Strictly, you hold a licence to use the name for as long as you keep renewing it, rather than owning
-        it outright. That is why renewals matter.
-        <Cite n={1} />
+        The domain matters most, because everything else hangs from it. For a .nz name, the Domain Name Commission is
+        explicit: make sure your business’s name is listed as the registrant, and if your web developer or provider is
+        listed instead, ask your registrar to have it transferred. A search on the Commission’s website shows who the
+        registrant is.
+        <Cite n={1} /> The .nz Rules back this up: a registrar or reseller must not register a .nz name in its own name
+        unless it means to use the name itself. If you want someone else to manage the name for you, their details can
+        go in the administrative contact instead.
+        <Cite n={2} /> Strictly, you hold a licence from InternetNZ to use the name for as long as it stays registered,
+        rather than owning it outright. That is why renewals matter.
+        <Cite n={2} />
       </p>
 
       <H2 id="handover">The handover checklist</H2>
@@ -98,7 +101,7 @@ export default function Body() {
         Own Your Online, the National Cyber Security Centre’s advice for businesses and individuals, recommends having
         reliable, tested backups, kept offline or disconnected from your computers so an attacker can’t delete them,
         and regularly installing updates so attackers can’t exploit known weaknesses.
-        <Cite n={2} /> For a website that means:
+        <Cite n={3} /> For a website that means:
       </p>
       <ul>
         <li>
@@ -112,7 +115,7 @@ export default function Body() {
         <li>
           <strong>Updates on a rhythm.</strong> Editors, plug-ins and server software publish security fixes regularly.
           The NCSC lists keeping software up to date among its critical controls.
-          <Cite n={3} /> Someone should be responsible for applying them, and for checking the site afterwards.
+          <Cite n={4} /> Someone should be responsible for applying them, and for checking the site afterwards.
         </li>
       </ul>
 
@@ -126,23 +129,23 @@ export default function Body() {
             , especially the <Term id="registrar">registrar</Term>, hosting, email and the
             site’s admin. Own Your Online recommends authenticator apps, tokens or physical keys over codes by text or
             email, which can be intercepted.
-            <Cite n={4} />
+            <Cite n={5} />
           </>,
           <>
             <strong>Least privilege.</strong> The NCSC’s principle: give people the minimum access they need to do
             their job.
-            <Cite n={3} /> Editors don’t need to be administrators.
+            <Cite n={4} /> Editors don’t need to be administrators.
           </>,
           <>
             <strong>A password manager</strong> for the business, so passwords are long, unique and not kept in a
             spreadsheet. It is on the NCSC’s list of critical controls too.
-            <Cite n={3} />
+            <Cite n={4} />
           </>,
           <>
             <strong>Domain renewals that can’t lapse.</strong> If a registration expires, someone else could register
             the name. Own Your Online suggests automatic renewal with a payment method that’s kept current, and
             contact details that are complete and up to date.
-            <Cite n={5} />
+            <Cite n={6} />
           </>,
           <>
             <strong>Removing people promptly.</strong> When someone leaves your business, or a supplier’s work ends,
@@ -183,7 +186,7 @@ export default function Body() {
             t: "Look up the domain",
             b: (
               <p>
-                For a .nz name, a WHOIS search on the Domain Name Commission’s website shows who it is registered to.
+                For a .nz name, a search on the Domain Name Commission’s website shows who the registrant is.
                 <Cite n={1} /> If it isn’t your business, that is the first thing to fix.
               </p>
             ),
@@ -218,10 +221,11 @@ export default function Body() {
         ]}
       />
       <p>
-        If a .nz registration was put in someone else’s name, the change of registrant goes through the registrar,
-        with both the current and the new registrant confirming it. Complaints go to the registrar first, and to the Domain
-        Name Commission if the registrar doesn’t resolve them and a .nz policy may have been breached.
-        <Cite n={1} />
+        If a .nz registration was put in someone else’s name, ask them to transfer it to you. If they agree, their
+        registrar handles the change; if they refuse, the Commission runs a dispute resolution service.
+        <Cite n={7} /> A problem with a provider goes to the provider first. If it hasn’t responded, is taking too long
+        or didn’t resolve the issue, you can complain to the Commission.
+        <Cite n={8} />
       </p>
 
       <H2 id="leaving">Leaving a provider without drama</H2>
@@ -231,11 +235,11 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>Moving a .nz domain to another registrar</strong> needs its <Term id="udai">UDAI</Term>, a code that confirms the request.
-          You get it from your current registrar, who, per the Domain Name Commission’s guide for registrants, must
-          give it to you promptly and at no cost. Moving registrar doesn’t necessarily end other contracts with the
-          old provider, such as hosting.
-          <Cite n={1} />
+          <strong>Moving a .nz domain to another registrar</strong> needs its authorisation code (it used to be called
+          the <Term id="udai">UDAI</Term>), which confirms the request. Your current provider must give it to you on
+          request and free of charge, and must not delay the move by withholding it.
+          <Cite n={9} /> Moving registrar doesn’t necessarily end other contracts with the old provider, such as
+          hosting, so check what else you have with them.
         </li>
         <li>
           <strong>Ask for the code and content</strong> in a standard form (a repository, an export of the content and

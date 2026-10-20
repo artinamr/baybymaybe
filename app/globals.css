@@ -560,6 +560,11 @@ html[data-intro-skip] .intro-mask > span {
   position: relative;
   display: inline-block;
 }
+/* The hero's visible words are drawn from data-t, so the h1 reads to search
+   engines and assistants as its one sentence (the sr-only text), not twice. */
+.hero-h1 [data-t]::before {
+  content: attr(data-t);
+}
 .pot-outline {
   color: transparent;
   -webkit-text-stroke: max(1px, 0.006em) var(--indigo);
@@ -1733,8 +1738,8 @@ html[data-clip] #stage-frame {
 .stone-door {
   display: inline-flex;
   align-items: center;
-  gap: 11px;
-  padding: 6px 18px 6px 6px;
+  gap: 12px;
+  padding: 6px 22px 6px 6px;
   border-radius: 999px;
   white-space: nowrap;
   color: var(--ink);
@@ -1752,7 +1757,7 @@ html[data-clip] #stage-frame {
   top: 12px;
   opacity: 0;
   transform: scale(0.42);
-  transform-origin: 23px 50%;
+  transform-origin: 26px 50%;
   transition:
     opacity 160ms ease-out,
     transform 560ms var(--ease-expo);
@@ -1767,15 +1772,15 @@ html[data-stone-hover]:not([data-scrolled]) .stone-cursor-lens {
   flex: none;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--indigo);
   box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--indigo) 70%, transparent);
 }
 .si-play svg {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   fill: #fff;
   margin-left: 2px;
 }
@@ -1792,13 +1797,13 @@ html[data-stone-hover]:not([data-scrolled]) .stone-cursor-lens {
   text-align: left;
 }
 .si-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.006em;
 }
 .si-meta {
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 1.2;
   color: color-mix(in oklab, var(--ink) 62%, transparent);
 }

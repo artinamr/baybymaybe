@@ -4,6 +4,7 @@ import { Stage, Story } from "@/components/work/Stories";
 import { WorkTitle } from "@/components/work/WorkTitle";
 import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
+import { PageLd } from "@/components/site/JsonLd";
 import { SiteStudy } from "@/components/work/SiteStudy";
 import { Reading, readingFor } from "@/components/work/Reading";
 import { KIND_LABEL, WORK_ITEMS, project } from "@/content/work";
@@ -45,11 +46,13 @@ export default async function CaseStudy({ params }: { params: Promise<{ slug: st
   if (p.kind === "site")
     return (
       <Page here="work" crumbs={crumbs}>
+        <PageLd href={PAGES.project(p.slug)} name={`${p.client}: ${p.title}`} description={p.summary} />
         <SiteStudy p={p} crumbs={crumbs} />
       </Page>
     );
   return (
     <Page here="work" crumbs={crumbs}>
+        <PageLd href={PAGES.project(p.slug)} name={`${p.client}: ${p.title}`} description={p.summary} />
       <section className="sp-hero cs-hero">
         <Crumbs crumbs={crumbs} />
         <p className="cs-label" data-rv>

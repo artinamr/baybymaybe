@@ -3,9 +3,11 @@ import { LegalPage, type LegalSection } from "@/components/site/LegalPage";
 import { CONTACT } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
+const DESCRIPTION = "What personal information the Nerodyn website collects, why, who else sees it, how long it is kept, and how to have it corrected or deleted.";
+
 export const metadata: Metadata = pageMeta({
   title: "Privacy policy",
-  description: "What personal information the Nerodyn website collects, why, who else sees it, how long it is kept, and how to have it corrected or deleted.",
+  description: DESCRIPTION,
   path: "privacy/",
 });
 
@@ -122,6 +124,7 @@ const SECTIONS: LegalSection[] = [
 export default function Privacy() {
   return (
     <LegalPage
+      description={DESCRIPTION}
       here="privacy"
       kicker="Privacy"
       title="Privacy policy"

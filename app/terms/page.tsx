@@ -3,9 +3,11 @@ import { LegalPage, type LegalSection } from "@/components/site/LegalPage";
 import { CONTACT } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
+const DESCRIPTION = "The terms of using the Nerodyn website: its content, the free audit, links to other websites, liability, and the New Zealand law that applies.";
+
 export const metadata: Metadata = pageMeta({
   title: "Terms of use",
-  description: "The terms of using the Nerodyn website: its content, the free audit, links to other websites, liability, and the New Zealand law that applies.",
+  description: DESCRIPTION,
   path: "terms/",
 });
 
@@ -98,6 +100,7 @@ const SECTIONS: LegalSection[] = [
 export default function Terms() {
   return (
     <LegalPage
+      description={DESCRIPTION}
       here="terms"
       kicker="Terms"
       title="Terms of use"

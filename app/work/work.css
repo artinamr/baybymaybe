@@ -731,3 +731,62 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* The work's first screen leads into the work itself: a short hero, so the
+   featured site's cover is already in view at 1440x900. */
+.sp-hero.wk-hero {
+  padding-bottom: calc(var(--vh) * 3);
+}
+
+/* The three concept sites as phones beside the headline (from 1200 px: narrower, they would touch it): the
+   middle one in front, the outer two turned a little; each lifts on hover. */
+.wk-fan {
+  display: none;
+}
+@media (min-width: 1200px) {
+  .sp-hero.wk-hero {
+    position: relative;
+  }
+  .wk-fan {
+    display: block;
+    position: absolute;
+    right: 0;
+    top: calc(var(--vh) * 11);
+    width: min(36vw, 480px);
+    aspect-ratio: 560 / 470;
+  }
+  .wk-fan-p {
+    position: absolute;
+    top: 7%;
+    width: 36%;
+    filter: drop-shadow(0 22px 34px color-mix(in oklab, var(--ink) 22%, transparent));
+    transition: transform 700ms var(--ease-expo);
+  }
+  .wk-fan-p img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .wk-fan-p:nth-child(1) {
+    left: 0;
+    transform: rotate(-7deg);
+  }
+  .wk-fan-p:nth-child(2) {
+    left: 32%;
+    top: 0;
+    z-index: 2;
+  }
+  .wk-fan-p:nth-child(3) {
+    left: 64%;
+    transform: rotate(7deg);
+  }
+  .wk-fan-p:nth-child(1):hover {
+    transform: rotate(-5deg) translateY(-10px);
+  }
+  .wk-fan-p:nth-child(2):hover {
+    transform: translateY(-10px);
+  }
+  .wk-fan-p:nth-child(3):hover {
+    transform: rotate(5deg) translateY(-10px);
+  }
+}

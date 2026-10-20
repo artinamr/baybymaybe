@@ -18,11 +18,24 @@ const CHECKED = "2026-10-05";
 
 /** The pages the definitions rest on. Numbered on the page in the order the terms first cite them. */
 export const GLOSSARY_SOURCES = {
-  dnc: {
-    title: "A ready reference for registrants",
+  dncRules: { title: ".nz Rules", publisher: "Domain Name Commission", url: "https://dnc.org.nz/about/compliance-and-enforcement/nz-rules/nz-rules/", accessed: "2026-10-20" },
+  dncManage: {
+    title: "Manage my domain name?",
     publisher: "Domain Name Commission",
-    url: "https://dnc.org.nz/assets/DocumentLibrary/a_ready_reference_for_registrants.pdf",
-    accessed: CHECKED,
+    url: "https://dnc.org.nz/tools-and-services/how-do-i-2/manage-my-domain-name/",
+    accessed: "2026-10-20",
+  },
+  dncTransfer: {
+    title: "Transfer my domain?",
+    publisher: "Domain Name Commission",
+    url: "https://dnc.org.nz/tools-and-services/how-do-i-2/transfer-my-domain-name/",
+    accessed: "2026-10-20",
+  },
+  dncCode: {
+    title: "Get an authentication code (UDAI)?",
+    publisher: "Domain Name Commission",
+    url: "https://dnc.org.nz/tools-and-services/how-do-i-2/get-a-udai/",
+    accessed: "2026-10-20",
   },
   ransom: {
     title: "Protect your business against ransomware",
@@ -56,7 +69,7 @@ export const GLOSSARY_SOURCES = {
     accessed: CHECKED,
   },
   moves: {
-    title: "Site moves with URL changes",
+    title: "How to move a site",
     publisher: "Google Search Central",
     url: "https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes",
     accessed: CHECKED,
@@ -156,25 +169,25 @@ export const GLOSSARY = [
     id: "domain-name",
     term: "Domain name",
     group: "site",
-    def: "Your website’s address, such as yourbusiness.co.nz. You register it through a registrar and renew it every year or few years. If someone registers a .nz name for you, they must register it in your name, not theirs.",
-    cite: ["dnc"],
+    def: "Your website’s address, such as yourbusiness.co.nz. You register it through a registrar and renew it every year or few years. For a .nz name, your business should be listed as the registrant, and a registrar or reseller must not register a name in its own name unless it means to use it itself.",
+    cite: ["dncManage", "dncRules"],
     see: { slug: "after-launch-ownership", id: "owning" },
   },
   {
     id: "registrar",
     term: "Registrar",
     group: "site",
-    def: "The company you register and renew a domain name through. For .nz names, registrars must meet criteria set by the Domain Name Commission, which monitors them, and you can move to another registrar at any time except in the first five days after registering.",
-    cite: ["dnc"],
+    def: "The company you register and renew a domain name through. For .nz names, the Domain Name Commission recommends its authorised registrars, which it deals with directly, and no provider may stop you moving to another by withholding the code you need.",
+    cite: ["dncTransfer"],
     see: { slug: "after-launch-ownership", id: "leaving" },
   },
   {
     id: "udai",
-    term: "UDAI",
-    also: "Unique Domain Authentication ID",
+    term: "Authorisation code",
+    also: "UDAI",
     group: "site",
-    def: "The code that confirms a request to move a .nz domain to another registrar. Your registrar must give it to you promptly and at no cost, and it is valid for 30 days.",
-    cite: ["dnc"],
+    def: "The code that confirms a request to move a .nz domain to another provider; it used to be called the UDAI. Your provider must give it to you on request and free of charge. It can be used only once and expires after 30 days.",
+    cite: ["dncTransfer", "dncCode"],
     see: { slug: "after-launch-ownership", id: "leaving" },
   },
   {
@@ -421,7 +434,7 @@ export const GLOSSARY = [
     term: "Chat assistant",
     also: "Website chatbot",
     group: "ai",
-    def: "Software on a website that answers visitors’ questions in conversation. The kind built on generative AI drafts its own answers, so the Privacy Commissioner’s guidance applies: it should answer from approved material, say what it is, and hand over to a person rather than improvise.",
+    def: "Software on a website that answers visitors’ questions in conversation. The kind built on generative AI writes its own answers, so it can be wrong with confidence: keep it to approved material, say that it’s an assistant, and offer a person.",
     cite: ["genai"],
     see: { slug: "website-chat-assistant", id: "harm" },
   },

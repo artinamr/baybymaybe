@@ -156,7 +156,7 @@ export default function Body() {
           principle 3 expects people to be made aware, when you collect their information, of the fact it is being
           collected, why, who will receive it, and their rights to access and correct it.
           <Cite n={1} /> Put a clear privacy notice next to the form and link to the full details. Check that it explains
-          who collects and holds the information, whether providing it is required, and what happens if it is not provided.
+          who collects and holds the information, and what it will be used for.
         </li>
         <li>
           <strong>Marketing needs consent.</strong> The Department of Internal Affairs sums up the{" "}
@@ -167,8 +167,9 @@ export default function Body() {
           the wording the person agreed to, and connect unsubscribes back to the CRM.
         </li>
         <li>
-          <strong>Keep it safe on every system.</strong> Principle 5 asks for reasonable security safeguards wherever
-          personal information is held, including when a service provider holds it for you.
+          <strong>Keep it safe on every system.</strong> Principle 5 asks for security safeguards that are reasonable in
+          the circumstances against loss and misuse, and, when you give the information to a service provider, for
+          everything reasonably within your power to be done to stop it being used or disclosed without authorisation.
           <Cite n={3} /> Each connected tool is one more place to secure: individual logins, <Term id="two-factor">two-step sign-in</Term>, and access
           only for the people who need it.
         </li>

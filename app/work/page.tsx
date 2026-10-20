@@ -2,15 +2,17 @@ import { Page, Kicker, Title, Closing } from "@/components/site/Page";
 import { WorkIndex } from "@/components/work/WorkIndex";
 import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
-import { KIND_LABEL, WORK_ITEMS } from "@/content/work";
+import { PageLd } from "@/components/site/JsonLd";
+import { HOME_WORK, KIND_LABEL, WORK_ITEMS } from "@/content/work";
 import { service } from "@/content/services";
 import { COVER_PREVIEW } from "@/content/coverPreviews";
 import { coverName, coverSrcSet } from "@/lib/covers";
 
+const DESCRIPTION = "Explore complete concept websites and working studio demonstrations. Try the interactions, read the decisions and see what a live version would need.";
+
 export const metadata = pageMeta({
   title: "Work",
-  description:
-    "Explore complete concept websites and working studio demonstrations. Try the interactions, read the decisions and see what a live version would need.",
+  description: DESCRIPTION,
   path: "work/",
 });
 
@@ -32,7 +34,8 @@ export default function Work() {
   }));
   return (
     <Page here="work" crumbs={[{ name: "Work", href: PAGES.work }]}>
-      <section className="sp-hero">
+      <PageLd type="CollectionPage" href={PAGES.work} name="Work" description={DESCRIPTION} />
+      <section className="sp-hero wk-hero">
         <Kicker>Work</Kicker>
         <Title lines={["Work you can", "put to the test."]} />
         <p className="sp-lede" data-rv>
@@ -40,10 +43,15 @@ export default function Work() {
           we think and what we build. The businesses are fictional, and each study explains what works here and what a
           live version would need.
         </p>
-        <div className="wk-reading" data-rv>
-          <p className="mono">A closer look</p>
-          <p>Start with the live work, then read the brief and the decisions behind it.</p>
-          <a href="#work-index" className="text-link">Explore the projects <span aria-hidden>↓</span></a>
+        {/* The live work in the first screen: the three concept sites as phones,
+            each opening its case study (cut out by tools/qa/phonecut.py). */}
+        <div className="wk-fan" data-rv>
+          {HOME_WORK.map((p) => (
+            <a key={p.slug} className="wk-fan-p" href={PAGES.project(p.slug)} aria-label={`${p.client}: ${p.title}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
+              <img src={p.cover.replace(/.webp$/, "-phone.webp")} alt="" width={520} height={1091} decoding="async" />
+            </a>
+          ))}
         </div>
       </section>
       <WorkIndex items={items} />

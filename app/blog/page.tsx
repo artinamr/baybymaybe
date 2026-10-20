@@ -7,7 +7,8 @@ import { BlogLd } from "@/components/site/JsonLd";
 import { CONTACT, PAGES, ogCard } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 
-import { ALL_SOURCES, BLOG_UPDATED, PUBLISHED, TOPICS, longDate, type ToolKind } from "@/content/blog";
+import { ALL_SOURCES, BLOG_UPDATED, PUBLISHED, TOPICS, longDate, topicLabel, type ToolKind } from "@/content/blog";
+import { Photo } from "@/components/site/Photo";
 import { BODIES } from "@/content/blog/bodies";
 import { GLOSSARY } from "@/content/blog/glossary";
 
@@ -32,6 +33,13 @@ const TOOL_ICON: Record<ToolKind, ReactNode> = {
   Test: <path d="M9.2 9a3 3 0 115 2.2c-1.3.8-2.2 1.5-2.2 3M12 18.5v.01" />,
 };
 
+/**
+ * The lead: the article the blog opens with, set large with its photograph
+ * in the first screen, as a publication leads with its best piece. An
+ * editorial choice; change the slug to change the lead.
+ */
+const LEAD = "redesign-or-improve";
+
 /** Glossary terms worth showing on the index: the ones owners ask us about most. */
 const SAMPLE = ["dns", "udai", "redirect", "core-web-vitals", "crm", "webhook", "human-in-the-loop", "privacy-act", "two-factor"];
 
@@ -47,6 +55,7 @@ export default function Blog() {
     a.tools.map((t) => ({ ...t, a, section: BODIES[a.slug]?.toc.find((x) => x.id === t.id)?.title ?? t.title }))
   );
   const sample = SAMPLE.map((id) => GLOSSARY.find((t) => t.id === id)).filter((t) => t !== undefined);
+  const lead = PUBLISHED.find((a) => a.slug === LEAD) ?? PUBLISHED[0];
   return (
     <Page here="blog" crumbs={[{ name: "Blog", href: PAGES.blog }]}>
       <BlogLd articles={PUBLISHED} />
@@ -54,6 +63,25 @@ export default function Blog() {
       <section className="sp-hero bl-hero">
         <Kicker>Blog</Kicker>
         <Title lines={["Know what you’re", "saying yes to."]} />
+        <article className="bl-lead" aria-labelledby="bl-lead-t" data-rv>
+          <a className="bl-lead-a" href={PAGES.article(lead.slug)}>
+            <div className="bl-lead-img">
+              <Photo p={lead.cover} sizes="(max-width: 900px) 92vw, 720px" eager decorative />
+            </div>
+            <div className="bl-lead-body">
+              <p className="bl-lead-k">
+                {topicLabel(lead.topic)} · {lead.minutes} min read
+              </p>
+              <h2 id="bl-lead-t" className="bl-lead-t">
+                {lead.title}
+              </h2>
+              <p className="bl-lead-s">{lead.short}</p>
+              <p className="bl-lead-go">
+                Read the article <span aria-hidden>→</span>
+              </p>
+            </div>
+          </a>
+        </article>
         <div className="bl-hero-row">
           <p className="sp-lede" data-rv>
             Work out what your website needs, what a quote should cover, and where AI can help with the daily work.

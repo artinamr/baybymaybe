@@ -205,21 +205,31 @@ export function ServiceLd({ name, description, href, image }: { name: string; de
   );
 }
 
-/** Questions and answers shown on a page (FAQPage matches what is visible). */
-export function QaLd({ items }: { items: { q: string; a: string }[] }) {
+/** Every question the /faq/ page carries: it is their one marked-up home. */
+const ON_FAQ = new Set(FAQ_ALL.flatMap((g) => g.items.map((it) => it.q)));
+
+/**
+ * Questions and answers shown on a page (FAQPage matches what is visible).
+ * A question that /faq/ also shows is marked up there only (Google: one
+ * instance of a question on the site); the page still shows it. `all` is
+ * /faq/ itself.
+ */
+export function QaLd({ items, all = false }: { items: { q: string; a: string }[]; all?: boolean }) {
+  const own = all ? items : items.filter((it) => !ON_FAQ.has(it.q));
+  if (!own.length) return null;
   return (
     <Ld
       data={{
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        mainEntity: items.map((it) => ({ "@type": "Question", name: it.q, acceptedAnswer: { "@type": "Answer", text: it.a } })),
+        mainEntity: own.map((it) => ({ "@type": "Question", name: it.q, acceptedAnswer: { "@type": "Answer", text: it.a } })),
       }}
     />
   );
 }
 
 export function FaqLd() {
-  return <QaLd items={FAQ_ALL.flatMap((g) => g.items)} />;
+  return <QaLd items={FAQ_ALL.flatMap((g) => g.items)} all />;
 }
 
 /** How a project runs: the five stages as steps, matching the methodology page. */

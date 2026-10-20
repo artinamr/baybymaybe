@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { SubHeader } from "./SubHeader";
 import { SubReveal } from "./SubReveal";
 import { SiteFooter } from "./SiteFooter";
+import { PageLd } from "./JsonLd";
+import { PAGES } from "@/lib/content";
 
 export type LegalSection = { id: string; title: string; body: ReactNode };
 
@@ -11,6 +13,7 @@ export type LegalSection = { id: string; title: string; body: ReactNode };
  */
 export function LegalPage({
   here,
+  description,
   kicker,
   title,
   updated,
@@ -18,6 +21,8 @@ export function LegalPage({
   sections,
 }: {
   here: "privacy" | "terms";
+  /** The page description (its structured data, as in its metadata). */
+  description: string;
   kicker: string;
   title: string;
   updated: string;
@@ -26,6 +31,7 @@ export function LegalPage({
 }) {
   return (
     <div className="sp">
+      <PageLd href={here === "privacy" ? PAGES.privacy : PAGES.terms} name={title} description={description} />
       <SubReveal />
       <SubHeader here={here} />
       <main id="main" className="sp-main">

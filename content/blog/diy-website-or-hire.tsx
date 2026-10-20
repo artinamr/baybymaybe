@@ -32,8 +32,8 @@ export default function Body() {
         picking the one that matches your week and your plans.
       </p>
       <p>
-        Business.govt.nz puts the trade plainly: “setting up a website costs money, and maintaining it takes time and
-        skill”, whichever way you go.
+        Comparing your own website with selling through a marketplace, Business.govt.nz puts the trade plainly:
+        “setting up a website costs money, and maintaining it takes time and skill”.
         <Cite n={1} /> The skill in that sentence is the part owners discover late: the launch is the start of the
         looking-after, not the end of the work.
       </p>
@@ -47,9 +47,9 @@ export default function Body() {
       </p>
       <p>
         A <Term id="website-builder">site builder</Term> is the usual tool for this: ready-made templates, an editor
-        in the browser, and the hosting handled for one subscription. Templates are included in a Squarespace
-        subscription. Check which version you are using before choosing one: version 7.0 lets you switch templates;
-        version 7.1 uses a common set of features and does not let you switch templates.
+        in the browser, and the hosting handled for one subscription. The catch is that the site lives on the
+        builder: Wix, for example, says a Wix site must run on its own servers, though you can keep the domain with
+        another provider.
         <Cite n={2} />
       </p>
       <p>
@@ -142,9 +142,9 @@ export default function Body() {
       <H2 id="if-you-build">If you build it, protect these</H2>
       <ul>
         <li>
-          <strong>The domain in your business’s name.</strong> For .nz names the rule is explicit: if you ask someone
-          to register on your behalf, “they must register it in your name, not theirs”. You can check with a WHOIS
-          search on the Domain Name Commission’s website.
+          <strong>The domain in your business’s name.</strong> For a .nz name, the Domain Name Commission’s advice is
+          to make sure your business is listed as the registrant, and to have your registrar transfer it if your web
+          developer or provider is listed instead. A search on its website shows who the registrant is.
           <Cite n={4} />
         </li>
         <li>
@@ -153,9 +153,9 @@ export default function Body() {
         </li>
         <li>
           <strong>An exit you have actually asked about.</strong> Before you start, ask the tool how you would take
-          your content away. Moving to a fresh trial means recreating everything by hand (Squarespace’s help says a
-          new trial starts empty: “you’ll have to recreate all your site’s existing content”).
-          <Cite n={2} /> Export copies of your words and photos somewhere separate as you go.
+          your content away. Squarespace, for one, exports only some of a site, to a file meant for WordPress, and
+          says plainly that “some content doesn’t export”.
+          <Cite n={5} /> Export copies of your words and photos somewhere separate as you go.
         </li>
         <li>
           <strong>The basics that make pages good:</strong> fast photos, honest titles, one clear page per service.
@@ -193,12 +193,13 @@ export default function Body() {
       </p>
       <ul>
         <li>
-          <strong>From DIY to hired.</strong> What carries over: the domain (a .nz name moves with its UDAI, which
-          your registrar must give you promptly and at no cost, and which is valid for 30 days).
-          <Cite n={4} /> The words and photos carry over if you have kept copies out of the tool. What doesn’t: the
-          pages themselves may need rebuilding. For example, Squarespace says creating a new trial site means
-          recreating the existing content there.
-          <Cite n={2} />
+          <strong>From DIY to hired.</strong> What carries over: the domain. A .nz name moves with its authorisation
+          code (it used to be called the UDAI), which your provider must give you on request and free of charge
+          <Cite n={6} /> and which expires after 30 days.
+          <Cite n={7} /> The words and photos carry over if you have kept copies out of the tool. What doesn’t: the
+          pages themselves usually need rebuilding, because a builder’s pages depend on its own platform. In
+          Squarespace’s words, “many features rely on our platform’s JavaScript and CSS”.
+          <Cite n={5} />
         </li>
         <li>
           <strong>From hired to in-house.</strong> If everything is in your name with your own logins, this is an
