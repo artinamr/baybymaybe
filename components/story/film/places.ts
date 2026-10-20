@@ -340,6 +340,12 @@ export function buildHome(scene: THREE.Scene): Home {
   const timber: [number, number, number] = [0.86, 0.74, 0.6];
   const newMesh = new THREE.InstancedMesh(new Batch().add(block(1, 1, 1, 0.012), null, 1, timber).build(), white, newRest.length);
   newRest.forEach((m, i) => newMesh.setMatrixAt(i, m));
+  // (Its colours from the start: the weathering tints each board, and a colour attribute that only
+  // appears at the first build is a new program, compiled mid-film: a half-second freeze.)
+  {
+    const c = new THREE.Color(1, 1, 1);
+    for (let i = 0; i < newRest.length; i++) newMesh.setColorAt(i, c);
+  }
   newMesh.castShadow = newMesh.receiveShadow = true;
   g.add(newMesh);
 
