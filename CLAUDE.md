@@ -660,7 +660,13 @@ too uncreative ... step up that game"; worked overnight on story-r27).**
   makes two views cheap: the new half's GPU median is 20 ms against round
   26's 23.6 on the same machine (`tools/qa/story-gpu.mjs`, A/B against the
   live site). Never resize a shadow map mid-film: it stopped every
-  shadow-receiving draw.
+  shadow-receiving draw. Never hide a group that holds a light for one pane:
+  a different set of lights is a new program for every material, compiled on
+  first use (a 6 s freeze at the split); the panes hide surfaces only
+  (`world.ts` `paneParts`). Glow materials are shared within a place: the
+  van's lights once lit the office's lamp bulb; give a changing glow its own
+  material. Wheel-scroll recordings: `tools/qa/story-motion.mjs` (interleave
+  with the live site; the shared GPU swings p95 by 2x).
 - Look-dev: `window.__story.world.paneOverride` and `officeTo`, rendered by
   `tools/qa/story-cands.mjs`; frozen stills hold the page's CSS transitions,
   so the stills tools finish them first. The checks fly the panes
