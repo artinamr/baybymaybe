@@ -1,16 +1,18 @@
 import { PAGES } from "@/lib/content";
-import { H2, Callout, Check, Steps, Cite } from "@/components/blog/Prose";
+import { H2, H3, Callout, Check, Figure, Steps, Cite } from "@/components/blog/Prose";
+import { DecisionTree } from "@/components/blog/Diagrams";
 import { Term } from "@/components/blog/Term";
 
 export const toc = [
   { id: "what-it-is", title: "What SEO is" },
-  { id: "how-google-decides", title: "How Google decides" },
+  { id: "how-google-decides", title: "How Google chooses what to show" },
   { id: "what-google-rewards", title: "What Google rewards" },
+  { id: "diagnose", title: "Where is your site stuck?" },
   { id: "five-jobs", title: "Five jobs worth doing first" },
   { id: "page-check", title: "A page, checked before it goes live" },
-  { id: "how-long", title: "How long it takes" },
-  { id: "paying-someone", title: "Paying someone to do it" },
-  { id: "not-the-problem", title: "When SEO isn’t the problem" },
+  { id: "how-long", title: "How long it takes, and how to judge it" },
+  { id: "paying-someone", title: "Paying someone: what to ask" },
+  { id: "not-the-problem", title: "When SEO isn’t the answer" },
   { id: "yours", title: "How we’d look at yours" },
 ];
 
@@ -18,246 +20,411 @@ export default function Body() {
   return (
     <>
       <p>
-        Start with pages that clearly explain your services and are easy for people and search engines to use.
-        That is the foundation of <Term id="seo">search engine optimisation</Term> (SEO). Before paying for it, learn
-        what the work involves and how you will judge progress.
+        Getting found on Google starts with plain work on your own website and, if you meet customers face to face, a
+        free Google listing. Before you pay anyone, find where your site is stuck, fix that first, and judge the result
+        over weeks, not days.
       </p>
 
       <H2 id="what-it-is">What SEO is</H2>
       <p>
-        When someone types “accountant Wellington” or “dashcam installation” into Google, the results it shows are
-        chosen from pages it has found and filed, ranked by how well it judges each one answers the search. SEO is the
-        work of putting your pages in that running: so Google finds them, understands them, and prefers them for the
-        searches that matter to your business.
+        When someone searches Google for “heat pump service Hamilton”, the results come from pages Google has already
+        found and stored, ranked by how well each seems to answer the search.{" "}
+        <Term id="seo">Search engine optimisation</Term> (SEO) is the work of getting your pages onto that list: found,
+        understood and chosen for the searches that bring you work.
       </p>
       <p>
-        It sits beside advertising, and the two do different jobs. A search ad appears the day you pay for it and
-        disappears when you stop. Search work builds slowly and keeps working. Business.govt.nz, the government’s
-        business advice site, puts making content easy to find (including search engine optimisation) among the few
-        kinds of online marketing that generally give the most return for the effort.
-        <Cite n={1} />
+        It sits beside advertising. A search ad starts once it passes Google’s review (most are reviewed within one
+        business day) and runs while you pay.
+        <Cite n={1} /> Search work is slower, but what it builds doesn’t switch off when you stop paying.
+        Business.govt.nz counts both, with email and social media, among the online marketing that generally gives the
+        most return.
+        <Cite n={2} />
       </p>
-      <Callout title="It is free to appear in the results">
+      <Callout title="Appearing in Google is free">
         <p>
-          Google does not charge to include a site in its results, and its own guidance says paying an agency does not
-          influence them either: “Google never accepts money to include or rank sites in our search results.”
-          <Cite n={2} /> What people sell is the work, not the placement.
+          Google never takes money to include or rank a site, and advertising with Google has no effect on where you
+          appear.
+          <Cite n={3} /> What people sell is the work.
         </p>
       </Callout>
 
-      <H2 id="how-google-decides">How Google decides</H2>
+      <H2 id="how-google-decides">How Google chooses what to show</H2>
       <p>
-        Google runs automated programs that read pages across the web and file them in an index. Its starter guide
-        says most sites are discovered automatically after they are published. Links from other sites help Google
-        discover new pages, and a{" "}
-        <Term id="sitemap">sitemap</Term> can help, though Google says submitting one isn’t required.
-        <Cite n={3} />
+        Google’s automated crawlers download the pages it finds, its index stores what each page contains, and when
+        someone searches it returns the results it judges relevant. That can depend on the searcher’s location, language
+        and device.
+        <Cite n={4} />
       </p>
       <p>
-        Ranking then weighs much more, and Google is direct about what matters most: content that is helpful,
-        reliable and written for people.
-        <Cite n={4} /> It is just as firm about the other side. Google’s spam policies (stuffing pages with keywords,
-        buying links, publishing pages made only to rank for particular searches) say a site that breaks them may
-        rank lower or not appear in the results at all.
-        <Cite n={5} />
+        You rarely need to ask to be included: Google says the vast majority of sites in its results are added
+        automatically as it crawls the web.
+        <Cite n={5} /> It doesn’t guarantee to show any page, though, even one that follows Google Search Essentials,
+        its basic rules for sites.
+        <Cite n={4} />
+      </p>
+      <p>
+        Sites that break Google’s spam policies may rank lower or not appear at all.
+        <Cite n={6} /> Three of those policies catch small businesses out:
+      </p>
+      <ul>
+        <li>
+          <strong>Keyword stuffing:</strong> filling a page with keywords or numbers to manipulate rankings.
+        </li>
+        <li>
+          <strong>Buying links:</strong> paying for links to rank higher.
+        </li>
+        <li>
+          <strong>Doorway pages:</strong> Google’s examples include many pages aimed at particular regions or cities
+          that all funnel people to one page.
+          <Cite n={6} />
+        </li>
+      </ul>
+      <p>
+        Twenty near-identical “Plumber in [town]” pages, each sending people to the same contact page, fit that last
+        description. One page listing the areas you cover doesn’t.
+      </p>
+      <p>
+        AI answers rest on the same work. Google says AI Overviews and AI Mode have no extra requirements and need no
+        special optimisation: a page shown as a link must be indexed and eligible to appear with a snippet. Keep
+        important content in text, and make sure any <Term id="structured-data">structured data</Term> matches what
+        visitors see.
+        <Cite n={7} />
       </p>
 
       <H2 id="what-google-rewards">What Google rewards</H2>
       <p>
-        Google’s advice on content comes down to one idea: write for the reader, and let the search engine see the
-        same thing the reader sees. Its self-check questions include whether the page shows first-hand knowledge,
-        whether it adds something the other results don’t, and whether someone reading it would leave feeling they
-        learned enough to reach their goal.
-        <Cite n={6} />
-      </p>
-      <p>
-        In practice, for a business site, that looks like:
+        Google’s core advice is to make helpful, reliable content for people.
+        <Cite n={8} /> Its self-check asks, among other things, whether a page offers original information or
+        analysis, adds real value compared with the other results, and leaves a reader knowing enough to reach their
+        goal.
+        <Cite n={9} /> For a business site, that means:
       </p>
       <ul>
         <li>
-          <strong>One clear page per thing you do,</strong> described in the words a customer would use. Google’s
-          guidance is to use the words people would search with, and to put them where they count: the page’s title
-          and main heading, and descriptive places such as image alt text and link text.
-          <Cite n={4} />
+          <strong>One clear page for each thing you sell,</strong> with the words people would search with in
+          prominent places: the page title, the main heading, image alt text and link text.
+          <Cite n={8} />
         </li>
         <li>
-          <strong>An accurate title and description for every page.</strong> Write a distinct title that clearly
-          describes the page. Google builds the summary beneath it in results mostly from the page itself, and only
-          occasionally from your description, so make the top of the page say plainly what it offers.
-          <Cite n={3} />
+          <strong>A distinct title on every page:</strong> unique, clear, concise and accurate. The snippet under it
+          comes mostly from the page itself and only occasionally from your{" "}
+          <Term id="title-and-description">meta description</Term>, so the top of the page should say plainly what it
+          offers.
+          <Cite n={5} />
         </li>
         <li>
-          <strong>Originality.</strong> Don’t copy what competitors or suppliers have written, in part or whole.
-          <Cite n={3} /> A page only earns its place if it adds something.
+          <strong>Your own words.</strong> Don’t copy others’ content, in part or in full.
+          <Cite n={5} />
         </li>
         <li>
-          <strong>A fast, steady page.</strong> Content that is easy to read, well organised with headings, and not
-          buried under pop-ups. There is no preferred word count; Google says chasing one is a warning sign.
-          <Cite n={6} />
+          <strong>A page that’s easy to use.</strong> Google’s ranking systems use{" "}
+          <Term id="core-web-vitals">Core Web Vitals</Term>, and Google asks whether pages avoid intrusive pop-ups and
+          too many distracting ads. Relevance still comes first: Google aims to show the most relevant page even if its
+          experience is poor.
+          <Cite n={10} />
         </li>
       </ul>
+      <p>
+        Google also has no preferred word count, and it lists writing to one as a warning sign.
+        <Cite n={9} />
+      </p>
+
+      <H2 id="diagnose">Where is your site stuck?</H2>
+      <p>
+        Answer these in order. Questions two and three need{" "}
+        <Term id="search-console">Google Search Console</Term>, the first of the five jobs below.
+      </p>
+      <Figure caption="Where your site is stuck: the first “no” is where to start.">
+        <DecisionTree
+          steps={[
+            {
+              q: "Does Google have your important pages?",
+              no: {
+                t: "Start with being found",
+                b: "Search Google for site:yourbusiness.co.nz, using your own address. If a service page is missing, check it with Search Console’s URL Inspection tool, fix what it reports and request indexing.",
+              },
+            },
+            {
+              q: "Do your pages appear for the searches that bring you work?",
+              no: {
+                t: "Start with your pages and words",
+                b: "Give each service its own page in your customers’ words. If you meet customers face to face, claim your Business Profile.",
+              },
+            },
+            {
+              q: "When you appear, do people click?",
+              no: {
+                t: "Start with titles and openings",
+                b: "If a page appears often but is rarely clicked, give it a title and an opening that say plainly what it offers, and where.",
+              },
+            },
+            {
+              q: "When people arrive, do they get in touch?",
+              no: {
+                t: "Start with the page itself",
+                b: "More visitors won’t help a page that loses them. Put the next step on the first screen and fix slow pages.",
+              },
+            },
+          ]}
+          end={{
+            t: "Search isn’t what’s holding you back",
+            b: "If every answer is yes, the limit is demand or competition. Advertising, referrals or a new service may help more than further SEO.",
+          }}
+        />
+      </Figure>
+      <p>
+        A site: search lists pages Google has indexed, though not always every one.
+        <Cite n={11} /> URL Inspection shows Google’s indexed version of a page and lets you request indexing, though a
+        request isn’t a guarantee.
+        <Cite n={12} /> The Performance report counts clicks and impressions (how often you appeared in results).
+        <Cite n={13} />
+      </p>
 
       <H2 id="five-jobs">Five jobs worth doing first</H2>
       <p>
-        If you do nothing else, do these five. They are in order, and each one makes the next easier.
+        Most small businesses should do these five first, in this order. The first gives you the figures for the check
+        above.
       </p>
       <Steps
         items={[
           {
-            t: "Sort your pages: one per service",
+            t: "Set up Search Console",
+            b: (
+              <>
+                <p>
+                  It’s free. You don’t need it to appear in Google, but it shows the searches you appear in, how often
+                  people click, which sites link to you and any problems Google finds.
+                  <Cite n={14} />
+                </p>
+                <p>
+                  Add your site as a Domain property, which covers every version of your address (www or not, http or
+                  https), and verify it with a <Term id="dns">DNS</Term> record at your domain provider. Figures
+                  should appear within a few days.
+                  <Cite n={15} />
+                </p>
+              </>
+            ),
+          },
+          {
+            t: "Claim your Business Profile, if you meet customers",
             b: (
               <p>
-                List what you actually sell, and give each thing a page of its own (or one page for a tight group).
-                A page that answers “do you do X, and what does it involve?” beats a home page that mentions
-                everything once.
+                Your <Term id="google-business-profile">Google Business Profile</Term> is the free listing that shows
+                your business on Search and Maps. Only businesses that meet customers face to face are eligible.
+                <Cite n={16} /> Our guide covers{" "}
+                <a href={`${PAGES.article("google-business-profile")}#add-or-claim`}>adding or claiming one</a>.
               </p>
             ),
           },
           {
-            t: "Write the title and description for each page",
+            t: "Give each service its own page, in your customers’ words",
             b: (
               <p>
-                Put the service and the place in the title if they belong there (“Heat pumps, install and service,
-                Hamilton”). Write the description as a one-sentence answer to “why this page?”.
-                <Cite n={3} />
+                Give each thing you sell its own page, or one page for a tight group. If callers say “leaking roof”,
+                don’t only write “roof remediation”: use their words in the title, the main heading and the first
+                screen.
+                <Cite n={8} /> Link each page from your menu. Google mainly finds pages through links, and a{" "}
+                <Term id="sitemap">sitemap</Term> can help but isn’t required.
+                <Cite n={5} />
               </p>
             ),
           },
           {
-            t: "Say it the way customers say it",
+            t: "Write a title and description for each page",
             b: (
               <p>
-                If callers say “leaking roof”, don’t only write “roof remediation”. Use the customer’s words in the
-                headings and the first screen, then be precise underneath.
-                <Cite n={4} />
+                Put the service and the place in the title where they belong: “Heat pump servicing in Hamilton | Your
+                business name”. Make each title unique to its page.
+                <Cite n={5} /> Write the description as a one-sentence answer to “why this page?”.
               </p>
             ),
           },
           {
-            t: "Make the page quick and pleasant on a phone",
+            t: "Make every page quick and readable on a phone",
             b: (
               <p>
-                Compress the photos, clear the pop-ups, and check the page on the cheapest phone you own. Google’s
-                measures of page experience (<Term id="core-web-vitals">Core Web Vitals</Term>) are the ones to
-                ask a developer about.
-              </p>
-            ),
-          },
-          {
-            t: "Set up Search Console, then leave it alone for a month",
-            b: (
-              <p>
-                <Term id="search-console">Google Search Console</Term> is free. It shows which searches your pages
-                appear in, which ones get clicked, and any problems Google hit while reading the site.
-                <Cite n={7} /> It is also how you submit a sitemap and ask for a page to be re-read.
+                Compress photos, remove pop-ups that cover the page, and test your main pages in{" "}
+                <Term id="pagespeed-insights">PageSpeed Insights</Term>. Google’s targets: the main content within 2.5
+                seconds, a response to a tap within 200 milliseconds, and a layout that barely moves (a shift score of
+                0.1 or less), for at least three in four page loads.
+                <Cite n={17} />
               </p>
             ),
           },
         ]}
       />
-
-      <H2 id="page-check">A page, checked before it goes live</H2>
-      <p>Use this list to review a page before publishing it or planning changes.</p>
-      <Check
-        items={[
-          <>
-            <strong>One subject.</strong> The page answers one question completely, and the heading says what it is
-            in plain words.
-          </>,
-          <>
-            <strong>The customer’s words appear.</strong> The phrases people actually type are in the title, the
-            first screen and the headings, naturally.
-          </>,
-          <>
-            <strong>A title and description written on purpose,</strong> unique to this page, accurate, and free of
-            exaggeration.
-            <Cite n={3} />
-          </>,
-          <>
-            <strong>Images with alt text</strong> that describe the picture, so the page makes sense without them.
-            <Cite n={3} />
-          </>,
-          <>
-            <strong>Fast on a phone.</strong> Photos compressed, nothing launching on load, and the first screen
-            readable without scrolling sideways.
-          </>,
-          <>
-            <strong>A next step.</strong> The way to call, book or enquire is on the first screen and at the end.
-          </>,
-          <>
-            <strong>Linked in both directions:</strong> the page is reached from your menu or a related page, and it
-            links on to the pages it mentions.
-            <Cite n={3} />
-          </>,
-        ]}
-      />
-
-      <H2 id="how-long">How long it takes</H2>
+      <H3>An example: a heat pump installer in Hamilton</H3>
       <p>
-        Google says changes can take anywhere from hours to several months to affect search results, and recommends
-        waiting a few weeks before judging their effect.
-        <Cite n={3} /> Use Search Console to check impressions, clicks and the searches your pages appear for. Compare
-        those figures over time, allowing for seasonal changes in demand.
-        <Cite n={7} />
+        An illustration, not a client. A two-person firm installs and services heat pumps around Hamilton. Its site has
+        a home page and one “Services” page covering installation, servicing, repairs and ducted systems.
       </p>
-      <p>
-        It also never quite finishes. Pages date, services change, competitors publish. The businesses that do well
-        treat it as a habit (a page improved each month, dates checked each year) rather than a project with an end.
-      </p>
-
-      <H2 id="paying-someone">Paying someone to do it</H2>
-      <p>
-        You can do everything in this article yourself. Hiring someone buys speed and technical depth, and Google’s
-        advice on choosing help is worth reading before you sign anything. Its list of useful services includes
-        reviewing your content and structure, technical advice, help developing content, keyword research, and
-        training your own team.
-        <Cite n={2} />
-      </p>
-      <p>Its warnings are just as specific:</p>
       <ul>
         <li>
-          <strong>“No one can guarantee a #1 ranking on Google.”</strong> Walk away from anyone who promises one.
-          <Cite n={2} />
+          <strong>The check.</strong> Search Console shows the site appearing for its own name and for “heat pumps
+          Hamilton”, but hardly at all for “heat pump servicing” or “ducted heat pump”. It is stuck at question two.
         </li>
         <li>
-          <strong>Be wary of secrecy.</strong> A good consultant explains what they intend to do in words you can
-          follow.
-          <Cite n={2} />
+          <strong>The changes.</strong> The owners split the services page into four, each with its own title and an
+          opening that says what’s included and how to book. One page lists the towns they cover, instead of a page
+          per town. They claim their Business Profile and put a booking button on every first screen.
         </li>
         <li>
-          <strong>Link schemes backfire.</strong> Buying links, or swapping them in bulk, breaks Google’s spam
-          policies and can cost the site its place in the results.
-          <Cite n={5} /> And Google is plain that you are responsible for what any firm you hire does to your site.
-          <Cite n={2} />
-        </li>
-        <li>
-          <strong>Start with read-only access.</strong> Google’s advice is to give a new SEO read access to Search
-          Console only, not the right to change anything, at this stage.
-          <Cite n={2} />
+          <strong>Measuring it.</strong> They note the date of each change. Six to eight weeks later they compare
+          clicks and impressions for those searches with the weeks before and, as their work is seasonal, with the
+          same weeks last year. Then they count the enquiries.
         </li>
       </ul>
 
-      <H2 id="not-the-problem">When SEO isn’t the problem</H2>
+      <H2 id="page-check">A page, checked before it goes live</H2>
+      <p>Run any page through this before you publish or change it.</p>
+      <Check
+        items={[
+          <>
+            <strong>One subject.</strong> The page answers one question completely, and its main heading names it
+            plainly.
+          </>,
+          <>
+            <strong>Your customers’ words</strong> in the title, the main heading and the first screen, written
+            naturally.
+            <Cite n={8} />
+          </>,
+          <>
+            <strong>A title written for this page:</strong> unique, clear, concise and accurate.
+            <Cite n={5} /> And a description that says what the page offers.
+          </>,
+          <>
+            <strong>Alt text on every image:</strong> a short description of how the picture relates to the page.
+            <Cite n={5} />
+          </>,
+          <>
+            <strong>Quick on a phone:</strong> photos compressed, and nothing covering the page when it opens.
+            <Cite n={10} />
+          </>,
+          <>
+            <strong>A next step</strong> (call, book or enquire) on the first screen and again at the end.
+          </>,
+          <>
+            <strong>Linked both ways:</strong> reached from your menu or a related page, and linking on to the pages it
+            mentions.
+            <Cite n={5} />
+          </>,
+          <>
+            <strong>Clearly local:</strong> the areas you serve, a New Zealand phone number and, if customers visit,
+            your address. Google says a country domain such as .nz is a strong signal of who a site is for, and local
+            addresses and phone numbers are signals too.
+            <Cite n={18} />
+          </>,
+        ]}
+      />
+
+      <H2 id="how-long">How long it takes, and how to judge it</H2>
+      <p>What to expect, and when:</p>
+      <ul>
+        <li>
+          <strong>Within a few days</strong> of adding your site, figures appear in Search Console.
+          <Cite n={15} />
+        </li>
+        <li>
+          <strong>Within a day or so</strong> of asking, a new or changed page is usually indexed, though it can take
+          much longer.
+          <Cite n={12} />
+        </li>
+        <li>
+          <strong>From a few hours to several months</strong> is how long Google says a change can take to have an
+          effect. It suggests waiting a few weeks before judging whether it helped.
+          <Cite n={5} />
+        </li>
+      </ul>
+      <p>Then judge it monthly, the same way each time:</p>
+      <ul>
+        <li>
+          <strong>Compare like with like.</strong> The Performance report shows the past three months unless you
+          change it.
+          <Cite n={13} /> Compare clicks and impressions for the searches you care about with the period before the
+          change, and with last year’s if your work is seasonal.
+        </li>
+        <li>
+          <strong>Keep a change log</strong> with the date of each change, so a rise or a fall can be matched to its
+          cause.
+        </li>
+        <li>
+          <strong>Count enquiries.</strong> More clicks matter only if they bring work.
+        </li>
+      </ul>
+      <p>It never quite finishes: improve a page a month, and recheck your facts each year.</p>
+
+      <H2 id="paying-someone">Paying someone: what to ask</H2>
       <p>
-        Search work makes an existing demand findable. It doesn’t create demand, and it can’t rescue an offer nobody
-        wants at the price you need. Before spending on it, be sure the enquiry actually exists: if people already
-        find you by word of mouth once they hear the business’s name, but nobody searches for the service by name,
-        the work is naming and explaining, which is slower. Advertising, or being where your customers already are,
-        may pay first.
+        You can do all of this yourself; hiring buys time and technical depth. Google lists useful work such as content
+        reviews, technical advice, keyword research, training and optimising for generative AI. It says a good time to
+        hire is when you’re considering a redesign or planning a new site: the earlier, the better.
+        <Cite n={3} />
       </p>
       <p>
-        And if the site itself is confusing, slow or out of date, fixing those pages comes before any search work.
-        There is no point bringing more people to a page that loses them. If you’re deciding between fixing and
-        rebuilding, that decision has its own article: <a href={`${PAGES.article("redesign-or-improve")}#fixes`}>the fixes that pay
-        first</a>.
+        Google suggests asking these before you hire.
+        <Cite n={3} />
+      </p>
+      <Check
+        items={[
+          <>Can you show us examples of your previous work, and some success stories?</>,
+          <>Do you follow Google Search Essentials?</>,
+          <>What results do you expect, in what time, and how do you measure success?</>,
+          <>What’s your experience in our industry, and in New Zealand or our city?</>,
+          <>How long have you been in business?</>,
+          <>Will you tell us about every change you make to our site?</>,
+        ]}
+      />
+      <p>
+        We’d add: what exactly do we get each month, and who will own the pages, accounts and reports you produce? At
+        first, give them read access to Search Console only, not write access.
+        <Cite n={3} /> Walk away from:
+      </p>
+      <ul>
+        <li>
+          <strong>A guaranteed ranking.</strong> Google is blunt: “No one can guarantee a #1 ranking on Google.”
+          <Cite n={3} />
+        </li>
+        <li>
+          <strong>Secrecy.</strong> Be careful of anyone who won’t clearly explain what they intend to do.
+          <Cite n={3} />
+        </li>
+        <li>
+          <strong>Cold emails.</strong> Be wary of SEO firms and agencies that email you out of the blue.
+          <Cite n={3} />
+        </li>
+        <li>
+          <strong>Link schemes.</strong> Avoid anyone selling schemes to get you more links, or to submit your site to
+          thousands of search engines.
+          <Cite n={3} /> Buying links breaks Google’s spam policies,
+          <Cite n={6} /> and you are responsible for what any firm you hire does.
+          <Cite n={3} />
+        </li>
+        <li>
+          <strong>A paid place in a ranking that looks independent.</strong> In October 2026 the Commerce Commission
+          asked the High Court to stop two websites presenting rankings that businesses paid for as independent; the
+          court had not ruled when we checked. You can report an approach to the Commission on 0800 943 600.
+          <Cite n={19} />
+        </li>
+      </ul>
+
+      <H2 id="not-the-problem">When SEO isn’t the answer</H2>
+      <p>
+        Search work makes existing demand findable. It doesn’t create demand, and it can’t rescue an offer people don’t
+        want at your price. If few people search for what you do, advertising, referrals or being where your customers
+        already are may pay first. If you need enquiries this month, an ad is faster.
+      </p>
+      <p>
+        If the site itself is confusing, slow or out of date, fix those pages first: there’s no point bringing more
+        people to a page that loses them. Start with{" "}
+        <a href={`${PAGES.article("redesign-or-improve")}#fixes`}>the fixes that pay first</a>.
       </p>
 
       <H2 id="yours">How we’d look at yours</H2>
       <p>
-        For the free audit, send us your site and tell us which services you want people to find. We’ll review how
-        clearly the pages answer those searches and the obvious gaps to address first. If the pages need rebuilding,
-        our <a href={PAGES.service("websites")}>websites service</a> starts from that list. You can also give it to your
-        current provider.
+        For the free audit, send us your site and the three services you most want found. We’ll work through the four
+        questions (with read access to Search Console, if you can give it) and tell you which jobs to do first, for you
+        or whoever runs your site. If the pages need rebuilding, our{" "}
+        <a href={PAGES.service("websites")}>websites service</a> starts from that list.
       </p>
     </>
   );

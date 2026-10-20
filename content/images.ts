@@ -239,6 +239,19 @@ export const PHOTOS = {
     "50% 50%"
   ),
   "svc-ai-card": photo("services/ai-automation", 1200, 1500, "Overlapping blank envelopes in coral, yellow and pale green.", MAIL),
+
+  // The studio: its banner (24:11), the place the team works from. Phones keep the island on the left.
+  "studio-hero": photo(
+    "studio/hero",
+    2400,
+    1100,
+    "A purple sky with a band of pink light over the sea and a dark island on the horizon, seen from Mt Victoria in Auckland.",
+    {
+      ...unsplash("Mt Victoria, Auckland, New Zealand", "Kyle Myburgh", "kylemyburgh", "Mt_Victoria,_Auckland,_New_Zealand_(Unsplash).jpg", "8 June 2016"),
+      checked: "2026-10-20",
+    },
+    "8% 50%"
+  ),
 } satisfies Record<string, Photo>;
 
 export type PhotoKey = keyof typeof PHOTOS;

@@ -1,0 +1,38 @@
+/* The first screen: the headline across, then the introduction beside a photograph of the place the team works from. */
+.st-hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+.st-photo {
+  margin: 0;
+}
+.st-photo .sp-banner {
+  aspect-ratio: 16 / 10;
+}
+.st-photo figcaption {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.st-photo figcaption a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Phones and narrow windows: the photograph between the headline and the introduction. */
+@media (max-width: 900px) {
+  .st-hero-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .st-photo {
+    order: -1;
+  }
+  .st-photo .sp-banner {
+    aspect-ratio: 4 / 3;
+  }
+}

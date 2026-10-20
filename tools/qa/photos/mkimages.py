@@ -39,6 +39,8 @@ SPECS = [
     ("services/platforms", "platform-folders", (4, 5), (1200, 600), (0.74, 0.5), 1.0, S),
     ("services/ai-automation-wide", "automation-mail", (24, 11), (2400, 1200), (0.5, 0.5), 1.0, 0.72),
     ("services/ai-automation", "automation-mail", (4, 5), (1200, 600), (0.5, 0.5), 1.0, 0.72),
+    # studio: the banner (24:11), the sky over the sea from Mt Victoria, Auckland; kept low for the island and the water
+    ("studio/hero", "auckland-mtvictoria", (24, 11), (2400, 1200), (0.5, 0.7), 1.0, 0.8),
 ]
 
 

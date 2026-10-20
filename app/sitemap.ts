@@ -35,7 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...PUBLISHED.map((a) => ({ path: `blog/${a.slug}/`, priority: 0.7, modified: a.updated ?? a.published, images: [abs(a.cover.src)] })),
     { path: "blog/glossary/", priority: 0.6 },
     { path: "blog/how-we-write/", priority: 0.4 },
-    { path: "studio/", priority: 0.6 },
+    { path: "studio/", priority: 0.6, images: [abs(PHOTOS["studio-hero"].src)] },
     { path: "pricing/", priority: 0.7 },
     { path: "contact/", priority: 0.7 },
     { path: "faq/", priority: 0.6 },

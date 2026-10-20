@@ -116,11 +116,17 @@
   font-weight: 600;
   color: var(--ink);
 }
+/* Links in the text: a quiet underline at rest that fills to the link's own colour on hover. */
 .prose a {
   color: var(--indigo);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  text-decoration-color: color-mix(in oklab, var(--indigo) 38%, transparent);
+  transition: text-decoration-color 220ms ease;
+}
+.prose a:hover {
+  text-decoration-color: currentColor;
 }
 .ar-h2 {
   font-family: var(--display);
@@ -2268,6 +2274,7 @@ ol.dg {
   .prose a,
   .term-a {
     color: #000;
+    text-decoration-color: currentColor;
   }
   .ar-h2 {
     margin: 18pt 0 8pt;
