@@ -654,7 +654,7 @@ export const ARTICLES: ArticleMeta[] = [
         accessed: "2026-10-20",
       },
       {
-        title: "Privacy Act 2020 (sections 11 and 201)",
+        title: "Privacy Act 2020 (sections 11, 112 to 116 and 201)",
         publisher: "New Zealand Legislation",
         url: "https://www.legislation.govt.nz/act/public/2020/0031/latest/whole.html",
         accessed: "2026-10-20",
