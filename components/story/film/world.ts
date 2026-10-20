@@ -42,6 +42,8 @@ const H = (x: number, y: number, z: number) => V(-44 - x, y, 15.5 - z);
 const S = (x: number, y: number, z: number) => V(44 + x, y, -17 + z);
 const WALL_COL = new THREE.Color(1.0, 0.8, 0.55);
 /** The inbox pile's foot: in front of the workshop's roller door, above the van. */
+/** How many cars drive the main street. */
+const TRAFFIC = 4;
 const COLUMN_BASE = V(44 + 3.7, 2.9, -17 + 8.4);
 
 /** Parse "7:40pm" into hours after the first evening's midnight (am is the next day). */
@@ -119,6 +121,7 @@ export class World {
   private rival: THREE.Group;
   private ourVan: THREE.Group;
   private phoneLight: THREE.PointLight;
+  private traffic: { body: THREE.InstancedMesh; dark: THREE.InstancedMesh };
   private mailLight: THREE.PointLight;
   private pulseLight: THREE.PointLight;
   /** The last impact (the paper hitting the floor, the landing after the rewind): its moment. */
@@ -167,6 +170,14 @@ export class World {
 
     // The other customers, and the new route over the town.
     this.crowd = new Crowd(this.scene, this.town.houses, V(-30, 0, 8));
+    // Traffic: a few cars along the main street, on their own time (life, not story).
+    this.traffic = {
+      body: new THREE.InstancedMesh(this.town.car.body, this.town.mats[0], TRAFFIC),
+      dark: new THREE.InstancedMesh(this.town.car.dark, this.town.mats[3], TRAFFIC),
+    };
+    this.traffic.body.castShadow = true;
+    this.traffic.body.frustumCulled = this.traffic.dark.frustumCulled = false;
+    this.scene.add(this.traffic.body, this.traffic.dark);
     this.system = new System(this.scene, H(-2, 0, -1), S(-4, 0, 4));
     this.mailA = new Envelope(this.scene);
     this.mailB = new Envelope(this.scene);
@@ -443,6 +454,16 @@ export class World {
     // a breath beside it.
     const push = (0.5 - 0.5 * Math.cos(t * 0.5)) * 0.013 * br;
     cam.position.lerp(this.cam.at, push);
+    // ...and a slow drift round it (under a degree, a quarter of a minute a turn): the picture keeps its depth.
+    {
+      const a = Math.sin(t * 0.27) * 0.012 * br;
+      const c = Math.cos(a);
+      const sn = Math.sin(a);
+      const dx = cam.position.x - this.cam.at.x;
+      const dz = cam.position.z - this.cam.at.z;
+      cam.position.x = this.cam.at.x + dx * c - dz * sn;
+      cam.position.z = this.cam.at.z + dx * sn + dz * c;
+    }
     cam.position.x += Math.sin(t * 0.37) * 0.01 * br;
     cam.position.y += Math.sin(t * 0.29 + 1) * 0.008 * br;
     cam.up.set(Math.sin(this.cam.roll), Math.cos(this.cam.roll), 0);
@@ -484,6 +505,7 @@ export class World {
     this.crowdAndCounts(Pw, t, nw);
     this.seasons(Pw);
     this.route(P, t);
+    this.drive(t);
     this.keepClear(f.dt);
     this.pointer(f.pointer);
     this.prevP = P;
@@ -655,6 +677,28 @@ export class World {
     c.lerp(new THREE.Color(0.92, 1.12, 0.78), spring);
   }
 
+  /** The traffic: cars along the main street, each on its own lap, on real time. */
+  private drive(t: number) {
+    const m = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    const one = V(1, 1, 1);
+    const tt = this.reduced ? 0 : t;
+    for (let i = 0; i < TRAFFIC; i++) {
+      const side = i % 2 ? 1 : -1;
+      const speed = 9 + (i % 3) * 1.6;
+      const lap = 300;
+      const x = ((((tt * speed + i * 97) % lap) + lap) % lap) - lap / 2;
+      // On the two cross streets (the main street is the story's), each lane on the left (New Zealand).
+      const dir = side < 0 ? -1 : 1;
+      const z = (i < 2 ? 46 : -46) + side * 1.2;
+      m.compose(V(x * dir, 0, z), q.setFromAxisAngle(V(0, 1, 0), dir > 0 ? Math.PI / 2 : -Math.PI / 2), one);
+      this.traffic.body.setMatrixAt(i, m);
+      this.traffic.dark.setMatrixAt(i, m);
+    }
+    this.traffic.body.instanceMatrix.needsUpdate = true;
+    this.traffic.dark.instanceMatrix.needsUpdate = true;
+  }
+
   /** A van's wheels turn with the road it covers, and its body rides on its springs. */
   private roll(van: THREE.Group) {
     const ud = van.userData as { last?: THREE.Vector3; odo?: number };
@@ -765,7 +809,12 @@ export class World {
     }
     if (P < B.n3am[0]) {
       const typing = inW(P, B.nForm) ? 1 : 0;
-      return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.62 + 0.15 * typing, 1, 0.25);
+      // The reply lands: a start, the phone lifted, the head up for a moment.
+      const oh = bump(P, B.nBack[1], B.nBack[1] + 0.24, 0.05);
+      sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.62 + 0.15 * typing + 0.14 * oh, 1, 0.25 - 0.1 * oh);
+      o.head[0] -= 0.3 * oh;
+      o.neck[0] -= 0.12 * oh;
+      return o;
     }
     if (inW(P, [22.36, 22.6])) return sofaPhone(o, h.seat, h.seatYaw, h.floor, t, 0.66, 1, 0.3);
     // Yes said, up from the sofa and off to bed (the lamp goes off at the door).

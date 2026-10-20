@@ -70,7 +70,7 @@ if (PHONE) {
 world.scene.updateMatrixWorld(true);
 
 const SKIP = new Set();
-for (const o of [world.sam.root, world.owner.root, world.samPhone.group, world["ourVan"], world["rival"]]) o.traverse((c) => SKIP.add(c));
+for (const o of [world.sam.root, world.owner.root, world.samPhone.group, world["ourVan"], world["rival"], world["traffic"].body, world["traffic"].dark]) o.traverse((c) => SKIP.add(c));
 const pos = [];
 const v = new THREE.Vector3();
 const m = new THREE.Matrix4();

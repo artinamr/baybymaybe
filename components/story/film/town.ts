@@ -464,6 +464,8 @@ export type Town = {
   pool: (i: number, x: number, z: number, r: number, power: number, col: THREE.Color) => void;
   mats: THREE.Material[];
   field: HeightField;
+  /** A car (its white body, its dark parts) for the traffic. */
+  car: { body: THREE.BufferGeometry; dark: THREE.BufferGeometry };
 };
 
 export function buildTown(scene: THREE.Scene, quality: number): Town {
@@ -877,5 +879,5 @@ export function buildTown(scene: THREE.Scene, quality: number): Town {
     field.box(l.x, l.z + front * (l.d / 2 - 0.3), l.w, 0.8, 0, 1.0);
     field.box(l.x, l.z - front * (l.d / 2 - 0.1), l.w, 0.2, 0, 1.8);
   }
-  return { group, houses, setWindow, setGlass, ground: gm.u, lamps, setLamps, pool, mats, field };
+  return { group, houses, setWindow, setGlass, ground: gm.u, lamps, setLamps, pool, mats, field, car: carGeo };
 }
