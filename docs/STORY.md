@@ -228,6 +228,12 @@ message.
   shadows (`sky.aimShadow`), haze and depth of field; the composite gives
   each pane its own vignette and fringe, keeps bloom off the gap, and paints
   the gap in the page's paper (#F6F5F2), clean.
+- **A page turned** (`split.ts` `TURN_A`): as the night runs to morning, Sam's
+  pane folds shut into the gap (the office fills the page at dawn) and opens
+  again inside the room; the camera changes while it is shut. From then on
+  Sam's days are seen from inside, past the rug and out through the sliders
+  to the deck. The panes' keys are not smoothed, so a change inside the gap
+  stays a clean change.
 - **The two places**: Sam's living room through the open sliders (Sam on the
   sofa with the phone; by day the deck and the garden), and the office seen
   through its shopfront (the desk, the chair, the laptop). Two lit windows at
