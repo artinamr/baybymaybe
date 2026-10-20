@@ -85,8 +85,10 @@ function Director() {
       }
       if (!alive) return;
       film.progress = 0.82;
-      // Draw a few frames from the film's far ends, so every program is ready.
-      for (const P of [0, 2.3, 3.5, 5.98, 8.3, 13.3, 16.0, 17.7, 20.76, 22.9]) {
+      // Draw a few frames from the film's far ends, so every program is ready; and the new way's
+      // moments, where each pane first draws something (a program compiled on first use there was a
+      // half-second freeze at the deck's first boards), so nothing compiles or uploads mid-film.
+      for (const P of [0, 2.3, 3.5, 5.98, 8.3, 13.3, 16.0, 17.7, 19.4, 19.72, 20.0, 20.76, 21.2, 21.46, 22.4, 22.72, 22.9, 23.5, 24.2, 25.2, 25.62, 26.3, 27.0, 27.6]) {
         world.update({ dt: 0, time: 0, P, pointer: { x: 0, y: 0, has: false } });
         world.render(0);
       }
