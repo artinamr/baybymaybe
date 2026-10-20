@@ -1,4 +1,5 @@
 import { Page, Kicker, Title, Closing } from "@/components/site/Page";
+import { coverSrcSet } from "@/lib/covers";
 import { QaList } from "@/components/site/QaList";
 import { PageLd, QaLd } from "@/components/site/JsonLd";
 import { Photo } from "@/components/site/Photo";
@@ -212,7 +213,7 @@ export default function Services() {
             <a key={p.slug} className="svc-demo" href={PAGES.project(p.slug)} data-rv style={{ transitionDelay: `${i * 90}ms` }}>
               <span className="svc-demo-img">
                 {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
-                <img src={p.cover} alt="" width={2400} height={1500} loading="lazy" decoding="async" />
+                <img src={p.cover} srcSet={coverSrcSet(p.cover)} sizes="(max-width: 760px) 92vw, 600px" alt="" width={2400} height={1500} loading="lazy" decoding="async" />
               </span>
               <span className="svc-demo-kind">
                 <b>{service(p.services[0])?.name}</b> · {p.client}, a {KIND_LABEL[p.kind].toLowerCase()}

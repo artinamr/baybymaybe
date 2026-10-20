@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { coverSrcSet } from "@/lib/covers";
 import { Page, Crumbs, Kicker, Closing } from "@/components/site/Page";
 import { QaList } from "@/components/site/QaList";
 import { QaLd, ServiceLd } from "@/components/site/JsonLd";
@@ -159,7 +160,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <a key={p.slug} className="wk-card svc-work-card" href={PAGES.project(p.slug)} data-rv style={{ transitionDelay: `${(i % 3) * 80}ms` }}>
                 <span className="wk-img">
                   {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser to gain */}
-                  <img src={p.cover} alt="" width={2400} height={1500} loading="lazy" decoding="async" />
+                  <img src={p.cover} srcSet={coverSrcSet(p.cover)} sizes="(max-width: 760px) 92vw, 600px" alt="" width={2400} height={1500} loading="lazy" decoding="async" />
                 </span>
                 <span className="wk-kind">
                   <b>{p.client}</b>

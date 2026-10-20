@@ -5,6 +5,7 @@ import { PageSection, PageMarker } from "./Section";
 import { PAGES } from "@/lib/content";
 import { HOME_WORK, KIND_LABEL } from "@/content/work";
 import { service } from "@/content/services";
+import { coverSrcSet } from "@/lib/covers";
 
 /**
  * 03 · SELECTED WORK — the proof, as a sheet over the film (held on the AI's
@@ -33,7 +34,7 @@ export function Work() {
               {/* The middle card is tall on a wide screen: it shows the phone view where there is one. */}
               <picture>
                 {i === 1 && w.coverTall ? <source media="(min-width: 1100px)" srcSet={w.coverTall} /> : null}
-                <img src={w.cover} alt="" width={2400} height={1500} loading="eager" fetchPriority="low" decoding="async" />
+                <img src={w.cover} srcSet={coverSrcSet(w.cover)} sizes="(max-width: 760px) 92vw, 60vw" alt="" width={2400} height={1500} loading="eager" fetchPriority="low" decoding="async" />
               </picture>
               <span className="work-shine" aria-hidden />
             </a>

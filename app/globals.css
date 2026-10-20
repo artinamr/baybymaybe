@@ -4270,7 +4270,9 @@ html[data-reduced] .si-play::after {
   border: 1px solid var(--hair-soft);
   border-radius: 20px;
   aspect-ratio: 16 / 10;
-  background: #eeede9;
+  /* Behind the cover: its tiny blurred preview (set inline), scaled up soft,
+     so a card never shows blank while its cover loads. */
+  background: #eeede9 top left / cover no-repeat;
 }
 .wk-card:first-child .wk-img {
   aspect-ratio: 21 / 10;

@@ -4,6 +4,8 @@ import { PAGES } from "@/lib/content";
 import { pageMeta } from "@/lib/meta";
 import { KIND_LABEL, WORK_ITEMS } from "@/content/work";
 import { service } from "@/content/services";
+import { COVER_PREVIEW } from "@/content/coverPreviews";
+import { coverName, coverSrcSet } from "@/lib/covers";
 
 export const metadata = pageMeta({
   title: "Work",
@@ -23,6 +25,8 @@ export default function Work() {
     summary: p.summary,
     cover: p.cover,
     coverAlt: p.coverAlt,
+    srcSet: coverSrcSet(p.cover),
+    preview: COVER_PREVIEW[coverName(p.cover)],
     label: KIND_LABEL[p.kind],
     services: p.services.map((sl) => ({ slug: sl, name: service(sl)?.name ?? sl })),
   }));
