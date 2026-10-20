@@ -87,7 +87,6 @@ const JOB_SPOTS: [number, number, number, number, number][] = [
 /** When each job's card burns away at the turn. */
 const burnAt = (i: number): [number, number] => [B.fall[0] + 0.02 + i * 0.04, B.fall[0] + 0.3 + i * 0.04];
 
-const SHADOW_ONCE = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("shadow1") === "1";
 
 /** THE OFFICE'S MOMENTS (the new way): when the office's screen is up, what it shows, and what the pointer calls it. */
 const OFFICE: { a: number; b: number; id: string; part: string }[] = [
@@ -1663,17 +1662,19 @@ export class World {
       v.camera = cam;
       v.rect = this.rects[i];
       v.focus = cam.position.distanceTo(c.at);
-      v.aperture = this.camOverride ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
+      // (The office pane is sharp through: its depth pass is not drawn.)
+      v.aperture = this.camOverride || (i === 1 && c.sub < 0.05) ? 0 : c.dof * (this.quality > 0 ? 1 : 0);
       // Each pane's shadows are spent on its own subject.
       const r = Math.min(150, Math.max(3, v.focus * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.6) * 1.6));
-      // (Experiment: SHADOW_ONCE draws the sun's shadow map for pane A only.)
+      // The office pane looks into a closed room: no sky to draw behind it.
+      const sky = i === 0 || c.sub > 0.05;
       v.before = () => {
         this.sky.aimShadow(c.at, r);
-        if (SHADOW_ONCE) this.gl.shadowMap.autoUpdate = i === 0;
+        this.sky.dome.visible = sky;
       };
     }
     this.post.render(this.gl, this.scene, this.views, g, time);
-    this.gl.shadowMap.autoUpdate = true;
+    this.sky.dome.visible = true;
   }
 }
 
