@@ -1,37 +1,38 @@
-import { H2, H3, Callout, Steps, Compare, Figure, Cite } from "@/components/blog/Prose";
-import { Routes } from "@/components/blog/Diagrams";
+import { H2, H3, Callout, Steps, Check, Figure, Cite } from "@/components/blog/Prose";
+import { Routes, DecisionTree } from "@/components/blog/Diagrams";
 import { Term } from "@/components/blog/Term";
 import { PAGES } from "@/lib/content";
 
 export const toc = [
   { id: "what-it-is", title: "What a portal is (and isn’t)" },
-  { id: "signals", title: "Five signals" },
+  { id: "signals", title: "Five signals, and how to count them" },
   { id: "off-the-shelf", title: "Off the shelf, or custom?" },
   { id: "first-version", title: "What the first version should do" },
-  { id: "running", title: "What it takes to keep it running" },
   { id: "security", title: "Security and privacy basics" },
+  { id: "running", title: "What it takes to keep it running" },
   { id: "did-it-work", title: "Judging whether it worked" },
-  { id: "example", title: "An example you can click through" },
+  { id: "example", title: "An example: a property manager’s office" },
+  { id: "yours", title: "How we’d look at yours" },
 ];
 
 export default function Body() {
   return (
     <>
       <p>
-        A client portal is worth considering when routine updates, documents and approvals take up too much of the
-        working day. It gives clients a place to find their own information, and your team a shared record of the
-        work. Start by checking whether existing software can do that before commissioning a custom build.
+        A client portal is worth it when routine updates, document chasing and approvals fill your inbox every week.
+        Before paying for one, count those signals for two weeks, then check whether software you already use has a
+        client area you can switch on. Build a custom portal only when your work has stages no product can show.
       </p>
 
       <H2 id="what-it-is">What a portal is (and isn’t)</H2>
       <p>
         A client portal is a private place, behind a login, where each client sees their own work with you: what’s
-        happening, what they need to provide, what needs their approval, and what they owe. Your team sees the same
-        information from the other side, for every client at once.
+        happening, what they need to send, what needs their approval and what they owe. Your team sees the same records
+        from the other side, for every client at once.
       </p>
       <p>
-        It isn’t a replacement for talking to people. Good portals take the routine traffic (status, documents,
-        approvals, invoices) out of email, so that when you do talk, it’s about something that needs a person.
+        It doesn’t replace talking to people. It takes the routine traffic out of email (status, documents, approvals,
+        invoices), so when you do talk, it’s about something that needs a person.
       </p>
       <Figure caption="What moves out of the inbox: each routine exchange gets one place to live.">
         <Routes
@@ -45,180 +46,323 @@ export default function Body() {
         />
       </Figure>
 
-      <H2 id="signals">Five signals that email has become the bottleneck</H2>
+      <H2 id="signals">Five signals, and how to count them</H2>
       <H3>1. The same status question, every day</H3>
       <p>
-        If a good share of incoming email is clients asking where things are, the information exists. It just lives
-        somewhere they can’t see. A status page each client can check removes the question rather than answering it
-        faster.
+        If clients keep asking where things are, the information exists but lives where they can’t see it. A status page
+        each client can check removes the question instead of answering it faster.
       </p>
       <H3>2. Chasing documents</H3>
       <p>
-        When work regularly waits on a file from the client, and someone on your team spends time reminding, finding and
-        renaming attachments, a single place to upload, with a list of what’s still missing, pays for itself in
-        hours.
+        Work waits on a client’s file while your team sends reminders, then finds and renames the attachments. One place
+        to upload, with a list of what’s missing, shows clients what you need without anyone asking.
       </p>
       <H3>3. Approvals buried in threads</H3>
       <p>
-        “Yes, go ahead” at the bottom of a forty-message thread is a weak record of what was agreed. A portal
-        can show exactly what was approved, by whom and when.
+        “Yes, go ahead” at the bottom of a long thread is a weak record of what was agreed. A portal shows exactly what
+        was approved, by whom and when.
       </p>
       <H3>4. Typing the same details twice</H3>
       <p>
-        If job details are written in an email, typed into a spreadsheet and typed again into the accounting software,
-        every copy is a chance for a mistake. A portal connected to your other systems lets each detail be entered once.
+        Job details arrive by email, go into a spreadsheet, then into the accounting software. Every copy is a chance for
+        a mistake. A portal <a href={PAGES.article("connect-website-crm-booking")}>connected to your other systems</a>{" "}
+        lets each detail be entered once.
       </p>
       <H3>5. Requests after hours</H3>
       <p>
-        Clients who want to check something at nine at night will either wait until morning or email you. Neither helps
-        them. Letting them look it up (or book, or pay) whenever it suits them is often the change they notice most.
+        A client checking something at nine at night either waits until morning or emails you. Letting them look it up,
+        book or pay then helps you both.
+      </p>
+      <H3>How to count them</H3>
+      <p>
+        For two weeks, keep a tally: a column for each signal, a mark each time it happens, and roughly how long it took.
+        The tally is also your baseline for judging whether a portal worked.
       </p>
       <p>
-        One signal on its own can usually be solved with a better process or a shared folder. Three or more, every week,
-        is the point where a portal starts to make sense.
+        One signal, or signals that only show up in your busiest season, can usually be fixed with a better process.
+        Three or more, every week, and a portal is worth pricing.
       </p>
 
       <H2 id="off-the-shelf">Off the shelf, or custom?</H2>
+      <p>There are four answers, and the cheapest comes first.</p>
+      <Figure caption="Answer from the top, and stop at your first “no”.">
+        <DecisionTree
+          steps={[
+            {
+              q: "Do three or more of the signals turn up every week?",
+              no: {
+                t: "Fix the process first",
+                b: "A shared folder for each client, a standard update email and one person who owns the replies.",
+              },
+            },
+            {
+              q: "Have you ruled out a client area in software you already pay for?",
+              no: { t: "Switch on what you have", b: "Try its client area with a few friendly clients for a month." },
+            },
+            {
+              q: "Have you ruled out the products made for your kind of work?",
+              no: { t: "Subscribe", b: "Choose one that fits your stages and budget, after the checks below." },
+            },
+          ]}
+          end={{
+            t: "Scope a custom first version",
+            b: "The smallest portal that removes the most email, under a contract that gives you the code and your data.",
+          }}
+        />
+      </Figure>
+      <H3>Before you subscribe: the checks</H3>
       <p>
-        Honestly: often off the shelf is the right first step. Many industries have established software with a client
-        area built in, and many general tools offer shared workspaces. If one fits the way you work, it will be cheaper
-        and quicker than building, and you’ll learn what you really need.
+        Own Your Online, from the National Cyber Security Centre (NCSC), suggests questions to ask before you rely on{" "}
+        <Term id="off-the-shelf">off-the-shelf software</Term>.<Cite n={1} /> With New Zealand’s rules added:
       </p>
-      <p>
-        A custom portal earns its cost when your work doesn’t fit the shape of the tools: when your jobs have stages
-        no product models, when the portal must join up several systems you already depend on, when the client’s
-        experience is part of what you sell, or when the per-user pricing of a product grows faster than your business
-        does.
-      </p>
-      <Compare
-        caption="Off-the-shelf and custom portals compared"
-        head={["", "Off the shelf", "Custom"]}
-        rows={[
-          ["Time to start", "Days to weeks", "Weeks to months"],
-          ["Upfront cost", "Low; usually a subscription", "Higher; a build quoted from a scope"],
-          ["Fits your process", "If your process fits the product", "Built around your process"],
-          ["Connections", "Whatever the product supports", "To the systems you choose"],
-          ["Running costs", "Per user or per client, rising as you grow", "Hosting and support, largely flat"],
-          ["If you leave", "Export what the product allows", "The code and data are yours"],
+      <Check
+        items={[
+          <>Can it show your stages and a quote waiting for approval, not just files and messages?</>,
+          <>
+            Can each person, staff and client, have their own login, with{" "}
+            <Term id="two-factor">two-factor sign-in</Term>?<Cite n={1} />
+          </>,
+          <>
+            Can you set roles, so clients see only their own work and staff only what they need?<Cite n={1} />
+          </>,
+          <>
+            Can you see what it stores, export all of it in a usable form, and delete it?<Cite n={1} />
+          </>,
+          <>
+            Where is the data held? Even if it’s overseas, the Privacy Commissioner says that in most circumstances
+            you’ll be responsible for the personal information you put in the cloud, not the provider.<Cite n={2} />
+          </>,
+          <>
+            Will it hold invoices or other business records? Inland Revenue says records stored offshore, including in
+            the cloud, need its approval, held by you or the provider.<Cite n={3} /> Ask the provider.
+          </>,
+          <>
+            Do you hold health information? For the health sector, the Health Information Privacy Code 2020 takes the
+            place of the privacy principles,<Cite n={4} /> so check the product against the code.
+          </>,
+          <>What will it cost in three years at your size: per user, per client or flat?</>,
+          <>What happens to your data, and your clients’ logins, if you cancel?</>,
         ]}
       />
+      <H3>If you build, make sure you own it</H3>
+      <p>
+        Custom earns its cost when your work doesn’t fit the tools: stages no product models, several systems the portal
+        must join up, or a client experience that is part of what you sell.
+      </p>
+      <p>
+        Under the Copyright Act 1994, a business that commissions, and pays or agrees to pay for, a computer program is
+        the first owner of its copyright, but only “subject to any agreement to the contrary”.<Cite n={5} /> A
+        development contract can be that agreement.
+      </p>
+      <p>
+        Read its intellectual property clause, get the code and your data in a form another developer can work on, and
+        ask a lawyer if the portal is central to your business.
+      </p>
 
       <H2 id="first-version">What the first version should do</H2>
       <p>
-        The most common mistake is building everything at once. The first version should be the smallest thing that
-        removes the most email, and nothing else. A sensible order:
+        A common mistake is to build everything at once. The first version should be the smallest thing that removes the
+        most email. A sensible order:
       </p>
       <Steps
         items={[
-          { t: "Accounts and the client’s list of work", b: <p>Each client signs in and sees their own jobs, nothing else.</p> },
+          {
+            t: "Accounts and each client’s list of work",
+            b: <p>Each person signs in as themselves and sees their own jobs, nothing else.</p>,
+          },
           {
             t: "Status, in your words",
-            b: <p>One clear stage per job, the next step, and who it’s waiting on. Updated by your team as part of the work, not as an extra task.</p>,
+            b: <p>One clear stage per job, the next step and who it’s waiting on, updated by your team as part of the work.</p>,
           },
           { t: "Documents both ways", b: <p>Upload, download, and a list of what’s still needed.</p> },
-          { t: "Approvals with a record", b: <p>The quote or the change, approved in one step, with the time and the name kept.</p> },
-          { t: "Then, and only then, the rest", b: <p>Payments, messaging, scheduling and reports, once the first version is in daily use and you know which would help most.</p> },
+          {
+            t: "Approvals with a record",
+            b: <p>The quote or the change, approved in one step, with the name, the time and the exact version kept.</p>,
+          },
+          {
+            t: "Then, and only then, the rest",
+            b: (
+              <p>
+                Payments, messaging, scheduling and reports, once the first version is in daily use and you know which
+                would help most.
+              </p>
+            ),
+          },
+        ]}
+      />
+      <p>
+        Approvals deserve care. The Contract and Commercial Law Act 2017 presumes an electronic signature reliable
+        enough when the means of signing is linked to the signer and nobody else, was under their control alone, and any
+        later change to the signature is detectable.<Cite n={6} /> Build approvals the same way: individual logins,
+        nobody approving for someone else, and a record nobody can quietly edit.
+      </p>
+
+      <H2 id="security">Security and privacy basics</H2>
+      <p>
+        Under New Zealand’s <Term id="privacy-act">Privacy Act 2020</Term>, principle 5 requires you to protect personal
+        information with security safeguards that are reasonable in the circumstances, against loss, unauthorised
+        access, use, modification or disclosure, and other misuse.<Cite n={7} /> For a portal, that means at least:
+      </p>
+      <Check
+        items={[
+          <>
+            <strong>Individual accounts.</strong> Everyone signs in as themselves. No shared logins, for your team or for
+            clients.
+          </>,
+          <>
+            <strong>Two-factor sign-in.</strong> The NCSC calls enforcing multi-factor authentication the most critical
+            control for preventing unauthorised access, especially for accounts reachable from anywhere on the internet,
+            <Cite n={8} /> as a portal’s are. Codes sent by text or email can be intercepted, so Own Your Online advises
+            authenticator apps, tokens or physical key fobs.<Cite n={9} /> Make it compulsory for staff and offer it to
+            clients.
+          </>,
+          <>
+            <strong>Access that follows the record.</strong> The failure that matters most in a portal is one client
+            seeing another’s records. Broken access control tops the OWASP Top 10 of web application security risks,
+            and its common examples include viewing or editing someone else’s account by supplying its identifier.
+            OWASP’s advice: deny by default, except for public resources, and enforce who owns each record.
+            <Cite n={10} /> Give staff only the access their job needs.<Cite n={8} />
+          </>,
+          <>
+            <strong>A record of who did what.</strong> An audit trail of approvals, uploads and changes protects you and
+            your clients when there’s a disagreement, and helps you notice when something is wrong.
+          </>,
+          <>
+            <strong>A plan for a breach.</strong> If it’s reasonable to believe a{" "}
+            <Term id="privacy-breach">privacy breach</Term> has caused serious harm, or is likely to, the Privacy Act
+            requires you to notify the Privacy Commissioner as soon as practicable.<Cite n={11} /> The Commissioner’s
+            guidance on timing: “Ideally you’ll do that within 72 hours after you’re aware that you have a notifiable
+            breach, even if you’re still investigating it.” You also need to tell the people affected as soon as you
+            can, unless an exception applies.<Cite n={12} /> Decide now who would make that call.
+          </>,
+        ]}
+      />
+      <Callout title="Collect less">
+        <p>
+          Principle 1 says to collect personal information only when it’s necessary for your purpose.<Cite n={11} /> The
+          safest information is what you never stored. Before adding a field, ask whether you need it, and for how long.
+        </p>
+      </Callout>
+      <H3>Before launch: the access test</H3>
+      <p>Run these with two test clients and a test staff account, before any real client signs in.</p>
+      <Check
+        items={[
+          <>
+            Signed in as client A, try to open one of client B’s jobs by changing the number in the page address. It must
+            refuse.
+          </>,
+          <>A removed staff member and a former client can’t sign in, and links they were sent no longer open files.</>,
+          <>Every page and file asks for a login, unless it’s meant to be public.</>,
+          <>An approval shows who, when and which version, and nobody can edit it afterwards.</>,
+          <>A staff account can’t sign in without the second step.</>,
         ]}
       />
 
       <H2 id="running">What it takes to keep it running</H2>
       <p>
-        A portal is only as good as the information in it. The ones that fail usually fail quietly: statuses stop being
-        updated, clients learn the portal is out of date, and the emails come back. Plan for the everyday side before
-        launch:
+        When portals fail, it’s usually quietly: statuses stop being updated, clients learn the portal is out of date,
+        and the emails come back. Plan the everyday side before launch.
       </p>
       <ul>
         <li>
-          <strong>Updating it is part of the work, not extra work.</strong> If a job moves stage when someone does the
-          thing that moves it (approves, uploads, completes), the portal stays true without anyone remembering to update
-          it. Where a person must update a status, make it one click from the screen they already use.
+          <strong>Updating it is part of the work.</strong> A job moves stage when someone approves, uploads or completes
+          something. Where a person must update a status, make it one click from the screen they already use.
         </li>
         <li>
-          <strong>Someone owns it.</strong> One person in your business decides what’s shown, answers questions
-          about it, and notices when something looks wrong.
+          <strong>Someone owns it.</strong> One person decides what’s shown, answers questions about it and notices when
+          something looks wrong.
         </li>
         <li>
-          <strong>Clients are shown, not told.</strong> A short welcome (what they’ll find, how to sign in, who to
-          call) and a link in every email that would previously have carried the update.
+          <strong>Clients are shown where to look.</strong> A short welcome (what they’ll find, how to sign in, who to
+          call), and a link in every email that used to carry the update. When clients still email, reply with the link.
         </li>
         <li>
-          <strong>Email doesn’t vanish overnight.</strong> Some clients will keep emailing for a while. Answer with
-          a link to the right page, and they learn where to look.
+          <strong>Leaving is planned too.</strong> When a client’s work ends, close their login. Keep invoices and other
+          business records for at least seven tax years, as Inland Revenue asks,<Cite n={3} /> but don’t keep other
+          personal information longer than you need it: that’s principle 9.<Cite n={11} />
         </li>
         <li>
-          <strong>Running costs are known.</strong> Hosting, the services it relies on, and support, all written down
-          before you commit, so the second year holds no surprises.
+          <strong>Running costs are written down.</strong> Hosting, the services it relies on and support, agreed before
+          you commit, so the second year holds no surprises.
         </li>
       </ul>
-
-      <H2 id="security">Security and privacy basics</H2>
-      <p>
-        A portal holds your clients’ information, so it carries real responsibility. Under New Zealand’s{" "}
-        <Term id="privacy-act">Privacy Act 2020</Term>, information privacy principle 5 requires a business holding personal information to protect it
-        with security safeguards that are reasonable in the circumstances, against loss, unauthorised access, use,
-        modification or disclosure, and other misuse.
-        <Cite n={1} /> In practice, for a portal, that means at least:
-      </p>
-      <ul>
-        <li>
-          <strong>Individual accounts.</strong> Every person signs in as themselves. No shared logins, for your team or for
-          clients.
-        </li>
-        <li>
-          <strong>Two-step sign-in.</strong> The National Cyber Security Centre calls enforcing <Term id="two-factor">multi-factor authentication</Term>{" "}
-          the most critical control for preventing unauthorised access,
-          <Cite n={2} /> and its Own Your Online guidance notes that codes sent by text or email can be intercepted,
-          recommending authenticator apps, tokens or physical keys instead.
-          <Cite n={3} /> Make it compulsory for your staff; offer it to clients.
-        </li>
-        <li>
-          <strong>Roles.</strong> The NCSC’s principle of least privilege, giving people the minimum access they need
-          to do their job,
-          <Cite n={2} /> applies to clients too: each sees only their own work.
-        </li>
-        <li>
-          <strong>A record of who did what.</strong> An audit trail of approvals, uploads and changes protects you and your
-          clients when there’s a disagreement, and helps you notice when something is wrong.
-        </li>
-        <li>
-          <strong>A plan for when something goes wrong.</strong> If a privacy breach has caused, or might cause, serious
-          harm, the Privacy Act requires the business to notify the Privacy Commissioner and to tell the affected people
-          as soon as it can. The Commissioner’s guidance on timing: “Ideally you’ll do that within 72 hours after you’re
-          aware that you have a notifiable breach, even if you’re still investigating it.”
-          <Cite n={4} /> Know in advance who would make that call.
-        </li>
-      </ul>
-      <Callout title="Collect less">
-        <p>
-          The safest information is the information you never stored. Before adding a field to the portal, ask whether you
-          really need it, and for how long.
-        </p>
-      </Callout>
 
       <H2 id="did-it-work">Judging whether it worked</H2>
       <p>
-        Decide before launch what you will look at afterwards, and measure it yourself rather than relying on a
-        vendor’s case study. Useful things to count, before and after:
+        Use your two-week tally as the baseline. After a couple of months of normal use, count the same things for
+        another two weeks:
       </p>
       <ul>
-        <li>How many status questions arrive by email or phone in a typical week.</li>
+        <li>Status questions by email or phone.</li>
         <li>How long an approval takes, from sending the quote to the go-ahead.</li>
         <li>How long documents take to arrive once requested.</li>
-        <li>How many hours a week the team spends copying details between systems.</li>
+        <li>Hours spent copying details between systems.</li>
         <li>What clients say about it, unprompted.</li>
       </ul>
       <p>
-        Give it a couple of months of normal use before judging. If the numbers haven’t moved, find out why before
-        adding features. Usually some part of the work is still happening outside the portal.
+        Measure it yourself rather than trusting a vendor’s case study. If the numbers haven’t moved, find out why before
+        adding features: usually some of the work still happens outside the portal.
       </p>
 
-      <H2 id="example">An example you can click through</H2>
+      <H2 id="example">An example: a property manager’s office</H2>
       <p>
-        We built a working demonstration of this kind of portal for a fictional building-maintenance company,{" "}
-        <a href={PAGES.project("operations-portal")}>Kerrow</a>: one job board for the team, and one place for clients to
-        follow their jobs, approve quotes and pay. Approving a quote in the client view moves the job on the team’s
-        board. It is a demonstration (the business and its data are invented, and nothing is sent), but it shows the
-        shape of a first version better than a description can.
+        An illustration, not a real client: a property management office in Dunedin, with two managers and an
+        administrator.
+      </p>
+      <Steps
+        items={[
+          {
+            t: "Count for two weeks",
+            b: (
+              <p>
+                Owners ask about repairs and rent most days, signed forms and insurance papers are chased weekly, and
+                repair quotes wait in long threads for an owner’s go-ahead. Each repair is typed into a spreadsheet, then
+                the accounts. Four signals, every week.
+              </p>
+            ),
+          },
+          {
+            t: "Check what they already pay for",
+            b: (
+              <p>
+                Their property management software has an owner portal nobody has switched on. It shows statements and
+                repairs, takes documents and lets owners approve quotes.
+              </p>
+            ),
+          },
+          {
+            t: "Run the checks",
+            b: (
+              <p>
+                They make two-factor sign-in compulsory for staff and offer it to owners, check they can export
+                everything, and ask whether the provider has Inland Revenue’s approval to store records offshore.
+              </p>
+            ),
+          },
+          {
+            t: "Try it small",
+            b: (
+              <p>
+                Five owners who like trying new things use it for a month and say what’s missing. Then everyone is
+                invited, and the standard emails link to the portal instead of carrying attachments.
+              </p>
+            ),
+          },
+          {
+            t: "Count again",
+            b: <p>After two months of normal use, they repeat the two-week tally and compare it with the first.</p>,
+          },
+        ]}
+      />
+      <p>
+        They build nothing; the double typing waits for a connection between the two systems. Custom would make sense
+        only if their work changed shape, or per-owner pricing outgrew their fees.
+      </p>
+      <H3>And one you can click through</H3>
+      <p>
+        For the custom path, our <a href={PAGES.project("operations-portal")}>Kerrow demonstration</a> is a fictional
+        building-maintenance company’s portal: one job board for the team, and one place for clients to follow jobs,
+        approve quotes and pay. Its business and data are invented, and nothing is sent.
       </p>
 
       <H2 id="yours">How we’d look at yours</H2>
