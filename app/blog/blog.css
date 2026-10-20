@@ -991,6 +991,77 @@ ol.dg {
    ========================================================================== */
 
 /* ---- The index: the hero's figures ---- */
+/* The lead: the blog opens like a publication, with one article set large,
+   its photograph and its short answer in the first screen. */
+.bl-lead {
+  margin: calc(var(--vh) * 6) 0 calc(var(--vh) * 7);
+}
+.bl-lead-a {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: center;
+  gap: 28px clamp(28px, 4vw, 64px);
+  color: inherit;
+  text-decoration: none;
+}
+.bl-lead-img {
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--hair-soft);
+  border-radius: 22px;
+  background: #eeede9;
+}
+.bl-lead-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1400ms var(--ease-expo);
+}
+.bl-lead-a:hover .bl-lead-img img {
+  transform: scale(1.025);
+}
+.bl-lead-k {
+  margin: 0 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+.bl-lead-t {
+  margin: 0 0 18px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(30px, 3.2vw, 46px);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  text-wrap: balance;
+  transition: color 250ms ease;
+}
+.bl-lead-a:hover .bl-lead-t {
+  color: var(--indigo);
+}
+.bl-lead-s {
+  max-width: 34em;
+  margin: 0 0 22px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--ink) 72%, transparent);
+}
+.bl-lead-go {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--indigo);
+}
+@media (max-width: 900px) {
+  .bl-lead-a {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bl-lead-img {
+    border-radius: 18px;
+  }
+}
 .bl-hero-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
