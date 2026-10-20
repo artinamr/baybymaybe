@@ -144,7 +144,9 @@ export const KEYS: Key[] = [
   ...hold(22.1, node(17.43, 15.9, 2.5), node(21, 15.9, -10), 40, 0.7, 0.12, undefined, 0),
   { P: 22.38, eye: env(-8, 3, 12), at: env(-6, -1, 4), fov: 46, ppx: 0.56 },
   ...hold(22.52, READ_EYE, READ_AT, 32, 0.6, 0.04, undefined, 0.14),
-  ...hold(22.9, H(4.0, 5.5, -15.5), H(-1.2, 0.8, -6.5), 38, 0.6, 0.06),
+  // The build: a slow arc round the deck as its pieces drop in.
+  { P: 22.64, eye: H(4.6, 4.0, -11.8), at: H(-1.0, 0.9, -6.8), fov: 38, ppx: 0.6 },
+  { P: 23.06, eye: H(2.8, 6.0, -19.0), at: H(-1.2, 0.8, -6.5), fov: 38, ppx: 0.6 },
   ...hold(23.4, DECK_EYE, DECK_AT, 34, 0.64, 0.08, undefined, 0.14),
   // NEW FOLLOW-UP: the review; a year; the reminder; our van.
   ...hold(24.2, DECK_EYE, DECK_AT, 34, 0.64, 0.1, undefined, 0.14),

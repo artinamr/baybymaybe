@@ -570,6 +570,14 @@ not longer, but the bar really raised").**
   (ceiling 1.5, floor 0.7). Everything is in docs/STORY.md "Set pieces".
   The scene pass is ~12 ms at 1080p on the integrated AMD; measure with
   the scratchpad's gpu.mjs-style script (`?perf=1`, `window.__perf.gpu`).
+  Then, on "forget optimisation, step the animation up": wind in the trees,
+  morning mist (a height-fog chunk patch, `hookMist` on every material),
+  windows that go dark as customers give up, the enquiry's and the pulse's
+  lights, arrivals that settle (`settle`), wheels and springs on the vans,
+  an impact shake, traffic on the cross streets, a drifting camera, an arc
+  round the deck build. Judged from recordings at the scroll ceiling; the
+  user asked for building over looking (keep image checks to one per
+  feature).
 - **Second pass (same day)**: the words come first (cards fade behind the
   words, `keepClear`; the route's parts framed whole on the right; the
   admin, turn and opening words leave before the 3D crosses them); nothing

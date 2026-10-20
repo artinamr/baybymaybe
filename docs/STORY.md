@@ -167,7 +167,23 @@ burning their own faces out.
   About 1.2 to 1.9 ms a frame at 1080p on an integrated GPU.
 - **A living camera.** Never quite still: a slow push toward the subject
   and back (a hair over a percent of its distance, a dozen seconds a
-  cycle) with the breath beside it.
+  cycle), a slow drift round it (under a degree), the breath beside them.
+- **Life in the world** (on real time, so a held frame still lives): wind in
+  every tree (`mats.ts` `foliageMat`: a sway per leaf by height and place,
+  the garden's tree too); mist on the ground in the mornings (`MIST`: a
+  height-fog patch on three's fog chunks, thickest about half past six, a
+  breath at dusk and at night, none inside a room); four cars on the two
+  cross streets (`world.ts` `drive`; the main street belongs to the story).
+- **Light that belongs to someone.** The enquiry carries a light over the
+  roofs it flies across (`mailLight`), the route's pulse lights the houses
+  it passes (`pulseLight`), and every customer who gives up is a window
+  gone dark across the town (`crowd.ts` `gone`, read by the window loop).
+- **Weight.** Arrivals overshoot a little and settle (`ease.ts` `settle`):
+  the lifted screens, the admin cards, the inbox strips, the deck's pieces,
+  the route's parts. The vans' wheels turn with the road and the body rides
+  on its springs (`roll`); an impact shakes the camera as the paper hits
+  the floor and on landing after the rewind. The new deck's build is a slow
+  arc round it as the pieces drop in; Sam starts when the reply lands.
 
 ## Reading and control
 

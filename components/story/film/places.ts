@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { at, Batch, block, ball, footAO, gableEnd, gableRoof, hull, interiorAO, rod, tablet, turned, ROOF, LEAF } from "./model";
-import { glowMat, modelMat, satinMat } from "./mats";
+import { foliageMat, glowMat, modelMat, satinMat } from "./mats";
 import { HOME, SHOP } from "./town";
 
 /**
@@ -245,6 +245,8 @@ export function buildHome(scene: THREE.Scene): Home {
 
   // THE GARDEN: lawn edging, a tree, the washing line, a bed along the fence.
   const garden = new Batch();
+  const treeB = new Batch();
+  const foliage = foliageMat();
   {
     const t = new Batch();
     t.add(rod(0.2, 2.6, 12), at(-3.2, 0, -16), (p) => 0.6 + 0.4 * Math.min(1, p.y / 2));
@@ -258,7 +260,8 @@ export function buildHome(scene: THREE.Scene): Home {
       [-3.8, 3.6, -18.0, 1.9],
     ] as const)
       t.add(ball(r, 22, 14), at(x, y, z, 0, 0, 0, 1, 0.62, 1), (p) => 0.55 + 0.45 * Math.min(1, Math.max(0, (p.y - 2.5) / 2.4)));
-    garden.add(t.build(), null, 1, LEAF);
+    // (Its own mesh, in the foliage material: it takes the wind like the town's trees.)
+    treeB.add(t.build(), null, 1, LEAF);
   }
   // A rotary washing line.
   garden.add(rod(0.03, 2.0, 10), at(3.4, 0, -14.5), (p) => 0.6 + 0.4 * Math.min(1, p.y), DARKER);
@@ -350,6 +353,7 @@ export function buildHome(scene: THREE.Scene): Home {
   interiorAO(meshOf(b, white).geometry, inside, 0.55);
   interiorAO(meshOf(soft, fabric).geometry, inside, 0.55);
   meshOf(garden, white);
+  meshOf(treeB, foliage);
   const oldDeck = meshOf(deckOld, white);
   const windows = new THREE.Mesh(glass.build(), glow);
   g.add(windows);
@@ -379,7 +383,7 @@ export function buildHome(scene: THREE.Scene): Home {
     windows,
     deck: inFrame(f, (nx0 + nx1) / 2, 0.6, (NZ0 + NZ1) / 2),
     garden: inFrame(f, 0, 0, -14),
-    mats: [white, fabric, glow],
+    mats: [white, fabric, glow, foliage],
   };
 }
 
